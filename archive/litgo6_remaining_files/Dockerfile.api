@@ -1,0 +1,67 @@
+# Dockerfile.api
+# Dockerfile otimizado para API FastAPI de matching jurídico
+# Baseado nas melhores práticas para ML models em produção
+
+# Estágio 1: Build dependencies
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copiar requirements e instalar dependências
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar o restante da aplicação
+COPY . .
+
+# Expõe a porta que o app vai rodar
+EXPOSE 8000
+
+# Estágio 2: Production image
+FROM python:3.11-slim as production
+
+# Instalar dependências mínimas do sistema
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Criar usuário não-root
+RUN useradd --create-home --shell /bin/bash app
+
+# Copiar dependências instaladas do estágio builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar código da aplicação
+COPY backend/ ./backend/
+COPY supabase/migrations/ ./supabase/migrations/
+
+# Criar diretório para modelos e cache
+RUN mkdir -p /app/models /app/cache && \
+    chown -R app:app /app
+
+# Mudar para usuário não-root
+USER app
+
+# Baixar modelo de embeddings na build (cache)
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
+
+# Variáveis de ambiente
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expor porta
+EXPOSE 8000
+
+# Comando para iniciar a aplicação
+CMD ["uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"] 

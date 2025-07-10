@@ -1,0 +1,884 @@
+openapi: 3.0.3
+info:
+  title: LITGO5 API
+  description: |
+    API do Sistema de Matching Jurídico Inteligente LITGO5
+    
+    ## Visão Geral
+    O LITGO5 é uma plataforma que conecta clientes a advogados especializados através de algoritmos de IA e análise semântica.
+    
+    ## Autenticação
+    Todos os endpoints (exceto health check) requerem autenticação JWT via header `Authorization: Bearer <token>`
+    
+    ## Rate Limiting
+    - Triagem: 30 requests/minuto
+    - Conversação: 60 requests/minuto
+    - Status: 120 requests/minuto
+    - Outros endpoints: 100 requests/minuto
+    
+    ## Versioning
+    Esta API segue versionamento semântico. Versão atual: v1
+    
+  version: 1.0.0
+  contact:
+    name: LITGO5 Team
+    email: dev@litgo5.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Desenvolvimento Local
+  - url: https://api.litgo5.com
+    description: Produção
+
+tags:
+  - name: Health
+    description: Verificação de saúde do sistema
+  - name: Triagem
+    description: Triagem inteligente de casos
+  - name: Matching
+    description: Algoritmo de matching de advogados
+  - name: Cases
+    description: Gestão de casos jurídicos
+  - name: Documents
+    description: Gestão de documentos
+  - name: Messages
+    description: Sistema de mensagens/chat
+  - name: Time Tracking
+    description: Controle de tempo e faturamento
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health Check
+      description: Verifica o status de saúde da API e serviços conectados
+      responses:
+        '200':
+          description: Sistema saudável
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  services:
+                    type: object
+                    properties:
+                      redis:
+                        type: string
+                        example: "healthy"
+                      database:
+                        type: string
+                        example: "healthy"
+                      ai_services:
+                        type: string
+                        example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/triage:
+    post:
+      tags:
+        - Triagem
+      summary: Triagem Inteligente Assíncrona
+      description: Inicia processo de triagem assíncrona de caso com IA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - texto_cliente
+                - coords
+              properties:
+                texto_cliente:
+                  type: string
+                  example: "Fui demitido sem justa causa e não recebi as verbas rescisórias"
+                coords:
+                  type: array
+                  items:
+                    type: number
+                  example: [-23.5505, -46.6333]
+      responses:
+        '202':
+          description: Triagem iniciada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                    example: "abc123-def456"
+                  status:
+                    type: string
+                    example: "accepted"
+                  message:
+                    type: string
+                    example: "A triagem do seu caso foi iniciada..."
+
+  /api/triage/status/{task_id}:
+    get:
+      tags:
+        - Triagem
+      summary: Status da Triagem
+      description: Consulta o status de uma triagem em andamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "abc123-def456"
+      responses:
+        '200':
+          description: Status da triagem
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed]
+                  result:
+                    type: object
+                    properties:
+                      case_id:
+                        type: string
+                      area:
+                        type: string
+                      subarea:
+                        type: string
+                      urgency_h:
+                        type: integer
+                      embedding:
+                        type: array
+                        items:
+                          type: number
+
+  /api/match:
+    post:
+      tags:
+        - Matching
+      summary: Match de Advogados
+      description: Encontra os melhores advogados para um caso específico
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - case_id
+              properties:
+                case_id:
+                  type: string
+                  example: "case-789"
+                k:
+                  type: integer
+                  default: 5
+                  example: 5
+                preset:
+                  type: string
+                  enum: [fast, balanced, expert]
+                  default: balanced
+                radius_km:
+                  type: number
+                  default: 50
+                  example: 50
+                exclude_ids:
+                  type: array
+                  items:
+                    type: string
+                  example: ["lawyer-123"]
+      responses:
+        '200':
+          description: Matches encontrados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  case_id:
+                    type: string
+                  matches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LawyerMatch'
+
+  /api/explain:
+    post:
+      tags:
+        - Matching
+      summary: Explicação de Matches
+      description: Gera explicações detalhadas sobre os matches
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - case_id
+                - lawyer_ids
+              properties:
+                case_id:
+                  type: string
+                  example: "case-789"
+                lawyer_ids:
+                  type: array
+                  items:
+                    type: string
+                  example: ["lw-001", "lw-002"]
+      responses:
+        '200':
+          description: Explicações geradas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  explanations:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    example:
+                      "lw-001": "Dr. João Silva é uma excelente opção! Com 95% de compatibilidade..."
+
+  /api/cases/my-cases:
+    get:
+      tags:
+        - Cases
+      summary: Meus Casos
+      description: Lista todos os casos do usuário atual
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de casos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaseSummary'
+
+  /api/cases/{case_id}:
+    get:
+      tags:
+        - Cases
+      summary: Detalhes do Caso
+      description: Retorna detalhes completos de um caso específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "case-789"
+      responses:
+        '200':
+          description: Detalhes do caso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetails'
+        '404':
+          description: Caso não encontrado
+        '403':
+          description: Sem permissão para acessar este caso
+
+  /api/cases/{case_id}/status:
+    patch:
+      tags:
+        - Cases
+      summary: Atualizar Status do Caso
+      description: Atualiza o status de um caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - new_status
+              properties:
+                new_status:
+                  type: string
+                  enum: [triagem, matching, offer_sent, in_progress, completed, cancelled]
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Status atualizado com sucesso
+        '400':
+          description: Status inválido
+        '403':
+          description: Sem permissão para atualizar este caso
+
+  /api/documents/upload/{case_id}:
+    post:
+      tags:
+        - Documents
+      summary: Upload de Documento
+      description: Faz upload de documento para um caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentResponse'
+
+  /api/documents/case/{case_id}:
+    get:
+      tags:
+        - Documents
+      summary: Listar Documentos do Caso
+      description: Lista todos os documentos de um caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Lista de documentos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DocumentResponse'
+
+  /api/documents/{document_id}/download:
+    get:
+      tags:
+        - Documents
+      summary: Download de Documento
+      description: Baixa um documento específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Arquivo para download
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /api/cases/{case_id}/messages:
+    get:
+      tags:
+        - Messages
+      summary: Buscar Mensagens do Caso
+      description: Lista mensagens do chat de um caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de mensagens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+
+    post:
+      tags:
+        - Messages
+      summary: Enviar Mensagem
+      description: Envia uma mensagem no chat do caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  example: "Obrigada pela atualização!"
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                  example: ["doc-124", "doc-125"]
+      responses:
+        '200':
+          description: Mensagem enviada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /api/cases/{case_id}/time_entries:
+    get:
+      tags:
+        - Time Tracking
+      summary: Listar Entradas de Tempo
+      description: Lista todas as entradas de tempo de um caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de entradas de tempo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time_entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TimeEntry'
+                  summary:
+                    type: object
+                    properties:
+                      total_hours:
+                        type: number
+                      total_amount:
+                        type: number
+                      approved_hours:
+                        type: number
+                      pending_approval:
+                        type: number
+
+    post:
+      tags:
+        - Time Tracking
+      summary: Registrar Tempo Trabalhado
+      description: Registra uma nova entrada de tempo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+                - start_time
+                - end_time
+                - billable_hours
+                - hourly_rate
+              properties:
+                description:
+                  type: string
+                  example: "Análise de documentos e redação de parecer"
+                start_time:
+                  type: string
+                  format: date-time
+                end_time:
+                  type: string
+                  format: date-time
+                billable_hours:
+                  type: number
+                  example: 3.0
+                hourly_rate:
+                  type: number
+                  example: 200.0
+                category:
+                  type: string
+                  example: "legal_analysis"
+      responses:
+        '200':
+          description: Entrada de tempo registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeEntry'
+
+  /api/cases/{case_id}/fees:
+    patch:
+      tags:
+        - Time Tracking
+      summary: Ajustar Honorários
+      description: Ajusta o modelo de honorários de um caso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: case_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fee_type
+              properties:
+                fee_type:
+                  type: string
+                  enum: [success, fixed, hourly]
+                percentage:
+                  type: number
+                  example: 20.0
+                fixed_amount:
+                  type: number
+                  example: 5000.0
+                hourly_rate:
+                  type: number
+                  example: 300.0
+                adjustments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                      amount:
+                        type: number
+      responses:
+        '200':
+          description: Honorários ajustados com sucesso
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LawyerMatch:
+      type: object
+      properties:
+        lawyer_id:
+          type: string
+        nome:
+          type: string
+        fair:
+          type: number
+        equity:
+          type: number
+        features:
+          type: object
+          properties:
+            A:
+              type: number
+            S:
+              type: number
+            T:
+              type: number
+            G:
+              type: number
+            Q:
+              type: number
+            U:
+              type: number
+            R:
+              type: number
+            C:
+              type: number
+        breakdown:
+          type: object
+          properties:
+            area_match:
+              type: string
+            similarity:
+              type: string
+            geo_score:
+              type: string
+        weights_used:
+          type: object
+        preset_used:
+          type: string
+        avatar_url:
+          type: string
+        is_available:
+          type: boolean
+        primary_area:
+          type: string
+        rating:
+          type: number
+        distance_km:
+          type: number
+
+    CaseSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        area:
+          type: string
+        subarea:
+          type: string
+        status:
+          type: string
+        lawyer_id:
+          type: string
+        lawyer_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        estimated_cost:
+          type: number
+        progress:
+          type: integer
+        next_deadline:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date-time
+            description:
+              type: string
+        stats:
+          type: object
+          properties:
+            messages_count:
+              type: integer
+            documents_count:
+              type: integer
+            events_count:
+              type: integer
+
+    CaseDetails:
+      allOf:
+        - $ref: '#/components/schemas/CaseSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            client_id:
+              type: string
+            client_name:
+              type: string
+            contract_id:
+              type: string
+            final_fee:
+              type: number
+            service_scope:
+              type: object
+              properties:
+                description:
+                  type: string
+                tasks:
+                  type: array
+                  items:
+                    type: string
+            timeline:
+              type: object
+              properties:
+                created:
+                  type: string
+                  format: date-time
+                lawyer_assigned:
+                  type: string
+                  format: date-time
+                contract_signed:
+                  type: string
+                  format: date-time
+                in_progress:
+                  type: string
+                  format: date-time
+
+    DocumentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        case_id:
+          type: string
+        uploaded_by:
+          type: string
+        file_name:
+          type: string
+        file_size:
+          type: integer
+        file_type:
+          type: string
+        file_url:
+          type: string
+        storage_path:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        case_id:
+          type: string
+        sender_id:
+          type: string
+        sender_name:
+          type: string
+        sender_type:
+          type: string
+          enum: [client, lawyer]
+        message:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              file_name:
+                type: string
+        created_at:
+          type: string
+          format: date-time
+        read_at:
+          type: string
+          format: date-time
+
+    TimeEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        case_id:
+          type: string
+        lawyer_id:
+          type: string
+        description:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        billable_hours:
+          type: number
+        hourly_rate:
+          type: number
+        total_amount:
+          type: number
+        category:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        approved:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+        code:
+          type: string
+        timestamp:
+          type: string
+          format: date-time 

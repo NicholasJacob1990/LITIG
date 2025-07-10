@@ -1,0 +1,154 @@
+# Configuração do Projeto Flutter - LITGO5
+# Este arquivo define as configurações base para o projeto Flutter
+
+name: litgo_flutter
+description: Sistema de Match Jurídico Inteligente - Flutter Version
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.13.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+    
+  # Estado e Arquitetura
+  flutter_bloc: ^8.1.3
+  equatable: ^2.0.5
+  get_it: ^7.6.4
+  injectable: ^2.3.2
+  
+  # Navegação
+  go_router: ^12.1.3
+  
+  # HTTP e API
+  dio: ^5.3.2
+  retrofit: ^4.0.3
+  json_annotation: ^4.8.1
+  
+  # Supabase
+  supabase_flutter: ^2.0.0
+  
+  # UI e Animações
+  flutter_animate: ^4.2.0+1
+  cached_network_image: ^3.3.0
+  shimmer: ^3.0.0
+  
+  # Formulários e Validação
+  flutter_form_builder: ^9.1.1
+  form_builder_validators: ^9.1.0
+  
+  # Utilitários
+  intl: ^0.18.1
+  collection: ^1.18.0
+  
+  # Armazenamento Local
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
+  
+  # Notificações
+  flutter_local_notifications: ^16.1.0
+  
+  # Permissões
+  permission_handler: ^11.0.1
+  
+  # Câmera e Arquivos
+  image_picker: ^1.0.4
+  file_picker: ^6.1.1
+  
+  # Mapas
+  google_maps_flutter: ^2.5.0
+  geolocator: ^10.1.0
+  
+  # Calendário e Agenda
+  table_calendar: ^3.0.9
+  syncfusion_flutter_calendar: ^23.2.7
+  
+  # Conectividade
+  connectivity_plus: ^5.0.1
+  
+  # Logging
+  logger: ^2.0.2+1
+  
+  # Criptografia
+  crypto: ^3.0.3
+  
+  # Ícones Lucide
+  lucide_icons: ^0.263.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+    
+  # Análise de Código
+  flutter_lints: ^3.0.1
+  
+  # Geração de Código
+  build_runner: ^2.4.7
+  injectable_generator: ^2.4.1
+  retrofit_generator: ^8.0.4
+  json_serializable: ^6.7.1
+  
+  # Testes
+  mockito: ^5.4.2
+  bloc_test: ^9.1.4
+  integration_test:
+    sdk: flutter
+    
+  # Ícones
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+  
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+
+# Configuração de Ícones
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+
+# Configuração de Análise
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.gr.dart"
+  errors:
+    invalid_annotation_target: ignore
+    missing_required_param: warning
+    missing_return: error
+    dead_code: info
+    
+linter:
+  rules:
+    - avoid_print
+    - avoid_unnecessary_containers
+    - avoid_web_libraries_in_flutter
+    - no_logic_in_create_state
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_fields
+    - prefer_final_locals
+    - prefer_single_quotes
+    - require_trailing_commas
+    - sort_child_properties_last
+    - use_key_in_widget_constructors
+    - use_super_parameters 

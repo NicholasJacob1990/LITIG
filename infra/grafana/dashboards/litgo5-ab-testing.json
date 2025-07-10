@@ -1,0 +1,110 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "LITGO5 - A/B Testing & Monitoramento de Modelos",
+    "tags": ["litgo5", "ab-testing", "modelos", "ltr"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Testes A/B Ativos",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "ab_test_performance_gauge",
+            "legendFormat": "{{test_id}} - {{group}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Exposições A/B por Hora",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(ab_test_exposure_total[1h]) * 3600",
+            "legendFormat": "{{test_id}} - {{group}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Taxa de Conversão A/B",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(ab_test_conversions_total[1h]) / rate(ab_test_exposure_total[1h])",
+            "legendFormat": "{{test_id}} - {{group}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Performance do Modelo LTR",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "model_performance_gauge{metric=\"ndcg\"}",
+            "legendFormat": "NDCG - {{model_type}}"
+          },
+          {
+            "expr": "model_performance_gauge{metric=\"correlation\"}",
+            "legendFormat": "Correlação - {{model_type}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Drift de Features",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "model_drift_gauge",
+            "legendFormat": "{{feature}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Alertas de Modelo",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(model_alert_total[1h]) * 3600",
+            "legendFormat": "{{alert_type}} - {{level}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 7,
+        "title": "Retreinos de Modelo",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(model_retrain_total[1h]) * 3600",
+            "legendFormat": "{{trigger}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ],
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "refresh": "1m",
+    "schemaVersion": 30,
+    "version": 1
+  }
+} 

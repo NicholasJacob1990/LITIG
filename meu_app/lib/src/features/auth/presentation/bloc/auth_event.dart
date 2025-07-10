@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'dart:io';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -8,107 +7,32 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Evento para verificar o estado de autenticação atual
-class AuthStateChanged extends AuthEvent {
-  final dynamic user;
-  const AuthStateChanged(this.user);
-
-  @override
-  List<Object?> get props => [user];
+class AuthCheckRequested extends AuthEvent {
+  const AuthCheckRequested();
 }
 
-/// Evento para realizar login
-class AuthLoginRequested extends AuthEvent {
+class AuthSignInRequested extends AuthEvent {
   final String email;
   final String password;
 
-  const AuthLoginRequested({required this.email, required this.password});
+  const AuthSignInRequested({
+    required this.email,
+    required this.password,
+  });
 
   @override
   List<Object?> get props => [email, password];
 }
 
-/// Evento para registrar um cliente
-class AuthRegisterClientRequested extends AuthEvent {
-  final String email;
-  final String password;
-  final String name;
-  final String userType;
-  final String? cpf;
-  final String? cnpj;
-
-  const AuthRegisterClientRequested({
-    required this.email,
-    required this.password,
-    required this.name,
-    required this.userType,
-    this.cpf,
-    this.cnpj,
-  });
-
-  @override
-  List<Object?> get props => [email, password, name, userType, cpf, cnpj];
+class AuthSignOutRequested extends AuthEvent {
+  const AuthSignOutRequested();
 }
 
-/// Evento para registrar um advogado
-class AuthRegisterLawyerRequested extends AuthEvent {
-  // Step 1
-  final String email;
-  final String password;
-  final String name;
-  final String cpf;
-  final String phone;
-  
-  // Step 2
-  final String oab;
-  final String areas;
-  final int maxCases;
-  final String cep;
-  final String address;
-  final String city;
-  final String state;
+class AuthUserChanged extends AuthEvent {
+  final dynamic user;
 
-  // Step 3
-  final File? cvFile;
-  final File? oabFile;
-  final File? residenceProofFile;
-
-  // Step 4
-  final String? gender;
-  final String? ethnicity;
-  final bool isPcd;
-  
-  // Step 5
-  final bool agreedToTerms;
-
-  const AuthRegisterLawyerRequested({
-    required this.email,
-    required this.password,
-    required this.name,
-    required this.cpf,
-    required this.phone,
-    required this.oab,
-    required this.areas,
-    required this.maxCases,
-    required this.cep,
-    required this.address,
-    required this.city,
-    required this.state,
-    this.cvFile,
-    this.oabFile,
-    this.residenceProofFile,
-    this.gender,
-    this.ethnicity,
-    required this.isPcd,
-    required this.agreedToTerms,
-  });
+  const AuthUserChanged(this.user);
 
   @override
-  List<Object?> get props => [
-    email, password, name, cpf, phone, oab, areas, maxCases, cep, address, city, state,
-    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms
-  ];
-}
-
-/// Evento para realizar logout
-class AuthLogoutRequested extends AuthEvent {} 
+  List<Object?> get props => [user];
+} 

@@ -1,0 +1,19 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'host.exp.exponent'
+version = '13.1.5'
+
+android {
+  namespace "expo.modules.sharing"
+  defaultConfig {
+    versionCode 16
+    versionName '13.1.5'
+  }
+}
+
+dependencies {
+  api "androidx.legacy:legacy-support-v4:1.0.0"
+}

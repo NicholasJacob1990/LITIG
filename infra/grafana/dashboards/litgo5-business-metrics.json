@@ -1,0 +1,156 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "LITGO5 - Métricas de Negócio & Equidade",
+    "tags": ["litgo5", "business", "equidade", "advogados"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Coeficiente de Gini - Distribuição de Casos",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "equity_distribution_gini",
+            "legendFormat": "Gini"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.3},
+                {"color": "red", "value": 0.4}
+              ]
+            },
+            "unit": "short",
+            "decimals": 3
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Advogados Disponíveis por Área",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "lawyers_available_count",
+            "legendFormat": "{{area}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 18, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Carga Média dos Advogados",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "average_lawyer_load_percent",
+            "legendFormat": "{{area}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Ofertas Ativas vs Pendentes",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "active_offers_count",
+            "legendFormat": "Ofertas Ativas"
+          },
+          {
+            "expr": "pending_contracts_count",
+            "legendFormat": "Contratos Pendentes"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Taxa de Conversão de Ofertas",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "offers:conversion_rate:1h",
+            "legendFormat": "Taxa de Conversão"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Contratos Assinados por Dia",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(contracts_signed_total[1d]) * 86400",
+            "legendFormat": "Contratos/dia"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Distribuição de Casos por Advogado (Top 10)",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, lawyer_cases_assigned_total)",
+            "legendFormat": "{{lawyer_id}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Tempo Médio de Resposta a Ofertas",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, rate(offer_response_duration_seconds_bucket[5m]))",
+            "legendFormat": "Mediana"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(offer_response_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "refresh": "5m",
+    "schemaVersion": 30,
+    "version": 1
+  }
+} 

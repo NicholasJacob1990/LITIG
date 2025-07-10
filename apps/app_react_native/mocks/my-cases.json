@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "id": "case-mock-123",
+      "title": "Ação de Cobrança Indevida (Mock)",
+      "area": "Consumidor",
+      "subarea": "Cobrança",
+      "status": "in_progress",
+      "lawyer_id": "lw-mock-001",
+      "lawyer_name": "Dra. Ana Fictícia",
+      "created_at": "2024-07-01T10:00:00Z",
+      "updated_at": "2024-07-20T14:30:00Z",
+      "estimated_cost": 5000.0,
+      "progress": 50,
+      "next_deadline": {
+        "date": "2024-08-01T17:00:00Z",
+        "description": "Apresentar réplica"
+      },
+      "stats": {
+        "messages_count": 8,
+        "documents_count": 3,
+        "events_count": 5
+      }
+    },
+    {
+      "id": "case-mock-456",
+      "title": "Divórcio Consensual (Mock)",
+      "area": "Família",
+      "subarea": "Divórcio",
+      "status": "summary_generated",
+      "lawyer_id": null,
+      "lawyer_name": null,
+      "created_at": "2024-07-15T11:00:00Z",
+      "updated_at": "2024-07-18T16:00:00Z",
+      "estimated_cost": 8000.0,
+      "progress": 25,
+      "next_deadline": {
+        "date": "2024-07-30T17:00:00Z",
+        "description": "Escolher advogado"
+      },
+      "stats": {
+        "messages_count": 2,
+        "documents_count": 1,
+        "events_count": 2
+      }
+    }
+  ]
+} 

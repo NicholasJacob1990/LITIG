@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Configuração de alertas
+rule_files:
+  - "alerts.yml"
+
+# Configuração de scraping
+scrape_configs:
+  # Job para coletar métricas da API LITGO
+  - job_name: 'litgo-api'
+    static_configs:
+      - targets: ['api:8000']  # Nome do serviço no docker-compose
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Job para métricas do próprio Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+# Configuração de alertmanager (opcional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093 

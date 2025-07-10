@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+sempre faça análises holísticas do código, verifique o que ele impacta e como ele depende dos demais componentes. matenha documentação atualizada.

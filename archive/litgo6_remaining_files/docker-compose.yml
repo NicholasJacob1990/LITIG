@@ -1,0 +1,116 @@
+# (Compose version key removed — modern Docker Compose no longer requires it)
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: litgo_db
+    ports:
+      - "54326:5432"
+    environment:
+      POSTGRES_DB: litgo
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d litgo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: litgo5_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "litgo5_redis_password_2024", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      - REDIS_PASSWORD=litgo5_redis_password_2024
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./tests:/app/tests
+    env_file:
+      - env.example
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ./backend:/app/backend
+    env_file:
+      - env.example
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: celery -A backend.celery_app worker --loglevel=info
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ./backend:/app/backend
+    env_file:
+      - env.example
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: celery -A backend.celery_app beat --loglevel=info
+
+  # Serviço Prometheus para coleta de métricas
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: litgo5-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    depends_on:
+      api:
+        condition: service_started
+
+networks:
+  default:
+    name: litgo_network 
+
+volumes:
+  pgdata:
+  redis_data:
+  prometheus-data: 

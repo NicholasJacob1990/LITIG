@@ -1,0 +1,13 @@
+{"event": "match", "case_id": "case_01", "lawyer_id": "lawyer_A", "features": {"A": 0.9, "S": 0.8, "T": 0.7, "G": 0.9, "Q": 0.6, "U": 1.0, "R": 0.8}, "label": "accepted"}
+{"event": "match", "case_id": "case_01", "lawyer_id": "lawyer_B", "features": {"A": 0.8, "S": 0.7, "T": 0.9, "G": 0.6, "Q": 0.8, "U": 0.9, "R": 0.9}, "label": "declined"}
+{"event": "match", "case_id": "case_02", "lawyer_id": "lawyer_C", "features": {"A": 0.9, "S": 0.9, "T": 0.9, "G": 0.8, "Q": 0.7, "U": 1.0, "R": 0.9}, "label": "won"}
+{"event": "match", "case_id": "case_02", "lawyer_id": "lawyer_A", "features": {"A": 0.7, "S": 0.6, "T": 0.7, "G": 0.9, "Q": 0.6, "U": 0.8, "R": 0.8}, "label": "lost"}
+{"event": "match", "case_id": "case_03", "lawyer_id": "lawyer_D", "features": {"A": 1.0, "S": 0.95, "T": 0.88, "G": 0.7, "Q": 0.9, "U": 0.9, "R": 0.95}, "label": "won"}
+{"event": "match", "case_id": "case_03", "lawyer_id": "lawyer_E", "features": {"A": 1.0, "S": 0.85, "T": 0.92, "G": 0.8, "Q": 0.7, "U": 1.0, "R": 0.9}, "label": "accepted"}
+{"event": "match", "case_id": "case_04", "lawyer_id": "lawyer_A", "features": {"A": 0.6, "S": 0.5, "T": 0.7, "G": 0.8, "Q": 0.6, "U": 0.7, "R": 0.8}, "label": "declined"}
+{"event": "match", "case_id": "case_04", "lawyer_id": "lawyer_F", "features": {"A": 1.0, "S": 0.2, "T": 0.6, "G": 0.9, "Q": 0.4, "U": 0.5, "R": 0.5}, "label": "lost"}
+{"event": "match", "case_id": "case_05", "lawyer_id": "lawyer_C", "features": {"A": 0.9, "S": 0.9, "T": 0.9, "G": 0.8, "Q": 0.7, "U": 1.0, "R": 0.9}, "label": "accepted"}
+{"event": "match", "case_id": "case_05", "lawyer_id": "lawyer_D", "features": {"A": 1.0, "S": 0.95, "T": 0.88, "G": 0.7, "Q": 0.9, "U": 0.9, "R": 0.95}, "label": "won"}
+{"event": "match", "case_id": "case_06", "lawyer_id": "lawyer_B", "features": {"A": 0.8, "S": 0.7, "T": 0.9, "G": 0.6, "Q": 0.8, "U": 0.9, "R": 0.9}, "label": "lost"}
+{"event": "match", "case_id": "case_06", "lawyer_id": "lawyer_G", "features": {"A": 0.9, "S": 0.8, "T": 0.95, "G": 0.85, "Q": 0.8, "U": 0.95, "R": 0.92}, "label": "won"}
+{"event": "unrelated", "message": "some other log"}

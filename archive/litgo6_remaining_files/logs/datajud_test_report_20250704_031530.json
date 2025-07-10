@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-07-04T03:15:30.767050",
+  "test_suite": "DataJud API Integration",
+  "version": "1.0.0",
+  "results": {
+    "tribunals_configured": 88,
+    "expected_tribunals": 86,
+    "api_key_configured": true,
+    "regions_mapped": 27
+  }
+}

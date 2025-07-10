@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:meu_app/injection_container.dart';
-import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:meu_app/src/router/app_router.dart';
-import 'package:meu_app/src/core/theme/theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'src/core/injection/injection_container.dart';
+import 'src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'src/features/auth/presentation/bloc/auth_event.dart';
+import 'src/router/app_router.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   try {
     await Supabase.initialize(
-      url: 'http://localhost:54321',
-      anonKey:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeo-s3C13nNhVOQnJbLUgJdHNTMJJBQYBzk',
+      // Usando URL do projeto real conforme documentação
+      url: 'https://cgmzvdfzzqrvlxqyowle.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbXp2ZGZ6enFydmx4cXlvd2xlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MTU3NzMsImV4cCI6MjA2NzM5MTc3M30.k-MKLJOGLlXKIlq4D4dMFSXYbOFLFrjm7EyHK7kPbNo',
     );
     print('✅ Supabase inicializado com sucesso');
   } catch (e) {
@@ -26,26 +24,25 @@ Future<void> main() async {
     }
   }
 
-  configureDependencies();
-  runApp(const MyApp());
+  // Inicializar dependências
+  await initializeDependencies();
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  late final AuthBloc _authBloc;
-  late final GoRouter _router;
+  late AuthBloc _authBloc;
+  late final router = appRouter(_authBloc);
 
   @override
   void initState() {
     super.initState();
-    _authBloc = getIt<AuthBloc>();
-    _router = appRouter(_authBloc);
+    _authBloc = getIt<AuthBloc>()..add(const AuthCheckRequested());
   }
 
   @override
@@ -59,58 +56,13 @@ class _MyAppState extends State<MyApp> {
     return BlocProvider.value(
       value: _authBloc,
       child: MaterialApp.router(
-        routerConfig: _router,
-        title: 'LITIG',
+        title: 'LITGO5',
         debugShowCheckedModeBanner: false,
-        theme: appTheme, // Aplicando o tema do LITGO6
-        builder: (context, widget) {
-          ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-            return ErrorScreen(error: errorDetails.exception.toString());
-          };
-          return widget ?? const ErrorScreen(error: 'Widget nulo');
-        },
-      ),
-    );
-  }
-}
-
-class ErrorScreen extends StatelessWidget {
-  final String error;
-  
-  const ErrorScreen({super.key, required this.error});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Erro')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              const Text(
-                'Ops! Algo deu errado',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: usar GoRouter para navegar
-                },
-                child: const Text('Voltar ao Início'),
-              ),
-            ],
-          ),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
         ),
+        routerConfig: router,
       ),
     );
   }

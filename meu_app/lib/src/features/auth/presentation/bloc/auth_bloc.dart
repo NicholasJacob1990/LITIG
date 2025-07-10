@@ -1,117 +1,108 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meu_app/src/features/auth/domain/errors/auth_exceptions.dart';
-import 'package:meu_app/src/features/auth/domain/repositories/auth_repository.dart';
-import 'package:meu_app/src/features/auth/domain/usecases/login_usecase.dart';
-import 'package:meu_app/src/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:meu_app/src/features/auth/domain/usecases/register_client_usecase.dart';
-import 'package:meu_app/src/features/auth/domain/usecases/register_lawyer_usecase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
-  final LoginUseCase _loginUseCase;
-  final RegisterClientUseCase _registerClientUseCase;
-  final RegisterLawyerUseCase _registerLawyerUseCase;
-  final LogoutUseCase _logoutUseCase;
+  final SupabaseClient _supabase;
+  StreamSubscription<AuthState>? _authSubscription;
 
-  AuthBloc({required this.authRepository})
-      : _loginUseCase = LoginUseCase(authRepository),
-        _registerClientUseCase = RegisterClientUseCase(authRepository),
-        _registerLawyerUseCase = RegisterLawyerUseCase(authRepository),
-        _logoutUseCase = LogoutUseCase(authRepository),
-        super(AuthInitial()) {
-    on<AuthLoginRequested>(_onLoginRequested);
-    on<AuthRegisterClientRequested>(_onRegisterClientRequested);
-    on<AuthRegisterLawyerRequested>(_onRegisterLawyerRequested);
-    on<AuthLogoutRequested>(_onLogoutRequested);
-    on<AuthStateChanged>(_onAuthStateChanged);
+  AuthBloc({SupabaseClient? supabase})
+      : _supabase = supabase ?? Supabase.instance.client,
+        super(const AuthInitial()) {
+    on<AuthCheckRequested>(_onAuthCheckRequested);
+    on<AuthSignInRequested>(_onAuthSignInRequested);
+    on<AuthSignOutRequested>(_onAuthSignOutRequested);
+    on<AuthUserChanged>(_onAuthUserChanged);
 
-    authRepository.authStateChanges.listen((user) {
-      add(AuthStateChanged(user));
-    });
+    // Listen to auth state changes
+    _authSubscription = _supabase.auth.onAuthStateChange.listen(
+      (data) {
+        final user = data.user;
+        add(AuthUserChanged(user));
+      },
+    );
   }
 
-  void _onAuthStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {
-    if (event.user != null) {
-      emit(Authenticated(event.user));
+  Future<void> _onAuthCheckRequested(
+    AuthCheckRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      final user = _supabase.auth.currentUser;
+
+      if (user != null) {
+        final userRole = _getUserRole(user);
+        emit(AuthenticatedState(user: user, userRole: userRole));
+      } else {
+        emit(const UnauthenticatedState());
+      }
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthSignInRequested(
+    AuthSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        email: event.email,
+        password: event.password,
+      );
+
+      if (response.user != null) {
+        final userRole = _getUserRole(response.user!);
+        emit(AuthenticatedState(user: response.user!, userRole: userRole));
+      } else {
+        emit(const AuthError(message: 'Falha na autenticação'));
+      }
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthSignOutRequested(
+    AuthSignOutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await _supabase.auth.signOut();
+      emit(const UnauthenticatedState());
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  void _onAuthUserChanged(
+    AuthUserChanged event,
+    Emitter<AuthState> emit,
+  ) {
+    final user = event.user;
+
+    if (user != null) {
+      final userRole = _getUserRole(user);
+      emit(AuthenticatedState(user: user, userRole: userRole));
     } else {
-      emit(Unauthenticated());
+      emit(const UnauthenticatedState());
     }
   }
 
-  Future<void> _onLoginRequested(AuthLoginRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    try {
-      await _loginUseCase(LoginParams(email: event.email, password: event.password));
-      // O stream authStateChanges cuidará de emitir o estado Authenticated
-    } on AuthException catch (e) {
-      emit(AuthError(e.message));
-    } catch (e) {
-      emit(const AuthError('Ocorreu um erro desconhecido.'));
-    }
+  String _getUserRole(User user) {
+    // Extrair role dos metadados do usuário
+    final metadata = user.userMetadata;
+    return metadata?['role'] ?? 'client';
   }
 
-  Future<void> _onRegisterClientRequested(AuthRegisterClientRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    try {
-      await _registerClientUseCase(RegisterClientParams(
-        email: event.email,
-        password: event.password,
-        name: event.name,
-        userType: event.userType,
-        cpf: event.cpf,
-        cnpj: event.cnpj,
-      ));
-      emit(const AuthSuccess('Registro de cliente realizado com sucesso! Por favor, verifique seu e-mail.'));
-    } on AuthException catch (e) {
-      emit(AuthError(e.message));
-    } catch (e) {
-      emit(const AuthError('Ocorreu um erro desconhecido.'));
-    }
-  }
-
-  Future<void> _onRegisterLawyerRequested(AuthRegisterLawyerRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    try {
-      await _registerLawyerUseCase(RegisterLawyerParams(
-        email: event.email,
-        password: event.password,
-        name: event.name,
-        cpf: event.cpf,
-        phone: event.phone,
-        oab: event.oab,
-        areas: event.areas,
-        maxCases: event.maxCases,
-        cep: event.cep,
-        address: event.address,
-        city: event.city,
-        state: event.state,
-        cvFile: event.cvFile,
-        oabFile: event.oabFile,
-        residenceProofFile: event.residenceProofFile,
-        gender: event.gender,
-        ethnicity: event.ethnicity,
-        isPcd: event.isPcd,
-        agreedToTerms: event.agreedToTerms,
-      ));
-      emit(const AuthSuccess('Registro de advogado realizado com sucesso! Sua conta está em análise.'));
-    } on AuthException catch (e) {
-      emit(AuthError(e.message));
-    } catch (e) {
-      emit(const AuthError('Ocorreu um erro desconhecido.'));
-    }
-  }
-
-  Future<void> _onLogoutRequested(AuthLogoutRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    try {
-      await _logoutUseCase();
-       // O stream authStateChanges cuidará de emitir o estado Unauthenticated
-    } on AuthException catch (e) {
-      emit(AuthError(e.message));
-    } catch (e) {
-      emit(const AuthError('Ocorreu um erro desconhecido.'));
-    }
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    return super.close();
   }
 } 

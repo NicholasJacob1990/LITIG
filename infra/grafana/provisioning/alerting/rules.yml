@@ -1,0 +1,101 @@
+apiVersion: 1
+
+groups:
+  - name: LITGO5 Critical Alerts
+    interval: 30s
+    rules:
+      - uid: system_health_critical
+        title: "Sistema LITGO5 - Saúde Crítica"
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: system_health_score < 60
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: "Score de saúde do sistema LITGO5 está abaixo de 60%"
+          summary: "Sistema em estado crítico"
+        labels:
+          severity: critical
+          team: devops
+
+      - uid: high_error_rate
+        title: "LITGO5 - Alta Taxa de Erro"
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: rate(triage_requests_total{status="error"}[5m]) > 0.1
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: "Taxa de erro nas triagens está acima de 10%"
+          summary: "Alta taxa de erro detectada"
+        labels:
+          severity: warning
+          team: backend
+
+      - uid: equity_distribution_unfair
+        title: "LITGO5 - Distribuição Injusta de Casos"
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: equity_distribution_gini > 0.4
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: NoData
+        execErrState: Alerting
+        for: 30m
+        annotations:
+          description: "Coeficiente de Gini acima de 0.4 indica distribuição muito desigual"
+          summary: "Distribuição de casos injusta detectada"
+        labels:
+          severity: warning
+          team: business
+
+      - uid: model_drift_detected
+        title: "LITGO5 - Drift de Modelo Detectado"
+        condition: A
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 900
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: model_drift_gauge{feature="overall"} > 0.3
+              intervalMs: 1000
+              maxDataPoints: 43200
+        noDataState: NoData
+        execErrState: Alerting
+        for: 15m
+        annotations:
+          description: "Drift detectado no modelo LTR com score {{ $value }}"
+          summary: "Modelo pode precisar de retreino"
+        labels:
+          severity: warning
+          team: ml 

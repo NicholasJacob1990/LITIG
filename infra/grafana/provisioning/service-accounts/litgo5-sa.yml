@@ -1,0 +1,10 @@
+apiVersion: 1
+
+service_accounts:
+  - name: litgo5-automation-sa
+    displayName: "LITGO5 Automation Service Account"
+    role: Admin
+    isDisabled: false
+    tokens:
+      - name: litgo5-automation-token
+        secondsToLive: 2592000  # 30 dias 

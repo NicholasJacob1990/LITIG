@@ -1,0 +1,224 @@
+groups:
+- name: litgo_alerts
+  interval: 30s
+  rules:
+  
+  # =============================================================================
+  # ALERTAS CRÍTICOS - Resposta imediata necessária
+  # =============================================================================
+  
+  - alert: HighErrorRate
+    expr: rate(triage_requests_total{status="error"}[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: critical
+      team: backend
+    annotations:
+      summary: "Alta taxa de erro em triagem ({{ $value | humanizePercentage }})"
+      description: "Taxa de erro nas requisições de triagem está acima de 10% por mais de 2 minutos."
+      runbook: "https://wiki.litgo.com/runbooks/high-error-rate"
+  
+  - alert: AllJobsFailing
+    expr: sum(rate(job_executions_total{status="failed"}[5m])) by (job_name) > 0.5
+    for: 5m
+    labels:
+      severity: critical
+      team: devops
+    annotations:
+      summary: "Job {{ $labels.job_name }} falhando continuamente"
+      description: "O job {{ $labels.job_name }} está falhando em mais de 50% das execuções."
+  
+  - alert: NoMatchesFound
+    expr: rate(matches_found_total[10m]) == 0
+    for: 10m
+    labels:
+      severity: critical
+      team: backend
+    annotations:
+      summary: "Nenhum match encontrado nos últimos 10 minutos"
+      description: "O sistema não está encontrando matches, possível problema no algoritmo."
+  
+  # =============================================================================
+  # ALERTAS DE ALTA SEVERIDADE - Ação necessária em breve
+  # =============================================================================
+  
+  - alert: HighLatency
+    expr: histogram_quantile(0.95, rate(triage_duration_seconds_bucket[5m])) > 30
+    for: 5m
+    labels:
+      severity: warning
+      team: backend
+    annotations:
+      summary: "Latência alta em triagem (P95: {{ $value | humanizeDuration }})"
+      description: "95% das triagens estão levando mais de 30 segundos."
+  
+  - alert: ManyOffersExpiring
+    expr: rate(offers_created_total[1h]) > 0 and (active_offers_count / rate(offers_created_total[1h])) < 0.3
+    for: 15m
+    labels:
+      severity: warning
+      team: business
+    annotations:
+      summary: "Muitas ofertas expirando sem resposta"
+      description: "Menos de 30% das ofertas estão sendo respondidas."
+  
+  - alert: LowCacheHitRate
+    expr: cache_hit_rate{cache_type="redis"} < 0.5
+    for: 10m
+    labels:
+      severity: warning
+      team: devops
+    annotations:
+      summary: "Taxa de acerto do cache Redis baixa ({{ $value | humanizePercentage }})"
+      description: "Cache Redis com menos de 50% de hit rate, possível problema de configuração."
+  
+  # =============================================================================
+  # ALERTAS DE EQUIDADE - Distribuição injusta
+  # =============================================================================
+  
+  - alert: UnfairDistribution
+    expr: equity_distribution_gini > 0.4
+    for: 30m
+    labels:
+      severity: warning
+      team: business
+    annotations:
+      summary: "Distribuição de casos desigual (Gini: {{ $value | humanize }})"
+      description: "Coeficiente de Gini acima de 0.4 indica distribuição muito desigual."
+  
+  - alert: LawyersOverloaded
+    expr: average_lawyer_load_percent > 90
+    for: 15m
+    labels:
+      severity: warning
+      team: business
+    annotations:
+      summary: "Advogados sobrecarregados em {{ $labels.area }}"
+      description: "Carga média dos advogados em {{ $labels.area }} está acima de 90%."
+  
+  # =============================================================================
+  # ALERTAS DE JOBS - Problemas com tarefas agendadas
+  # =============================================================================
+  
+  - alert: JobNotRunning
+    expr: time() - job_last_success_timestamp > 86400
+    for: 1h
+    labels:
+      severity: warning
+      team: devops
+    annotations:
+      summary: "Job {{ $labels.job_name }} não executa há mais de 24h"
+      description: "Última execução bem-sucedida foi há {{ $value | humanizeDuration }}."
+  
+  - alert: EquityJobFailed
+    expr: increase(job_executions_total{job_name="calculate_equity", status="failed"}[1h]) > 0
+    for: 5m
+    labels:
+      severity: warning
+      team: backend
+    annotations:
+      summary: "Job de cálculo de equidade falhou"
+      description: "O job de equidade falhou, distribuição pode ficar comprometida."
+  
+  # =============================================================================
+  # ALERTAS DE DEPENDÊNCIAS EXTERNAS
+  # =============================================================================
+  
+  - alert: ExternalAPITimeout
+    expr: rate(external_api_duration_seconds_count{quantile="0.95"}[5m]) > 10
+    for: 5m
+    labels:
+      severity: warning
+      team: backend
+    annotations:
+      summary: "API externa {{ $labels.service }} com timeout frequente"
+      description: "{{ $labels.service }} está com P95 > 10s, considere usar fallback."
+  
+  - alert: HighFallbackUsage
+    expr: rate(fallback_usage_total[5m]) > 0.2
+    for: 10m
+    labels:
+      severity: info
+      team: backend
+    annotations:
+      summary: "Alto uso de fallback para {{ $labels.service }}"
+      description: "Fallback sendo usado em mais de 20% das requisições."
+  
+  # =============================================================================
+  # ALERTAS DE CAPACIDADE - Problemas de escala
+  # =============================================================================
+  
+  - alert: QueueBacklog
+    expr: queue_size > 1000
+    for: 5m
+    labels:
+      severity: warning
+      team: devops
+    annotations:
+      summary: "Fila {{ $labels.queue_name }} com backlog alto"
+      description: "Mais de 1000 itens na fila, possível gargalo de processamento."
+  
+  - alert: FewLawyersAvailable
+    expr: lawyers_available_count < 5
+    for: 30m
+    labels:
+      severity: info
+      team: business
+    annotations:
+      summary: "Poucos advogados disponíveis em {{ $labels.area }}"
+      description: "Apenas {{ $value }} advogados disponíveis, considere recrutar mais."
+  
+  # =============================================================================
+  # ALERTAS DE SISTEMA - Saúde geral
+  # =============================================================================
+  
+  - alert: SystemHealthLow
+    expr: system_health_score < 80
+    for: 10m
+    labels:
+      severity: warning
+      team: devops
+    annotations:
+      summary: "Saúde do sistema degradada ({{ $value }}/100)"
+      description: "Score de saúde abaixo de 80, verificar métricas individuais."
+  
+  - alert: DatabaseSlowQueries
+    expr: histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m])) > 1
+    for: 5m
+    labels:
+      severity: warning
+      team: backend
+    annotations:
+      summary: "Queries lentas no banco (P95: {{ $value | humanizeDuration }})"
+      description: "95% das queries estão levando mais de 1 segundo."
+
+# =============================================================================
+# REGRAS DE GRAVAÇÃO - Pré-calcular métricas complexas
+# =============================================================================
+
+- name: litgo_recording_rules
+  interval: 30s
+  rules:
+  
+  # Taxa de sucesso por estratégia
+  - record: triage:success_rate:5m
+    expr: |
+      sum(rate(triage_requests_total{status="success"}[5m])) by (strategy) /
+      sum(rate(triage_requests_total[5m])) by (strategy)
+  
+  # Latência média por preset
+  - record: matching:latency_avg:5m
+    expr: |
+      rate(matching_duration_seconds_sum[5m]) /
+      rate(matching_duration_seconds_count[5m])
+  
+  # Taxa de conversão de ofertas
+  - record: offers:conversion_rate:1h
+    expr: |
+      sum(rate(contracts_signed_total[1h])) /
+      sum(rate(offers_created_total[1h]))
+  
+  # Carga média do sistema
+  - record: system:load_average:5m
+    expr: |
+      avg(average_lawyer_load_percent) 

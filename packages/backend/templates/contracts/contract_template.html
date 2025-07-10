@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrato de Prestação de Serviços Jurídicos</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12px;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        
+        .contract-info {
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 10px;
+        }
+        
+        .parties {
+            margin-bottom: 25px;
+        }
+        
+        .party {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .party-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .clause {
+            margin-bottom: 20px;
+        }
+        
+        .clause-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .clause-content {
+            text-align: justify;
+            margin-left: 20px;
+        }
+        
+        .fee-highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .signatures {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+        
+        .case-summary {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .case-summary h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        @media print {
+            body { margin: 0; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Contrato de Prestação de Serviços Jurídicos</h1>
+    </div>
+    
+    <div class="contract-info">
+        <strong>Contrato Nº:</strong> {{ contract_number }}<br>
+        <strong>Data:</strong> {{ generated_at.strftime('%d/%m/%Y às %H:%M') }}<br>
+        <strong>Plataforma:</strong> LITGO - Conexão Jurídica Inteligente
+    </div>
+    
+    <div class="parties">
+        <div class="party">
+            <div class="party-title">Contratante (Cliente)</div>
+            <strong>Nome:</strong> {{ client.full_name or client.name or 'Nome não informado' }}<br>
+            <strong>Email:</strong> {{ client.email or 'Email não informado' }}<br>
+            <strong>Telefone:</strong> {{ client.phone or 'Telefone não informado' }}<br>
+            {% if client.document %}
+            <strong>CPF/CNPJ:</strong> {{ client.document }}<br>
+            {% endif %}
+            <strong>Endereço:</strong> {{ client.address or 'Endereço não informado' }}
+        </div>
+        
+        <div class="party">
+            <div class="party-title">Contratado (Advogado)</div>
+            <strong>Nome:</strong> {{ lawyer.full_name or lawyer.name or 'Nome não informado' }}<br>
+            <strong>Email:</strong> {{ lawyer.email or 'Email não informado' }}<br>
+            <strong>Telefone:</strong> {{ lawyer.phone or 'Telefone não informado' }}<br>
+            {% if lawyer.oab %}
+            <strong>OAB:</strong> {{ lawyer.oab }}<br>
+            {% endif %}
+            <strong>Especialização:</strong> {{ lawyer.specialization or case.area or 'Não informado' }}<br>
+            <strong>Endereço:</strong> {{ lawyer.address or 'Endereço não informado' }}
+        </div>
+    </div>
+    
+    <div class="case-summary">
+        <h3>Resumo do Caso</h3>
+        <strong>Área:</strong> {{ case.area or 'Não especificada' }}<br>
+        {% if case.subarea %}
+        <strong>Subárea:</strong> {{ case.subarea }}<br>
+        {% endif %}
+        <strong>Título:</strong> {{ case.title or 'Caso jurídico' }}<br>
+        {% if case.description %}
+        <strong>Descrição:</strong> {{ case.description[:300] }}{% if case.description|length > 300 %}...{% endif %}<br>
+        {% endif %}
+        {% if case.urgency_h %}
+        <strong>Urgência:</strong> {{ case.urgency_h }} horas<br>
+        {% endif %}
+        <strong>Data de Criação:</strong> {{ case.created_at.strftime('%d/%m/%Y') if case.created_at else 'Não informada' }}
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 1ª - Do Objeto</div>
+        <div class="clause-content">
+            O presente contrato tem por objeto a prestação de serviços jurídicos pelo CONTRATADO em favor do CONTRATANTE, 
+            especificamente relacionados ao caso descrito acima, na área de <strong>{{ case.area or 'Direito' }}</strong>, 
+            incluindo mas não se limitando a: consultoria jurídica, análise de documentos, elaboração de peças processuais, 
+            acompanhamento processual e representação judicial quando necessária.
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 2ª - Dos Honorários</div>
+        <div class="clause-content">
+            Os honorários advocatícios serão calculados da seguinte forma:
+            <div class="fee-highlight">
+                {{ fee_description }}
+            </div>
+            {% if contract.fee_model.type == 'success' %}
+            <p><strong>Importante:</strong> Os honorários de êxito serão devidos apenas em caso de resultado favorável ao cliente, 
+            incidindo sobre o valor efetivamente obtido (seja por acordo, sentença ou execução).</p>
+            {% elif contract.fee_model.type == 'fixed' %}
+            <p><strong>Pagamento:</strong> O valor poderá ser pago em até 3 (três) parcelas iguais, sendo a primeira no ato da assinatura 
+            deste contrato e as demais com vencimento a cada 30 (trinta) dias.</p>
+            {% elif contract.fee_model.type == 'hourly' %}
+            <p><strong>Cobrança:</strong> As horas serão contabilizadas mensalmente e cobradas até o 5º dia útil do mês subsequente, 
+            com prazo de pagamento de 15 (quinze) dias.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 3ª - Das Obrigações do Contratado</div>
+        <div class="clause-content">
+            São obrigações do CONTRATADO:
+            <ul>
+                <li>Prestar os serviços com diligência, competência e dentro dos prazos legais;</li>
+                <li>Manter o cliente informado sobre o andamento do caso;</li>
+                <li>Preservar o sigilo profissional;</li>
+                <li>Atuar com lealdade e boa-fé;</li>
+                <li>Aplicar toda sua experiência e conhecimento técnico ao caso;</li>
+                <li>Comunicar imediatamente qualquer fato relevante ao processo.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 4ª - Das Obrigações do Contratante</div>
+        <div class="clause-content">
+            São obrigações do CONTRATANTE:
+            <ul>
+                <li>Fornecer todas as informações e documentos necessários;</li>
+                <li>Efetuar o pagamento dos honorários na forma pactuada;</li>
+                <li>Comunicar mudanças de endereço, telefone ou email;</li>
+                <li>Colaborar com o andamento do processo;</li>
+                <li>Arcar com custas processuais e despesas quando necessário;</li>
+                <li>Manter conduta compatível com a dignidade da advocacia.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 5ª - Da Vigência e Rescisão</div>
+        <div class="clause-content">
+            Este contrato vigorará até a conclusão dos serviços objeto deste instrumento. 
+            Qualquer das partes poderá rescindir o contrato mediante notificação prévia de 30 (trinta) dias, 
+            ficando o CONTRATADO com direito aos honorários pelos serviços já prestados.
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 6ª - Do Foro</div>
+        <div class="clause-content">
+            Para dirimir quaisquer controvérsias oriundas deste contrato, fica eleito o foro da comarca de domicílio do CONTRATANTE, 
+            com renúncia expressa de qualquer outro, por mais privilegiado que seja.
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 7ª - Disposições Gerais</div>
+        <div class="clause-content">
+            Este contrato foi firmado através da plataforma LITGO, que utilizou inteligência artificial para conectar as partes 
+            com base na compatibilidade do caso e expertise do advogado. As assinaturas digitais têm força legal equivalente 
+            às assinaturas manuscritas, conforme Lei nº 14.063/2020.
+        </div>
+    </div>
+    
+    <div class="signatures">
+        <div class="signature-box">
+            <strong>{{ client.full_name or client.name or 'CONTRATANTE' }}</strong><br>
+            <small>Cliente</small><br>
+            {% if contract.signed_client %}
+            <small>Assinado em: {{ contract.signed_client.strftime('%d/%m/%Y às %H:%M') }}</small>
+            {% else %}
+            <small>Pendente de assinatura</small>
+            {% endif %}
+        </div>
+        
+        <div class="signature-box">
+            <strong>{{ lawyer.full_name or lawyer.name or 'CONTRATADO' }}</strong><br>
+            <small>Advogado{% if lawyer.oab %} - OAB {{ lawyer.oab }}{% endif %}</small><br>
+            {% if contract.signed_lawyer %}
+            <small>Assinado em: {{ contract.signed_lawyer.strftime('%d/%m/%Y às %H:%M') }}</small>
+            {% else %}
+            <small>Pendente de assinatura</small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Este contrato foi gerado automaticamente pela plataforma LITGO em {{ generated_at.strftime('%d/%m/%Y às %H:%M') }}.</p>
+        <p>Documento protegido por assinatura digital e armazenado com segurança.</p>
+        <p><strong>ID do Contrato:</strong> {{ contract.id }}</p>
+    </div>
+</body>
+</html> 
+ 
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrato de Prestação de Serviços Jurídicos</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12px;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        
+        .contract-info {
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 10px;
+        }
+        
+        .parties {
+            margin-bottom: 25px;
+        }
+        
+        .party {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .party-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .clause {
+            margin-bottom: 20px;
+        }
+        
+        .clause-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .clause-content {
+            text-align: justify;
+            margin-left: 20px;
+        }
+        
+        .fee-highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .signatures {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+        
+        .case-summary {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .case-summary h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        @media print {
+            body { margin: 0; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Contrato de Prestação de Serviços Jurídicos</h1>
+    </div>
+    
+    <div class="contract-info">
+        <strong>Contrato Nº:</strong> {{ contract_number }}<br>
+        <strong>Data:</strong> {{ generated_at.strftime('%d/%m/%Y às %H:%M') }}<br>
+        <strong>Plataforma:</strong> LITGO - Conexão Jurídica Inteligente
+    </div>
+    
+    <div class="parties">
+        <div class="party">
+            <div class="party-title">Contratante (Cliente)</div>
+            <strong>Nome:</strong> {{ client.full_name or client.name or 'Nome não informado' }}<br>
+            <strong>Email:</strong> {{ client.email or 'Email não informado' }}<br>
+            <strong>Telefone:</strong> {{ client.phone or 'Telefone não informado' }}<br>
+            {% if client.document %}
+            <strong>CPF/CNPJ:</strong> {{ client.document }}<br>
+            {% endif %}
+            <strong>Endereço:</strong> {{ client.address or 'Endereço não informado' }}
+        </div>
+        
+        <div class="party">
+            <div class="party-title">Contratado (Advogado)</div>
+            <strong>Nome:</strong> {{ lawyer.full_name or lawyer.name or 'Nome não informado' }}<br>
+            <strong>Email:</strong> {{ lawyer.email or 'Email não informado' }}<br>
+            <strong>Telefone:</strong> {{ lawyer.phone or 'Telefone não informado' }}<br>
+            {% if lawyer.oab %}
+            <strong>OAB:</strong> {{ lawyer.oab }}<br>
+            {% endif %}
+            <strong>Especialização:</strong> {{ lawyer.specialization or case.area or 'Não informado' }}<br>
+            <strong>Endereço:</strong> {{ lawyer.address or 'Endereço não informado' }}
+        </div>
+    </div>
+    
+    <div class="case-summary">
+        <h3>Resumo do Caso</h3>
+        <strong>Área:</strong> {{ case.area or 'Não especificada' }}<br>
+        {% if case.subarea %}
+        <strong>Subárea:</strong> {{ case.subarea }}<br>
+        {% endif %}
+        <strong>Título:</strong> {{ case.title or 'Caso jurídico' }}<br>
+        {% if case.description %}
+        <strong>Descrição:</strong> {{ case.description[:300] }}{% if case.description|length > 300 %}...{% endif %}<br>
+        {% endif %}
+        {% if case.urgency_h %}
+        <strong>Urgência:</strong> {{ case.urgency_h }} horas<br>
+        {% endif %}
+        <strong>Data de Criação:</strong> {{ case.created_at.strftime('%d/%m/%Y') if case.created_at else 'Não informada' }}
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 1ª - Do Objeto</div>
+        <div class="clause-content">
+            O presente contrato tem por objeto a prestação de serviços jurídicos pelo CONTRATADO em favor do CONTRATANTE, 
+            especificamente relacionados ao caso descrito acima, na área de <strong>{{ case.area or 'Direito' }}</strong>, 
+            incluindo mas não se limitando a: consultoria jurídica, análise de documentos, elaboração de peças processuais, 
+            acompanhamento processual e representação judicial quando necessária.
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 2ª - Dos Honorários</div>
+        <div class="clause-content">
+            Os honorários advocatícios serão calculados da seguinte forma:
+            <div class="fee-highlight">
+                {{ fee_description }}
+            </div>
+            {% if contract.fee_model.type == 'success' %}
+            <p><strong>Importante:</strong> Os honorários de êxito serão devidos apenas em caso de resultado favorável ao cliente, 
+            incidindo sobre o valor efetivamente obtido (seja por acordo, sentença ou execução).</p>
+            {% elif contract.fee_model.type == 'fixed' %}
+            <p><strong>Pagamento:</strong> O valor poderá ser pago em até 3 (três) parcelas iguais, sendo a primeira no ato da assinatura 
+            deste contrato e as demais com vencimento a cada 30 (trinta) dias.</p>
+            {% elif contract.fee_model.type == 'hourly' %}
+            <p><strong>Cobrança:</strong> As horas serão contabilizadas mensalmente e cobradas até o 5º dia útil do mês subsequente, 
+            com prazo de pagamento de 15 (quinze) dias.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 3ª - Das Obrigações do Contratado</div>
+        <div class="clause-content">
+            São obrigações do CONTRATADO:
+            <ul>
+                <li>Prestar os serviços com diligência, competência e dentro dos prazos legais;</li>
+                <li>Manter o cliente informado sobre o andamento do caso;</li>
+                <li>Preservar o sigilo profissional;</li>
+                <li>Atuar com lealdade e boa-fé;</li>
+                <li>Aplicar toda sua experiência e conhecimento técnico ao caso;</li>
+                <li>Comunicar imediatamente qualquer fato relevante ao processo.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 4ª - Das Obrigações do Contratante</div>
+        <div class="clause-content">
+            São obrigações do CONTRATANTE:
+            <ul>
+                <li>Fornecer todas as informações e documentos necessários;</li>
+                <li>Efetuar o pagamento dos honorários na forma pactuada;</li>
+                <li>Comunicar mudanças de endereço, telefone ou email;</li>
+                <li>Colaborar com o andamento do processo;</li>
+                <li>Arcar com custas processuais e despesas quando necessário;</li>
+                <li>Manter conduta compatível com a dignidade da advocacia.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 5ª - Da Vigência e Rescisão</div>
+        <div class="clause-content">
+            Este contrato vigorará até a conclusão dos serviços objeto deste instrumento. 
+            Qualquer das partes poderá rescindir o contrato mediante notificação prévia de 30 (trinta) dias, 
+            ficando o CONTRATADO com direito aos honorários pelos serviços já prestados.
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 6ª - Do Foro</div>
+        <div class="clause-content">
+            Para dirimir quaisquer controvérsias oriundas deste contrato, fica eleito o foro da comarca de domicílio do CONTRATANTE, 
+            com renúncia expressa de qualquer outro, por mais privilegiado que seja.
+        </div>
+    </div>
+    
+    <div class="clause">
+        <div class="clause-title">Cláusula 7ª - Disposições Gerais</div>
+        <div class="clause-content">
+            Este contrato foi firmado através da plataforma LITGO, que utilizou inteligência artificial para conectar as partes 
+            com base na compatibilidade do caso e expertise do advogado. As assinaturas digitais têm força legal equivalente 
+            às assinaturas manuscritas, conforme Lei nº 14.063/2020.
+        </div>
+    </div>
+    
+    <div class="signatures">
+        <div class="signature-box">
+            <strong>{{ client.full_name or client.name or 'CONTRATANTE' }}</strong><br>
+            <small>Cliente</small><br>
+            {% if contract.signed_client %}
+            <small>Assinado em: {{ contract.signed_client.strftime('%d/%m/%Y às %H:%M') }}</small>
+            {% else %}
+            <small>Pendente de assinatura</small>
+            {% endif %}
+        </div>
+        
+        <div class="signature-box">
+            <strong>{{ lawyer.full_name or lawyer.name or 'CONTRATADO' }}</strong><br>
+            <small>Advogado{% if lawyer.oab %} - OAB {{ lawyer.oab }}{% endif %}</small><br>
+            {% if contract.signed_lawyer %}
+            <small>Assinado em: {{ contract.signed_lawyer.strftime('%d/%m/%Y às %H:%M') }}</small>
+            {% else %}
+            <small>Pendente de assinatura</small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Este contrato foi gerado automaticamente pela plataforma LITGO em {{ generated_at.strftime('%d/%m/%Y às %H:%M') }}.</p>
+        <p>Documento protegido por assinatura digital e armazenado com segurança.</p>
+        <p><strong>ID do Contrato:</strong> {{ contract.id }}</p>
+    </div>
+</body>
+</html> 
+ 

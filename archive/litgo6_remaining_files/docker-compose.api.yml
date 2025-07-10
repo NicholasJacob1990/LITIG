@@ -1,0 +1,196 @@
+version: '3.8'
+
+services:
+  # PostgreSQL com pgvector para embeddings
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: litgo5_postgres
+    environment:
+      POSTGRES_DB: litgo5
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - litgo5_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: litgo5_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - litgo5_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # API FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: litgo5_api
+    environment:
+      # Database
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/litgo5
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # API Keys (configure com suas chaves)
+      JUSBRASIL_API_KEY: ${JUSBRASIL_API_KEY:-demo_key}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      
+      # Security
+      LGPD_SALT: ${LGPD_SALT:-development_salt}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-development_secret}
+      
+      # Environment
+      APP_ENVIRONMENT: development
+      
+      # FastAPI
+      PYTHONPATH: /app
+    ports:
+      - "8080:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - litgo5_network
+    volumes:
+      # Mount para desenvolvimento (hot reload)
+      - ./backend:/app/backend:ro
+      # Volume para modelos ML (cache)
+      - ml_models:/app/models
+      - ./tests:/app/tests
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Celery Worker para jobs assíncronos
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: litgo5_worker
+    command: celery -A backend.celery_app worker --loglevel=info -Q jusbrasil,default
+    environment:
+      # Database
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/litgo5
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # API Keys
+      JUSBRASIL_API_KEY: ${JUSBRASIL_API_KEY:-demo_key}
+      
+      # Security
+      LGPD_SALT: ${LGPD_SALT:-development_salt}
+      
+      # Environment
+      APP_ENVIRONMENT: development
+      PYTHONPATH: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - litgo5_network
+    volumes:
+      - ./backend:/app/backend:ro
+      - ml_models:/app/models
+
+  # Celery Beat para jobs periódicos
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: litgo5_beat
+    command: celery -A backend.celery_app beat --loglevel=info
+    environment:
+      # Database
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/litgo5
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # API Keys
+      JUSBRASIL_API_KEY: ${JUSBRASIL_API_KEY:-demo_key}
+      
+      # Environment
+      APP_ENVIRONMENT: development
+      PYTHONPATH: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - litgo5_network
+    volumes:
+      - ./backend:/app/backend:ro
+
+  # Flower para monitoramento do Celery
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: litgo5_flower
+    command: celery -A backend.celery_app flower --port=5555
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      PYTHONPATH: /app
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    networks:
+      - litgo5_network
+
+  # Nginx para proxy reverso (opcional)
+  nginx:
+    image: nginx:alpine
+    container_name: litgo5_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - litgo5_network
+    profiles:
+      - production  # Só ativa em produção
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  ml_models:
+    driver: local
+
+networks:
+  litgo5_network:
+    driver: bridge 
