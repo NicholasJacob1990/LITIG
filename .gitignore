@@ -219,4 +219,4 @@ dump.rdb
 test_*.py
 *_test.py
 *.test.js
-*.spec.js LITGO6/
+*.spec.js 
