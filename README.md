@@ -1,329 +1,255 @@
-# 🏛️ LITIG - Sistema de Match Jurídico Inteligente
+# 🚀 LITIG-1 - Sistema de Match Jurídico Inteligente
 
-<div align="center">
+Sistema completo de matching entre clientes e advogados usando inteligência artificial, com triagem inteligente e algoritmos de recomendação.
 
-![LITIG Logo](https://img.shields.io/badge/LITIG-Sistema%20Jurídico%20Inteligente-blue?style=for-the-badge)
+## 📋 Visão Geral
 
-[![CI/CD](https://github.com/NicholasJacob1990/LITIG/actions/workflows/ci.yml/badge.svg)](https://github.com/NicholasJacob1990/LITIG/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge&logo=python)](https://python.org)
-[![React Native](https://img.shields.io/badge/React%20Native-0.72+-61DAFB.svg?style=for-the-badge&logo=react)](https://reactnative.dev)
-[![Flutter](https://img.shields.io/badge/Flutter-3.22+-02569B.svg?style=for-the-badge&logo=flutter)](https://flutter.dev)
+O LITIG-1 é uma plataforma inovadora que conecta clientes com advogados especializados através de:
 
-**Conectando clientes a advogados especializados através de Inteligência Artificial**
-
-[🚀 Demo](#demo) • [📖 Documentação](#documentação) • [🛠️ Instalação](#instalação) • [🤝 Contribuição](#contribuição)
-
-</div>
-
-## 🎯 Visão Geral
-
-O **LITIG** é um ecossistema completo de tecnologia jurídica que utiliza Inteligência Artificial para conectar clientes a advogados especializados. O sistema analisa casos jurídicos em linguagem natural, extrai informações relevantes e realiza matches inteligentes baseados em múltiplos critérios.
-
-### 🌟 Principais Funcionalidades
-
-- **🤖 Triagem Inteligente**: Análise automatizada de casos usando Claude 3.5 Sonnet
-- **🎯 Match Preciso**: Algoritmo proprietário com 7 dimensões de análise
-- **⚖️ Dados Oficiais**: Integração com DataJud (CNJ) para taxas de sucesso reais
-- **📱 Multi-plataforma**: React Native, Flutter e Web
-- **🔐 Segurança**: Autenticação JWT e criptografia end-to-end
-- **📊 Analytics**: Monitoramento em tempo real e métricas avançadas
+- **Triagem Inteligente**: IA analisa casos e identifica área jurídica
+- **Matching Algorítmico**: Algoritmo proprietário para melhor compatibilidade
+- **Interface Híbrida**: React Native (atual) + Flutter (em migração)
+- **Backend Robusto**: FastAPI + Supabase + PostgreSQL
+- **Análise de Dados**: Embeddings e ML para recomendações
 
 ## 🏗️ Arquitetura do Sistema
 
-O LITIG é composto por três projetos principais que trabalham de forma integrada:
-
-```mermaid
-graph TB
-    subgraph "Frontend Applications"
-        A[📱 React Native/Expo<br/>LITGO6]
-        B[📱 Flutter App<br/>meu_app]
-        C[🌐 Web Interface]
-    end
-    
-    subgraph "Backend Services"
-        D[🐍 Python API<br/>FastAPI + Supabase]
-        E[🔄 Celery Workers<br/>Processamento Assíncrono]
-        F[🧠 AI Services<br/>Claude + OpenAI]
-    end
-    
-    subgraph "Data Layer"
-        G[🗄️ PostgreSQL<br/>Supabase + pgvector]
-        H[⚡ Redis<br/>Cache + Queues]
-        I[📊 DataJud CNJ<br/>Dados Oficiais]
-    end
-    
-    A --> D
-    B --> D
-    C --> D
-    D --> E
-    E --> F
-    D --> G
-    E --> H
-    E --> I
+```
+LITIG-1/
+├── apps/
+│   ├── app_flutter/          # ✅ Aplicativo Flutter (nova implementação)
+│   └── app_react_native/     # 🔄 Aplicativo React Native (atual)
+├── packages/
+│   └── backend/              # 🚀 API FastAPI + Serviços
+├── flutter_migration/        # 📚 Documentação da migração
+├── docs/                     # 📖 Documentação geral
+└── infra/                    # 🔧 Infraestrutura (Redis, Prometheus)
 ```
 
-### 📦 Estrutura do Projeto
+## 🔄 Status da Migração Flutter
 
-```
-LITIG/
-├── 📱 LITGO6/                    # React Native/Expo (Principal)
-│   ├── app/                      # Expo Router - Navegação
-│   ├── components/               # Componentes reutilizáveis
-│   ├── backend/                  # API Python (FastAPI)
-│   ├── supabase/                 # Migrações e configurações
-│   └── .github/workflows/        # CI/CD Pipeline
-├── 📱 meu_app/                   # Flutter (Alternativo)
-│   ├── lib/                      # Código Flutter
-│   ├── src/                      # Arquitetura Clean
-│   └── test/                     # Testes unitários
-├── 🧠 flutter_migration/         # Documentação de migração
-└── 📚 docs/                      # Documentação geral
-```
+### ✅ Implementado
+- [x] Arquitetura Clean Architecture
+- [x] Sistema de autenticação (AuthBloc)
+- [x] Chat triagem inteligente
+- [x] Sistema de matches de advogados
+- [x] Navegação com tabs shell (5 abas)
+- [x] Tela de mensagens para cliente
+- [x] Dashboard com dados integrados
+- [x] Build macOS funcionando
 
-## 🚀 Instalação
+### 🔄 Em Progresso
+- [ ] Migração completa de todas as features
+- [ ] Testes de integração abrangentes
+- [ ] Otimizações de performance
+- [ ] Deploy em produção
 
-### Pré-requisitos
+### 📋 Próximos Passos
+1. Finalizar migração das telas restantes
+2. Implementar testes E2E
+3. Configurar CI/CD para Flutter
+4. Deploy gradual em produção
 
-- **Node.js** 18.x ou superior
-- **Python** 3.11 ou superior  
-- **Flutter** 3.22.0 ou superior
-- **Docker** (opcional)
-- **Git**
+## 🚀 Quick Start
 
-### 🔧 Configuração Rápida
-
+### Flutter App (Nova Implementação)
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/NicholasJacob1990/LITIG.git
-cd LITIG
+# Navegar para o app Flutter
+cd apps/app_flutter
 
-# 2. Configure o backend Python
-cd LITGO6
-cp env.example .env
-python3 -m venv venv
-source venv/bin/activate  # Linux/macOS
-pip install -r backend/requirements.txt
-
-# 3. Configure o frontend React Native
-npm install
-
-# 4. Configure o Flutter (opcional)
-cd ../meu_app
+# Instalar dependências
 flutter pub get
 
-# 5. Inicie os serviços
-# Backend API
-cd ../LITGO6
-source venv/bin/activate
-uvicorn backend.main:app --reload
-
-# Frontend React Native
-npm start
-
-# Flutter
-cd ../meu_app
+# Executar app
 flutter run
 ```
 
-Para configuração detalhada, consulte o [🔧 Guia de Configuração](LITGO6/ENVIRONMENT_SETUP.md).
+### Backend API
+```bash
+# Navegar para o backend
+cd packages/backend
 
-## 🤖 Tecnologias Utilizadas
+# Instalar dependências
+pip install -r requirements.txt
+
+# Executar servidor
+python main.py
+```
+
+### React Native App (Atual)
+```bash
+# Navegar para o app React Native
+cd apps/app_react_native
+
+# Instalar dependências
+npm install
+
+# Executar app
+npm start
+```
+
+## 🔧 Tecnologias Utilizadas
 
 ### Frontend
-- **React Native 0.72+** com Expo SDK 49+
-- **Flutter 3.22+** com Clean Architecture
-- **TypeScript** para tipagem forte
-- **NativeWind** (Tailwind CSS para React Native)
-- **Expo Router** para navegação
+- **Flutter**: Framework mobile (nova implementação)
+- **React Native**: Framework mobile (atual)
+- **Dart**: Linguagem para Flutter
+- **TypeScript**: Linguagem para React Native
 
 ### Backend
-- **FastAPI** para API REST
-- **Python 3.11+** com async/await
-- **Supabase** (PostgreSQL + Auth + Storage)
-- **pgvector** para busca semântica
-- **Celery** para processamento assíncrono
-- **Redis** para cache e filas
+- **FastAPI**: Framework web Python
+- **Supabase**: Backend-as-a-Service
+- **PostgreSQL**: Banco de dados principal
+- **Redis**: Cache e sessions
+- **Celery**: Processamento assíncrono
 
-### Inteligência Artificial
-- **Claude 3.5 Sonnet** (Anthropic) para triagem
-- **OpenAI Embeddings** para vetorização
-- **Algoritmo proprietário** de ranking multi-criterial
-- **DataJud CNJ** para dados oficiais
+### ML/AI
+- **OpenAI**: Modelos de linguagem
+- **Embeddings**: Vetorização de texto
+- **scikit-learn**: Machine learning
+- **Pandas**: Análise de dados
 
-### DevOps & Infraestrutura
-- **GitHub Actions** para CI/CD
-- **Docker** para containerização
-- **Prometheus + Grafana** para monitoramento
-- **Supabase** para banco de dados gerenciado
-
-## 🔄 Fluxo de Funcionamento
-
-### 1. Triagem Inteligente
-```mermaid
-sequenceDiagram
-    participant C as Cliente
-    participant F as Frontend
-    participant A as API
-    participant AI as Claude AI
-    participant DB as Supabase
-
-    C->>F: Descreve caso jurídico
-    F->>A: POST /api/triage
-    A->>AI: Análise estruturada
-    AI->>A: {área, urgência, resumo}
-    A->>DB: Salva caso + embedding
-    A->>F: Retorna resultado
-    F->>C: Exibe casos similares
-```
-
-### 2. Match de Advogados
-```mermaid
-sequenceDiagram
-    participant F as Frontend
-    participant A as API
-    participant DB as Supabase
-    participant ALG as Algoritmo
-
-    F->>A: POST /api/match
-    A->>DB: Busca advogados compatíveis
-    A->>ALG: Calcula ranking (7 dimensões)
-    ALG->>A: Lista rankeada
-    A->>F: Top 5 advogados
-    F->>F: Exibe com explicações
-```
-
-## 📊 Métricas e KPIs
-
-### Performance
-- **Tempo de triagem**: < 3 segundos
-- **Precisão do match**: > 85%
-- **Disponibilidade**: 99.9% uptime
-- **Latência da API**: < 200ms
-
-### Negócio
-- **Taxa de conversão**: Match → Contratação
-- **Satisfação do cliente**: NPS > 8
-- **Distribuição equitativa**: Gini < 0.3
-- **Qualidade dos matches**: Feedback positivo > 90%
-
-## 🔐 Segurança
-
-- **Autenticação JWT** com refresh tokens
-- **Rate limiting** (60 req/min por IP)
-- **Criptografia end-to-end** para dados sensíveis
-- **CORS** configurado para origens específicas
-- **Validação rigorosa** com Pydantic schemas
-- **Logs de auditoria** para todas as operações
+### Infraestrutura
+- **Docker**: Containerização
+- **Prometheus**: Monitoramento
+- **Grafana**: Dashboards
+- **GitHub Actions**: CI/CD
 
 ## 📚 Documentação
 
-### Documentação Técnica
-- [🏗️ Arquitetura do Sistema](LITGO6/ARQUITETURA_SISTEMA.md)
-- [🤖 Algoritmo de Match](LITGO6/docs/Algoritmo.md)
-- [🔧 Configuração de Ambiente](LITGO6/ENVIRONMENT_SETUP.md)
-- [📖 API Documentation](LITGO6/API_DOCUMENTATION.md)
+### Migração Flutter
+- [📋 Comparação Técnica](./flutter_migration/FLUTTER_COMPARACAO_TECNICA.md)
+- [🚀 Guia de Desenvolvimento](./flutter_migration/FLUTTER_DEVELOPMENT.md)
+- [📈 Resumo Executivo](./flutter_migration/FLUTTER_EXECUTIVE_SUMMARY.md)
+- [🗓️ Roadmap](./flutter_migration/FLUTTER_ROADMAP.md)
+- [💰 Implementação Financeira](./flutter_migration/FLUTTER_FINANCIAL_IMPLEMENTATION.md)
 
-### Documentação de Migração Flutter
-- [📋 Sumário Executivo](flutter_migration/FLUTTER_EXECUTIVE_SUMMARY.md)
-- [🔍 Comparação Técnica](flutter_migration/FLUTTER_COMPARACAO_TECNICA.md)
-- [🛣️ Roadmap de Migração](flutter_migration/FLUTTER_ROADMAP.md)
-- [💰 Análise Financeira](flutter_migration/FLUTTER_FINANCIAL_IMPLEMENTATION.md)
+### Sistema
+- [🔍 Análise Funcional](./docs/system/ANALISE_FUNCIONAL.md)
+- [🤖 Análise Gemini](./docs/system/ANALISE_GEMINI.md)
+- [📡 Documentação API](./docs/system/API_DOCUMENTATION.md)
 
 ## 🧪 Testes
 
+### Flutter
 ```bash
-# Backend Python
-cd LITGO6
-source venv/bin/activate
-pytest backend/tests/ -v --cov=backend
+cd apps/app_flutter
 
-# Frontend React Native
-cd LITGO6
-npm test
+# Testes unitários
+flutter test
 
+# Testes de integração
+flutter drive --target=test_driver/app.dart
+```
+
+### Backend
+```bash
+cd packages/backend
+
+# Testes unitários
+pytest tests/
+
+# Testes de integração
+pytest tests/integration/
+```
+
+## 🔐 Configuração de Ambiente
+
+### Variáveis de Ambiente
+```bash
 # Flutter
-cd meu_app
-flutter test --coverage
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_anon_key
+API_BASE_URL=http://localhost:8000
+
+# Backend
+DATABASE_URL=postgresql://...
+REDIS_URL=redis://localhost:6379
+OPENAI_API_KEY=your_openai_key
 ```
 
-## 🚀 Deploy
-
-### Ambiente de Desenvolvimento
+### Supabase Setup
 ```bash
-# Usando Docker Compose
-cd LITGO6
-docker-compose up -d
+# Instalar Supabase CLI
+npm install -g supabase
+
+# Fazer login
+supabase login
+
+# Linkar projeto
+supabase link --project-ref your-project-ref
 ```
 
-### Produção
-O projeto utiliza **GitHub Actions** para CI/CD automatizado:
-- ✅ Testes automatizados
-- 🔍 Análise de código (ESLint, Pylint)
-- 🔒 Scan de segurança (Snyk, Bandit)
-- 🚀 Deploy automático para staging/produção
+## 📊 Métricas de Performance
 
-## 📈 Roadmap
+### Objetivos Flutter
+- **60fps** consistente em animações
+- **<3s** tempo de inicialização
+- **<0.1%** crash rate
+- **40%** melhoria vs React Native
 
-### 🎯 Versão 1.0 (Atual)
-- [x] Triagem inteligente com Claude AI
-- [x] Match básico com algoritmo proprietário
-- [x] Interface React Native
-- [x] API Python com FastAPI
-- [x] Integração Supabase
+### Algoritmo de Matching
+- **95%+** precisão na triagem
+- **<2s** tempo de resposta
+- **20+** fatores de compatibilidade
+- **85%** satisfação dos usuários
 
-### 🚀 Versão 2.0 (Q2 2024)
-- [ ] Migração completa para Flutter
-- [ ] Chat em tempo real
-- [ ] Videochamadas integradas
-- [ ] Pagamentos via Stripe
-- [ ] Dashboard analytics
+## 🤝 Contribuindo
 
-### 🌟 Versão 3.0 (Q4 2024)
-- [ ] AI explicável (XAI)
-- [ ] Predição de resultados
-- [ ] Marketplace de serviços
-- [ ] App para advogados
-- [ ] Integração com tribunais
+### Fluxo de Trabalho
+1. Fork o repositório
+2. Crie uma branch para sua feature
+3. Implemente com testes
+4. Faça PR com descrição detalhada
 
-## 🤝 Contribuição
+### Padrões de Código
+- **Flutter**: Seguir dart_style
+- **Python**: PEP 8 + black
+- **TypeScript**: ESLint + Prettier
+- **Git**: Commits semânticos
 
-Contribuições são sempre bem-vindas! Por favor, leia nosso [Guia de Contribuição](CONTRIBUTING.md) antes de submeter um PR.
+## 🐛 Problemas Conhecidos
 
-### 🐛 Reportando Bugs
-1. Verifique se o bug já foi reportado
-2. Crie uma issue detalhada
-3. Inclua steps para reproduzir
-4. Adicione screenshots se aplicável
+### Flutter
+- [x] ✅ Erro de build macOS (resolvido)
+- [ ] Performance em listas grandes
+- [ ] Integração com push notifications
 
-### 💡 Sugerindo Melhorias
-1. Abra uma issue com a tag `enhancement`
-2. Descreva a funcionalidade desejada
-3. Explique por que seria útil
-4. Considere implementar você mesmo!
+### Backend
+- [ ] Rate limiting refinado
+- [ ] Otimização de queries
+- [ ] Cache warming
 
-## 📄 Licença
+## 📝 Changelog
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
+### v1.0.0 (Janeiro 2025)
+- ✅ Correção erro build macOS
+- ✅ Implementação chat triagem
+- ✅ Sistema de matches funcionando
+- ✅ Navegação com 5 abas
+- ✅ Tela de mensagens cliente
+- ✅ Arquitetura Clean implementada
 
-## 👥 Equipe
+### v0.9.0 (Dezembro 2024)
+- 🔄 Início da migração Flutter
+- 📚 Documentação completa
+- 🏗️ Setup da arquitetura
 
-- **Nicholas Jacob** - *Desenvolvedor Principal* - [@NicholasJacob1990](https://github.com/NicholasJacob1990)
+## 🔗 Links Úteis
 
-## 🙏 Agradecimentos
+- **Repositório**: [GitHub](https://github.com/NicholasJacob1990/LITIG)
+- **Documentação**: [Docs](./docs/)
+- **API**: [FastAPI Docs](http://localhost:8000/docs)
+- **Supabase**: [Dashboard](https://app.supabase.com/)
 
-- **Anthropic** pelo Claude 3.5 Sonnet
-- **OpenAI** pelas APIs de embeddings
-- **Supabase** pela infraestrutura de dados
-- **Expo** pela plataforma de desenvolvimento
-- **Comunidade Flutter** pelas contribuições
+## 📞 Contato
+
+Para dúvidas ou sugestões:
+- **Email**: contato@litig.com.br
+- **GitHub**: [@NicholasJacob1990](https://github.com/NicholasJacob1990)
 
 ---
 
-<div align="center">
-
-**[⬆ Voltar ao topo](#-litig---sistema-de-match-jurídico-inteligente)**
-
-Made with ❤️ by [Nicholas Jacob](https://github.com/NicholasJacob1990)
-
-</div> 
+**Última atualização**: Janeiro 2025  
+**Versão**: 1.0.0  
+**Status**: ✅ Ativo | �� Em desenvolvimento 
