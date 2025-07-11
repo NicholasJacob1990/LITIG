@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from backend.services.redis_service import redis_service
+from .redis_service import redis_service
 
 from .conversation_state_manager import conversation_state_manager
 from .embedding_service import generate_embedding

@@ -19,12 +19,12 @@ class LawyersBloc extends Bloc<LawyersEvent, LawyersState> {
   Future<void> _onFetchLawyers(FetchLawyers event, Emitter<LawyersState> emit) async {
     emit(LawyersLoading());
     try {
-      // Simulação de dados. Substitua por uma chamada de API real.
-      final mockLawyers = [
-        {"id": "lw-001", "name": "Dra. Ana Costa", "specialties": ["Trabalhista", "Cível"], "rating": 4.8, "distance_km": 2.5, "is_available": true, "avatar_url": "https://cors-anywhere.herokuapp.com/https://i.pravatar.cc/150?u=lw-001"},
-        {"id": "lw-002", "name": "Dr. Bruno Martins", "specialties": ["Criminal", "Família"], "rating": 4.9, "distance_km": 5.1, "is_available": false, "avatar_url": "https://cors-anywhere.herokuapp.com/https://i.pravatar.cc/150?u=lw-002"},
-        {"id": "lw-003", "name": "Dra. Carla Dias", "specialties": ["Consumidor"], "rating": 4.7, "distance_km": 8.0, "is_available": true, "avatar_url": "https://i.pravatar.cc/150?u=lw-003"},
-        {"id": "lw-004", "name": "Dr. Daniel Farias", "specialties": ["Trabalhista", "Previdenciário"], "rating": 4.8, "distance_km": 12.3, "is_available": true, "avatar_url": "https://i.pravatar.cc/150?u=lw-004"},
+      // Dados mock dos advogados
+      const mockLawyers = [
+        {"id": "lw-001", "name": "Dra. Ana Costa", "specialties": ["Trabalhista", "Cível"], "rating": 4.8, "distance_km": 2.5, "is_available": true, "avatar_url": "https://ui-avatars.com/api/?name=Ana+Costa&background=3B82F6&color=fff"},
+        {"id": "lw-002", "name": "Dr. Bruno Martins", "specialties": ["Criminal", "Família"], "rating": 4.9, "distance_km": 5.1, "is_available": false, "avatar_url": "https://ui-avatars.com/api/?name=Bruno+Martins&background=10B981&color=fff"},
+        {"id": "lw-003", "name": "Dra. Carla Dias", "specialties": ["Consumidor"], "rating": 4.7, "distance_km": 8.0, "is_available": true, "avatar_url": "https://ui-avatars.com/api/?name=Carla+Dias&background=F59E0B&color=fff"},
+        {"id": "lw-004", "name": "Dr. Daniel Farias", "specialties": ["Trabalhista", "Previdenciário"], "rating": 4.8, "distance_km": 12.3, "is_available": true, "avatar_url": "https://ui-avatars.com/api/?name=Daniel+Farias&background=8B5CF6&color=fff"},
       ];
       emit(LawyersLoaded(mockLawyers));
     } catch (e) {

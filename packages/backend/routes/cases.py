@@ -6,9 +6,9 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from backend.auth import get_current_user
-from backend.config import get_supabase_client
-from backend.services.case_service import create_case_service
+from ..auth import get_current_user
+from ..config import get_supabase_client
+from ..services.case_service import create_case_service
 
 logger = logging.getLogger(__name__)
 

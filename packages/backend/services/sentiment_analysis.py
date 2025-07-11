@@ -12,7 +12,7 @@ import nltk
 import torch
 from transformers import pipeline
 
-from backend.metrics import external_api_duration
+from ..metrics import external_api_duration
 
 logger = logging.getLogger(__name__)
 

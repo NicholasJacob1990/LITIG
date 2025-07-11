@@ -7,8 +7,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.auth import get_current_user
-from backend.models import (  # Reutilizar os modelos existentes
+from ..auth import get_current_user
+from ..models import (  # Reutilizar os modelos existentes
+    MatchRequest,
     MatchResponse,
     MatchResult,
 )
@@ -78,3 +79,4 @@ async def get_persisted_matches(
     except Exception as e:
         raise HTTPException(status_code=500,
                             detail=f"Erro ao buscar recomendações: {e}")
+

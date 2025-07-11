@@ -14,7 +14,7 @@ class MockCaseRepository implements CaseRepository {
       caseNumber: caseId,
       status: 'Em Andamento',
       lawyer: Lawyer(
-        avatarUrl: 'https://cors-anywhere.herokuapp.com/https://i.pravatar.cc/150?u=carlos',
+        avatarUrl: 'https://ui-avatars.com/api/?name=Carlos+Oliveira&background=8B5CF6&color=fff',
         name: 'Dr. Carlos Mendes',
         specialty: 'Direito Trabalhista',
         rating: 4.8,

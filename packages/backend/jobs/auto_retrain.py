@@ -18,9 +18,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
-from backend.config import get_settings
-from backend.metrics import model_performance_gauge, model_retrain_total
-from backend.services.ab_testing import ABTestConfig, TestStatus, ab_testing_service
+from ..config import get_settings
+from ..metrics import model_performance_gauge, model_retrain_total
+from ..services.ab_testing import ABTestConfig, TestStatus, ab_testing_service
 from supabase import create_client
 
 settings = get_settings()

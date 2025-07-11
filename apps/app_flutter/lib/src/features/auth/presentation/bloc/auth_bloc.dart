@@ -30,12 +30,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       add(AuthStateChanged(user));
     });
 
+    on<AuthCheckStatusRequested>(_onCheckStatusRequested);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
     on<AuthRegisterClientRequested>(_onRegisterClientRequested);
     on<AuthRegisterLawyerRequested>(_onRegisterLawyerRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthStateChanged>(_onAuthStateChanged);
+  }
+
+  Future<void> _onCheckStatusRequested(
+    AuthCheckStatusRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      final user = await authRepository.getCurrentUser();
+      if (user != null) {
+        emit(Authenticated(user));
+      } else {
+        emit(Unauthenticated());
+      }
+    } catch (e) {
+      emit(const AuthError('Erro ao verificar status de autenticação.'));
+    }
   }
 
   void _onAuthStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {

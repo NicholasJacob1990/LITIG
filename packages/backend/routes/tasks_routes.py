@@ -15,12 +15,13 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from backend.auth import get_current_user
-from backend.services.celery_task_service import (
-    TaskPriority,
-    TaskStatus,
-    celery_task_service,
+from ..auth import get_current_user
+from ..services.celery_task_service import (
+    get_task_status,
+    get_task_result,
+    cleanup_task_data,
 )
+from ..models import TaskStatusResponse, TaskResultResponse, TaskCleanupResponse
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
@@ -309,3 +310,4 @@ async def get_queue_status(
         "stats": stats.get(queue_name, {}),
         "timestamp": datetime.now().isoformat()
     }
+

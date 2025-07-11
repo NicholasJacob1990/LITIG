@@ -8,14 +8,16 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.auth import get_current_user
-from backend.jobs.auto_retrain import auto_retrain_task
-from backend.services.ab_testing import (
+from ..auth import get_current_user
+from ..jobs.auto_retrain import auto_retrain_task
+from ..services.ab_testing import (
+    ABTest,
     ABTestConfig,
-    ABTestResult,
+    ABTestVariant,
     TestStatus,
     ab_testing_service,
 )
+from ..models import ABTestVariantUpdate, ABTestStatusUpdate
 from backend.services.model_monitoring import model_monitoring_service
 
 logger = logging.getLogger(__name__)
@@ -360,4 +362,6 @@ async def get_retrain_status(
 
     except Exception as e:
         logger.error(f"Erro ao obter status do retreino: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
         raise HTTPException(status_code=500, detail=str(e))

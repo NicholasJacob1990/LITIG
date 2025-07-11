@@ -37,7 +37,7 @@ class MatchedLawyer extends Equatable {
       reviewCount: json['review_count'] ?? 0,
       distanceKm: (json['distance_km'] as num?)?.toDouble() ?? 0.0,
       isAvailable: json['is_available'] ?? false,
-      avatarUrl: json['avatar_url'] ?? 'https://i.pravatar.cc/150?u=${json['lawyer_id']}',
+      avatarUrl: json['avatar_url'] ?? 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(json['name'] ?? 'Advogado')}&background=6B7280&color=fff',
       rating: (json['rating'] as num?)?.toDouble(),
       fair: (json['fair'] as num?)?.toDouble() ?? 0.0,
       equity: (json['equity'] as num?)?.toDouble() ?? 0.0,

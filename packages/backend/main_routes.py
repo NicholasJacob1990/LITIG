@@ -11,26 +11,26 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 # Importa a função de recarregamento
-from backend.algoritmo_match import load_weights as reload_algorithm_weights
-from backend.auth import get_current_user
-from backend.celery_app import celery_app
-from backend.models import (
+from .algoritmo_match import load_weights as reload_algorithm_weights
+from .auth import get_current_user
+from .celery_app import celery_app
+from .models import (
     ExplainRequest,
     ExplainResponse,
     MatchRequest,
     MatchResponse,
     TriageRequest,
 )
-from backend.routes.ab_testing import router as ab_testing_router
-from backend.routes.contracts import router as contracts_router
+from .routes.ab_testing import router as ab_testing_router
+from .routes.contracts import router as contracts_router
 
 # Importar as novas rotas de triagem inteligente
-from backend.routes.intelligent_triage_routes import router as intelligent_triage_router
-from backend.routes.offers import router as offers_router
-from backend.services import generate_explanations_for_matches
-from backend.services.conversation_service import conversation_service
-from backend.services.match_service import find_and_notify_matches
-from backend.tasks.triage_tasks import process_triage_async as run_full_triage_flow_task
+from .routes.intelligent_triage_routes import router as intelligent_triage_router
+from .routes.offers import router as offers_router
+from .services import generate_explanations_for_matches
+from .services.conversation_service import conversation_service
+from .services.match_service import find_and_notify_matches
+from .tasks.triage_tasks import process_triage_async as run_full_triage_flow_task
 
 # Configuração do rate limiter para as rotas
 limiter = Limiter(key_func=get_remote_address)
@@ -253,7 +253,7 @@ async def test_business_metrics():
     Endpoint de teste para métricas de negócio.
     """
     try:
-        from backend.services.business_metrics import business_metrics
+        from .services.business_metrics import business_metrics
 
         # Testar métricas básicas
         conversion_metrics = await business_metrics.calculate_conversion_metrics(7)
@@ -277,7 +277,7 @@ async def test_report_generation(report_type: str = "weekly"):
         report_type: "weekly" ou "monthly"
     """
     try:
-        from backend.jobs.automated_reports import test_report_generation
+        from .jobs.automated_reports import test_report_generation
 
         # Executar job de teste
         result = test_report_generation.delay(report_type)
@@ -297,7 +297,7 @@ async def check_report_status(task_id: str):
     Verifica o status de um job de relatório.
     """
     try:
-        from backend.celery_app import celery_app
+        from .celery_app import celery_app
 
         result = celery_app.AsyncResult(task_id)
 
@@ -316,7 +316,7 @@ async def test_report_direct():
     Testa geração de relatório diretamente sem usar Celery.
     """
     try:
-        from backend.services.automated_reports import automated_reports_service
+        from .services.automated_reports import automated_reports_service
 
         # Gerar relatório diretamente
         result = await automated_reports_service.generate_weekly_report()

@@ -16,10 +16,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 # Imports locais dos serviços de integração
-from backend.services.escavador_integration import EscavadorClient, OutcomeClassifier
-from backend.services.jusbrasil_integration_realistic import (
-    DataQuality,
-    RealisticJusbrasilIntegration,
+from .escavador_integration import EscavadorClient, OutcomeClassifier
+from .jusbrasil_integration_realistic import (
+    JusbrasilRealisticAPI,
+    JusbrasilRealisticService,
 )
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class HybridLegalDataService:
 
         self.db_connection = db_connection
         self.escavador_client = EscavadorClient(api_key=escavador_api_key)
-        self.jusbrasil_integration = RealisticJusbrasilIntegration(
+        self.jusbrasil_integration = JusbrasilRealisticService(
             db_connection, api_key=jusbrasil_api_key)
 
         logger.info("Serviço de Integração Híbrida inicializado (Escavador + Jusbrasil).")
@@ -126,7 +126,7 @@ class HybridLegalDataService:
             tribunal_distribution={},  # O SDK v2 não detalha tribunal por processo
             activity_level="high",  # Placeholder
             specialization_score=0.8,  # Placeholder
-            data_quality=DataQuality.HIGH.value,
+            data_quality="high", # Assuming DataQuality.HIGH.value is "high"
             last_sync=datetime.now(),
             limitations=[]
         )
@@ -156,7 +156,7 @@ class HybridLegalDataService:
             primary_source='none', total_cases=0, victories=0, defeats=0,
             ongoing=0, real_success_rate=0.0, analysis_confidence=0.0,
             area_distribution={}, tribunal_distribution={}, activity_level='low',
-            specialization_score=0.0, data_quality=DataQuality.UNAVAILABLE.value,
+            specialization_score=0.0, data_quality="unavailable",
             last_sync=datetime.now(), limitations=["Nenhuma fonte de dados disponível."]
         )
 

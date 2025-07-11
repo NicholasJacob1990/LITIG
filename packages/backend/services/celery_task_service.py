@@ -18,8 +18,8 @@ from typing import Any, Callable, Dict, List, Optional
 from celery import Task, states
 from celery.result import AsyncResult
 
-from backend.celery_app import celery_app
-from backend.services.redis_service import redis_service
+from ..celery_app import celery_app
+from .redis_service import redis_service
 
 logger = logging.getLogger(__name__)
 

@@ -8,12 +8,12 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 from dotenv import load_dotenv
 
-from backend.algoritmo_match import KPI, Case, Lawyer, MatchmakingAlgorithm, haversine
-from backend.metrics import cache_hits_total, cache_misses_total
-from backend.models import MatchRequest
-from backend.services.cache_service_simple import simple_cache_service as cache_service
-from backend.services.notify_service import send_notifications_to_lawyers
-from backend.services.offer_service import create_offers_from_ranking
+from ..algoritmo_match import KPI, Case, Lawyer, MatchmakingAlgorithm, haversine
+from ..metrics import cache_hits_total, cache_misses_total
+from ..models import MatchRequest
+from .cache_service_simple import simple_cache_service as cache_service
+from .notify_service import send_notifications_to_lawyers
+from .offer_service import create_offers_from_ranking
 from supabase import Client, create_client
 
 # --- Configuração ---

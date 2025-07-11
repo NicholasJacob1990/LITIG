@@ -11,8 +11,9 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 from dotenv import load_dotenv
 
-from backend.services.embedding_service_parallel import parallel_embedding_service
+from .embedding_service_parallel import parallel_embedding_service
 from supabase import Client, create_client
+from ..metrics import external_api_duration, fallback_usage_total, track_time
 
 # Configuração
 load_dotenv()
@@ -304,3 +305,4 @@ if __name__ == "__main__":
         print(f"Resultados dos testes: {test_results}")
 
     asyncio.run(test())
+

@@ -64,6 +64,13 @@ class AuthInterceptor extends Interceptor {
       // Aqui poderia implementar refresh token ou logout automático
     }
     
+    // Tratar erros de conectividade específicos para Flutter Web
+    if (err.type == DioExceptionType.connectionError) {
+      print('⚠️  AVISO: Backend não está acessível em localhost:8000');
+      print('💡 O app vai usar dados mock para demonstração');
+      print('🔧 Para conectar ao backend real, certifique-se que ele está rodando');
+    }
+    
     handler.next(err);
   }
 } 

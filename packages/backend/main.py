@@ -13,30 +13,30 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from backend.main_routes import router as api_router
+from .main_routes import router as api_router
 # from backend.routes import (
 #     auth, cases, users, contracts, matching,
 #     support, admin, ab_testing, ocr, payments,
 #     notifications, reviews, video, reports
 # )
-from backend.routes.cases import router as cases_router
-from backend.routes.consultations import router as consultations_router
-from backend.routes.contracts import router as contracts_router
-from backend.routes.documents import router as documents_router
-from backend.routes.health_routes import router as health_router
-from backend.routes.intelligent_triage_routes import router as triage_router
-from backend.routes.offers import router as offers_router
-from backend.routes.process_events import router as process_events_router
-from backend.routes.recommendations import router as recommendations_router
-from backend.routes.reviews_route import router as reviews_router
-from backend.routes.tasks import router as tasks_router
-from backend.routes.tasks_routes import router as celery_tasks_router
-from backend.routes.webhooks import router as webhooks_router
-from backend.routes.weights import router as weights_router
-from backend.routes.ab_testing import router as ab_testing_router
-from backend.routes.reports import router as reports_router
-from backend.services.cache_service_simple import close_simple_cache, init_simple_cache
-from backend.services.redis_service import redis_service
+from .routes.cases import router as cases_router
+from .routes.consultations import router as consultations_router
+from .routes.contracts import router as contracts_router
+from .routes.documents import router as documents_router
+from .routes.health_routes import router as health_router
+from .routes.intelligent_triage_routes import router as triage_router
+from .routes.offers import router as offers_router
+from .routes.process_events import router as process_events_router
+from .routes.recommendations import router as recommendations_router
+from .routes.reviews_route import router as reviews_router
+from .routes.tasks import router as tasks_router
+from .routes.tasks_routes import router as celery_tasks_router
+from .routes.webhooks import router as webhooks_router
+from .routes.weights import router as weights_router
+from .routes.ab_testing import router as ab_testing_router
+from .routes.reports import router as reports_router
+from .services.cache_service_simple import close_simple_cache, init_simple_cache
+from .services.redis_service import redis_service
 
 # Carrega as variáveis de ambiente do arquivo .env
 # find_dotenv() sobe a árvore de diretórios para encontrar o .env
@@ -105,7 +105,12 @@ if os.getenv("ENVIRONMENT") == "production":
         os.getenv("FRONTEND_URL", "https://app.litgo.com"),
     ]
 else:
+    # Para desenvolvimento, permite qualquer origem local e curinga.
     origins = [
+        "http://localhost",
+        "http://localhost:8080",
+        "http://localhost:8081",
+        # Adicione outras portas de desenvolvimento se necessário
         "*"  # Permite todas as origens em desenvolvimento
     ]
 
@@ -153,7 +158,7 @@ async def read_root():
 @app.get("/cache/stats", tags=["Monitoring"])
 async def get_cache_stats():
     """Retorna estatísticas do cache Redis."""
-    from backend.services.cache_service_simple import simple_cache_service
+    from .services.cache_service_simple import simple_cache_service
     stats = await simple_cache_service.get_cache_stats()
     return stats
 
@@ -162,6 +167,11 @@ async def get_cache_stats():
 async def get_metrics():
     """Endpoint para Prometheus coletar métricas."""
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# Configuração de Logging
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # Configuração de Logging
 # if __name__ == "__main__":

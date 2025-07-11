@@ -4,8 +4,8 @@ Endpoints para geração de relatórios em PDF.
 from fastapi import APIRouter, Depends, HTTPException, Response
 from supabase import Client
 
-from backend.config import get_supabase_client
-from backend.services.report_service import ReportService
+from ..config import get_supabase_client
+from ..services.report_service import ReportService
 
 router = APIRouter(
     prefix="/reports",

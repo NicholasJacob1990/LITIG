@@ -59,7 +59,7 @@ import re
 import numpy as np
 import redis.asyncio as aioredis
 try:
-    from backend.services.availability_service import get_lawyers_availability_status
+    from .services.availability_service import get_lawyers_availability_status
 except ImportError:
     # Fallback para testes - mock da função
     async def get_lawyers_availability_status(lawyer_ids):

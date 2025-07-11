@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meu_app/injection_container.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/src/core/theme/app_theme.dart';
 import 'package:meu_app/src/core/theme/theme_cubit.dart';
@@ -51,6 +52,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _authBloc = getIt<AuthBloc>();
+    _authBloc.add(AuthCheckStatusRequested()); // Dispara a verificação aqui
     _router = appRouter(_authBloc);
   }
 

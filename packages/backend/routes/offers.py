@@ -9,9 +9,9 @@ from uuid import UUID
 from pydantic import BaseModel
 
 # Usando o serviço de ofertas correto e completo
-from backend.services.offer_service import get_lawyer_offers, update_offer_status, Offer
-from backend.auth import get_current_user
-from backend.models import OfferStatusUpdate
+from ..services.offer_service import get_lawyer_offers, update_offer_status, Offer
+from ..auth import get_current_user
+from ..models import OfferStatusUpdate
 
 router = APIRouter(
     prefix="/offers",

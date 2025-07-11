@@ -13,11 +13,11 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from backend.config import get_settings
-from backend.metrics import (
-    model_alert_total,
-    model_drift_gauge,
+from ..config import get_settings
+from ..metrics import (
+    data_drift_gauge,
     model_performance_gauge,
+    prediction_latency_histogram,
 )
 from supabase import create_client
 
@@ -218,13 +218,13 @@ class ModelMonitoringService:
             drift_detected = overall_drift_score > self.thresholds["drift_score"]
 
             # Atualizar métricas
-            model_drift_gauge.labels(
+            data_drift_gauge.labels(
                 model_type=model_name,
                 feature="overall"
             ).set(overall_drift_score)
 
             for feature, drift_score in feature_drifts.items():
-                model_drift_gauge.labels(
+                data_drift_gauge.labels(
                     model_type=model_name,
                     feature=feature
                 ).set(drift_score)
@@ -497,11 +497,11 @@ class ModelMonitoringService:
             self.alerts.append(alert)
 
             # Incrementar contador de alertas
-            model_alert_total.labels(
-                model_type=model_name,
-                alert_type=alert_type,
-                level=level.value
-            ).inc()
+            # model_alert_total.labels( # This line was removed as per the new_code
+            #     model_type=model_name,
+            #     alert_type=alert_type,
+            #     level=level.value
+            # ).inc()
 
             # Salvar no banco
             alert_data = {

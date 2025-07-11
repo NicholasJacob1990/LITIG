@@ -10,12 +10,13 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sse_starlette.sse import EventSourceResponse
 
-from backend.auth import get_current_user
-from backend.services.conversation_state_manager import conversation_state_manager
-from backend.services.intelligent_triage_orchestrator import (
+from ..auth import get_current_user
+from ..services.conversation_state_manager import conversation_state_manager
+from ..services.intelligent_triage_orchestrator import (
     OrchestrationResult,
     intelligent_triage_orchestrator,
 )
+from ..models import TriageMessage, TriageMessageResponse, TriageStartBody
 
 # Configuração do rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -382,3 +383,4 @@ async def get_system_stats(
             status_code=500,
             detail=f"Erro ao obter estatísticas do sistema: {str(e)}"
         )
+

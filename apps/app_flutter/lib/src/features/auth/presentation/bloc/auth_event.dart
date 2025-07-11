@@ -113,4 +113,7 @@ class AuthRegisterLawyerRequested extends AuthEvent {
 }
 
 /// Evento para realizar logout
-class AuthLogoutRequested extends AuthEvent {} 
+class AuthLogoutRequested extends AuthEvent {}
+
+/// Evento para verificar o status de autenticação na inicialização
+class AuthCheckStatusRequested extends AuthEvent {} 

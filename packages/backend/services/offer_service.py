@@ -10,8 +10,8 @@ from uuid import UUID
 from datetime import datetime, timedelta
 from supabase import create_client, Client
 
-from backend.models import Offer, OfferCreate, OfferStatusUpdate, OffersListResponse
-from backend.algoritmo_match import Case, Lawyer
+from ..models import Offer, OfferCreate, OfferStatusUpdate, OffersListResponse
+from ..algoritmo_match import Case, Lawyer
 
 # Configuração
 SUPABASE_URL = os.getenv("SUPABASE_URL")

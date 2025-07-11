@@ -20,7 +20,7 @@ from exponent_server_sdk import (
     PushTicketError,
 )
 
-from backend.services.cache_service_simple import simple_cache_service as cache_service
+from .cache_service_simple import simple_cache_service as cache_service
 from redis import Redis
 from supabase import Client, create_client
 

@@ -12,7 +12,7 @@ from typing import Dict, Any
 from fastapi import HTTPException, status
 from supabase import Client
 
-from backend.api.schemas import ReviewCreate
+from ..api.schemas import ReviewCreate
 
 logger = logging.getLogger(__name__)
 
