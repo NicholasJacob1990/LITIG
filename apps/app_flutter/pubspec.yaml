@@ -29,6 +29,7 @@ dependencies:
   shimmer: ^3.0.0
   dio: ^5.8.0+1
   google_sign_in: ^6.2.1
+  fpdart: ^1.1.1
   
   # Formulários e Validação
 

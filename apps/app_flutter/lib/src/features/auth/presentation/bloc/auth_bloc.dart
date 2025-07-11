@@ -8,6 +8,7 @@ import 'package:meu_app/src/features/auth/domain/usecases/register_lawyer_usecas
 import 'package:meu_app/src/features/auth/domain/usecases/signin_with_google_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import 'dart:async';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
@@ -16,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterClientUseCase _registerClientUseCase;
   final RegisterLawyerUseCase _registerLawyerUseCase;
   final LogoutUseCase _logoutUseCase;
+  late StreamSubscription<dynamic> _userSubscription;
 
   AuthBloc({required this.authRepository})
       : _loginUseCase = LoginUseCase(authRepository),
@@ -24,16 +26,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _registerLawyerUseCase = RegisterLawyerUseCase(authRepository),
         _logoutUseCase = LogoutUseCase(authRepository),
         super(AuthInitial()) {
+    _userSubscription = authRepository.authStateChanges.listen((user) {
+      add(AuthStateChanged(user));
+    });
+
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
     on<AuthRegisterClientRequested>(_onRegisterClientRequested);
     on<AuthRegisterLawyerRequested>(_onRegisterLawyerRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthStateChanged>(_onAuthStateChanged);
-
-    authRepository.authStateChanges.listen((user) {
-      add(AuthStateChanged(user));
-    });
   }
 
   void _onAuthStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {

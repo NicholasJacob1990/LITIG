@@ -8,12 +8,13 @@ class LawyersRepositoryImpl implements LawyersRepository {
   LawyersRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<MatchedLawyer>> findMatches({required String caseId}) async {
-    try {
-      return await remoteDataSource.findMatches(caseId: caseId);
-    } catch (e) {
-      // TODO: Implementar tratamento de erro
-      rethrow;
+  Future<List<MatchedLawyer>> findMatches({String? caseId}) async {
+    // TODO: Se caseId for nulo, buscar o último caso do usuário aqui
+    // antes de chamar o remoteDataSource.
+    if (caseId == null) {
+      // Por enquanto, retorna uma lista vazia para não quebrar.
+      return [];
     }
+    return await remoteDataSource.findMatches(caseId: caseId);
   }
 } 

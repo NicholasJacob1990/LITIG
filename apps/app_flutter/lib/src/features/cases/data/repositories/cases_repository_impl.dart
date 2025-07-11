@@ -16,4 +16,14 @@ class CasesRepositoryImpl implements CasesRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<Case> getCaseById(String caseId) async {
+    try {
+      return await remoteDataSource.getCaseById(caseId);
+    } catch (e) {
+      // TODO: Melhorar tratamento de erro
+      rethrow;
+    }
+  }
 } 

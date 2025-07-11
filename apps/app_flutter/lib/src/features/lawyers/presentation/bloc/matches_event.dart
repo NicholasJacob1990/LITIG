@@ -5,7 +5,10 @@ abstract class MatchesEvent {
 }
 
 class FetchMatches extends MatchesEvent {
-  final String caseId;
+  final String? caseId;
 
-  const FetchMatches({required this.caseId});
+  const FetchMatches({this.caseId});
+
+  @override
+  List<Object?> get props => [caseId];
 } 

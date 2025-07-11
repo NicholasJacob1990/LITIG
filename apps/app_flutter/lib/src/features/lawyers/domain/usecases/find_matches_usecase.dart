@@ -6,7 +6,8 @@ class FindMatchesUseCase {
 
   FindMatchesUseCase(this.repository);
 
-  Future<List<MatchedLawyer>> call({required String caseId}) async {
+  Future<List<MatchedLawyer>> call({String? caseId}) async {
+    // Se o caseId for nulo, a lógica de fallback está no repositório.
     return await repository.findMatches(caseId: caseId);
   }
 } 

@@ -8,24 +8,36 @@ import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_dashb
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
+  // Função helper para verificar se é advogado (múltiplos valores possíveis)
+  bool _isLawyer(String? userRole) {
+    if (userRole == null) return false;
+    return userRole == 'lawyer' || 
+           userRole == 'LAWYER' || 
+           userRole == 'advogado' ||
+           userRole == 'Lawyer';
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, auth_states.AuthState>(
       builder: (context, state) {
         if (state is auth_states.Authenticated) {
           final user = state.user;
-          // Assumindo que o role 'advogado' vem do backend
-          if (user.role == 'advogado') {
+          
+          // Debug: imprimir o role para verificar o valor
+          print('DEBUG Dashboard: User role = ${user.role}');
+          
+          if (_isLawyer(user.role)) {
             return LawyerDashboard(userName: user.name ?? 'Advogado');
           } else {
             return ClientDashboard(userName: user.name ?? 'Cliente');
           }
         }
         // Exibe um loader enquanto o estado de autenticação é resolvido
-    return const Scaffold(
-      body: Center(
+        return const Scaffold(
+          body: Center(
             child: CircularProgressIndicator(),
-      ),
+          ),
         );
       },
     );

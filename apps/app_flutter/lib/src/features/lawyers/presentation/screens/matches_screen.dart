@@ -8,9 +8,9 @@ import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_card.dart';
 
 class MatchesScreen extends StatelessWidget {
-  final String caseId;
+  final String? caseId;
 
-  const MatchesScreen({super.key, required this.caseId});
+  const MatchesScreen({super.key, this.caseId});
 
   @override
   Widget build(BuildContext context) {

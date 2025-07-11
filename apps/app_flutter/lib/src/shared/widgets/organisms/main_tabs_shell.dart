@@ -12,75 +12,76 @@ class MainTabsShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos um BlocBuilder para reagir a mudanças de estado, como logout.
     return BlocBuilder<AuthBloc, auth_states.AuthState>(
       builder: (context, state) {
         if (state is auth_states.Authenticated) {
-          final userRole = state.user.role ?? 'client'; // Default to client if role is null
-
+          final userRole = state.user.role ?? 'client';
           return Scaffold(
             body: child,
             bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _calculateSelectedIndex(context),
+              currentIndex: _calculateSelectedIndex(context, userRole),
               onTap: (index) => _onItemTapped(index, context, userRole),
               items: _getNavItems(userRole),
-              type: BottomNavigationBarType.fixed, // Garante que todos os itens apareçam
+              type: BottomNavigationBarType.fixed,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey,
             ),
           );
         }
-        // Se não estiver autenticado, não mostra o shell (GoRouter cuidará do redirect)
         return Scaffold(body: child);
       },
     );
   }
 
-  int _calculateSelectedIndex(BuildContext context) {
-    final GoRouter route = GoRouter.of(context);
-    final String location = route.routerDelegate.currentConfiguration.uri.toString();
-    if (location.startsWith('/dashboard')) {
-      return 0;
-    }
-    if (location.startsWith('/cases')) {
-      return 1;
-    }
-    if (location.startsWith('/triage') || location.startsWith('/schedule')) { // Agenda do advogado
-      return 2;
-    }
-    if (location.startsWith('/lawyers') || location.startsWith('/messages')) { // Mensagens do advogado
-      return 3;
-    }
-    if (location.startsWith('/profile')) {
-      return 4;
+  int _calculateSelectedIndex(BuildContext context, String userRole) {
+    final String location = GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+    
+    if (_isLawyer(userRole)) {
+      if (location.startsWith('/dashboard')) return 0;
+      if (location.startsWith('/cases')) return 1;
+      if (location.startsWith('/schedule')) return 2;
+      if (location.startsWith('/messages')) return 3;
+      if (location.startsWith('/profile')) return 4;
+    } else { // Cliente
+      if (location.startsWith('/dashboard')) return 0;
+      if (location.startsWith('/cases')) return 1;
+      if (location.startsWith('/lawyers')) return 2;
+      if (location.startsWith('/client-messages')) return 3;
+      if (location.startsWith('/services')) return 4;
+      if (location.startsWith('/profile')) return 5;
     }
     return 0;
   }
 
   void _onItemTapped(int index, BuildContext context, String userRole) {
-    switch (index) {
-      case 0:
-        context.go('/dashboard');
-        break;
-      case 1:
-        context.go('/cases');
-        break;
-      case 2:
-        final route = (userRole == 'client') ? '/triage' : '/schedule'; // Rota para /schedule precisa ser criada
-        context.go(route);
-        break;
-      case 3:
-        final route = (userRole == 'client') ? '/lawyers' : '/messages'; // Rota para /messages precisa ser criada
-        context.go(route);
-        break;
-      case 4:
-        context.go('/profile');
-        break;
+    if (_isLawyer(userRole)) {
+      switch (index) {
+        case 0: context.go('/dashboard'); break;
+        case 1: context.go('/cases'); break;
+        case 2: context.go('/schedule'); break;
+        case 3: context.go('/messages'); break;
+        case 4: context.go('/profile'); break;
+      }
+    } else { // Cliente
+      switch (index) {
+        case 0: context.go('/dashboard'); break;
+        case 1: context.go('/cases'); break;
+        case 2: context.go('/lawyers'); break;
+        case 3: context.go('/client-messages'); break;
+        case 4: context.go('/services'); break;
+        case 5: context.go('/profile'); break;
+      }
     }
   }
 
+  bool _isLawyer(String? userRole) {
+    if (userRole == null) return false;
+    final role = userRole.toLowerCase();
+    return role == 'lawyer' || role == 'advogado';
+  }
+
   List<BottomNavigationBarItem> _getNavItems(String userRole) {
-    if (userRole == 'lawyer') {
+    if (_isLawyer(userRole)) {
       return const [
         BottomNavigationBarItem(icon: Icon(LucideIcons.gauge), label: 'Painel'),
         BottomNavigationBarItem(icon: Icon(LucideIcons.briefcase), label: 'Casos'),
@@ -89,12 +90,13 @@ class MainTabsShell extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Perfil'),
       ];
     }
-    // Default para cliente
+    // Cliente
     return const [
       BottomNavigationBarItem(icon: Icon(LucideIcons.home), label: 'Início'),
       BottomNavigationBarItem(icon: Icon(LucideIcons.clipboardList), label: 'Meus Casos'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.bot), label: 'Triagem'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.users), label: 'Advogados'),
+      BottomNavigationBarItem(icon: Icon(LucideIcons.search), label: 'Advogados'),
+      BottomNavigationBarItem(icon: Icon(LucideIcons.messageCircle), label: 'Mensagens'),
+      BottomNavigationBarItem(icon: Icon(LucideIcons.layoutGrid), label: 'Serviços'),
       BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Perfil'),
     ];
   }

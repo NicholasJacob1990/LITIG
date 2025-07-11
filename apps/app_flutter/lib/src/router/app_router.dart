@@ -12,14 +12,14 @@ import 'package:meu_app/src/features/auth/presentation/screens/splash_screen.dar
 import 'package:meu_app/src/features/cases/presentation/screens/case_detail_screen.dart';
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
-import 'package:meu_app/src/features/lawyers/presentation/screens/matches_screen.dart';
-import 'package:meu_app/src/features/triage/presentation/screens/chat_triagem_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/lawyers_screen.dart';
+import 'package:meu_app/src/features/messages/presentation/screens/client_messages_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/settings_screen.dart';
 import 'package:meu_app/src/features/schedule/presentation/screens/schedule_screen.dart';
 import 'package:meu_app/src/features/messages/presentation/screens/messages_screen.dart';
+import 'package:meu_app/src/features/services/presentation/screens/services_screen.dart';
 import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
 
 GoRouter appRouter(AuthBloc authBloc) {
@@ -33,17 +33,14 @@ GoRouter appRouter(AuthBloc authBloc) {
           state.matchedLocation == '/register-client' ||
           state.matchedLocation == '/register-lawyer';
 
-      // Se o estado ainda não foi determinado (inicial), continue na splash
       if (authBloc.state is auth_states.AuthInitial) {
         return state.matchedLocation == '/splash' ? null : '/splash';
       }
 
-      // Se não estiver logado e não estiver em uma tela de autenticação, redirecione para /login
       if (!loggedIn && !isAuthenticating) {
         return '/login';
       }
 
-      // Se estiver logado e tentando acessar uma tela de autenticação ou a splash, redirecione para o dashboard
       if (loggedIn && (isAuthenticating || state.matchedLocation == '/splash')) {
         return '/dashboard';
       }
@@ -94,24 +91,19 @@ GoRouter appRouter(AuthBloc authBloc) {
                     final caseId = state.pathParameters['caseId']!;
                     return CaseDetailScreen(caseId: caseId);
                   },
-                  routes: [
-                    GoRoute(
-                      path: 'matches',
-                      builder: (context, state) {
-                        final caseId = state.pathParameters['caseId']!;
-                        return MatchesScreen(caseId: caseId);
-                      },
-                    ),
-                  ]
                 ),
               ]),
           GoRoute(
-            path: '/triage',
-            builder: (context, state) => const ChatTriagemScreen(),
-          ),
-          GoRoute(
             path: '/lawyers',
             builder: (context, state) => const LawyersScreen(),
+          ),
+          GoRoute(
+            path: '/client-messages',
+            builder: (context, state) => const ClientMessagesScreen(),
+          ),
+          GoRoute(
+            path: '/services',
+            builder: (context, state) => const ServicesScreen(),
           ),
           GoRoute(
             path: '/schedule',
@@ -140,7 +132,6 @@ GoRouter appRouter(AuthBloc authBloc) {
   );
 }
 
-// Helper para refresh do GoRouter com o BLoC
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();

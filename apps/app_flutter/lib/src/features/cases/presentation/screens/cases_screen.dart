@@ -1,11 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meu_app/src/features/cases/data/datasources/cases_remote_data_source.dart';
-import 'package:meu_app/src/features/cases/data/repositories/cases_repository_impl.dart';
-import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/presentation/widgets/case_card.dart';
+import 'package:meu_app/injection_container.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class CasesScreen extends StatelessWidget {
@@ -14,14 +11,7 @@ class CasesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) {
-        // TODO: Mover para GetIt
-        final dio = Dio();
-        final dataSource = CasesRemoteDataSourceImpl(dio: dio);
-        final repository = CasesRepositoryImpl(remoteDataSource: dataSource);
-        final useCase = GetMyCasesUseCase(repository);
-        return CasesBloc(getMyCasesUseCase: useCase)..add(FetchCases());
-      },
+      create: (context) => getIt<CasesBloc>()..add(FetchCases()),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Meus Casos'),
@@ -37,21 +27,36 @@ class CasesScreen extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (state is CasesError) {
-                    return Center(child: Text('Erro: ${state.message}'));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(LucideIcons.alertCircle, size: 64, color: Colors.red),
+                          const SizedBox(height: 16),
+                          Text('Erro: ${state.message}'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => context.read<CasesBloc>().add(FetchCases()),
+                            child: const Text('Tentar Novamente'),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                   if (state is CasesLoaded) {
                     if (state.filteredCases.isEmpty) {
                       return _buildEmptyState(state.activeFilter);
                     }
                     return ListView.builder(
+                      padding: const EdgeInsets.all(16),
                       itemCount: state.filteredCases.length,
                       itemBuilder: (context, index) {
                         final caseData = state.filteredCases[index];
                         return CaseCard(
                           caseId: caseData.id,
                           title: caseData.title,
-                          subtitle: 'Status: ${caseData.status}', // Exemplo
-                          clientType: 'PF', // Exemplo
+                          subtitle: 'Status: ${caseData.status}',
+                          clientType: 'PF', // TODO: Obter do caso
                           status: caseData.status,
                           preAnalysisDate: caseData.createdAt.toIso8601String(),
                           lawyer: caseData.lawyer,
@@ -108,6 +113,14 @@ class CasesScreen extends StatelessWidget {
           Text(
             'Não há casos com status "$activeFilter"',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              // TODO: Navegar para tela de nova triagem
+            },
+            icon: const Icon(LucideIcons.plus),
+            label: const Text('Iniciar Nova Consulta'),
           ),
         ],
       ),

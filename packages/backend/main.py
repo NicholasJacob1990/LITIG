@@ -3,6 +3,7 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv, find_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
@@ -36,6 +37,10 @@ from backend.routes.ab_testing import router as ab_testing_router
 from backend.routes.reports import router as reports_router
 from backend.services.cache_service_simple import close_simple_cache, init_simple_cache
 from backend.services.redis_service import redis_service
+
+# Carrega as variáveis de ambiente do arquivo .env
+# find_dotenv() sobe a árvore de diretórios para encontrar o .env
+load_dotenv(find_dotenv())
 
 # --- Configuração de Logging ---
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
@@ -101,15 +106,7 @@ if os.getenv("ENVIRONMENT") == "production":
     ]
 else:
     origins = [
-        "http://localhost",
-        "http://localhost:*",  # Permite qualquer porta do localhost
-        "http://localhost:8081",  # Porta padrão do Expo Go
-        "http://localhost:3000",  # Porta padrão de apps React
-        "http://127.0.0.1:8081",  # Variação local
-        "http://127.0.0.1:3000",  # Variação local
-        "http://localhost:54857", # Porta do app Flutter em modo de desenvolvimento web
-        "http://127.0.0.1:*",     # Permite qualquer porta do 127.0.0.1
-        "*",  # Permite todas as origens em desenvolvimento
+        "*"  # Permite todas as origens em desenvolvimento
     ]
 
 app.add_middleware(

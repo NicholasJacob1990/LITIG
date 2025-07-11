@@ -25,3 +25,7 @@ slowapi
 sendgrid
 exponent-server-sdk
 fpdf2
+docusign-esign
+sse-starlette
+anthropic
+python-multipart
