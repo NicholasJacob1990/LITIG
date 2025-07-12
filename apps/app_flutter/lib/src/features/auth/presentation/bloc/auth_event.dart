@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:meu_app/src/features/auth/domain/entities/user.dart';
 import 'dart:io';
 
 abstract class AuthEvent extends Equatable {
@@ -10,7 +11,7 @@ abstract class AuthEvent extends Equatable {
 
 /// Evento para verificar o estado de autenticação atual
 class AuthStateChanged extends AuthEvent {
-  final dynamic user;
+  final User? user;
   const AuthStateChanged(this.user);
 
   @override

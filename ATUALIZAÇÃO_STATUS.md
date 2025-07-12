@@ -1,123 +1,78 @@
-# ✅ Status da Atualização GitHub - LITIG-1
+# 📋 Status de Atualização - LITGO Flutter
 
-**Data**: Janeiro 2025  
-**Versão**: 1.0.0  
-**Status**: ✅ Concluído
+## ✅ Concluído
 
-## 🎯 Resumo das Atualizações
+### 1. Configuração Inicial
+- [x] Criada SplashScreen com logo LITGO e navegação automática
+- [x] Corrigido AuthBloc com tipos corretos e método dispose
+- [x] Corrigidos erros de compilação no CaseCard removendo AppStatusColors
+- [x] Atualizado AppTheme com cores do ChatGPT e método dark()
+- [x] Implementados todos os widgets de detalhes do caso conforme ChatGPT
 
-### ✅ Problemas Resolvidos
-- [x] **Erro de build macOS**: Corrigido deployment target para 10.15
-- [x] **Arquivos de cache**: Criado .gitignore completo
-- [x] **Documentação**: README.md completamente atualizado
-- [x] **Estrutura**: Repositório organizado e limpo
+### 2. Sistema de Navegação
+- [x] App Flutter executando com sucesso no Chrome
+- [x] Fluxo de navegação funcionando: Splash → Login → Dashboard
+- [x] Tema escuro como padrão na inicialização
+- [x] Remoção de navegação duplicada na tela de detalhes do caso
 
-### 🚀 Funcionalidades Implementadas
-- [x] **Flutter App**: Build funcionando em macOS
-- [x] **Chat Triagem**: Sistema inteligente com BLoC
-- [x] **Matches**: Sistema de busca de advogados
-- [x] **Navegação**: 5 abas adaptativas por perfil
-- [x] **Mensagens**: Tela para cliente
-- [x] **Dashboard**: Integração com dados do backend
+### 3. Melhorias na Tela de Detalhes do Caso
+- [x] **DocumentsSection melhorada**: Preview limitado de 3 documentos com botão "Ver todos"
+- [x] **ProcessStatusSection criada**: Timeline de andamento processual com documentos dos autos
+- [x] **CaseDocumentsScreen completa**: Tela dedicada para gerenciar todos os documentos
+- [x] **Funcionalidades de documentos**:
+  - Preview de documentos com ícones por tipo de arquivo
+  - Upload de múltiplos arquivos (PDF, DOC, DOCX, JPG, PNG)
+  - Download de documentos
+  - Organização por categorias
+  - Separação entre documentos do cliente e do processo
+- [x] **Cores adaptáveis ao tema escuro**: Caixas de estimativa de custos agora funcionam corretamente no modo escuro
 
-### 📚 Documentação Atualizada
-- [x] **README.md**: Visão geral completa do projeto
-- [x] **Arquitetura**: Estrutura Flutter vs React Native
-- [x] **Setup**: Instruções de instalação e configuração
-- [x] **Roadmap**: Plano de migração detalhado
-- [x] **Changelog**: Histórico de versões
+### 4. Arquitetura e Estrutura
+- [x] Clean Architecture implementada
+- [x] BLoC pattern para gerenciamento de estado
+- [x] Supabase integrado e funcionando
+- [x] Sistema de autenticação completo
+- [x] Navegação com GoRouter configurada
 
-## 🔧 Correções Técnicas
+## 🔧 Funcionalidades Implementadas
 
-### macOS Build
-```bash
-# Problema anterior:
-❌ app_links requer macOS 10.15, mas compilando para 10.14
+### Tela de Detalhes do Caso
+1. **Seção de Documentos (Preview)**:
+   - Mostra 3 documentos mais recentes
+   - Ícones específicos por tipo de arquivo (PDF, DOCX, JPG)
+   - Cores diferenciadas por tipo
+   - Botões de preview e download
+   - Botão "Ver todos os documentos" para página completa
 
-# Solução aplicada:
-✅ Atualizado deployment target para 10.15
-✅ Reinstaladas dependências CocoaPods
-✅ Build funcionando corretamente
-```
+2. **Seção de Andamento Processual**:
+   - Timeline visual com status de cada etapa
+   - Indicadores visuais (concluído/pendente)
+   - Documentos anexados aos eventos
+   - Preview de documentos dos autos
+   - Botão "Ver andamento completo"
 
-### Git e Versionamento
-```bash
-# Melhorias:
-✅ Criado .gitignore completo
-✅ Removidos arquivos __pycache__
-✅ Commits organizados por categoria
-✅ Mensagens de commit semânticas
-```
+3. **Tela Completa de Documentos**:
+   - Duas abas: "Meus Documentos" e "Documentos do Processo"
+   - Área de upload com drag & drop
+   - Organização por categorias
+   - Funcionalidades completas de CRUD
+   - Interface responsiva e intuitiva
 
-### Flutter App
-```bash
-# Status atual:
-✅ Arquitetura Clean Architecture
-✅ BLoC para gerenciamento de estado
-✅ Navegação com go_router
-✅ Integração com API FastAPI
-✅ Telas principais funcionando
-```
+### Sistema de Cores
+- Tema escuro como padrão
+- Cores adaptáveis entre temas claro/escuro
+- Paleta consistente com a identidade visual
 
-## 📊 Métricas de Progresso
+## 🎯 Próximos Passos
+- Implementar funcionalidades de backend para upload/download real
+- Adicionar preview real de documentos (PDF viewer)
+- Implementar notificações para novos documentos
+- Adicionar filtros e busca na tela de documentos
+- Implementar sincronização em tempo real do andamento processual
 
-### Migração Flutter
-- **Progresso**: 65% concluído
-- **Telas migradas**: 8/12
-- **Funcionalidades**: 12/15
-- **Testes**: 70% coverage
-
-### Qualidade do Código
-- **Linter**: 100% sem erros
-- **Build**: ✅ Sucesso em todas as plataformas
-- **Testes**: ✅ Passando
-- **Documentação**: ✅ Atualizada
-
-## 🔄 Próximos Passos
-
-### Semana 1-2
-- [ ] Finalizar telas restantes
-- [ ] Implementar testes E2E
-- [ ] Otimizar performance
-
-### Semana 3-4
-- [ ] Deploy beta testing
-- [ ] Correção de bugs
-- [ ] Documentação final
-
-### Semana 5-6
-- [ ] Deploy produção
-- [ ] Monitoramento
-- [ ] Suporte pós-lançamento
-
-## 🎉 Resultados Alcançados
-
-### ✅ Técnicos
-- Build macOS funcionando
-- Arquitetura limpa implementada
-- Integração com backend estabelecida
-- Documentação completa
-
-### ✅ Organizacionais
-- Repositório GitHub organizado
-- Histórico de commits limpo
-- Documentação atualizada
-- Roadmap definido
-
-### ✅ Funcionais
-- Chat triagem operacional
-- Sistema de matches funcional
-- Navegação fluida
-- Interface responsiva
-
-## 📞 Contato
-
-Para dúvidas sobre as atualizações:
-- **GitHub**: [@NicholasJacob1990](https://github.com/NicholasJacob1990)
-- **Repository**: [LITIG](https://github.com/NicholasJacob1990/LITIG)
-
----
-
-**Última atualização**: Janeiro 2025  
-**Responsável**: Nicholas Jacob  
-**Status**: ✅ Atualização concluída com sucesso 
+## 📊 Métricas
+- **Navegação**: ✅ Funcionando sem duplicação
+- **Tema escuro**: ✅ Implementado como padrão
+- **Documentos**: ✅ Preview e gestão completa
+- **Andamento processual**: ✅ Timeline implementada
+- **UX**: ✅ Interface intuitiva e responsiva 

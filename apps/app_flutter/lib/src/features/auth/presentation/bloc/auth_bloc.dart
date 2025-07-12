@@ -6,6 +6,7 @@ import 'package:meu_app/src/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:meu_app/src/features/auth/domain/usecases/register_client_usecase.dart';
 import 'package:meu_app/src/features/auth/domain/usecases/register_lawyer_usecase.dart';
 import 'package:meu_app/src/features/auth/domain/usecases/signin_with_google_usecase.dart';
+import 'package:meu_app/src/features/auth/domain/entities/user.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 import 'dart:async';
@@ -17,7 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterClientUseCase _registerClientUseCase;
   final RegisterLawyerUseCase _registerLawyerUseCase;
   final LogoutUseCase _logoutUseCase;
-  late StreamSubscription<dynamic> _userSubscription;
+  late StreamSubscription<User?> _userSubscription;
 
   AuthBloc({required this.authRepository})
       : _loginUseCase = LoginUseCase(authRepository),
@@ -57,7 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onAuthStateChanged(AuthStateChanged event, Emitter<AuthState> emit) {
     if (event.user != null) {
-      emit(Authenticated(event.user));
+      emit(Authenticated(event.user!));
     } else {
       emit(Unauthenticated());
     }
@@ -151,5 +152,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(const AuthError('Ocorreu um erro desconhecido.'));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _userSubscription.cancel();
+    return super.close();
   }
 } 

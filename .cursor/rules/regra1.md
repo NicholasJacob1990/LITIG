@@ -1,1 +1,3 @@
-sempre leia todo diretório antes de realizar alterações 
+-sempre leia todo diretório antes de realizar alterações 
+-anote todas as criações e alterações de novos componentes ou arquivos no @status.md e consulte-as sempre que continuar ou criar novas ações
+-tenha uma análise holística para o diretório flutter em cotejo com o diretório antigo em react @litgo6

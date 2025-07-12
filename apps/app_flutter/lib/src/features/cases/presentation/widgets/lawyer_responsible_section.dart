@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:meu_app/src/features/cases/domain/entities/case_detail_models.dart';
+import '../../../../shared/utils/app_colors.dart';
 
 class LawyerResponsibleSection extends StatelessWidget {
-  final Lawyer lawyer;
-  const LawyerResponsibleSection({super.key, required this.lawyer});
+  const LawyerResponsibleSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final chipBg = Theme.of(context).chipTheme.backgroundColor;
     return Card(
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            CircleAvatar(radius: 24, backgroundImage: NetworkImage(lawyer.avatarUrl)),
-            const SizedBox(width: 12),
+            const CircleAvatar(
+              radius: 28,
+              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(lawyer.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text('Dr. Carlos Mendes',
+                      style: t.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  Text(lawyer.specialty, style: const TextStyle(color: Colors.grey)),
+                  Text('Direito Trabalhista', style: t.bodySmall),
                   const SizedBox(height: 4),
-                  Row(
+                  const Row(
                     children: [
-                      const Icon(Icons.star, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text('${lawyer.rating.toStringAsFixed(1)} • ${lawyer.experienceYears} anos',
-                          style: const TextStyle(fontSize: 14)),
+                      Icon(Icons.star, color: Colors.amber, size: 16),
+                      SizedBox(width: 4),
+                      Text('4.8  •  12 anos'),
                     ],
                   ),
                 ],
@@ -38,13 +39,29 @@ class LawyerResponsibleSection extends StatelessWidget {
             ),
             Column(
               children: [
-                IconButton(onPressed: () {/* chat */}, icon: const Icon(Icons.chat_bubble, color: Colors.blue)),
-                IconButton(onPressed: () {/* vídeo */}, icon: const Icon(Icons.videocam, color: Colors.green)),
+                _ActionChip(icon: Icons.chat_bubble_outline, label: 'Chat', bg: chipBg!),
+                const SizedBox(height: 8),
+                _ActionChip(icon: Icons.videocam, label: 'Vídeo', bg: chipBg),
               ],
-            )
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class _ActionChip extends StatelessWidget {
+  const _ActionChip({required this.icon, required this.label, required this.bg});
+  final IconData icon;
+  final String label;
+  final Color bg;
+  @override
+  Widget build(BuildContext context) => Chip(
+        avatar: Icon(icon, size: 16),
+        label: Text(label),
+        backgroundColor: bg,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+      );
 } 

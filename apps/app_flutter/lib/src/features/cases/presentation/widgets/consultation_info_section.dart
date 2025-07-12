@@ -1,45 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:meu_app/src/features/cases/domain/entities/case_detail_models.dart';
+import '../../../../shared/utils/app_colors.dart';
 
 class ConsultationInfoSection extends StatelessWidget {
-  final ConsultationInfo info;
-  const ConsultationInfoSection({super.key, required this.info});
-
-  Widget _row(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.grey),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          const SizedBox(width: 4),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
+  const ConsultationInfoSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('Informações da Consulta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-          _row(Icons.calendar_today, 'Data da Consulta:', info.date),
-          _row(Icons.access_time, 'Duração:', info.duration),
-          _row(Icons.videocam, 'Modalidade:', info.mode),
-          _row(Icons.description, 'Plano:', info.plan),
-          const SizedBox(height: 8),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Informações da Consulta',
+                style: t.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 16),
+            _infoRow(Icons.calendar_month, 'Data da Consulta', '16/01/2024'),
+            _infoRow(Icons.timer_outlined, 'Duração', '45 minutos'),
+            _infoRow(Icons.videocam, 'Modalidade', 'Vídeo'),
+            _infoRow(Icons.receipt_long, 'Plano', 'Plano por Ato'),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _infoRow(IconData icon, String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: AppColors.lightText2),
+            const SizedBox(width: 8),
+            Text('$label: ',
+                style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text(value),
+          ],
+        ),
+      );
 } 

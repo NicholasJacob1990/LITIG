@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
+import 'package:meu_app/src/core/theme/app_theme.dart';
 
 class DetailedCaseCard extends StatelessWidget {
   final String caseId;
@@ -25,8 +27,10 @@ class DetailedCaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
-      elevation: 4,
+      elevation: 2,
+      shadowColor: Colors.black26,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
@@ -37,13 +41,13 @@ class DetailedCaseCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildLawyerHeader(),
+              _buildLawyerHeader(context),
               const SizedBox(height: 16),
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
               const SizedBox(height: 12),
-              _buildProgressSection(),
+              _buildProgressSection(context),
               const SizedBox(height: 12),
-              _buildNextStepSection(),
+              _buildNextStepSection(context),
               const Divider(height: 24),
               _buildActionButtons(context),
             ],
@@ -53,7 +57,9 @@ class DetailedCaseCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLawyerHeader() {
+  Widget _buildLawyerHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final statusColors = theme.extension<AppStatusColors>()!;
     return Row(
       children: [
         CachedNetworkImage(
@@ -70,50 +76,56 @@ class DetailedCaseCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(lawyer.specialty, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text(lawyer.name, style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+              Text(lawyer.specialty, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7), fontSize: 12)),
             ],
           ),
         ),
         Chip(
           label: Text(status),
-          backgroundColor: _getStatusColor(status).withOpacity(0.1),
-          labelStyle: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold),
+          backgroundColor: _getStatusColor(status, statusColors).withOpacity(0.1),
+          labelStyle: TextStyle(color: _getStatusColor(status, statusColors), fontWeight: FontWeight.bold, fontSize: 12),
           side: BorderSide.none,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
         ),
       ],
     );
   }
 
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final statusColors = theme.extension<AppStatusColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Progresso', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text('Progresso', style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: progress,
-          backgroundColor: Colors.grey[300],
-          valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status)),
+          backgroundColor: theme.colorScheme.outline.withOpacity(0.3),
+          valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status, statusColors)),
+          minHeight: 6,
+          borderRadius: BorderRadius.circular(3),
         ),
       ],
     );
   }
 
-  Widget _buildNextStepSection() {
+  Widget _buildNextStepSection(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
-        const Icon(LucideIcons.flag, size: 16, color: Colors.grey),
+        Icon(LucideIcons.flag, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
         const SizedBox(width: 8),
-        const Text('Próxima etapa: ', style: TextStyle(fontWeight: FontWeight.bold)),
-        Expanded(child: Text(nextStep, overflow: TextOverflow.ellipsis)),
+        Text('Próxima etapa: ', style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+        Expanded(child: Text(nextStep, overflow: TextOverflow.ellipsis, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)))),
       ],
     );
   }
 
   Widget _buildActionButtons(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _actionButton(context, icon: LucideIcons.bot, label: 'Resumo IA', onPressed: () {}),
         _actionButton(context, icon: LucideIcons.messageCircle, label: 'Chat', onPressed: () {}),
@@ -133,16 +145,16 @@ class DetailedCaseCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, AppStatusColors statusColors) {
     switch (status) {
       case 'Em Andamento':
-        return Colors.orange.shade700;
+        return statusColors.statusOrange!;
       case 'Concluído':
-        return Colors.green.shade700;
+        return statusColors.statusGreen!;
       case 'Aguardando':
-        return Colors.blue.shade700;
+        return statusColors.statusBlue!;
       default:
-        return Colors.grey.shade700;
+        return statusColors.statusBlue!; // Fallback
     }
   }
 } 
