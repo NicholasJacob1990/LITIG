@@ -2,6 +2,32 @@
 
 ## 🚀 Últimos Commits - 2025-01-15
 
+### **🌟 BRANCH CRIADO NO GITHUB - 2025-01-15**
+- **Branch**: `flutter-app-improvements`
+- **Commit**: 2306bd047
+- **Link do Pull Request**: https://github.com/NicholasJacob1990/LITIG/pull/new/flutter-app-improvements
+- **Resumo**: Implementação completa da estrutura Flutter com sistema de parcerias e melhorias gerais
+- **Arquivos modificados**: 51 arquivos (5.972 inserções, 1.103 deleções)
+- **Principais features**:
+  - ✅ Sistema de parcerias com propostas e dashboard
+  - ✅ Navegação estruturada com tabs
+  - ✅ Correção de imports e dependências
+  - ✅ Novos widgets e componentes
+  - ✅ Melhorias na estrutura de dados
+  - ✅ Documentação atualizada
+  - ✅ Testes unitários para parcerias
+  - ✅ Configuração de go_router e get_it
+  - ✅ Correções de bugs e performance
+
+### **📈 Status do Repository**:
+- **Branch Principal**: `main`
+- **Novo Branch**: `flutter-app-improvements`
+- **Total de Commits**: 109 objetos enviados
+- **Compressão**: 121.62 KiB comprimidos
+- **Status**: ✅ Push realizado com sucesso
+
+## 🚀 Últimos Commits - 2025-01-15
+
 ### **🔧 FIX CRÍTICO - Correção de Problemas no Cliente Flutter - 2025-01-15**
 - **Problema**: Usuário cliente com problemas visuais, dados não aparecendo (casos, advogados, mensagens)
 - **Causa Root**: Falha na configuração do Supabase local e problemas de autenticação
