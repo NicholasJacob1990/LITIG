@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../bloc/case_detail_bloc.dart';
 import '../widgets/lawyer_responsible_section.dart';
@@ -21,7 +22,9 @@ class CaseDetailScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
-          actions: [IconButton(icon: const Icon(Icons.share), onPressed: () {})],
+          actions: [
+            IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          ],
           title: const Column(
             children: [
               Text('Rescisão Trabalhista'),
@@ -66,7 +69,6 @@ class CaseDetailScreen extends StatelessWidget {
                   DocumentsSection(),
                   SizedBox(height: 16),
                   ProcessStatusSection(),
-                  SizedBox(height: 24), // Espaço extra no final
                 ],
               ),
             );

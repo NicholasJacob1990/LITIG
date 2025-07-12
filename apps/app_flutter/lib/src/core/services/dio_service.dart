@@ -1,13 +1,47 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide MultipartFile;
 
 class DioService {
   static Dio? _dio;
 
+  static String get _baseUrl {
+    // Debug logs para verificar a detecção de plataforma
+    print('🔍 DEBUG: kIsWeb = $kIsWeb');
+    
+    // Detecção mais robusta de plataforma
+    if (kIsWeb) {
+      print('🌐 DEBUG: Detectado Flutter Web - usando localhost:8080');
+      return 'http://localhost:8080/api';
+    }
+    
+    // Para plataformas nativas, verificar o Platform
+    try {
+      if (Platform.isAndroid) {
+        print('🤖 DEBUG: Detectado Android - usando 10.0.2.2:8080');
+        return 'http://10.0.2.2:8080/api'; // Emulador Android
+      } else if (Platform.isIOS) {
+        print('🍎 DEBUG: Detectado iOS - usando 127.0.0.1:8080');
+        return 'http://127.0.0.1:8080/api'; // Simulador iOS
+      } else {
+        print('🖥️ DEBUG: Detectado Desktop - usando localhost:8080');
+        return 'http://localhost:8080/api'; // Desktop
+      }
+    } catch (e) {
+      // Se Platform não estiver disponível (ex: Web), usar localhost
+      print('⚠️ DEBUG: Platform não disponível, fallback para localhost:8080');
+      return 'http://localhost:8080/api';
+    }
+  }
+
   static Dio get dio {
     if (_dio == null) {
+      final baseUrl = _baseUrl;
+      print('🚀 DEBUG: Inicializando Dio com baseUrl: $baseUrl');
+      
       _dio = Dio(BaseOptions(
-        baseUrl: 'http://localhost:8000/api',
+        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         headers: {
@@ -94,6 +128,37 @@ class DioService {
       });
     } catch (e) {
       print('Erro ao explicar matches: $e');
+      rethrow;
+    }
+  }
+
+  /// Busca manual de advogados com filtros
+  static Future<Response> searchLawyers({
+    String? query,
+    String? area,
+    String? uf,
+    double? minRating,
+    double? maxDistance,
+    bool? onlyAvailable,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      Map<String, dynamic> params = {
+        'limit': limit,
+        'offset': offset,
+      };
+      
+      if (query != null && query.isNotEmpty) params['q'] = query;
+      if (area != null) params['area'] = area;
+      if (uf != null) params['uf'] = uf;
+      if (minRating != null) params['min_rating'] = minRating;
+      if (maxDistance != null) params['max_distance'] = maxDistance;
+      if (onlyAvailable != null) params['only_available'] = onlyAvailable;
+      
+      return await dio.get('/lawyers', queryParameters: params);
+    } catch (e) {
+      print('Erro na busca de advogados: $e');
       rethrow;
     }
   }
@@ -329,11 +394,20 @@ class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // Adicionar token de autenticação automaticamente
-    final session = Supabase.instance.client.auth.currentSession;
-    final accessToken = session?.accessToken;
-    
-    if (accessToken != null) {
-      options.headers['Authorization'] = 'Bearer $accessToken';
+    try {
+      final session = Supabase.instance.client.auth.currentSession;
+      final accessToken = session?.accessToken;
+      
+      if (accessToken != null) {
+        options.headers['Authorization'] = 'Bearer $accessToken';
+      } else {
+        // Para testes, adicionar um token mockado quando não há autenticação
+        print('⚠️  Sem token de autenticação - usando modo teste');
+        options.headers['X-Test-Mode'] = 'true';
+      }
+    } catch (e) {
+      print('⚠️  Erro ao obter token: $e - usando modo teste');
+      options.headers['X-Test-Mode'] = 'true';
     }
     
     print('DEBUG: Request ${options.method} ${options.uri}');
@@ -353,16 +427,14 @@ class AuthInterceptor extends Interceptor {
     print('DEBUG: Error ${err.response?.statusCode} from ${err.requestOptions.uri}');
     print('DEBUG: Error message: ${err.message}');
     
-    // Tratar erros de autenticação
+    // Tratar erros de autenticação de forma mais flexível
     if (err.response?.statusCode == 401) {
-      // Token expirado ou inválido
-      print('DEBUG: Token inválido ou expirado');
-      // Aqui poderia implementar refresh token ou logout automático
+      print('DEBUG: Token inválido ou expirado - mas continuando...');
     }
     
     // Tratar erros de conectividade específicos para Flutter Web
     if (err.type == DioExceptionType.connectionError) {
-      print('⚠️  AVISO: Backend não está acessível em localhost:8000');
+      print('⚠️  AVISO: Backend não está acessível em localhost:8080');
       print('💡 O app vai usar dados mock para demonstração');
       print('🔧 Para conectar ao backend real, certifique-se que ele está rodando');
     }

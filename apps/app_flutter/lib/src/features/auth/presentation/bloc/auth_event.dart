@@ -60,6 +60,7 @@ class AuthRegisterLawyerRequested extends AuthEvent {
   final String password;
   final String name;
   final String cpf;
+  final String? cnpj; // Adicionado
   final String phone;
   
   // Step 2
@@ -83,12 +84,14 @@ class AuthRegisterLawyerRequested extends AuthEvent {
   
   // Step 5
   final bool agreedToTerms;
+  final String userType; // Adicionado
 
   const AuthRegisterLawyerRequested({
     required this.email,
     required this.password,
     required this.name,
     required this.cpf,
+    this.cnpj, // Adicionado
     required this.phone,
     required this.oab,
     required this.areas,
@@ -104,12 +107,13 @@ class AuthRegisterLawyerRequested extends AuthEvent {
     this.ethnicity,
     required this.isPcd,
     required this.agreedToTerms,
+    required this.userType, // Adicionado
   });
 
   @override
   List<Object?> get props => [
-    email, password, name, cpf, phone, oab, areas, maxCases, cep, address, city, state,
-    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms
+    email, password, name, cpf, cnpj, phone, oab, areas, maxCases, cep, address, city, state,
+    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType // Adicionado
   ];
 }
 

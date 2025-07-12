@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -31,7 +32,7 @@ class LawyerMatchCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: lawyer['avatar_url'] != null ? NetworkImage(lawyer['avatar_url']) : null,
+                  backgroundImage: lawyer['avatar_url'] != null ? CachedNetworkImageProvider(lawyer['avatar_url']) : null,
                   child: lawyer['avatar_url'] == null ? const Icon(LucideIcons.user, size: 30) : null,
                 ),
                 const SizedBox(width: 16),
@@ -69,7 +70,14 @@ class LawyerMatchCard extends StatelessWidget {
                 ),
               ],
             ),
-            const Divider(height: 32),
+            
+            const Divider(height: 24),
+
+            // Experiência e Prêmios
+            _buildExperienceAndAwards(context),
+
+            const Divider(height: 24),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -85,9 +93,9 @@ class LawyerMatchCard extends StatelessWidget {
                 ),
                 _buildInfoChip(
                   context,
-                  icon: lawyer['is_available'] ? LucideIcons.checkCircle : LucideIcons.xCircle,
-                  label: lawyer['is_available'] ? 'Disponível' : 'Indisponível',
-                  iconColor: lawyer['is_available'] ? Colors.green : Colors.red,
+                  icon: (lawyer['is_available'] ?? false) ? LucideIcons.checkCircle : LucideIcons.xCircle,
+                  label: (lawyer['is_available'] ?? false) ? 'Disponível' : 'Indisponível',
+                  iconColor: (lawyer['is_available'] ?? false) ? Colors.green : Colors.red,
                 ),
               ],
             ),
@@ -125,6 +133,120 @@ class LawyerMatchCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildExperienceAndAwards(BuildContext context) {
+    final theme = Theme.of(context);
+    final experienceYears = lawyer['experience_years'] as int?;
+    final awards = lawyer['awards'] as List?;
+    final professionalSummary = lawyer['professional_summary'] as String?;
+
+    if (experienceYears == null && (awards == null || awards.isEmpty)) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (experienceYears != null)
+              Row(
+                children: [
+                  Icon(LucideIcons.briefcase, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  const SizedBox(width: 8),
+                  Text('$experienceYears anos de experiência', style: theme.textTheme.bodyMedium),
+                ],
+              ),
+            if (professionalSummary != null && professionalSummary.isNotEmpty)
+              TextButton(
+                onPressed: () => _showCurriculumModal(context),
+                child: const Text('Ver Perfil Completo'),
+              ),
+          ],
+        ),
+        if (awards != null && awards.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: awards.take(3).map((award) => Chip(
+              avatar: const Icon(LucideIcons.award, size: 14, color: Colors.amber),
+              label: Text(award.toString(), style: theme.textTheme.labelSmall),
+              backgroundColor: Colors.amber.withOpacity(0.1),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            )).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showCurriculumModal(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Perfil - ${lawyer['nome']}', style: theme.textTheme.headlineSmall),
+                      IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildModalSection(theme, title: 'Resumo Profissional', content: lawyer['professional_summary']),
+                          _buildModalSection(theme, title: 'Experiência', content: '${lawyer['experience_years']} anos'),
+                          _buildModalSection(theme, title: 'Prêmios e Reconhecimentos', items: lawyer['awards']),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildModalSection(ThemeData theme, {required String title, String? content, List? items}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        if (content != null) Text(content, style: theme.textTheme.bodyLarge),
+        if (items != null)
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text('• $item', style: theme.textTheme.bodyMedium),
+          )),
+        const SizedBox(height: 24),
+      ],
     );
   }
 

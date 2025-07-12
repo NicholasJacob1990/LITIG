@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meu_app/injection_container.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/src/core/theme/app_theme.dart';
 import 'package:meu_app/src/core/theme/theme_cubit.dart';
@@ -11,12 +12,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  print('🚀 Iniciando aplicação...');
 
   try {
     await Supabase.initialize(
       url: 'http://localhost:54321',
-      anonKey:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
     );
     print('✅ Supabase inicializado com sucesso');
   } catch (e) {
@@ -24,10 +26,17 @@ Future<void> main() async {
       print('✅ Supabase já estava inicializado (hot restart)');
     } else {
       print('❌ Erro ao inicializar Supabase: $e');
+      print('⚠️  Continuando sem Supabase - usando modo offline');
     }
   }
 
-  configureDependencies();
+  try {
+    configureDependencies();
+    print('✅ Dependências configuradas');
+  } catch (e) {
+    print('❌ Erro ao configurar dependências: $e');
+  }
+
   runApp(
     BlocProvider(
       create: (context) => ThemeCubit(),
@@ -50,9 +59,20 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _authBloc = getIt<AuthBloc>();
-    _authBloc.add(AuthCheckStatusRequested()); // Dispara a verificação aqui
-    _router = appRouter(_authBloc);
+    print('📱 Inicializando MyApp...');
+    
+    try {
+      _authBloc = getIt<AuthBloc>();
+      print('✅ AuthBloc criado');
+      
+      _authBloc.add(AuthCheckStatusRequested());
+      print('✅ AuthCheckStatusRequested enviado');
+      
+      _router = appRouter(_authBloc);
+      print('✅ Router configurado');
+    } catch (e) {
+      print('❌ Erro na inicialização: $e');
+    }
   }
 
   @override
@@ -63,25 +83,35 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    print('🎨 Construindo MaterialApp...');
+    
     return BlocProvider.value(
       value: _authBloc,
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
-          return MaterialApp.router(
-            routerConfig: _router,
-            title: 'LITGO Flutter',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            themeMode: themeMode,
-            builder: (context, widget) {
-              ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-                return ErrorScreen(error: errorDetails.exception.toString());
-              };
-              return widget ?? const ErrorScreen(error: 'Widget nulo');
-            },
-          );
+      child: BlocListener<AuthBloc, auth_states.AuthState>(
+        listener: (context, state) {
+          print('🔄 AuthState mudou para: ${state.runtimeType}');
         },
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            print('🎨 Construindo com tema: $themeMode');
+            return MaterialApp.router(
+              routerConfig: _router,
+              title: 'LITGO Flutter',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              themeMode: themeMode,
+              builder: (context, widget) {
+                print('🏗️ Builder chamado, widget: ${widget.runtimeType}');
+                ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+                  print('❌ Erro capturado: ${errorDetails.exception}');
+                  return ErrorScreen(error: errorDetails.exception.toString());
+                };
+                return widget ?? const ErrorScreen(error: 'Widget nulo');
+              },
+            );
+          },
+        ),
       ),
     );
   }

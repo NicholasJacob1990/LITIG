@@ -1,10 +1,67 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ApiService {
-  static const String _baseUrl = 'http://localhost:8000/api'; // Corrigido de 8080 para 8000
-  static const String _baseUrlV2 = 'http://localhost:8000/api/v2'; // Adicionado para a v2 da API
+  static String get _baseUrl {
+    // Debug logs para verificar a detecção de plataforma
+    print('🔍 DEBUG ApiService: kIsWeb = $kIsWeb');
+    
+    // Detecção mais robusta de plataforma
+    if (kIsWeb) {
+      print('🌐 DEBUG ApiService: Detectado Flutter Web - usando localhost:8080');
+      return 'http://localhost:8080/api';
+    }
+    
+    // Para plataformas nativas, verificar o Platform
+    try {
+      if (Platform.isAndroid) {
+        print('🤖 DEBUG ApiService: Detectado Android - usando 10.0.2.2:8080');
+        return 'http://10.0.2.2:8080/api'; // Emulador Android
+      } else if (Platform.isIOS) {
+        print('🍎 DEBUG ApiService: Detectado iOS - usando 127.0.0.1:8080');
+        return 'http://127.0.0.1:8080/api'; // Simulador iOS
+      } else {
+        print('🖥️ DEBUG ApiService: Detectado Desktop - usando localhost:8080');
+        return 'http://localhost:8080/api'; // Desktop
+      }
+    } catch (e) {
+      // Se Platform não estiver disponível (ex: Web), usar localhost
+      print('⚠️ DEBUG ApiService: Platform não disponível, fallback para localhost:8080');
+      return 'http://localhost:8080/api';
+    }
+  }
+
+  static String get _baseUrlV2 {
+    // Debug logs para verificar a detecção de plataforma
+    print('🔍 DEBUG ApiService V2: kIsWeb = $kIsWeb');
+    
+    // Detecção mais robusta de plataforma
+    if (kIsWeb) {
+      print('🌐 DEBUG ApiService V2: Detectado Flutter Web - usando localhost:8080');
+      return 'http://localhost:8080/api/v2';
+    }
+    
+    // Para plataformas nativas, verificar o Platform
+    try {
+      if (Platform.isAndroid) {
+        print('🤖 DEBUG ApiService V2: Detectado Android - usando 10.0.2.2:8080');
+        return 'http://10.0.2.2:8080/api/v2'; // Emulador Android
+      } else if (Platform.isIOS) {
+        print('🍎 DEBUG ApiService V2: Detectado iOS - usando 127.0.0.1:8080');
+        return 'http://127.0.0.1:8080/api/v2'; // Simulador iOS
+      } else {
+        print('🖥️ DEBUG ApiService V2: Detectado Desktop - usando localhost:8080');
+        return 'http://localhost:8080/api/v2'; // Desktop
+      }
+    } catch (e) {
+      // Se Platform não estiver disponível (ex: Web), usar localhost
+      print('⚠️ DEBUG ApiService V2: Platform não disponível, fallback para localhost:8080');
+      return 'http://localhost:8080/api/v2';
+    }
+  }
 
   static Future<Map<String, String>> _getHeaders() async {
     final session = Supabase.instance.client.auth.currentSession;
@@ -23,7 +80,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getMyCases() async {
     try {
       final headers = await _getHeaders();
-      const url = '$_baseUrl/cases/my-cases';
+      final url = '$_baseUrl/cases/my-cases';
       
       print('DEBUG: Tentando acessar URL: $url');
       print('DEBUG: Headers: $headers');
@@ -84,7 +141,7 @@ class ApiService {
       }
 
       final body = jsonEncode({'user_id': user.id});
-      const url = '$_baseUrl/v2/triage/start';
+      final url = '$_baseUrlV2/triage/start';
       
       print('DEBUG: Tentando acessar URL: $url');
       print('DEBUG: Headers: $headers');
@@ -115,7 +172,7 @@ class ApiService {
     try {
       final headers = await _getHeaders();
       final body = jsonEncode({'case_id': caseId, 'message': message});
-      const url = '$_baseUrl/v2/triage/continue';
+      final url = '$_baseUrlV2/triage/continue';
 
       print('DEBUG: Tentando acessar URL (continue): $url');
       print('DEBUG: Headers (continue): $headers');
@@ -148,7 +205,7 @@ class ApiService {
     final headers = await _getHeaders();
     // TODO: Adicionar coordenadas do GPS
     final body = jsonEncode({'texto_cliente': description, 'coords': [-23.5505, -46.6333]});
-    const url = '$_baseUrl/triage';
+    final url = '$_baseUrl/triage';
 
     final response = await http.post(
       Uri.parse(url),
@@ -166,7 +223,7 @@ class ApiService {
   static Future<String> submitTriageTranscript(String transcript) async {
     final headers = await _getHeaders();
     final body = jsonEncode({'texto_cliente': transcript});
-    const url = '$_baseUrl/triage/full-flow';
+    final url = '$_baseUrl/triage/full-flow';
 
     // Endpoint corrigido
     final response = await http.post(
@@ -195,7 +252,7 @@ class ApiService {
       'k': 5,
       'preset': 'balanced',
     });
-    const url = '$_baseUrl/match';
+    final url = '$_baseUrl/match';
 
     final response = await http.post(
       Uri.parse(url),
@@ -229,7 +286,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> startIntelligentTriage() async {
     final headers = await _getHeaders();
-    const url = '$_baseUrlV2/triage/start';
+    final url = '$_baseUrlV2/triage/start';
 
     final response = await http.post(
       Uri.parse(url),
@@ -248,7 +305,7 @@ class ApiService {
     required String message,
   }) async {
     final headers = await _getHeaders();
-    const url = '$_baseUrlV2/triage/continue';
+    final url = '$_baseUrlV2/triage/continue';
     final body = jsonEncode({
       'case_id': caseId,
       'message': message,

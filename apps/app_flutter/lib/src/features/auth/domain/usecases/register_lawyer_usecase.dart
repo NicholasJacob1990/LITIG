@@ -13,6 +13,7 @@ class RegisterLawyerUseCase {
       password: params.password,
       name: params.name,
       cpf: params.cpf,
+      cnpj: params.cnpj,
       phone: params.phone,
       oab: params.oab,
       areas: params.areas,
@@ -37,6 +38,7 @@ class RegisterLawyerParams extends Equatable {
   final String password;
   final String name;
   final String cpf;
+  final String? cnpj;
   final String phone;
   final String oab;
   final String areas;
@@ -52,12 +54,14 @@ class RegisterLawyerParams extends Equatable {
   final String? ethnicity;
   final bool isPcd;
   final bool agreedToTerms;
+  final String userType;
 
   const RegisterLawyerParams({
     required this.email,
     required this.password,
     required this.name,
     required this.cpf,
+    this.cnpj,
     required this.phone,
     required this.oab,
     required this.areas,
@@ -73,6 +77,7 @@ class RegisterLawyerParams extends Equatable {
     this.ethnicity,
     required this.isPcd,
     required this.agreedToTerms,
+    required this.userType,
   });
 
   @override

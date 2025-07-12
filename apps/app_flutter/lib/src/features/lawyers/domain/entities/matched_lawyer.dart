@@ -9,13 +9,14 @@ class MatchedLawyer extends Equatable {
   final bool isAvailable;
   final String avatarUrl;
   final double? rating;
-
-  // Novos campos do LITGO6
-  final double fair; // Score de compatibilidade (substitui score)
+  final double fair;
   final double equity;
   final LawyerFeatures features;
+  final int? experienceYears;
+  final List<String> awards;
+  final String? professionalSummary;
 
-  const MatchedLawyer({
+  MatchedLawyer({
     required this.id,
     required this.nome,
     required this.primaryArea,
@@ -27,6 +28,9 @@ class MatchedLawyer extends Equatable {
     required this.fair,
     required this.equity,
     required this.features,
+    this.experienceYears,
+    this.awards = const [],
+    this.professionalSummary,
   });
 
   factory MatchedLawyer.fromJson(Map<String, dynamic> json) {
@@ -42,7 +46,31 @@ class MatchedLawyer extends Equatable {
       fair: (json['fair'] as num?)?.toDouble() ?? 0.0,
       equity: (json['equity'] as num?)?.toDouble() ?? 0.0,
       features: LawyerFeatures.fromJson(json['features'] ?? {}),
+      experienceYears: json['experience'] ?? json['experience_years'],
+      awards: List<String>.from(json['awards'] ?? []),
+      professionalSummary: json['professional_summary'] ?? json['bio'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'lawyer_id': id,
+      'nome': nome,
+      'primary_area': primaryArea,
+      'review_count': reviewCount,
+      'distance_km': distanceKm,
+      'is_available': isAvailable,
+      'avatar_url': avatarUrl,
+      'rating': rating,
+      'fair': fair,
+      'fair_score': fair, // Alias para compatibilidade
+      'equity': equity,
+      'features': {
+        'T': features.successRate,
+        'C': features.softSkills,
+        'U': features.responseTime,
+      },
+    };
   }
 
   @override
@@ -58,6 +86,9 @@ class MatchedLawyer extends Equatable {
         fair,
         equity,
         features,
+        experienceYears,
+        awards,
+        professionalSummary,
       ];
 }
 

@@ -15,6 +15,15 @@ import 'package:meu_app/src/features/cases/domain/repositories/cases_repository.
 import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/get_case_detail_usecase.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
+
+// Lawyers/Matching
+import 'package:meu_app/src/features/lawyers/data/datasources/lawyers_remote_datasource.dart';
+import 'package:meu_app/src/features/lawyers/data/repositories/lawyers_repository_impl.dart';
+import 'package:meu_app/src/features/lawyers/domain/repositories/lawyers_repository.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/find_matches_usecase.dart';
+import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
+import 'package:meu_app/src/features/partnerships/data/partnership_service.dart';
 
 // Services
 import 'package:meu_app/src/core/services/dio_service.dart';
@@ -56,4 +65,27 @@ void configureDependencies() {
 
   // Blocs
   getIt.registerFactory(() => CasesBloc(getMyCasesUseCase: getIt()));
+
+  // Lawyers/Matching
+  // Datasources
+  getIt.registerLazySingleton<LawyersRemoteDataSource>(
+      () => LawyersRemoteDataSourceImpl());
+
+  // Repositories
+  getIt.registerLazySingleton<LawyersRepository>(
+      () => LawyersRepositoryImpl(remoteDataSource: getIt()));
+
+  // Use Cases
+  getIt.registerLazySingleton<FindMatchesUseCase>(
+      () => FindMatchesUseCase(getIt()));
+
+  // Blocs
+  getIt.registerFactory(() => MatchesBloc(findMatchesUseCase: getIt()));
+
+  // Partnerships
+  // Services
+  getIt.registerLazySingleton(() => PartnershipService(getIt<Dio>()));
+  
+  // Blocs
+  getIt.registerFactory(() => PartnershipsBloc(getIt()));
 } 
