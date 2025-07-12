@@ -1,5 +1,31 @@
 # 📋 Status de Implementação - Andamento Processual
 
+## 🚀 Últimos Commits - 2025-01-14
+
+### **Commit c43b1bf85**: Implementação da migração React Native para Flutter
+- **Data**: 2025-01-14
+- **Arquivos modificados**: 27 arquivos
+- **Principais mudanças**:
+  - ✅ Implementado CaseCard widget com navegação moderna
+  - ✅ Estrutura de features com casos (cases) criada
+  - ✅ Tema e serviços de API atualizados para Flutter
+  - ✅ Documentação de migração e planos de sprint adicionados
+  - ✅ Widgets de apresentação para casos implementados
+  - ✅ Configurações de autenticação e navegação atualizadas
+  - ✅ Suporte para imagens em cache e avatares adicionado
+  - ✅ Sistema de status e cores personalizadas implementado
+
+### **Arquivos principais modificados**:
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/case_card.dart`
+- `apps/app_flutter/lib/src/core/services/dio_service.dart`
+- `apps/app_flutter/lib/src/core/theme/app_theme.dart`
+- `apps/app_flutter/lib/src/features/auth/presentation/bloc/auth_bloc.dart`
+
+### **Documentação criada**:
+- `docs/FLUTTER_MIGRATION_MASTER_PLAN.md`
+- `docs/FLUTTER_SPRINT_PLAN.md`
+- `docs/FLUTTER_COMPARATIVE_ANALYSIS.md`
+
 ## ✅ Localização do Andamento Processual em "Meus Casos"
 
 ### 1. **App React Native (Implementado)**
