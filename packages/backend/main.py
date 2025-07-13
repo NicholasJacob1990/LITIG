@@ -104,22 +104,18 @@ if os.getenv("ENVIRONMENT") == "production":
     origins = [
         os.getenv("FRONTEND_URL", "https://app.litgo.com"),
     ]
+    allow_origin_regex = None
 else:
-    # Para desenvolvimento, permite qualquer origem local e curinga.
-    origins = [
-        "http://localhost",
-        "http://localhost:8080",
-        "http://localhost:8081",
-        # Adicione outras portas de desenvolvimento se necessário
-        "*"  # Permite todas as origens em desenvolvimento
-    ]
+    # Para desenvolvimento, permite qualquer origem local via regex
+    origins = []
+    allow_origin_regex = r"http://(localhost|127\.0\.0\.1):\d+"
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=allow_origin_regex,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"] if os.getenv(
-        "ENVIRONMENT") == "production" else ["*"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

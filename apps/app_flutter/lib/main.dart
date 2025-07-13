@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +13,16 @@ import 'package:meu_app/src/core/theme/app_theme.dart';
 import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+String get _supabaseUrl {
+  if (kIsWeb) {
+    return 'http://127.0.0.1:54321';
+  }
+  if (Platform.isAndroid) {
+    return 'http://10.0.2.2:54321';
+  }
+  return 'http://127.0.0.1:54321';
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -17,8 +30,8 @@ Future<void> main() async {
 
   try {
     await Supabase.initialize(
-      url: 'http://localhost:54321',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+      url: _supabaseUrl,
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQw54IsKbscS7Cs8_wnwU',
     );
     print('✅ Supabase inicializado com sucesso');
   } catch (e) {

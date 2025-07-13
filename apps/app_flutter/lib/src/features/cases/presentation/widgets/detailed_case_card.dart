@@ -59,6 +59,7 @@ class DetailedCaseCard extends StatelessWidget {
 
   Widget _buildLawyerHeader(BuildContext context) {
     final theme = Theme.of(context);
+    final statusColors = theme.extension<AppStatusColors>()!;
     return Row(
       children: [
         CachedNetworkImage(
@@ -82,8 +83,8 @@ class DetailedCaseCard extends StatelessWidget {
         ),
         Chip(
           label: Text(status),
-          backgroundColor: _getStatusColor(status).withOpacity(0.1),
-          labelStyle: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold, fontSize: 12),
+          backgroundColor: _getStatusColor(status, statusColors).withOpacity(0.1),
+          labelStyle: TextStyle(color: _getStatusColor(status, statusColors), fontWeight: FontWeight.bold, fontSize: 12),
           side: BorderSide.none,
           padding: const EdgeInsets.symmetric(horizontal: 8),
         ),
@@ -93,6 +94,7 @@ class DetailedCaseCard extends StatelessWidget {
 
   Widget _buildProgressSection(BuildContext context) {
     final theme = Theme.of(context);
+    final statusColors = theme.extension<AppStatusColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -101,7 +103,7 @@ class DetailedCaseCard extends StatelessWidget {
         LinearProgressIndicator(
           value: progress,
           backgroundColor: theme.colorScheme.outline.withOpacity(0.3),
-          valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status)),
+          valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status, statusColors)),
           minHeight: 6,
           borderRadius: BorderRadius.circular(3),
         ),
@@ -143,16 +145,16 @@ class DetailedCaseCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, AppStatusColors statusColors) {
     switch (status) {
       case 'Em Andamento':
-        return Colors.orange;
+        return statusColors.statusOrange!;
       case 'Concluído':
-        return Colors.green;
+        return statusColors.statusGreen!;
       case 'Aguardando':
-        return Colors.blue;
+        return statusColors.statusBlue!;
       default:
-        return Colors.blue; // Fallback
+        return statusColors.statusBlue!; // Fallback
     }
   }
 } 

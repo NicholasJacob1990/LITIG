@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons/lucide_icons.dart' as lucide;
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/dashboard/data/datasources/dashboard_remote_data_source.dart';
@@ -30,7 +30,7 @@ class LawyerDashboard extends StatelessWidget {
           title: Text('Bem-vindo, $userName'),
           actions: [
             IconButton(
-              icon: const Icon(LucideIcons.logOut),
+              icon: const Icon(lucide.LucideIcons.logOut),
               onPressed: () => context.read<AuthBloc>().add(AuthLogoutRequested()),
             ),
           ],
@@ -70,11 +70,11 @@ class LawyerDashboard extends StatelessWidget {
           final theme = Theme.of(context);
           return Row(
             children: [
-              Expanded(child: StatCard(title: 'Casos Ativos', value: '${stats.activeCases}', icon: LucideIcons.briefcase, color: theme.colorScheme.primary)),
+              Expanded(child: StatCard(title: 'Casos Ativos', value: '${stats.activeCases}', icon: lucide.LucideIcons.briefcase, color: theme.colorScheme.primary)),
               const SizedBox(width: 16),
-              Expanded(child: StatCard(title: 'Novos Leads', value: '${stats.newLeads}', icon: LucideIcons.userPlus, color: Colors.green.shade400)),
+              Expanded(child: StatCard(title: 'Novos Leads', value: '${stats.newLeads}', icon: lucide.LucideIcons.userPlus, color: Colors.green.shade400)),
               const SizedBox(width: 16),
-              Expanded(child: StatCard(title: 'Alertas', value: '${stats.alerts}', icon: LucideIcons.bell, color: Colors.amber.shade400)),
+              Expanded(child: StatCard(title: 'Alertas', value: '${stats.alerts}', icon: lucide.LucideIcons.bell, color: Colors.amber.shade400)),
             ],
           );
         }
@@ -92,10 +92,10 @@ class LawyerDashboard extends StatelessWidget {
       mainAxisSpacing: 16,
       childAspectRatio: 1.5,
       children: [
-        _buildActionCard(context, 'Meus Casos', LucideIcons.briefcase, '/cases'),
-        _buildActionCard(context, 'Mensagens', LucideIcons.messageCircle, '/messages'),
-        _buildActionCard(context, 'Agenda', LucideIcons.calendar, '/schedule'),
-        _buildActionCard(context, 'Notificações', LucideIcons.bell, '/notifications'),
+        _buildActionCard(context, 'Meus Casos', lucide.LucideIcons.briefcase, '/cases'),
+        _buildActionCard(context, 'Mensagens', lucide.LucideIcons.messageCircle, '/messages'),
+        _buildActionCard(context, 'Agenda', lucide.LucideIcons.calendar, '/schedule'),
+        _buildActionCard(context, 'Notificações', lucide.LucideIcons.bell, '/notifications'),
       ],
     );
   }
@@ -104,16 +104,16 @@ class LawyerDashboard extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          leading: const Icon(LucideIcons.edit),
+          leading: Icon(lucide.LucideIcons.edit),
           title: const Text('Editar Perfil Público'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => context.go('/profile/edit'),
         ),
         ListTile(
-          leading: const Icon(LucideIcons.barChart),
-          title: const Text('Análise de Performance'),
+          leading: Icon(lucide.LucideIcons.settings),
+          title: const Text('Configurações'),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => context.go('/profile/performance'),
+          onTap: () => context.go('/profile/settings'),
         ),
       ],
     );

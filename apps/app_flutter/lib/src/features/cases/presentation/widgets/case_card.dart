@@ -36,7 +36,7 @@ class CaseCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
-        onTap: () => context.go('/cases/$caseId'),
+        onTap: () => context.push('/case-detail/$caseId'),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -62,7 +62,7 @@ class CaseCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
-                  onPressed: () => context.go('/cases/$caseId'),
+                  onPressed: () => context.push('/case-detail/$caseId'),
                   icon: const Icon(LucideIcons.eye, size: 16),
                   label: const Text('Ver Detalhes'),
                   style: TextButton.styleFrom(

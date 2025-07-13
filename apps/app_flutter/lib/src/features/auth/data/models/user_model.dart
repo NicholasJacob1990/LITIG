@@ -11,12 +11,24 @@ class UserModel extends User {
   });
 
   factory UserModel.fromSupabase(supabase.User supabaseUser) {
+    // Extrair role corretamente baseado no user_type
+    String? userRole;
+    final userType = supabaseUser.userMetadata?['user_type'];
+    
+    if (userType == 'LAWYER') {
+      // Para advogados, usar o campo 'role' específico
+      userRole = supabaseUser.userMetadata?['role'];
+    } else {
+      // Para clientes, usar o user_type diretamente
+      userRole = userType;
+    }
+    
     return UserModel(
       id: supabaseUser.id,
       email: supabaseUser.email ?? '',
       name: supabaseUser.userMetadata?['full_name'],
       avatarUrl: supabaseUser.userMetadata?['avatar_url'],
-      role: supabaseUser.userMetadata?['user_type'],
+      role: userRole,
     );
   }
 } 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../domain/entities/case_detail.dart';
 import '../../../../shared/utils/app_colors.dart';
 
@@ -108,7 +107,7 @@ class PreAnalysisSection extends StatelessWidget {
                       style: t.bodySmall!.copyWith(color: Colors.white70),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 8),
-                  Text('Analisado em: ${DateFormat('dd/MM/yyyy às HH:mm').format(preAnalysis!.analyzedAt)}',
+                  Text('Analisado em: ${_formatDate(preAnalysis!.analyzedAt)}',
                       style: t.bodySmall!.copyWith(color: Colors.white70),
                       textAlign: TextAlign.center),
                 ],
@@ -146,6 +145,49 @@ class PreAnalysisSection extends StatelessWidget {
                 .toList(),
             const SizedBox(height: 20),
 
+            // Documentos necessários (NOVO) ---------------------
+            if (preAnalysis!.requiredDocuments.isNotEmpty) ...[
+              Text('Documentos Necessários',
+                  style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              ...preAnalysis!.requiredDocuments
+                  .map((doc) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.description_outlined,
+                                size: 16, color: AppColors.lightText2),
+                            const SizedBox(width: 6),
+                            Expanded(child: Text(doc, style: t.bodySmall)),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+              const SizedBox(height: 20),
+            ],
+
+            // Estimativa de Custos -------------------------------
+            Text('Estimativa de Custos',
+                style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Row(children: [
+              _costCard(context, 'Consulta', 'R\$ ${preAnalysis!.estimatedCosts['Consulta']?.toStringAsFixed(2) ?? 'N/A'}'),
+              const SizedBox(width: 12),
+              _costCard(context, 'Representação', 'R\$ ${preAnalysis!.estimatedCosts['Representação']?.toStringAsFixed(2) ?? 'N/A'}'),
+            ]),
+            const SizedBox(height: 24),
+            
+            // Avaliação de Risco ---------------------------------
+            Text('Avaliação de Risco',
+                style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(
+              preAnalysis!.riskAssessment,
+              style: t.bodySmall,
+            ),
+            const SizedBox(height: 20),
+
             // Recomendação ---------------------------------------
             Text('Recomendação',
                 style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
@@ -170,7 +212,69 @@ class PreAnalysisSection extends StatelessWidget {
               label: const Text('Ver Análise Completa'),
             )
           ],
+                  ),
         ),
+      );
+  }
+
+  Color _getUrgencyColor(String urgencyLevel) {
+    switch (urgencyLevel.toLowerCase()) {
+      case 'alta':
+        return Colors.red;
+      case 'media':
+        return Colors.orange;
+      case 'baixa':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getUrgencyLabel(String urgencyLevel) {
+    switch (urgencyLevel.toLowerCase()) {
+      case 'alta':
+        return 'ALTA';
+      case 'media':
+        return 'MÉDIA';
+      case 'baixa':
+        return 'BAIXA';
+      default:
+        return urgencyLevel.toUpperCase();
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} às ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showFullAnalysis(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Análise Completa'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Área: ${preAnalysis!.legalArea}'),
+              const SizedBox(height: 8),
+              Text('Urgência: ${_getUrgencyLabel(preAnalysis!.urgencyLevel)}'),
+              const SizedBox(height: 8),
+              Text('Resumo:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(preAnalysis!.summary),
+              const SizedBox(height: 8),
+              Text('Recomendação:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(preAnalysis!.recommendation),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
       ),
     );
   }

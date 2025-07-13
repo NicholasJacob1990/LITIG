@@ -27,6 +27,11 @@ dependencies:
   cached_network_image: ^3.3.1
   flutter_dotenv: ^5.1.0
   supabase_flutter: ^2.5.8
+  
+  # Dependências de UI e ícones
+  google_fonts: ^6.1.0
+  lucide_icons: ^0.257.0
+  file_picker: ^8.0.0+1
 
 dev_dependencies:
   flutter_test:

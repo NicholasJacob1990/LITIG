@@ -133,6 +133,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ethnicity: event.ethnicity,
         isPcd: event.isPcd,
         agreedToTerms: event.agreedToTerms,
+        userType: event.userType,
       ));
       emit(const AuthSuccess('Registro de advogado realizado com sucesso! Sua conta está em análise.'));
     } on AuthException catch (e) {

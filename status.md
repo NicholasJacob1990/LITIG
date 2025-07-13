@@ -2,6 +2,168 @@
 
 ## 🚀 Últimos Commits - 2025-01-15
 
+### **🎯 PROJETO ESTRATÉGICO - Sistema Unificado de Ofertas para Perfis de Captação - 2025-01-15**
+- **Objetivo**: Implementar um sistema onde TODOS os perfis de captação (Escritório, Autônomo e futuro Super Associado) recebem ofertas de casos que devem aceitar ou rejeitar
+- **Mudança Estratégica**: Transformar a aba "Ofertas" em um funil universal de aceitação/rejeição de matches da triagem
+- **Status**: 📋 **PLANEJAMENTO COMPLETO** - Pronto para implementação
+
+### **🎯 Fluxo Redesenhado**:
+```
+Cliente → Triagem IA → Match → Oferta Pendente → [Aceitar/Rejeitar] → Caso Ativo
+```
+
+### **📋 PLANO DE AÇÃO COMPLETO**:
+
+#### **🚀 FASE 1: Sistema de Ofertas para Perfis Atuais (Escritório e Autônomo)**
+
+##### **BACKEND - Modificações Estruturais**:
+- ✅ **Nova Tabela**: `case_offers` (case_id, lawyer_id, status, expires_at, created_at)
+- ✅ **Novos Endpoints**:
+  - `GET /api/offers/pending` - Buscar ofertas pendentes
+  - `PATCH /api/offers/{id}/accept` - Aceitar oferta
+  - `PATCH /api/offers/{id}/reject` - Rejeitar oferta
+  - `POST /api/offers/create` - Criar oferta após match do cliente
+- ✅ **Modificação no Algoritmo**: Persistir matches como ofertas em vez de retorno temporário
+- ✅ **Lógica de Re-alocação**: Sistema para reoferecer casos rejeitados
+
+##### **FRONTEND - Adaptações Estruturais**:
+- ✅ **Unificação da Navegação**: MainTabsShell - trocar "Parcerias" por "Ofertas" para lawyer_individual/office
+- ✅ **Adaptação da OffersScreen**: Redesign para exibir ofertas de novos clientes (não parcerias internas)
+- ✅ **Novo OfferCard**: UI para mostrar resumo do caso, área, urgência, honorários potenciais
+- ✅ **Roteamento Pós-Login**: Direcionar perfis de captação para /offers em vez de /home
+- ✅ **Serviço de Ofertas**: OffersService com métodos para aceitar/rejeitar
+
+#### **✈️ FASE 2: Introdução do Perfil "Super Associado"**
+
+##### **BACKEND - Expansão**:
+- ✅ **Novo Role**: `lawyer_platform_associate` nos metadados do Supabase
+- ✅ **Inclusão no Match**: Modificar algoritmo para incluir Super Associados como destinatários
+- ✅ **Cadastro Especial**: Fluxo administrativo para promover associados a Super Associados
+
+##### **FRONTEND - Expansão**:
+- ✅ **Nova Navegação**: Adicionar case para lawyer_platform_associate (usa mesma aba Ofertas)
+- ✅ **Redirecionamento**: Incluir Super Associado no redirect para /offers
+- ✅ **Permissões**: Super Associado usa mesma UI de ofertas que Escritório/Autônomo
+
+### **📊 Impacto das Mudanças**:
+| Perfil | Antes | Depois |
+|--------|-------|---------|
+| **Escritório** | Casos diretos → Meus Casos | Match → Ofertas → [Aceitar] → Meus Casos |
+| **Autônomo** | Casos diretos → Meus Casos | Match → Ofertas → [Aceitar] → Meus Casos |
+| **Associado Comum** | Delegação → Ofertas | Mantém: Delegação → Ofertas |
+| **Super Associado** | ❌ Não existe | **NOVO**: Match → Ofertas → [Aceitar] → Meus Casos |
+
+### **🔧 Arquivos a Serem Modificados**:
+
+#### **Backend**:
+- `packages/backend/models/` - Nova tabela case_offers
+- `packages/backend/routes/offers.py` - Novos endpoints
+- `packages/backend/services/offer_service.py` - Lógica de negócio
+- `packages/backend/services/match_service.py` - Persistir ofertas
+- `packages/backend/routes/intelligent_triage_routes.py` - Integração com ofertas
+
+#### **Frontend**:
+- `apps/app_flutter/lib/src/shared/widgets/organisms/main_tabs_shell.dart` - Navegação unificada
+- `apps/app_flutter/lib/src/router/app_router.dart` - Redirecionamento para ofertas
+- `apps/app_flutter/lib/src/features/partnerships/presentation/screens/offers_screen.dart` - Redesign completo
+- `apps/app_flutter/lib/src/features/offers/` - Nova estrutura de features
+- `apps/app_flutter/lib/src/features/offers/data/offers_service.dart` - Serviço de ofertas
+- `apps/app_flutter/lib/src/features/offers/presentation/widgets/offer_card.dart` - Card de oferta
+
+### **⏱️ Cronograma Estimado**:
+- **Fase 1 - Backend**: 2-3 dias
+- **Fase 1 - Frontend**: 2-3 dias
+- **Testes e Ajustes**: 1-2 dias
+- **Fase 2 - Super Associado**: 1-2 dias
+- **Total**: 6-10 dias úteis
+
+### **🎯 Próximos Passos Imediatos**:
+1. ✅ Implementar nova tabela case_offers no backend
+2. ✅ Criar endpoints de ofertas
+3. ✅ Modificar algoritmo de match para persistir ofertas
+4. ✅ Adaptar OffersScreen no frontend
+5. ✅ Testar fluxo completo com perfis atuais
+6. ✅ Implementar Super Associado
+
+### **🔧 FIX CRÍTICO - Correção de Navegação por Tipo de Usuário - 2025-01-15**
+- **Problema**: Usuários não estavam sendo direcionados para suas telas correspondentes após o login
+- **Causa Root**: 
+  - Role detection inconsistente no `UserModel.fromSupabase`
+  - Redirecionamento genérico no `AppRouter` (todos para `/home`)
+  - Índices de navegação desalinhados no `MainTabsShell`
+- **Soluções Implementadas**:
+  - ✅ **UserModel Corrigido**: Extração correta do role baseado no `user_type`
+    - Para advogados (`user_type='LAWYER'`): usa campo `role` específico
+    - Para clientes: usa `user_type` diretamente
+  - ✅ **AppRouter Redirecionamento Inteligente**: Cada tipo vai para sua rota inicial
+    - `lawyer_associated` → `/dashboard`
+    - `lawyer_individual/lawyer_office` → `/home`
+    - `client` → `/client-home`
+  - ✅ **MainTabsShell Índices Corrigidos**: Branches alinhadas com StatefulShellRoute
+    - Advogado Associado: índices 0-5
+    - Advogado Contratante: índices 6-10
+    - Cliente: índices 11-16
+  - ✅ **Função _getCurrentIndex**: Mapeia corretamente branch para índice visual
+
+### **🎯 Navegação por Tipo de Usuário**:
+| Tipo de Usuário | Rota Inicial | Navegação |
+|-----------------|--------------|-----------|
+| **Advogado Associado** | `/dashboard` | Painel, Casos, Agenda, Ofertas, Mensagens, Perfil |
+| **Advogado Individual** | `/home` | Início, Parceiros, Parcerias, Mensagens, Perfil |
+| **Escritório** | `/home` | Início, Parceiros, Parcerias, Mensagens, Perfil |
+| **Cliente** | `/client-home` | Início, Meus Casos, Advogados, Mensagens, Serviços, Perfil |
+
+### **🔧 Implementação Técnica**:
+- **Role Detection**: Lógica condicional baseada no `user_type` do Supabase
+- **Router Redirect**: Switch statement para redirecionamento inteligente
+- **Branch Mapping**: Função helper para mapear índices de navegação
+- **Rotas Específicas**: Cada tipo tem suas rotas específicas (evita conflitos)
+
+### **Arquivos modificados**:
+- `apps/app_flutter/lib/src/features/auth/data/models/user_model.dart` - Role detection corrigido
+- `apps/app_flutter/lib/src/router/app_router.dart` - Redirecionamento inteligente e branches organizadas
+- `apps/app_flutter/lib/src/shared/widgets/organisms/main_tabs_shell.dart` - Índices corrigidos e função helper
+
+### **✨ IMPLEMENTAÇÃO COMPLETA - Dados Dinâmicos na Tela de Detalhes do Caso - 2025-01-15**
+- **Funcionalidade**: Implementação completa de dados dinâmicos na tela de detalhes do caso
+- **Problema Resolvido**: Tela de detalhes do caso estava com dados estáticos/hardcoded
+- **Implementação**:
+  - ✅ **Modelo CaseDetail Completo**: Criado com todas as entidades necessárias (LawyerInfo, ConsultationInfo, PreAnalysis, NextStep, CaseDocument, ProcessStatus, ProcessPhase)
+  - ✅ **CaseDetailBloc Atualizado**: State incluindo CaseDetail e dados mockeados implementados
+  - ✅ **LawyerResponsibleSection Refatorado**: Recebe dados dinâmicos do advogado responsável
+  - ✅ **ConsultationInfoSection Refatorado**: Mostra informações reais da consulta
+  - ✅ **PreAnalysisSection Refatorado**: Exibe análise preliminar com dados dinâmicos
+  - ✅ **NextStepsSection Refatorado**: Lista próximos passos com status e responsáveis
+  - ✅ **DocumentsSection Refatorado**: Mostra documentos reais com tamanhos e datas
+  - ✅ **ProcessStatusSection Refatorado**: Exibe fases do processo com progresso
+  - ✅ **CaseDetailScreen Atualizado**: Passa dados corretos para todos os widgets
+  - ✅ **AppBar Dinâmico**: Título e status atualizados com dados reais
+
+### **🎯 Melhorias de UX/UI**:
+- **Estados Vazios**: Implementados para quando não há dados disponíveis
+- **Tratamento de Erros**: Melhor handling com botão "Tentar novamente"
+- **Loading States**: Indicadores de carregamento apropriados
+- **Formatação de Dados**: Datas, tamanhos de arquivos e status formatados corretamente
+- **Interatividade**: Botões funcionais com feedback visual
+
+### **🔧 Implementação Técnica**:
+- **Dados Mockeados Realistas**: Simulação completa de um caso real de direito trabalhista
+- **Formatação de Datas**: Implementada sem dependência externa (intl)
+- **Tratamento de Nulos**: Verificações adequadas para campos opcionais
+- **Tipagem Forte**: Uso correto dos modelos de domínio
+- **Separação de Responsabilidades**: Cada widget recebe apenas os dados necessários
+
+### **Arquivos modificados**:
+- `apps/app_flutter/lib/src/features/cases/domain/entities/case_detail.dart` - Modelo completo criado
+- `apps/app_flutter/lib/src/features/cases/presentation/bloc/case_detail_bloc.dart` - State e dados mock
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/lawyer_responsible_section.dart` - Dados dinâmicos
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/consultation_info_section.dart` - Dados dinâmicos
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/pre_analysis_section.dart` - Dados dinâmicos
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/next_steps_section.dart` - Dados dinâmicos
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/documents_section.dart` - Dados dinâmicos
+- `apps/app_flutter/lib/src/features/cases/presentation/widgets/process_status_section.dart` - Dados dinâmicos
+- `apps/app_flutter/lib/src/features/cases/presentation/screens/case_detail_screen.dart` - Integração completa
+
 ### **🌟 BRANCH CRIADO NO GITHUB - 2025-01-15**
 - **Branch**: `flutter-app-improvements`
 - **Commit**: 2306bd047
@@ -26,7 +188,32 @@
 - **Compressão**: 121.62 KiB comprimidos
 - **Status**: ✅ Push realizado com sucesso
 
-## 🚀 Últimos Commits - 2025-01-15
+## �� Últimos Commits - 2025-01-15
+
+### **🔧 FIX CRÍTICO - Correção de Dependências e Compilação - 2025-01-15**
+- **Problema**: Erros de compilação devido a dependências ausentes (google_fonts, lucide_icons) e problemas de sintaxe
+- **Soluções Implementadas**:
+  - ✅ **Dependências Adicionadas**: google_fonts ^6.1.0 e lucide_icons ^0.257.0 instaladas no pubspec.yaml
+  - ✅ **RegisterLawyerParams Corrigido**: Adicionado parâmetro userType ausente na chamada do repository
+  - ✅ **PartnershipService Refatorado**: Corrigidos métodos estáticos para usar injeção de dependência
+  - ✅ **Flutter Clean**: Limpeza completa do projeto para resolver problemas de cache
+
+### **📦 Dependências Corrigidas**:
+- **google_fonts**: Adicionada para fontes customizadas no AppTheme
+- **lucide_icons**: Adicionada para ícones modernos em toda a aplicação
+- **Injection Container**: Configurado para PartnershipService
+
+### **🛠️ Correções de Código**:
+- **AuthBloc**: Adicionado userType na criação do RegisterLawyerParams
+- **LawyerSearchScreen**: Removido PartnershipService.initialize() estático
+- **ProposePartnershipScreen**: Corrigido para usar injeção de dependência
+- **PartnershipsDashboardScreen**: Atualizado para usar instância do serviço
+
+### **Arquivos modificados**:
+- `apps/app_flutter/pubspec.yaml` - Dependências adicionadas
+- `apps/app_flutter/lib/src/features/auth/presentation/bloc/auth_bloc.dart` - userType corrigido
+- `apps/app_flutter/lib/src/features/auth/domain/usecases/register_lawyer_usecase.dart` - Parâmetros corrigidos
+- `apps/app_flutter/lib/src/features/partnerships/presentation/screens/` - Múltiplos arquivos corrigidos
 
 ### **🔧 FIX CRÍTICO - Correção de Problemas no Cliente Flutter - 2025-01-15**
 - **Problema**: Usuário cliente com problemas visuais, dados não aparecendo (casos, advogados, mensagens)

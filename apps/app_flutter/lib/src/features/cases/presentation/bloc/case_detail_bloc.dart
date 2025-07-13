@@ -86,6 +86,17 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         ],
         recommendation: 'Recomenda-se renegociação de algumas cláusulas específicas.',
         analyzedAt: DateTime.now().subtract(const Duration(days: 1)),
+        requiredDocuments: [
+          'Contrato de trabalho original assinado',
+          'Últimos 6 holerites',
+          'Comunicação de dispensa (se houver)',
+          'Extrato do FGTS',
+        ],
+        riskAssessment: 'Baixo. A documentação parece robusta e a jurisprudência é favorável.',
+        estimatedCosts: { // Modificado
+          'Consulta': 350.00,
+          'Representação': 2500.00,
+        },
       ),
       nextSteps: [
         NextStep(
@@ -161,6 +172,10 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
             isCompleted: true,
             isCurrent: false,
             completedAt: null,
+            documents: [ // Adicionado
+              CaseDocumentPreview(id: 'doc_001', name: 'Contrato Original.pdf'),
+              CaseDocumentPreview(id: 'doc_002', name: 'Comprovante de Renda.pdf'),
+            ],
           ),
           const ProcessPhase(
             id: 'phase_002',
@@ -169,6 +184,9 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
             isCompleted: false,
             isCurrent: true,
             completedAt: null,
+            documents: [ // Adicionado
+              CaseDocumentPreview(id: 'doc_003', name: 'Análise Preliminar.docx'),
+            ],
           ),
           const ProcessPhase(
             id: 'phase_003',

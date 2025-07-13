@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

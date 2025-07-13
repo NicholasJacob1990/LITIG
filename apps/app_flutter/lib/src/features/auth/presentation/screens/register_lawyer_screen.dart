@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
@@ -107,10 +108,25 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   }
 
   Future<void> _pickFile(Function(File) onFilePicked) async {
-    // A lógica de file picker foi removida temporariamente
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = File(result.files.single.path!);
+        onFilePicked(file);
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade de upload de arquivo será implementada.')),
+          SnackBar(content: Text('Erro ao selecionar arquivo: $e')),
     );
+      }
+    }
   }
 
   @override

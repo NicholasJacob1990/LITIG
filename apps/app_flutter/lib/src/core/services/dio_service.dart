@@ -12,8 +12,8 @@ class DioService {
     
     // Detecção mais robusta de plataforma
     if (kIsWeb) {
-      print('🌐 DEBUG: Detectado Flutter Web - usando localhost:8080');
-      return 'http://localhost:8080/api';
+      print('🌐 DEBUG: Detectado Flutter Web - usando 127.0.0.1:8080');
+      return 'http://127.0.0.1:8080/api';
     }
     
     // Para plataformas nativas, verificar o Platform
@@ -30,8 +30,8 @@ class DioService {
       }
     } catch (e) {
       // Se Platform não estiver disponível (ex: Web), usar localhost
-      print('⚠️ DEBUG: Platform não disponível, fallback para localhost:8080');
-      return 'http://localhost:8080/api';
+      print('⚠️ DEBUG: Platform não disponível, fallback para 127.0.0.1:8080');
+      return 'http://127.0.0.1:8080/api';
     }
   }
 

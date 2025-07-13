@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../domain/entities/case_detail.dart';
 import '../../../../shared/utils/app_colors.dart';
 
@@ -55,7 +54,7 @@ class ConsultationInfoSection extends StatelessWidget {
             _infoRow(
               Icons.calendar_month, 
               'Data da Consulta', 
-              DateFormat('dd/MM/yyyy - HH:mm').format(consultation!.date)
+              _formatDate(consultation!.date)
             ),
             _infoRow(
               Icons.timer_outlined, 
@@ -144,5 +143,9 @@ class ConsultationInfoSection extends StatelessWidget {
       default:
         return plan;
     }
+  }
+  
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} - ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 } 

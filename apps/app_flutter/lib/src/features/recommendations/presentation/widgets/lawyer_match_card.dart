@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons/lucide_icons.dart' as lucide;
 
 class LawyerMatchCard extends StatelessWidget {
   final Map<String, dynamic> lawyer;
@@ -33,7 +33,7 @@ class LawyerMatchCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 30,
                   backgroundImage: lawyer['avatar_url'] != null ? CachedNetworkImageProvider(lawyer['avatar_url']) : null,
-                  child: lawyer['avatar_url'] == null ? const Icon(LucideIcons.user, size: 30) : null,
+                  child: lawyer['avatar_url'] == null ? Icon(lucide.LucideIcons.user, size: 30) : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -83,17 +83,17 @@ class LawyerMatchCard extends StatelessWidget {
               children: [
                 _buildInfoChip(
                   context,
-                  icon: LucideIcons.star,
+                  icon: lucide.LucideIcons.star,
                   label: '${lawyer['rating']?.toStringAsFixed(1) ?? 'N/A'} Avaliação',
                 ),
                 _buildInfoChip(
                   context,
-                  icon: LucideIcons.mapPin,
+                  icon: lucide.LucideIcons.mapPin,
                   label: lawyer['distance_km'] != null ? '${(lawyer['distance_km'] as num).toStringAsFixed(1)} km' : 'N/A',
                 ),
                 _buildInfoChip(
                   context,
-                  icon: (lawyer['is_available'] ?? false) ? LucideIcons.checkCircle : LucideIcons.xCircle,
+                  icon: (lawyer['is_available'] ?? false) ? lucide.LucideIcons.checkCircle : lucide.LucideIcons.xCircle,
                   label: (lawyer['is_available'] ?? false) ? 'Disponível' : 'Indisponível',
                   iconColor: (lawyer['is_available'] ?? false) ? Colors.green : Colors.red,
                 ),
@@ -105,7 +105,7 @@ class LawyerMatchCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onExplain,
-                    icon: const Icon(LucideIcons.helpCircle, size: 16),
+                    icon: Icon(lucide.LucideIcons.helpCircle, size: 16),
                     label: const Text('Por que este advogado?'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -155,7 +155,7 @@ class LawyerMatchCard extends StatelessWidget {
             if (experienceYears != null)
               Row(
                 children: [
-                  Icon(LucideIcons.briefcase, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  Icon(lucide.LucideIcons.briefcase, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
                   const SizedBox(width: 8),
                   Text('$experienceYears anos de experiência', style: theme.textTheme.bodyMedium),
                 ],
@@ -173,7 +173,7 @@ class LawyerMatchCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: awards.take(3).map((award) => Chip(
-              avatar: const Icon(LucideIcons.award, size: 14, color: Colors.amber),
+              avatar: Icon(lucide.LucideIcons.award, size: 14, color: Colors.amber),
               label: Text(award.toString(), style: theme.textTheme.labelSmall),
               backgroundColor: Colors.amber.withOpacity(0.1),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

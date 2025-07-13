@@ -8,7 +8,7 @@ class RegisterLawyerUseCase {
   RegisterLawyerUseCase(this.repository);
 
   Future<void> call(RegisterLawyerParams params) async {
-    return await repository.registerLawyer(
+    await repository.registerLawyer(
       email: params.email,
       password: params.password,
       name: params.name,
@@ -29,6 +29,7 @@ class RegisterLawyerUseCase {
       ethnicity: params.ethnicity,
       isPcd: params.isPcd,
       agreedToTerms: params.agreedToTerms,
+      userType: params.userType,
     );
   }
 }
@@ -83,6 +84,6 @@ class RegisterLawyerParams extends Equatable {
   @override
   List<Object?> get props => [
     email, password, name, cpf, phone, oab, areas, maxCases, cep, address, city, state,
-    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms
+    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType
   ];
 } 

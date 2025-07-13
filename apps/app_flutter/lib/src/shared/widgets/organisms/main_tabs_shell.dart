@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/features/auth/domain/entities/user.dart';
@@ -24,7 +25,7 @@ class MainTabsShell extends StatelessWidget {
           return Scaffold(
             body: navigationShell,
             bottomNavigationBar: BottomNavigationBar(
-              currentIndex: navigationShell.currentIndex,
+              currentIndex: _getCurrentIndex(userRole, navigationShell.currentIndex),
               onTap: (index) => _onItemTapped(index, navItems),
               items: navItems.map((item) => BottomNavigationBarItem(icon: Icon(item.icon), label: item.label)).toList(),
               type: BottomNavigationBarType.fixed,
@@ -46,34 +47,44 @@ class MainTabsShell extends StatelessWidget {
     );
   }
 
+  int _getCurrentIndex(String userRole, int currentBranchIndex) {
+    final navItems = _getNavItemsForRole(userRole);
+    for (int i = 0; i < navItems.length; i++) {
+      if (navItems[i].branchIndex == currentBranchIndex) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
   List<NavItem> _getNavItemsForRole(String userRole) {
     switch (userRole) {
       case 'lawyer_associated':
         return [
-          NavItem(label: 'Painel', icon: Icons.dashboard, branchIndex: 0),
-          NavItem(label: 'Casos', icon: Icons.folder, branchIndex: 1),
-          NavItem(label: 'Agenda', icon: Icons.event_note, branchIndex: 2),
-          NavItem(label: 'Ofertas', icon: Icons.inbox, branchIndex: 3),
-          NavItem(label: 'Mensagens', icon: Icons.chat, branchIndex: 4),
-          NavItem(label: 'Perfil', icon: Icons.person, branchIndex: 13),
+          NavItem(label: 'Painel', icon: LucideIcons.layoutDashboard, branchIndex: 0),
+          NavItem(label: 'Casos', icon: LucideIcons.folder, branchIndex: 1),
+          NavItem(label: 'Agenda', icon: LucideIcons.calendar, branchIndex: 2),
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 3),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 4),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 5),
         ];
       case 'lawyer_individual':
       case 'lawyer_office':
         return [
-          NavItem(label: 'Início', icon: Icons.home, branchIndex: 5),
-          NavItem(label: 'Parceiros', icon: Icons.search, branchIndex: 6),
-          NavItem(label: 'Parcerias', icon: Icons.handshake, branchIndex: 7),
-          NavItem(label: 'Mensagens', icon: Icons.chat, branchIndex: 4),
-          NavItem(label: 'Perfil', icon: Icons.person, branchIndex: 13),
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 6),
+          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 7),
+          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 8),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 9),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 10),
         ];
       default: // client
         return [
-          NavItem(label: 'Início', icon: Icons.home, branchIndex: 9),
-          NavItem(label: 'Meus Casos', icon: Icons.cases, branchIndex: 10),
-          NavItem(label: 'Advogados', icon: Icons.search, branchIndex: 11),
-          NavItem(label: 'Mensagens', icon: Icons.message, branchIndex: 12),
-          NavItem(label: 'Serviços', icon: Icons.grid_view, branchIndex: 13),
-          NavItem(label: 'Perfil', icon: Icons.person, branchIndex: 14),
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 11),
+          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 12),
+          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 13),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 14),
+          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 15),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 16),
         ];
     }
   }
