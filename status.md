@@ -2,6 +2,57 @@
 
 ## 🚀 Últimos Commits - 2025-01-15
 
+### **🚀 COMMIT MAIS RECENTE - 00140cfa8 - 2025-01-15**
+- **Título**: `feat: Resolução de conectividade backend e plano de Super-Associado`
+- **Estatísticas**: 22 arquivos alterados (2.047 inserções, 227 deleções)
+- **Principais Mudanças**:
+  - ✅ **Backend Simples**: `simple_server.py` expandido com todos os endpoints necessários
+  - ✅ **Feature-E**: Implementada no algoritmo de matching com pesos e presets B2B
+  - ✅ **Super-Associado**: Plano detalhado com checkbox de registro e fluxo de contrato
+  - ✅ **Migrações SQL**: Tabela de ofertas aprimorada e novo role lawyer_platform_associate
+  - ✅ **B2B Implementation Plan**: Documentação completa para parcerias empresariais
+  - ✅ **Conectividade**: Todos os endpoints testados com curl e funcionando
+  - ✅ **Flutter Integration**: Estrutura de ofertas completa com dialogs e serviços
+  - ✅ **Documentação**: Status expandido com implementações e testes realizados
+- **Arquivos Novos**:
+  - `docs/system/B2B_IMPLEMENTATION_PLAN.md` - Plano de implementação B2B
+  - `packages/backend/supabase/migrations/20250115000000_enhance_offers_table.sql` - Melhorias na tabela de ofertas
+  - `packages/backend/supabase/migrations/20250715000000_add_lawyer_platform_associate_role.sql` - Novo role Super-Associado
+  - `packages/backend/supabase/migrations/20250715000001_update_find_nearby_lawyers_super_associate.sql` - Busca incluindo Super-Associados
+- **Status**: ✅ Push realizado com sucesso para o GitHub
+
+### **🆕 IMPLEMENTAÇÃO FEATURE-E (FIRM REPUTATION) - 2025-01-15**
+- **Status**: ✅ **CONCLUÍDA** - Feature-E implementada no algoritmo de matching
+- **Arquivo**: `packages/backend/algoritmo_match.py`
+
+#### **🔧 Implementações Realizadas**:
+- **✅ Pesos Atualizados**: `DEFAULT_WEIGHTS` agora inclui `"E": 0.03`
+- **✅ Preset B2B**: Novo preset `"b2b"` com `"E": 0.10` para casos corporativos
+- **✅ Método `firm_reputation()`**: Implementado na classe `FeatureCalculator`
+  - Fórmula: 40% taxa sucesso + 25% NPS + 20% reputação mercado + 15% diversidade
+  - Fallback para score neutro 0.5 quando advogado não possui `firm_id`
+- **✅ Método `all()` Atualizado**: Inclui a nova feature `"E": self.firm_reputation()`
+- **✅ Arquivo LTR Weights**: `models/ltr_weights.json` atualizado com chaves "C" e "E"
+
+#### **🧪 Testes Realizados**:
+- ✅ **Importação**: Módulo carrega sem erros
+- ✅ **Pesos**: `DEFAULT_WEIGHTS` contém chave "E" com valor 0.03
+- ✅ **Preset B2B**: `PRESET_WEIGHTS["b2b"]` configurado corretamente
+- ✅ **Compatibilidade**: Funciona com estrutura atual do `Lawyer` (usa `getattr`)
+- ✅ **load_weights()**: Aceita chave "E" corretamente após atualização do arquivo JSON
+- ✅ **Filtro JSON**: Rejeita chaves desconhecidas e aceita "E"
+
+#### **⚠️ Pontos de Atenção Resolvidos**:
+- **✅ load_weights() aceita chave "E"**: Arquivo `models/ltr_weights.json` atualizado
+- **🔄 Lawyer.firm & firm_id**: Pendente - será resolvido nas próximas tarefas (migrations + dataclasses)
+- **🔄 Redis prefix (firm)**: Pendente - será implementado quando necessário
+- **🔄 Latência two-pass**: Pendente - será monitorado após implementação completa
+
+#### **📋 Próxima Tarefa**:
+- **backend_dataclasses**: Criar dataclasses `LawFirm` e `FirmKPI` no `algoritmo_match.py`
+
+---
+
 ### **🎯 RESOLUÇÃO DE CONECTIVIDADE BACKEND - 2025-01-15**
 - **Problema Identificado**: Backend principal com imports relativos complexos impedindo inicialização via uvicorn
 - **Solução Implementada**: Criação de servidor simples `simple_server.py` com endpoints essenciais
@@ -240,26 +291,25 @@ Cliente → Triagem IA → Match → Oferta Pendente → [Aceitar/Rejeitar] → 
 
 ### **🌟 BRANCH ATUALIZADO NO GITHUB - 2025-01-15**
 - **Branch**: `flutter-app-improvements`
-- **Commit Mais Recente**: 213137149
+- **Commit Mais Recente**: 00140cfa8
 - **Link do Pull Request**: https://github.com/NicholasJacob1990/LITIG/pull/new/flutter-app-improvements
-- **Resumo**: Implementação completa do Sistema de Ofertas e correções críticas
-- **Arquivos modificados**: 36 arquivos (3.120 inserções, 574 deleções)
+- **Resumo**: Resolução de conectividade backend e plano de Super-Associado
+- **Arquivos modificados**: 22 arquivos (2.047 inserções, 227 deleções)
 - **Principais features**:
-  - ✅ Sistema de Ofertas: Fluxo completo de triagem → oferta → aceitar/rejeitar
-  - ✅ Correção de Navegação: UserModel, AppRouter e MainTabsShell corrigidos por tipo de usuário
-  - ✅ Dados Dinâmicos: Tela de detalhes do caso totalmente implementada com dados reais
-  - ✅ Parcerias: Endpoints REST completos com estatísticas e histórico
-  - ✅ Correções de Dependências: google_fonts e lucide_icons adicionados
-  - ✅ Fallback Mode: Cliente Flutter funciona offline com dados mock
-  - ✅ Conectividade: Backend funcionando na porta 8080 com todas as correções
-  - ✅ UX/UI: Botões de criação de caso, filtros e navegação melhorados
-  - ✅ Documentação: Status atualizado com implementações e próximos passos
+  - ✅ Backend Simples: `simple_server.py` funcionando na porta 8080 com todos os endpoints
+  - ✅ Feature-E (Firm Reputation): Implementada no algoritmo de matching com pesos e presets
+  - ✅ Super-Associado: Plano detalhado com checkbox de registro e fluxo de contrato
+  - ✅ Migrações SQL: Tabela de ofertas aprimorada e novo role lawyer_platform_associate
+  - ✅ B2B Implementation Plan: Documentação completa para parcerias empresariais
+  - ✅ Conectividade Testada: Todos os endpoints verificados com curl e funcionando
+  - ✅ Flutter Integration: Estrutura de ofertas completa com dialogs e serviços
+  - ✅ Documentação Expandida: Status atualizado com implementações e testes realizados
 
 ### **📈 Status do Repository**:
 - **Branch Principal**: `main`
 - **Branch Ativo**: `flutter-app-improvements`
-- **Total de Objetos**: 81 objetos enviados (149 enumerados)
-- **Compressão**: 40.84 KiB comprimidos
+- **Total de Objetos**: 51 objetos enviados (95 enumerados)
+- **Compressão**: 30.01 KiB comprimidos
 - **Status**: ✅ Push realizado com sucesso (2025-01-15)
 
 ## �� Últimos Commits - 2025-01-15
