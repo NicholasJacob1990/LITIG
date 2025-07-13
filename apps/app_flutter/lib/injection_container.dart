@@ -27,6 +27,7 @@ import 'package:meu_app/src/features/partnerships/data/partnership_service.dart'
 
 // Services
 import 'package:meu_app/src/core/services/dio_service.dart';
+import 'package:meu_app/src/features/offers/data/services/offers_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -88,4 +89,8 @@ void configureDependencies() {
   
   // Blocs
   getIt.registerFactory(() => PartnershipsBloc(getIt()));
+
+  // Offers
+  // Services
+  getIt.registerLazySingleton(() => OffersService(getIt<Dio>()));
 } 

@@ -85,6 +85,7 @@ class AuthRegisterLawyerRequested extends AuthEvent {
   // Step 5
   final bool agreedToTerms;
   final String userType; // Adicionado
+  final bool isPlatformAssociate; // NOVO: Campo Super Associado
 
   const AuthRegisterLawyerRequested({
     required this.email,
@@ -108,12 +109,13 @@ class AuthRegisterLawyerRequested extends AuthEvent {
     required this.isPcd,
     required this.agreedToTerms,
     required this.userType, // Adicionado
+    this.isPlatformAssociate = false, // NOVO: Campo Super Associado
   });
 
   @override
   List<Object?> get props => [
     email, password, name, cpf, cnpj, phone, oab, areas, maxCases, cep, address, city, state,
-    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType // Adicionado
+    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType, isPlatformAssociate // Adicionado
   ];
 }
 

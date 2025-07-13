@@ -9,6 +9,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from ..auth import get_current_user
 from ..config import get_supabase_client
 from ..services.case_service import create_case_service
+from ..services.match_service import process_client_choice
+from pydantic import BaseModel
+from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -150,3 +153,49 @@ async def get_case_details(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar detalhes do caso"
         )
+
+
+"""
+Rotas para gerenciamento de casos.
+"""
+router = APIRouter(
+    prefix="/cases",
+    tags=["Cases"],
+    responses={404: {"description": "Not found"}},
+)
+
+# Modelos para requests
+class ClientChoiceRequest(BaseModel):
+    case_id: str
+    chosen_lawyer_id: str
+    choice_order: int = 1  # 1 = primeira escolha, 2 = segunda, etc.
+
+@router.post("/{case_id}/choose-lawyer")
+async def choose_lawyer_for_case(
+    request: ClientChoiceRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Processa a escolha do cliente após o matching.
+    Cria uma oferta para o advogado escolhido.
+    """
+    user_id = current_user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Usuário não autenticado.")
+
+    try:
+        # Verificar se o caso pertence ao usuário
+        # TODO: Implementar verificação de ownership do caso
+        
+        result = await process_client_choice(
+            case_id=request.case_id,
+            chosen_lawyer_id=request.chosen_lawyer_id,
+            choice_order=request.choice_order
+        )
+        
+        return result
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

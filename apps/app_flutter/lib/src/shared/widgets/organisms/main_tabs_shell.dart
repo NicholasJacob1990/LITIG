@@ -70,21 +70,23 @@ class MainTabsShell extends StatelessWidget {
         ];
       case 'lawyer_individual':
       case 'lawyer_office':
+      case 'lawyer_platform_associate': // NOVO: Super Associado - usa mesma navegação de captação
         return [
           NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 6),
-          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 7),
-          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 8),
-          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 9),
-          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 10),
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 7), // Sistema de ofertas
+          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 8),
+          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 9),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 10),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 11),
         ];
       default: // client
         return [
-          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 11),
-          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 12),
-          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 13),
-          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 14),
-          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 15),
-          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 16),
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 12),
+          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 13),
+          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 14),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 15),
+          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 16),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 17),
         ];
     }
   }

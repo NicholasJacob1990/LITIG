@@ -2,9 +2,11 @@
 
 ## 📋 Visão Geral
 
-**Objetivo**: Transformar a aba "Ofertas" em um funil universal onde TODOS os perfis de captação (Escritório, Autônomo e futuro Super Associado) recebem ofertas de casos da triagem que devem aceitar ou rejeitar explicitamente.
+**Objetivo**: Transformar a aba "Ofertas" em um funil universal onde TODOS os perfis de captação (Escritório, Autônomo e Super Associado) recebem ofertas de casos da triagem que devem aceitar ou rejeitar explicitamente.
 
 **Mudança Estratégica**: Eliminar a aceitação automática de casos e implementar um processo controlado de aceite/rejeição para melhor gestão de carga de trabalho e qualidade do atendimento.
+
+**Novo Perfil - Super Associado**: Advogado que se registra como associado do escritório titular LITGO (ao invés de ser associado de outro escritório). Durante o registro, existe uma opção para sinalizar esta condição. Apenas Super-Associados precisam assinar contrato de associação e têm acesso ao sistema de ofertas como perfil de captação.
 
 ---
 
@@ -905,9 +907,29 @@ StatefulShellBranch(routes: [
 
 ## ✈️ FASE 2: Introdução do Perfil "Super Associado"
 
+### 📋 Esclarecimento sobre Super-Associado
+
+**Definição**: O Super-Associado é um advogado que trabalha como associado do escritório titular da plataforma LITGO, diferente dos associados normais que trabalham para outros escritórios cadastrados na plataforma.
+
+**Processo de Registro**:
+1. Durante o registro como advogado associado, existe um campo/checkbox para sinalizar se o usuário é associado do escritório titular
+2. Esta marcação define automaticamente o role como `lawyer_platform_associate`
+3. **Apenas Super-Associados precisam de contrato de associação** (associados normais não precisam)
+4. Super-Associados têm acesso ao mesmo sistema de ofertas que escritórios individuais
+
+**Diferenças Técnicas**:
+- **Associado Normal**: `lawyer_associated` → Associado de outro escritório
+- **Super-Associado**: `lawyer_platform_associate` → Associado do escritório titular LITGO
+
+**Diferenças Funcionais**:
+- **Associado Normal**: Trabalha na aba "Casos" com delegação interna
+- **Super-Associado**: Trabalha na aba "Ofertas" com captação direta de casos
+
 ### Backend - Expansão Mínima
 
-#### 1. Novo Role no Sistema
+#### 1. Novo Role no Sistema - Super Associado
+
+**Conceito**: O Super-Associado é um advogado que trabalha como associado do escritório titular da plataforma (diferente dos associados normais que trabalham para outros escritórios). Durante o registro, existe uma opção para sinalizar que o usuário é associado do escritório titular.
 
 **Arquivo**: `packages/backend/services/auth_service.py`
 
@@ -917,37 +939,48 @@ VALID_LAWYER_ROLES = [
     'lawyer_individual',
     'lawyer_office', 
     'lawyer_associated',
-    'lawyer_platform_associate'  # NOVO
+    'lawyer_platform_associate'  # SUPER ASSOCIADO - Associado do escritório titular
 ]
 
-async def promote_to_platform_associate(user_id: str, admin_user_id: str) -> bool:
-    """Promove um advogado associado a Super Associado (Platform Associate)"""
+async def register_lawyer_associated(
+    user_data: dict, 
+    is_platform_associate: bool = False
+) -> dict:
+    """Registra um advogado associado, com opção de ser Super-Associado"""
     
-    # Verificar permissões do admin
-    admin = await User.get_by_id(admin_user_id)
-    if not admin.is_platform_admin:
-        raise PermissionError("Apenas admins da plataforma podem fazer esta ação")
+    # Definir role baseado na marcação
+    role = 'lawyer_platform_associate' if is_platform_associate else 'lawyer_associated'
     
-    # Buscar usuário
-    user = await User.get_by_id(user_id)
-    if not user or user.role != 'lawyer_associated':
-        raise ValueError("Usuário deve ser um advogado associado")
-    
-    # Atualizar role no Supabase
-    supabase_client.auth.admin.update_user_by_id(
-        user_id,
-        {"user_metadata": {"role": "lawyer_platform_associate"}}
-    )
-    
-    # Log da ação
-    await AuditLog.create({
-        "action": "promote_to_platform_associate",
-        "user_id": user_id,
-        "admin_id": admin_user_id,
-        "timestamp": datetime.utcnow()
+    # Criar usuário no Supabase
+    user = supabase_client.auth.sign_up({
+        "email": user_data['email'],
+        "password": user_data['password'],
+        "options": {
+            "data": {
+                "role": role,
+                "full_name": user_data['full_name'],
+                "is_platform_associate": is_platform_associate
+            }
+        }
     })
     
-    return True
+    # Criar perfil do advogado
+    lawyer_profile = {
+        "user_id": user.user.id,
+        "oab_number": user_data['oab_number'],
+        "state": user_data['state'],
+        "is_platform_associate": is_platform_associate,
+        "office_id": None if is_platform_associate else user_data.get('office_id'),
+        "contract_required": is_platform_associate  # Apenas Super-Associado precisa de contrato
+    }
+    
+    await LawyerProfile.create(lawyer_profile)
+    
+    # Se for Super-Associado, precisa assinar contrato de associação
+    if is_platform_associate:
+        await ContractService.generate_platform_association_contract(user.user.id)
+    
+    return {"user_id": user.user.id, "role": role}
 ```
 
 #### 2. Inclusão no Algoritmo de Match
@@ -982,9 +1015,224 @@ async def find_eligible_lawyers(case_requirements: dict) -> List[User]:
     )
 ```
 
+#### 3. Serviço de Contrato de Associação
+
+**Arquivo**: `packages/backend/services/contract_service.py`
+
+```python
+class ContractService:
+    
+    @staticmethod
+    async def generate_platform_association_contract(user_id: str) -> dict:
+        """Gera contrato de associação para Super-Associado"""
+        
+        user = await User.get_by_id(user_id)
+        if not user or user.role != 'lawyer_platform_associate':
+            raise ValueError("Contrato apenas para Super-Associados")
+        
+        # Template do contrato
+        contract_template = await ContractTemplate.get_by_type('platform_association')
+        
+        # Gerar contrato personalizado
+        contract_data = {
+            "user_id": user_id,
+            "contract_type": "platform_association",
+            "template_id": contract_template.id,
+            "status": "pending_signature",
+            "generated_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(days=7),
+            "terms": {
+                "lawyer_name": user.full_name,
+                "oab_number": user.lawyer_profile.oab_number,
+                "platform_office": "LITGO - Escritório Titular",
+                "fee_percentage": 30,  # 30% para plataforma
+                "minimum_cases_month": 5,
+                "availability_hours": "40h/semana"
+            }
+        }
+        
+        contract = await Contract.create(contract_data)
+        
+        # Enviar para assinatura digital
+        await DocusignService.send_for_signature(contract.id, user.email)
+        
+        return contract.to_dict()
+    
+    @staticmethod
+    async def handle_contract_signature(contract_id: str, signature_data: dict) -> bool:
+        """Processa assinatura do contrato"""
+        
+        contract = await Contract.get_by_id(contract_id)
+        if not contract:
+            raise ValueError("Contrato não encontrado")
+        
+        # Atualizar status
+        contract.status = 'signed'
+        contract.signed_at = datetime.utcnow()
+        contract.signature_data = signature_data
+        await contract.save()
+        
+        # Ativar perfil do Super-Associado
+        user = await User.get_by_id(contract.user_id)
+        user.lawyer_profile.is_active = True
+        user.lawyer_profile.contract_signed = True
+        await user.lawyer_profile.save()
+        
+        # Notificar ativação
+        await NotificationService.send_contract_signed_notification(contract.user_id)
+        
+        return True
+```
+
 ### Frontend - Expansão Mínima
 
-#### 1. Adicionar ao Sistema de Navegação
+#### 1. Tela de Registro com Opção Super-Associado
+
+**Arquivo**: `apps/app_flutter/lib/src/features/auth/presentation/screens/lawyer_registration_screen.dart`
+
+```dart
+class LawyerRegistrationScreen extends StatefulWidget {
+  @override
+  _LawyerRegistrationScreenState createState() => _LawyerRegistrationScreenState();
+}
+
+class _LawyerRegistrationScreenState extends State<LawyerRegistrationScreen> {
+  final _formKey = GlobalKey<FormState>();
+  String _selectedRole = 'lawyer_individual';
+  bool _isPlatformAssociate = false; // NOVA OPÇÃO
+  
+  Widget _buildRoleSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Tipo de Cadastro', style: Theme.of(context).textTheme.titleMedium),
+        SizedBox(height: 8),
+        
+        // Opções existentes
+        RadioListTile<String>(
+          title: Text('Advogado Individual'),
+          value: 'lawyer_individual',
+          groupValue: _selectedRole,
+          onChanged: (value) => setState(() {
+            _selectedRole = value!;
+            _isPlatformAssociate = false; // Reset
+          }),
+        ),
+        
+        RadioListTile<String>(
+          title: Text('Escritório de Advocacia'),
+          value: 'lawyer_office',
+          groupValue: _selectedRole,
+          onChanged: (value) => setState(() {
+            _selectedRole = value!;
+            _isPlatformAssociate = false; // Reset
+          }),
+        ),
+        
+        RadioListTile<String>(
+          title: Text('Advogado Associado'),
+          value: 'lawyer_associated',
+          groupValue: _selectedRole,
+          onChanged: (value) => setState(() => _selectedRole = value!),
+        ),
+        
+        // NOVA OPÇÃO: Super-Associado
+        if (_selectedRole == 'lawyer_associated') ...[
+          SizedBox(height: 16),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.blue.withOpacity(0.05),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tipo de Associação',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                SizedBox(height: 8),
+                
+                CheckboxListTile(
+                  title: Text('Sou associado do escritório titular LITGO'),
+                  subtitle: Text(
+                    'Super-Associados captam casos diretamente e precisam assinar contrato de associação',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  value: _isPlatformAssociate,
+                  onChanged: (value) => setState(() => _isPlatformAssociate = value!),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                
+                if (_isPlatformAssociate) ...[
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Será necessário assinar contrato de associação após o registro',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange[800],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+  
+  Future<void> _submitRegistration() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    try {
+      final registrationData = {
+        'email': _emailController.text,
+        'password': _passwordController.text,
+        'full_name': _nameController.text,
+        'oab_number': _oabController.text,
+        'state': _selectedState,
+        'role': _selectedRole,
+        'is_platform_associate': _isPlatformAssociate, // NOVA PROPRIEDADE
+      };
+      
+      final result = await AuthService.registerLawyer(registrationData);
+      
+      if (_isPlatformAssociate) {
+        // Redirecionar para tela de contrato
+        Navigator.pushNamed(context, '/contract-signature', arguments: result['user_id']);
+      } else {
+        // Fluxo normal
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro no registro: $e')),
+      );
+    }
+  }
+}
+```
+
+#### 2. Adicionar ao Sistema de Navegação
 
 **Arquivo**: `apps/app_flutter/lib/src/shared/widgets/organisms/main_tabs_shell.dart`
 
@@ -1103,10 +1351,14 @@ switch (userRole) {
 - [ ] Testes de integração
 
 ### Super Associado
-- [ ] Novo role no backend
+- [ ] Novo role no backend (`lawyer_platform_associate`)
+- [ ] Campo `is_platform_associate` no registro
+- [ ] Serviço de contrato de associação
 - [ ] Inclusão no algoritmo de match
 - [ ] Navegação no frontend
-- [ ] Tela administrativa para promoção
+- [ ] Tela de registro com opção Super-Associado
+- [ ] Tela de assinatura de contrato
+- [ ] Fluxo de ativação após contrato assinado
 - [ ] Testes específicos
 
 ---

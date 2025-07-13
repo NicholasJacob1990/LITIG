@@ -2,9 +2,60 @@
 
 ## 🚀 Últimos Commits - 2025-01-15
 
+### **🎯 RESOLUÇÃO DE CONECTIVIDADE BACKEND - 2025-01-15**
+- **Problema Identificado**: Backend principal com imports relativos complexos impedindo inicialização via uvicorn
+- **Solução Implementada**: Criação de servidor simples `simple_server.py` com endpoints essenciais
+- **Status**: ✅ **BACKEND FUNCIONANDO** - Porta 8080 ativa e responsiva
+
+#### **🔧 Correções Implementadas**:
+- **Servidor Simples**: `packages/backend/simple_server.py` expandido com todos os endpoints necessários
+- **Endpoints Implementados**:
+  - ✅ `GET /api/cases/my-cases` - Lista casos do cliente
+  - ✅ `GET /api/cases/{case_id}` - Detalhes do caso
+  - ✅ `GET /api/offers/pending` - Ofertas pendentes para advogados
+  - ✅ `PATCH /api/offers/{offer_id}/accept` - Aceitar oferta
+  - ✅ `PATCH /api/offers/{offer_id}/reject` - Rejeitar oferta
+  - ✅ `GET /api/offers/stats` - Estatísticas das ofertas
+  - ✅ `GET /api/lawyers/matches` - Matches de advogados
+  - ✅ `GET /api/partnerships` - Parcerias disponíveis
+  - ✅ `POST /api/v2/triage/start` - Iniciar triagem
+  - ✅ `POST /api/v2/triage/continue` - Continuar triagem
+  - ✅ `GET /api/v2/triage/status/{task_id}` - Status da triagem
+
+#### **🧪 Testes Realizados**:
+- ✅ **Conectividade**: `curl http://localhost:8080/` - Status OK
+- ✅ **Ofertas Pendentes**: `curl http://localhost:8080/api/offers/pending` - 2 ofertas retornadas
+- ✅ **Aceitar Oferta**: `curl -X PATCH http://localhost:8080/api/offers/offer-1/accept` - Sucesso
+- ✅ **Rejeitar Oferta**: `curl -X PATCH http://localhost:8080/api/offers/offer-2/reject` - Sucesso
+- ✅ **Casos do Cliente**: `curl http://localhost:8080/api/cases/my-cases` - 3 casos retornados
+- ✅ **Detalhes do Caso**: `curl http://localhost:8080/api/cases/case-123` - Timeline completa
+
+#### **📱 Status Flutter**:
+- ✅ **App Rodando**: Flutter executando em macOS com hot reload
+- ✅ **Conectividade**: Backend respondendo em http://localhost:8080
+- 🔄 **Testes em Andamento**: Verificando integração completa Flutter ↔ Backend
+
+#### **🎯 Próximos Passos**:
+1. **Testar Sistema de Ofertas**: Verificar se a tela de ofertas no Flutter está funcionando
+2. **Validar Navegação**: Confirmar se as rotas estão corretas para diferentes tipos de usuário
+3. **Testar Triagem**: Verificar se o sistema de triagem está integrado
+4. **Documentar Resultados**: Atualizar documentação com resultados dos testes
+
+---
+
 ### **🚀 COMMIT MAIS RECENTE - 213137149 - 2025-01-15**
 - **Título**: `feat: Implementação completa do Sistema de Ofertas e correções críticas`
 - **Estatísticas**: 36 arquivos alterados (3.120 inserções, 574 deleções)
+
+### **📋 ATUALIZAÇÃO PLANO SISTEMA OFERTAS - 2025-01-15**
+- **Esclarecimento sobre Super-Associado**: Atualizado PLANO_SISTEMA_OFERTAS.md com definição clara
+- **Processo de Registro**: Super-Associado é marcado via checkbox durante registro como associado do escritório titular LITGO
+- **Diferenciação**: Super-Associado trabalha como associado do escritório titular (não de outro escritório)
+- **Contrato Específico**: Apenas Super-Associados precisam de contrato de associação (associados normais não)
+- **Serviço de Contrato**: Implementado ContractService para geração automática de contrato de associação
+- **Tela de Registro**: Adicionada interface Flutter com checkbox para sinalizar Super-Associado
+- **Fluxo de Ativação**: Super-Associado só é ativado após assinatura do contrato
+- **Documentação Atualizada**: Checklist de implementação expandido com novas tarefas
 - **Principais Mudanças**:
   - ✅ Sistema de Ofertas: Fluxo completo de triagem → oferta → aceitar/rejeitar
   - ✅ Correção de Navegação: UserModel, AppRouter e MainTabsShell corrigidos por tipo de usuário
@@ -82,12 +133,16 @@ Cliente → Triagem IA → Match → Oferta Pendente → [Aceitar/Rejeitar] → 
 - `packages/backend/routes/intelligent_triage_routes.py` - Integração com ofertas
 
 #### **Frontend**:
-- `apps/app_flutter/lib/src/shared/widgets/organisms/main_tabs_shell.dart` - Navegação unificada
-- `apps/app_flutter/lib/src/router/app_router.dart` - Redirecionamento para ofertas
-- `apps/app_flutter/lib/src/features/partnerships/presentation/screens/offers_screen.dart` - Redesign completo
-- `apps/app_flutter/lib/src/features/offers/` - Nova estrutura de features
-- `apps/app_flutter/lib/src/features/offers/data/offers_service.dart` - Serviço de ofertas
-- `apps/app_flutter/lib/src/features/offers/presentation/widgets/offer_card.dart` - Card de oferta
+- ✅ `apps/app_flutter/lib/src/shared/widgets/organisms/main_tabs_shell.dart` - Navegação unificada (nova aba Ofertas)
+- ✅ `apps/app_flutter/lib/src/router/app_router.dart` - Redirecionamento para ofertas
+- ✅ `apps/app_flutter/lib/src/features/offers/` - Nova estrutura de features completa
+- ✅ `apps/app_flutter/lib/src/features/offers/domain/entities/` - Entidades CaseOffer e OfferStats
+- ✅ `apps/app_flutter/lib/src/features/offers/data/services/offers_service.dart` - Serviço de ofertas
+- ✅ `apps/app_flutter/lib/src/features/offers/presentation/screens/case_offers_screen.dart` - Tela principal de ofertas
+- ✅ `apps/app_flutter/lib/src/features/offers/presentation/widgets/case_offer_card.dart` - Card de oferta
+- ✅ `apps/app_flutter/lib/src/features/offers/presentation/widgets/accept_offer_dialog.dart` - Dialog aceitar
+- ✅ `apps/app_flutter/lib/src/features/offers/presentation/widgets/reject_offer_dialog.dart` - Dialog rejeitar
+- ✅ `apps/app_flutter/lib/injection_container.dart` - OffersService registrado no GetIt
 
 ### **⏱️ Cronograma Estimado**:
 - **Fase 1 - Backend**: 2-3 dias

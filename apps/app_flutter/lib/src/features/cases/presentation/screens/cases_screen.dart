@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/presentation/widgets/case_card.dart';
 import 'package:meu_app/injection_container.dart';
@@ -17,12 +16,6 @@ class CasesScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Meus Casos'),
           centerTitle: true,
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.go('/triage'),
-          icon: const Icon(LucideIcons.plus),
-          label: const Text('Criar Novo Caso'),
-          tooltip: 'Iniciar nova consulta de caso',
         ),
         body: Column(
           children: [
@@ -52,10 +45,10 @@ class CasesScreen extends StatelessWidget {
                   }
                   if (state is CasesLoaded) {
                     if (state.filteredCases.isEmpty) {
-                      return _buildEmptyState(context, state.activeFilter);
+                      return _buildEmptyState(state.activeFilter);
                     }
                     return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // Padding para o FAB
+                      padding: const EdgeInsets.all(16),
                       itemCount: state.filteredCases.length,
                       itemBuilder: (context, index) {
                         final caseData = state.filteredCases[index];
@@ -110,7 +103,7 @@ class CasesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, String activeFilter) {
+  Widget _buildEmptyState(String activeFilter) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +116,9 @@ class CasesScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () => context.go('/triage'),
+            onPressed: () {
+              // TODO: Navegar para tela de nova triagem
+            },
             icon: const Icon(LucideIcons.plus),
             label: const Text('Iniciar Nova Consulta'),
           ),

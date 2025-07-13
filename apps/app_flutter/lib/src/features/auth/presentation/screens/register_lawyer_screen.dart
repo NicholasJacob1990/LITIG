@@ -45,6 +45,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   String? _ethnicity;
   bool _isPcd = false;
   bool _agreedToTerms = false;
+  bool _isPlatformAssociate = false; // NOVO: Campo para Super Associado
 
   @override
   void dispose() {
@@ -104,6 +105,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
       isPcd: _isPcd,
       agreedToTerms: _agreedToTerms,
       userType: widget.role,
+      isPlatformAssociate: _isPlatformAssociate, // NOVO: Campo Super Associado
     ));
   }
 
@@ -151,7 +153,13 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                     content: Text('Cadastro enviado! Verifique seu e-mail.'),
                     backgroundColor: Colors.green,
                   ));
-            context.go('/login');
+            
+            // NOVO: Redirecionar para tela de contrato se for Super Associado
+            if (_isPlatformAssociate) {
+              context.go('/contract-signature');
+            } else {
+              context.go('/login');
+            }
           }
         },
         child: Form(
@@ -272,16 +280,89 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
 
    Widget _buildOfficeLinkStep() => Column(
     children: [
-       _buildTextField(
-        controller: _officeCodeController,
-        hintText: 'Código do Escritório',
-        validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null
+      // NOVO: Opção Super Associado
+      Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.blue.withOpacity(0.05),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Checkbox(
+                  value: _isPlatformAssociate,
+                  onChanged: (value) => setState(() {
+                    _isPlatformAssociate = value ?? false;
+                    if (_isPlatformAssociate) {
+                      _officeCodeController.clear(); // Limpa código do escritório
+                    }
+                  }),
+                ),
+                Expanded(
+                  child: Text(
+                    'Sou Super Associado da Plataforma LITGO',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Super Associados são advogados que trabalham diretamente com a plataforma LITGO, '
+              'recebendo casos através do sistema de ofertas e precisam assinar contrato de associação.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            if (_isPlatformAssociate) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Será necessário assinar contrato de associação após o registro',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange[800],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
-      const SizedBox(height: 8),
-      const Text(
-        'Insira o código fornecido pelo escritório de advocacia ao qual você está se associando.',
-        style: TextStyle(fontSize: 12, color: Colors.grey),
-      )
+      
+      // Campo original - só aparece se NÃO for Super Associado
+      if (!_isPlatformAssociate) ...[
+        _buildTextField(
+          controller: _officeCodeController,
+          hintText: 'Código do Escritório',
+          validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Insira o código fornecido pelo escritório de advocacia ao qual você está se associando.',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
     ],
   );
 
