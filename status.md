@@ -2,6 +2,25 @@
 
 ## 🚀 Últimos Commits - 2025-01-15
 
+### **🚀 COMMIT MAIS RECENTE - 213137149 - 2025-01-15**
+- **Título**: `feat: Implementação completa do Sistema de Ofertas e correções críticas`
+- **Estatísticas**: 36 arquivos alterados (3.120 inserções, 574 deleções)
+- **Principais Mudanças**:
+  - ✅ Sistema de Ofertas: Fluxo completo de triagem → oferta → aceitar/rejeitar
+  - ✅ Correção de Navegação: UserModel, AppRouter e MainTabsShell corrigidos por tipo de usuário
+  - ✅ Dados Dinâmicos: Tela de detalhes do caso totalmente implementada com dados reais
+  - ✅ Parcerias: Endpoints REST completos com estatísticas e histórico
+  - ✅ Correções de Dependências: google_fonts e lucide_icons adicionados
+  - ✅ Fallback Mode: Cliente Flutter funciona offline com dados mock
+  - ✅ Conectividade: Backend funcionando na porta 8080 com todas as correções
+  - ✅ UX/UI: Botões de criação de caso, filtros e navegação melhorados
+  - ✅ Documentação: Status atualizado com implementações e próximos passos
+- **Arquivos Novos**:
+  - `PLANO_SISTEMA_OFERTAS.md` - Plano completo do sistema de ofertas
+  - `packages/backend/routes/partnerships.py` - Endpoints REST para parcerias
+  - `packages/backend/services/partnership_service.py` - Serviço de parcerias
+- **Status**: ✅ Push realizado com sucesso para o GitHub
+
 ### **🎯 PROJETO ESTRATÉGICO - Sistema Unificado de Ofertas para Perfis de Captação - 2025-01-15**
 - **Objetivo**: Implementar um sistema onde TODOS os perfis de captação (Escritório, Autônomo e futuro Super Associado) recebem ofertas de casos que devem aceitar ou rejeitar
 - **Mudança Estratégica**: Transformar a aba "Ofertas" em um funil universal de aceitação/rejeição de matches da triagem
@@ -164,29 +183,29 @@ Cliente → Triagem IA → Match → Oferta Pendente → [Aceitar/Rejeitar] → 
 - `apps/app_flutter/lib/src/features/cases/presentation/widgets/process_status_section.dart` - Dados dinâmicos
 - `apps/app_flutter/lib/src/features/cases/presentation/screens/case_detail_screen.dart` - Integração completa
 
-### **🌟 BRANCH CRIADO NO GITHUB - 2025-01-15**
+### **🌟 BRANCH ATUALIZADO NO GITHUB - 2025-01-15**
 - **Branch**: `flutter-app-improvements`
-- **Commit**: 2306bd047
+- **Commit Mais Recente**: 213137149
 - **Link do Pull Request**: https://github.com/NicholasJacob1990/LITIG/pull/new/flutter-app-improvements
-- **Resumo**: Implementação completa da estrutura Flutter com sistema de parcerias e melhorias gerais
-- **Arquivos modificados**: 51 arquivos (5.972 inserções, 1.103 deleções)
+- **Resumo**: Implementação completa do Sistema de Ofertas e correções críticas
+- **Arquivos modificados**: 36 arquivos (3.120 inserções, 574 deleções)
 - **Principais features**:
-  - ✅ Sistema de parcerias com propostas e dashboard
-  - ✅ Navegação estruturada com tabs
-  - ✅ Correção de imports e dependências
-  - ✅ Novos widgets e componentes
-  - ✅ Melhorias na estrutura de dados
-  - ✅ Documentação atualizada
-  - ✅ Testes unitários para parcerias
-  - ✅ Configuração de go_router e get_it
-  - ✅ Correções de bugs e performance
+  - ✅ Sistema de Ofertas: Fluxo completo de triagem → oferta → aceitar/rejeitar
+  - ✅ Correção de Navegação: UserModel, AppRouter e MainTabsShell corrigidos por tipo de usuário
+  - ✅ Dados Dinâmicos: Tela de detalhes do caso totalmente implementada com dados reais
+  - ✅ Parcerias: Endpoints REST completos com estatísticas e histórico
+  - ✅ Correções de Dependências: google_fonts e lucide_icons adicionados
+  - ✅ Fallback Mode: Cliente Flutter funciona offline com dados mock
+  - ✅ Conectividade: Backend funcionando na porta 8080 com todas as correções
+  - ✅ UX/UI: Botões de criação de caso, filtros e navegação melhorados
+  - ✅ Documentação: Status atualizado com implementações e próximos passos
 
 ### **📈 Status do Repository**:
 - **Branch Principal**: `main`
-- **Novo Branch**: `flutter-app-improvements`
-- **Total de Commits**: 109 objetos enviados
-- **Compressão**: 121.62 KiB comprimidos
-- **Status**: ✅ Push realizado com sucesso
+- **Branch Ativo**: `flutter-app-improvements`
+- **Total de Objetos**: 81 objetos enviados (149 enumerados)
+- **Compressão**: 40.84 KiB comprimidos
+- **Status**: ✅ Push realizado com sucesso (2025-01-15)
 
 ## �� Últimos Commits - 2025-01-15
 
