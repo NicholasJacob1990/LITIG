@@ -147,108 +147,68 @@ preset = "expert_opinion"  # NOVO
 
 ---
 
-## 🎯 ESTRATÉGIA DE INTEGRAÇÃO CONCILIADA (VERSÃO FINAL)
+## 🎯 ESTRATÉGIA DE INTEGRAÇÃO FINAL (Pós-Análise Detalhada)
 
-Após uma análise profunda da UI e das funcionalidades existentes, a estratégia de integração foi **aprimorada** para ser mais eficiente e menos disruptiva para o usuário. Em vez de criar telas novas, vamos **evoluir as telas existentes**, conciliando as funcionalidades atuais com as novas capacidades de busca avançada.
+Com base em uma análise aprofundada da base de código e da interface do usuário, a estratégia foi refinada para ser mais eficiente e alinhada com as funcionalidades existentes. Em vez de criar novas telas, vamos **evoluir as telas atuais**, conciliando as funcionalidades de busca existentes com as novas capacidades de busca avançada.
 
-### 🔄 Fluxo Híbrido: O Melhor de Dois Mundos
+A implementação será direcionada para os perfis de usuário específicos da seguinte forma:
 
-A nova abordagem mantém os fluxos atuais como base e adiciona as ferramentas de precisão como "superpoderes" opcionais, criando uma experiência mais rica e flexível.
+### 👤 Perfil: Cliente (`client`)
 
-#### 1. Para Advogados (Aba "Parceiros" - `LawyerSearchScreen`)
-- **O que é Mantido:** A busca principal por meio de um campo de texto, onde o advogado descreve sua necessidade e a IA faz a triagem. O sistema de filtros manuais (pós-busca) também é 100% preservado.
-- **O que é Adicionado (Aprimoramento):**
-  - **📍 Ferramenta de Localização:** Um botão opcional `Adicionar Localização` que abre um mapa (`LocationPicker`). Se um local for selecionado, a busca usará o preset `'correspondent'` automaticamente.
-  - **⚙️ Seletor de Foco:** Um dropdown opcional para forçar um `preset` específico (`expert`, `expert_opinion`), dando ao usuário controle total sobre a intenção da busca.
-- **Resultado:** Uma única tela que permite desde uma busca rápida por texto até uma busca multi-condicional (texto + localização + foco), com o refinamento manual dos filtros no final.
+*   **Tela Alvo:** `LawyersScreen` (Aba "Advogados").
+*   **Estado Atual:** Esta tela possui duas abas:
+    1.  **"Recomendações":** Exibe uma lista de advogados e escritórios gerada pelo algoritmo de match com base no último caso do cliente.
+    2.  **"Buscar":** Oferece um campo de texto para uma busca manual por palavra-chave.
+*   **Estratégia de Integração:**
+    *   **Aprimorar a Aba "Recomendações":** Vamos adicionar o seletor de "Estilo de Busca" (ex: `[⭐ Recomendado]`, `[💰 Melhor Custo]`, `[🏆 Mais Experientes]`) diretamente nesta aba. Isso dará ao cliente controle sobre o tipo de recomendação que ele deseja ver, sem sair do fluxo principal.
+    *   **Manter a Aba "Buscar":** A funcionalidade de busca manual por palavra-chave na aba "Buscar" **será mantida como está**, servindo como uma ferramenta para quando o cliente sabe exatamente o nome do advogado ou escritório que procura.
 
-#### 2. Para Clientes (Aba "Advogados" - `LawyersScreen`)
-- **O que é Mantido:** A busca manual por texto/filtro direto continua funcionando de forma independente.
-- **O que é Adicionado (Aprimoramento):**
-  - **⭐ Seletor de Estilo de Busca:** Abaixo da busca manual, um seletor de "estilo" será adicionado para guiar o algoritmo de match. As opções serão amigáveis:
-    - `[Recomendado]` (preset: `balanced`)
-    - `[Melhor Custo]` (preset: `economic`)
-    - `[Mais Experientes]` (preset: `expert`)
-- **Resultado:** O cliente ganha controle sobre o tipo de recomendação que deseja receber, podendo alternar entre diferentes perfis de advogados com um único toque.
+### 👥 Perfis: Advogado Contratante (`lawyer_individual`, `lawyer_office`, `lawyer_platform_associate`)
+
+*   **Tela Alvo:** `LawyerSearchScreen` (Aba "Parceiros").
+*   **Estado Atual:** Esta tela já possui um campo de texto principal ("Descreva sua necessidade...") que alimenta uma busca semântica via IA no backend.
+*   **Estratégia de Integração (Fluxo Híbrido):**
+    *   **Manter o Campo de Texto como Protagonista:** A busca por texto livre continua sendo o ponto de partida.
+    *   **Adicionar "Ferramentas de Precisão":** Vamos introduzir as novas ferramentas como opcionais para aprimorar a busca:
+        *   **Seletor de Foco:** `[Correspondente]`, `[Especialista]`, `[Parecerista]`.
+        *   **Botão de Localização:** Para buscar correspondentes em um local específico, ignorando a localização do caso.
+    *   O advogado pode usar apenas o texto (fluxo atual) ou combinar o texto com as novas ferramentas para uma busca muito mais precisa e intencional.
+
+### ✍️ Perfil: Advogado Associado (`lawyer_associated`)
+
+*   **Estratégia de Integração:** **Nenhuma alteração.** O fluxo de trabalho deste perfil é focado na gestão de casos e tarefas atribuídas e não é impactado por esta funcionalidade de busca avançada.
 
 ---
 
-## 🚀 LISTA DE TAREFAS ATUALIZADA (PÓS-ANÁLISE)
+## ✅ LISTA DE TAREFAS FINAL E COMPLETA (Versão Conciliada)
 
-Esta lista de tarefas foi **adaptada** para refletir a estratégia de aprimoramento das telas existentes.
+Esta lista de tarefas é o roteiro definitivo, projetado para implementar a funcionalidade de busca avançada de forma segura e eficiente, respeitando a arquitetura e os fluxos de UI existentes.
 
-### 📋 FASE 1: Backend - Habilitando a Flexibilidade (Inalterado)
+### FASE 1: Backend - Habilitando a Flexibilidade (4 tarefas)
 
-**P1. backend_add_presets**
-- **Arquivos:** `LITGO6/backend/algoritmo_match.py`, `LITGO6/backend/api/schemas.py`
-- **Ação:** Adicionar presets 'correspondent' e 'expert_opinion' aos `PRESET_WEIGHTS` e ao enum `PresetPesos`.
-- **Dependências:** Nenhuma
+*   **(P1) `backend_add_presets`:** No arquivo `LITGO6/backend/algoritmo_match.py`, adicionar os novos presets `correspondent` e `expert_opinion` ao dicionário `PRESET_WEIGHTS`.
+*   **(P1) `backend_add_boutique_field`:** Na dataclass `LawFirm` em `LITGO6/backend/algoritmo_match.py`, adicionar o campo `is_boutique: bool = False`.
+*   **(P2) `backend_validate_presets`:** Executar um script para rodar a função `_validate_preset_weights()` e garantir que a soma dos pesos dos novos presets é 1.0. *(Depende de: `backend_add_presets`)*
+*   **(P3) `backend_expand_endpoint`:** No arquivo `LITGO6/backend/api/main.py`, modificar o endpoint `/api/match` e o schema `MatchRequestSchema` para aceitar um campo opcional de coordenadas geográficas (`custom_coords`) e um raio (`radius_km`). *(Depende de: `backend_add_presets`)*
 
-**P1. backend_add_boutique_field**
-- **Arquivo:** `LITGO6/backend/algoritmo_match.py`
-- **Ação:** Adicionar `is_boutique: bool = False` à dataclass `LawFirm`.
-- **Dependências:** Nenhuma
+### FASE 2: Flutter - Desacoplando a Lógica de Busca (4 tarefas)
 
-**P2. backend_validate_new_presets**
-- **Ação:** Executar `_validate_preset_weights()` para validar a soma dos pesos dos novos presets.
-- **Dependências:** `backend_add_presets`
+*   **(P4) `flutter_api_service`:** Em `api_service.dart`, modificar a função de match para aceitar o `preset` e as coordenadas customizadas dinamicamente. *(Depende de: `backend_expand_endpoint`)*
+*   **(P5) `flutter_search_architecture`:** Criar a arquitetura de busca (`Models`, `Repository`, `UseCases`, `BLoC`) na pasta `features/search`. *(Depende de: `flutter_api_service`)*
+*   **(P6) `flutter_register_deps`:** Registrar as novas dependências da arquitetura de busca no `injection_container.dart`. *(Depende de: `flutter_search_architecture`)*
+*   **(P7) `flutter_refactor_lawyer_screen`:** Refatorar a `LawyerSearchScreen` (tela do advogado) para usar o novo `SearchBloc`. *(Depende de: `flutter_register_deps`)*
 
-**P3. backend_expand_match_endpoint**
-- **Arquivo:** `LITGO6/backend/api/main.py`
-- **Ação:** Modificar o schema `MatchRequestSchema` para aceitar `custom_coords` e `radius_km`. O `match_service` deverá ser atualizado para usar essas coordenadas quando presentes.
-- **Dependências:** `backend_add_presets`
+### FASE 3: Flutter - Aprimorando as Interfaces (4 tarefas)
 
-### 📱 FASE 2: Flutter - Desacoplando a Lógica de Busca (Inalterado)
+*   **(P8) `flutter_integrate_lawyer_tools`:** Adicionar as ferramentas de precisão (seletor de foco, botão de localização) à UI da `LawyerSearchScreen`. *(Depende de: `flutter_refactor_lawyer_screen`)*
+*   **(P9) `flutter_connect_lawyer_logic`:** Conectar a UI da `LawyerSearchScreen` à lógica do `SearchBloc`, passando os novos parâmetros (preset, coordenadas). *(Depende de: `flutter_integrate_lawyer_tools`)*
+*   **(P10) `flutter_build_client_selector`:** Na `LawyersScreen` (tela do cliente), dentro da aba "Recomendações", construir o seletor de presets amigáveis. *(Depende de: `flutter_api_service`)*
+*   **(P11) `flutter_connect_client_logic`:** Conectar o seletor de presets do cliente para que ele acione uma nova busca com o preset correto via `HybridMatchBloc`. *(Depende de: `flutter_build_client_selector`)*
 
-**P4. flutter_api_service_dynamic_preset**
-- **Arquivo:** `apps/app_flutter/lib/src/core/services/api_service.dart` (ou serviço relevante)
-- **Ação:** Modificar a função de match para aceitar `preset`, `customCoords` e `radiusKm` dinamicamente.
-- **Dependências:** `backend_expand_match_endpoint`
+### FASE 4: Testes e Documentação (2 tarefas)
 
-**P5. flutter_create_search_architecture**
-- **Ação:** Implementar a arquitetura de busca com Models, Repository, UseCases e BLoC para encapsular toda a lógica da busca avançada.
-- **Dependências:** `flutter_api_service_dynamic_preset`
-
-**P6. flutter_register_dependencies**
-- **Ação:** Registrar todas as novas classes (Repository, UseCases, BLoC) no `injection_container.dart`.
-- **Dependências:** `flutter_create_search_architecture`
-
-### 🎨 FASE 3: Flutter - Aprimorando as Interfaces Existentes (Adaptado)
-
-**P7. flutter_refactor_lawyer_search_screen**
-- **Arquivo:** `.../lawyer_search_screen.dart`
-- **Ação:** Refatorar a tela para usar o novo `SearchBloc` como fonte de estado, desacoplando a UI da lógica de chamada direta ao serviço.
-- **Dependências:** `flutter_register_dependencies`
-
-**P8. flutter_integrate_lawyer_tools**
-- **Arquivo:** `.../lawyer_search_screen.dart`
-- **Ação:** Adicionar os novos widgets de ferramentas de precisão: o botão `Adicionar Localização` (que abre um mapa) e o `Dropdown` de Foco da Busca.
-- **Dependências:** `flutter_refactor_lawyer_search_screen`
-
-**P9. flutter_connect_lawyer_search_logic**
-- **Arquivo:** `.../lawyer_search_screen.dart`
-- **Ação:** Conectar os inputs (texto, localização, foco) para que o botão "Buscar" dispare o evento correto do `SearchBloc` com todos os dados.
-- **Dependências:** `flutter_integrate_lawyer_tools`
-
-**P10. flutter_build_client_preset_selector**
-- **Arquivo:** `.../lawyers_screen.dart`
-- **Ação:** Construir e integrar o widget `PresetSelector` com opções amigáveis ("Recomendado", "Melhor Custo", etc.).
-- **Dependências:** `flutter_api_service_dynamic_preset`
-
-**P11. flutter_connect_client_search_logic**
-- **Arquivo:** `.../lawyers_screen.dart`
-- **Ação:** Conectar o `PresetSelector` para que ele dispare uma nova busca via `SearchBloc` (ou um BLoC similar) com o `preset` escolhido pelo cliente.
-- **Dependências:** `flutter_build_client_preset_selector`
-
-### 🧪 FASE 4: Finalização (Adaptado)
-
-**P12. testing_end_to_end**
-- **Ação:** Criar e/ou adaptar testes de integração para validar os novos fluxos de busca do advogado e do cliente.
-- **Dependências:** `flutter_connect_lawyer_search_logic`, `flutter_connect_client_search_logic`
-
-**P13. documentation_update**
-- **Ação:** Atualizar este documento (`PLANO_SISTEMA_BUSCA_AVANCADA.md`) e o `status.md` para refletir as implementações concluídas.
-- **Dependências:** `testing_end_to_end`
+*   **(P12) `testing`:** Criar/adaptar os testes de integração para os novos fluxos de busca em ambas as telas. *(Depende de: `flutter_connect_lawyer_logic`, `flutter_connect_client_logic`)*
+*   **(P13) `documentation`:** Atualizar a documentação (`ATUALIZACAO_STATUS.md`) para refletir a conclusão do projeto. *(Depende de: `testing`)*
 
 ---
 
