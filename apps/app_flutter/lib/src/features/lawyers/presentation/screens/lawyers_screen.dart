@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyers_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/preset_selector.dart';
 import 'package:meu_app/src/features/recommendations/presentation/widgets/lawyer_match_card.dart';
 import 'package:meu_app/src/features/firms/presentation/widgets/firm_card.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
@@ -107,48 +108,189 @@ class HybridRecommendationsTabView extends StatefulWidget {
 }
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
+  String _selectedPreset = 'balanced';
+  
+  final List<Map<String, dynamic>> _clientPresets = [
+    {
+      'value': 'balanced',
+      'label': '⭐ Recomendado',
+      'description': 'Equilibrio ideal entre qualidade e preço',
+      'icon': Icons.star,
+      'color': Colors.amber,
+    },
+    {
+      'value': 'economic',
+      'label': '💰 Melhor Custo',
+      'description': 'Foco em economia e custo-benefício',
+      'icon': Icons.attach_money,
+      'color': Colors.green,
+    },
+    {
+      'value': 'expert',
+      'label': '🏆 Mais Experientes',
+      'description': 'Especialistas renomados na área',
+      'icon': Icons.emoji_events,
+      'color': Colors.purple,
+    },
+    {
+      'value': 'fast',
+      'label': '⚡ Mais Rápidos',
+      'description': 'Disponibilidade imediata',
+      'icon': Icons.flash_on,
+      'color': Colors.orange,
+    },
+    {
+      'value': 'b2b',
+      'label': '🏢 Escritórios',
+      'description': 'Foco em grandes escritórios',
+      'icon': Icons.business,
+      'color': Colors.blue,
+    },
+  ];
   
   @override
   void initState() {
     super.initState();
     // Buscar recomendações híbridas ao inicializar
-    context.read<HybridMatchBloc>().add(const FetchHybridMatches(
+    _fetchRecommendations();
+  }
+  
+  void _fetchRecommendations() {
+    context.read<HybridMatchBloc>().add(FetchHybridMatches(
       caseId: 'mock_case_id', // TODO: Usar caso real do contexto
       includeFirms: true,
-      preset: 'balanced',
+      preset: _selectedPreset,
     ));
+  }
+  
+  void _onPresetChanged(String preset) {
+    setState(() {
+      _selectedPreset = preset;
+    });
+    _fetchRecommendations();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HybridMatchBloc, HybridMatchState>(
-      builder: (context, state) {
-        if (state is HybridMatchLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        if (state is HybridMatchError) {
-          return _buildErrorState(context, state.message);
-        }
-        
-        if (state is HybridMatchLoaded) {
-          return HybridMatchList(
-            lawyers: state.lawyers,
-            firms: state.firms,
-            showSectionHeaders: true,
-            emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
-            onRefresh: () {
-              context.read<HybridMatchBloc>().add(const RefreshHybridMatches(
-                caseId: 'mock_case_id',
-                includeFirms: true,
-                preset: 'balanced',
-              ));
+    return Column(
+      children: [
+        _buildPresetSelector(),
+        Expanded(
+          child: BlocBuilder<HybridMatchBloc, HybridMatchState>(
+            builder: (context, state) {
+              if (state is HybridMatchLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              if (state is HybridMatchError) {
+                return _buildErrorState(context, state.message);
+              }
+              
+              if (state is HybridMatchLoaded) {
+                return HybridMatchList(
+                  lawyers: state.lawyers,
+                  firms: state.firms,
+                  showSectionHeaders: true,
+                  emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
+                  onRefresh: () {
+                    context.read<HybridMatchBloc>().add(RefreshHybridMatches(
+                      caseId: 'mock_case_id',
+                      includeFirms: true,
+                      preset: _selectedPreset,
+                    ));
+                  },
+                );
+              }
+              
+              return _buildEmptyState(context);
             },
-          );
-        }
-        
-        return _buildEmptyState(context);
-      },
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildPresetSelector() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tipo de Recomendação',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _clientPresets.length,
+              itemBuilder: (context, index) {
+                final preset = _clientPresets[index];
+                final isSelected = preset['value'] == _selectedPreset;
+                
+                return Padding(
+                  padding: EdgeInsets.only(right: index < _clientPresets.length - 1 ? 12 : 0),
+                  child: GestureDetector(
+                    onTap: () => _onPresetChanged(preset['value']),
+                    child: Container(
+                      width: 140,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isSelected 
+                            ? preset['color'].withOpacity(0.1)
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected 
+                              ? preset['color']
+                              : Colors.grey[300]!,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            preset['icon'],
+                            color: isSelected 
+                                ? preset['color']
+                                : Colors.grey[600],
+                            size: 24,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            preset['label'],
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected 
+                                  ? preset['color']
+                                  : Colors.grey[700],
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _clientPresets.firstWhere((p) => p['value'] == _selectedPreset)['description'],
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
