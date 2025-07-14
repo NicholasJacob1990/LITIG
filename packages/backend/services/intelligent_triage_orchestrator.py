@@ -18,6 +18,8 @@ from .intelligent_interviewer_service import (
 )
 from .lex9000_integration_service import lex9000_integration_service
 from .triage_service import triage_service
+from .match_service import find_and_notify_matches
+from ..models import MatchRequest
 
 
 @dataclass
@@ -229,6 +231,20 @@ class IntelligentTriageOrchestrator:
             # Fallback para failover
             result = await self._process_failover_flow(interviewer_result)
             orchestration["flow_type"] = "fallback_analysis"
+
+        # DISPARAR MATCHING AUTOMÁTICO EM SEGUNDO PLANO
+        try:
+            print(f"Disparando matching automático para o caso {case_id}...")
+            match_req = MatchRequest(
+                case_id=interviewer_result.case_id,
+                k=5,  # Usar um valor padrão ou obter de config
+                preset="balanced", # Usar um preset padrão
+            )
+            # Executar como uma tarefa de fundo para não bloquear a resposta
+            asyncio.create_task(find_and_notify_matches(match_req))
+            print(f"Tarefa de matching para o caso {case_id} agendada.")
+        except Exception as e:
+            print(f"Erro ao disparar matching automático para o caso {case_id}: {e}")
 
         # Calcular tempo de processamento
         processing_time = int((time.time() - start_time) * 1000)
@@ -560,6 +576,22 @@ class IntelligentTriageOrchestrator:
 
             # Processar resultado
             result = await self._process_completed_conversation(case_id)
+
+            orchestration["status"] = "completed"
+            orchestration["result"] = result
+            orchestration["completion_reason"] = reason
+
+            return result
+
+        except Exception as e:
+            orchestration["status"] = "error"
+            orchestration["error"] = f"Erro ao forçar finalização: {str(e)}"
+            return None
+
+
+# Instância única do orquestrador
+intelligent_triage_orchestrator = IntelligentTriageOrchestrator()
+
 
             orchestration["status"] = "completed"
             orchestration["result"] = result

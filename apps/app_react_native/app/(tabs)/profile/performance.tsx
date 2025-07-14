@@ -1,95 +1,156 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { DollarSign, PieChart, TrendingUp, BarChart2 } from 'lucide-react-native';
-import { BarChart } from 'react-native-gifted-charts';
-import { financialReportsService } from '@/lib/services/financial';
-import MetricCard from './components/MetricCard';
+import { Sliders, Zap } from 'lucide-react-native';
 
-const screenWidth = Dimensions.get('window').width;
+import { providerService } from '@/lib/services/provider';
+import { WeakPoint, Suggestion } from '@/lib/services/types';
+import ProfileStrength from './components/ProfileStrength';
+import DiagnosticCard from './components/DiagnosticCard';
 
 const PerformanceScreen = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-
-  const { data: financials, isLoading, error } = useQuery({
-    queryKey: ['lawyerFinancials'],
-    queryFn: () => financialReportsService.getLawyerFinancials(),
+  const { data: insights, isLoading, error, refetch } = useQuery({
+    queryKey: ['performanceInsights'],
+    queryFn: () => providerService.getPerformanceInsights(),
   });
 
   const renderContent = () => {
     if (isLoading) {
-      return <ActivityIndicator size="large" style={styles.loader} />;
+      return <ActivityIndicator size="large" style={styles.loader} color="#1E40AF" />;
     }
     if (error) {
       return <Text style={styles.errorText}>Erro ao carregar dados: {error.message}</Text>;
     }
-    if (!financials) {
-      return <Text style={styles.errorText}>Nenhum dado financeiro encontrado.</Text>;
+    if (!insights) {
+      return <Text style={styles.errorText}>Nenhum dado de performance encontrado.</Text>;
     }
 
-    const chartData = financials.monthly_billing.map(item => ({
-      value: item.value,
-      label: item.month.substring(5, 7),
-      frontColor: '#177AD5',
+    // Assumindo que a API retorna os pontos fracos e sugestões na mesma ordem.
+    const diagnosticItems = insights.weak_points.map((wp: WeakPoint, index: number) => ({
+      weakPoint: wp,
+      suggestion: insights.improvement_suggestions[index],
     }));
 
     return (
-      <View>
-        <View style={styles.metricsGrid}>
-          <MetricCard title="Faturamento Total" value={`R$ ${financials.total_billed.toFixed(2)}`} icon={DollarSign} color="#10B981" />
-          <MetricCard title="Recebimento Total" value={`R$ ${financials.total_received.toFixed(2)}`} icon={PieChart} color="#3B82F6" />
-          <MetricCard title="Contratos Ativos" value={financials.active_contracts.toString()} icon={TrendingUp} color="#7C3AED" />
-          <MetricCard title="Ticket Médio" value={`R$ ${financials.avg_ticket.toFixed(2)}`} icon={BarChart2} color="#F59E0B" />
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
+      >
+        <ProfileStrength
+          score={insights.overall_score}
+          grade={insights.grade}
+          trend={insights.trend}
+        />
 
-        <View style={styles.chartContainer}>
-          <Text style={styles.sectionTitle}>Faturamento Mensal (Últimos meses)</Text>
-          <BarChart
-            data={chartData}
-            barWidth={30}
-            spacing={20}
-            roundedTop
-            isAnimated
-          />
+        <View style={styles.sectionHeader}>
+          <Sliders size={20} color="#1E40AF" />
+          <Text style={styles.sectionTitle}>Diagnóstico e Oportunidades</Text>
         </View>
-      </View>
+        
+        {diagnosticItems.map((item: { weakPoint: WeakPoint; suggestion: Suggestion }, index: number) => (
+          item.suggestion && (
+            <DiagnosticCard
+              key={index}
+              weakPoint={item.weakPoint}
+              suggestion={item.suggestion}
+            />
+          )
+        ))}
+
+        {diagnosticItems.length === 0 && (
+          <View style={styles.allGoodContainer}>
+            <Zap size={24} color="#10B981" />
+            <Text style={styles.allGoodTitle}>Tudo Certo por Aqui!</Text>
+            <Text style={styles.allGoodText}>
+              Seu perfil está com uma ótima performance. Continue assim!
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     );
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Minha Performance</Text>
+        <Text style={styles.subtitle}>Insights para otimizar seu perfil e resultados</Text>
       </View>
-
-      <View style={styles.tabContainer}>
-        <TouchableOpacity onPress={() => setActiveTab('overview')} style={[styles.tab, activeTab === 'overview' && styles.activeTab]}>
-          <Text style={[styles.tabText, activeTab === 'overview' && styles.activeTabText]}>Visão Geral</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setActiveTab('reports')} style={[styles.tab, activeTab === 'reports' && styles.activeTab]}>
-          <Text style={[styles.tabText, activeTab === 'reports' && styles.activeTabText]}>Relatórios</Text>
-        </TouchableOpacity>
-      </View>
-
       {renderContent()}
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
-  header: { padding: 24, backgroundColor: '#1E3A8A' },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
-  tabContainer: { flexDirection: 'row', padding: 16, justifyContent: 'center', backgroundColor: '#FFFFFF' },
-  tab: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20 },
-  activeTab: { backgroundColor: '#1E40AF' },
-  tabText: { color: '#374151', fontWeight: '600' },
-  activeTabText: { color: '#FFFFFF' },
-  metricsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', padding: 16 },
-  chartContainer: { padding: 16, backgroundColor: '#FFFFFF', borderRadius: 12, margin: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-  loader: { marginTop: 50 },
-  errorText: { textAlign: 'center', marginTop: 20, color: 'red' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F3F4F6' 
+  },
+  header: { 
+    backgroundColor: '#1E40AF',
+    padding: 24,
+    paddingTop: 48,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  title: { 
+    fontSize: 26, 
+    fontWeight: 'bold', 
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#D1D5DB',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  loader: { 
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: { 
+    textAlign: 'center', 
+    marginTop: 40, 
+    color: '#EF4444',
+    padding: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  sectionTitle: { 
+    fontSize: 20, 
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginLeft: 8,
+  },
+  allGoodContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    margin: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  allGoodTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#10B981',
+    marginTop: 8,
+  },
+  allGoodText: {
+    fontSize: 14,
+    color: '#4B5563',
+    textAlign: 'center',
+    marginTop: 4,
+  }
 });
 
 export default PerformanceScreen; 

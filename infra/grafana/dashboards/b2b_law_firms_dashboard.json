@@ -1,0 +1,429 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "B2B Law Firms - Monitoring Dashboard",
+    "tags": ["b2b", "law-firms", "matching", "performance"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "B2B Ranking Latency (P99)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(litgo_match_rank_duration_seconds_bucket{entity=\"firm\"}[5m]))",
+            "legendFormat": "P99 Latency",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.1
+                },
+                {
+                  "color": "red",
+                  "value": 0.2
+                }
+              ]
+            },
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "B2B Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(match_b2b_success_rate[1h])",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.7
+                },
+                {
+                  "color": "green",
+                  "value": 0.8
+                }
+              ]
+            },
+            "unit": "percentunit"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 6,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Firm vs Lawyer Matches",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(rate(litgo_match_rank_total{entity=\"firm\"}[5m]))",
+            "legendFormat": "Firms",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(litgo_match_rank_total{entity=\"lawyer\"}[5m]))",
+            "legendFormat": "Lawyers",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Active Firms Count",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(firm_kpis_active_cases > 0)",
+            "legendFormat": "Active Firms",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 18,
+          "y": 0
+        }
+      },
+      {
+        "id": 5,
+        "title": "B2B Ranking Latency Over Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(litgo_match_rank_duration_seconds_bucket{entity=\"firm\"}[5m]))",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(litgo_match_rank_duration_seconds_bucket{entity=\"firm\"}[5m]))",
+            "legendFormat": "P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(litgo_match_rank_duration_seconds_bucket{entity=\"firm\"}[5m]))",
+            "legendFormat": "P99",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "Firm API Endpoints Performance",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{endpoint=~\"/firms.*\"}[5m]))",
+            "legendFormat": "{{endpoint}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 7,
+        "title": "Feature-E Calculation Errors",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(feature_e_calculation_errors_total[5m])",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.01
+                },
+                {
+                  "color": "red",
+                  "value": 0.02
+                }
+              ]
+            },
+            "unit": "percentunit"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 8,
+        "title": "Conflict Scan Performance",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(conflict_scan_timeout_total[5m])",
+            "legendFormat": "Timeout Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(conflict_scan_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Duration",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 16
+        }
+      },
+      {
+        "id": 9,
+        "title": "Firm KPIs Data Freshness",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "time() - firm_kpis_last_updated_timestamp",
+            "legendFormat": "{{firm_name}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 43200
+                },
+                {
+                  "color": "red",
+                  "value": 86400
+                }
+              ]
+            },
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 16
+        }
+      },
+      {
+        "id": 10,
+        "title": "B2B Funnel Metrics",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(corporate_cases_created_total[5m])",
+            "legendFormat": "Corporate Cases Created",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(firm_matches_generated_total[5m])",
+            "legendFormat": "Firm Matches Generated",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(firm_contracts_created_total[5m])",
+            "legendFormat": "Firm Contracts Created",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 11,
+        "title": "Top Performing Firms",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, firm_kpis_success_rate)",
+            "legendFormat": "{{firm_name}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "percentunit"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 12,
+        "title": "Partnership Activity",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(partnership_proposals_sent_total[5m])",
+            "legendFormat": "Proposals Sent",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(partnership_proposals_accepted_total[5m])",
+            "legendFormat": "Proposals Accepted",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(partnership_proposals_rejected_total[5m])",
+            "legendFormat": "Proposals Rejected",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "B2B Law Firms - Monitoring Dashboard",
+    "uid": "b2b_law_firms_dashboard",
+    "version": 1,
+    "weekStart": ""
+  }
+} 

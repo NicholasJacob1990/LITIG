@@ -26,11 +26,11 @@ abstract class AuthRepository {
   });
 
   Future<void> registerLawyer({
-    // Step 1
     required String email,
     required String password,
     required String name,
     required String cpf,
+    String? cnpj,
     required String phone,
     
     // Step 2
@@ -54,6 +54,8 @@ abstract class AuthRepository {
     
     // Step 5
     required bool agreedToTerms,
+    required String userType,
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   });
 
   Future<void> signOut();

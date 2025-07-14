@@ -66,11 +66,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     _buildHeader(context),
                     const SizedBox(height: 32),
-                    _buildForm(),
+                    _buildForm(context),
                     const SizedBox(height: 24),
-                    _buildDivider(),
+                    _buildDivider(context),
                     const SizedBox(height: 24),
-                    _buildSocialLogin(),
+                    _buildSocialLogin(context),
                     const SizedBox(height: 32),
                     _buildRegisterPrompt(context),
                   ],
@@ -86,15 +86,25 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader(BuildContext context) {
     return Column(
       children: [
+        Icon(
+          LucideIcons.shieldCheck,
+          size: 64,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(height: 16),
         Text(
           'Acesse sua Conta',
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(BuildContext context) {
     return Form(
       key: _formKey,
       child: Column(
@@ -102,25 +112,29 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(hintText: 'E-mail'),
+            decoration: const InputDecoration(
+              hintText: 'E-mail',
+              prefixIcon: Icon(LucideIcons.mail),
+            ),
             keyboardType: TextInputType.emailAddress,
-            validator: (v) => (v!.isEmpty || !v.contains('@')) ? 'E-mail inválido' : null,
+            validator: (v) => (v == null || v.isEmpty || !v.contains('@')) ? 'E-mail inválido' : null,
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _passwordController,
             decoration: InputDecoration(
               hintText: 'Senha',
+              prefixIcon: const Icon(LucideIcons.lock),
               suffixIcon: IconButton(
                 onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                 icon: Icon(_isPasswordVisible ? LucideIcons.eyeOff : LucideIcons.eye),
               ),
             ),
             obscureText: !_isPasswordVisible,
-            validator: (v) => v!.length < 8 ? 'A senha deve ter pelo menos 8 caracteres' : null,
+            validator: (v) => (v == null || v.length < 8) ? 'A senha deve ter pelo menos 8 caracteres' : null,
           ),
           const SizedBox(height: 8),
-          _buildForgotPassword(),
+          _buildForgotPassword(context),
           const SizedBox(height: 24),
           _buildLoginButton(),
         ],
@@ -128,50 +142,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildEmailField() {
-    return TextFormField(
-      controller: _emailController,
-      decoration: const InputDecoration(
-        hintText: 'E-mail',
-      ),
-      keyboardType: TextInputType.emailAddress,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) return 'E-mail é obrigatório';
-        if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) return 'Formato de e-mail inválido';
-        return null;
-      },
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return TextFormField(
-      controller: _passwordController,
-      decoration: InputDecoration(
-        hintText: 'Senha',
-        suffixIcon: IconButton(
-          onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-          icon: Icon(
-            _isPasswordVisible ? LucideIcons.eyeOff : LucideIcons.eye,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          ),
-        ),
-      ),
-      obscureText: !_isPasswordVisible,
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Senha é obrigatória';
-        return null;
-      },
-    );
-  }
-
-  Widget _buildForgotPassword() {
+  Widget _buildForgotPassword(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
           // TODO: Implementar lógica de esqueci a senha
         },
-        child: const Text('Esqueceu a senha?'),
+        child: Text(
+          'Esqueceu a senha?',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
       ),
     );
   }
@@ -181,6 +162,10 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context, state) {
         final isLoading = state is auth_states.AuthLoading;
         return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           onPressed: isLoading ? null : _handleLogin,
           child: isLoading
               ? SizedBox(
@@ -199,30 +184,36 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
     return Row(
       children: [
         const Expanded(child: Divider()),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text('ou', style: Theme.of(context).textTheme.bodyMedium),
+          child: Text(
+            'ou',
+            style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
+          ),
         ),
         const Expanded(child: Divider()),
       ],
     );
   }
 
-  Widget _buildSocialLogin() {
+  Widget _buildSocialLogin(BuildContext context) {
     return BlocBuilder<AuthBloc, auth_states.AuthState>(
       builder: (context, state) {
         final isLoading = state is auth_states.AuthLoading;
         return OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
           onPressed: isLoading
               ? null
               : () {
                   context.read<AuthBloc>().add(AuthGoogleSignInRequested());
                 },
-          icon: const Icon(LucideIcons.chrome),
+          icon: const Icon(LucideIcons.user), // Placeholder for Google icon
           label: const Text('Entrar com Google'),
         );
       },
@@ -231,27 +222,57 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildRegisterPrompt(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Cadastro de Cliente
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Não tem uma conta?', style: Theme.of(context).textTheme.bodyMedium),
+            const Text('Não tem uma conta?'),
             TextButton(
               onPressed: () => context.go('/register-client'),
-              child: const Text('Cadastre-se'),
+              child: Text(
+                'Cadastre-se como Cliente',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+
+        const SizedBox(height: 24),
+        
+        const Divider(),
+        
+        const SizedBox(height: 24),
+
+        // Cadastro de Advogado
+        Text('É advogado(a)? Cadastre-se como:', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12.0,
+          runSpacing: 12.0,
+          alignment: WrapAlignment.center,
           children: [
-            Text('É advogado(a)?', style: Theme.of(context).textTheme.bodyMedium),
-            TextButton(
-              onPressed: () => context.go('/register-lawyer'),
-              child: const Text('Cadastre-se aqui'),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.user),
+              label: const Text('Autônomo'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_individual'}),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.users),
+              label: const Text('Associado'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_associated'}),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.building),
+              label: const Text('Escritório'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_office'}),
             ),
           ],
-        ),
+        )
       ],
     );
   }

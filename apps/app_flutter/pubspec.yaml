@@ -9,33 +9,46 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
-  google_fonts: ^6.2.1
-  supabase_flutter: ^2.5.3
-  flutter_bloc: ^8.1.5
-  bloc: ^8.1.4
-  get_it: ^7.7.0
-  equatable: ^2.0.7
-  lucide_icons: ^0.257.0
-  injectable: ^2.3.2
-  http: ^1.2.1
-  go_router: ^14.2.0
-  image_picker: ^1.1.2
-  file_picker: ^8.0.3
-  dotted_border: ^2.1.0
-  # UI e Animações
-  flutter_animate: ^4.2.0+1
-  cached_network_image: ^3.3.1
-  shimmer: ^3.0.0
-  dio: ^5.8.0+1
-  google_sign_in: ^6.2.1
-  fpdart: ^1.1.1
   
-  # Formulários e Validação
+  # Adicionadas para o sistema de parcerias e modelos de dados
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.9.0
+  flutter_html: ^3.0.0-beta.2 # Para renderizar o contrato
+  fl_chart: ^0.68.0 # Para gráficos do dashboard
+  # Fim das dependências adicionadas
+  
+  cupertino_icons: ^1.0.6
+  dio: ^5.5.0+1
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  get_it: ^7.7.0
+  go_router: ^14.2.0
+  google_maps_flutter: ^2.7.0
+  cached_network_image: ^3.3.1
+  flutter_dotenv: ^5.1.0
+  supabase_flutter: ^2.5.8
+  
+  # Dependências de UI e ícones
+  google_fonts: ^6.1.0
+  lucide_icons: ^0.257.0
+  file_picker: ^8.0.0+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
+  # Adicionadas para geração de código
+  freezed: ^2.5.2
+  build_runner: ^2.4.11
+  json_serializable: ^6.8.0
+
+  # Adicionadas para testes
+  bloc_test: ^9.1.7
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+  # Fim das dependências adicionadas
+
   flutter_lints: ^3.0.0
 
 flutter:

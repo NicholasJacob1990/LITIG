@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../domain/entities/case_detail.dart';
 import '../../../../shared/utils/app_colors.dart';
 
 class PreAnalysisSection extends StatelessWidget {
-  const PreAnalysisSection({super.key});
+  final PreAnalysis? preAnalysis;
+  
+  const PreAnalysisSection({
+    super.key,
+    this.preAnalysis,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +26,50 @@ class PreAnalysisSection extends StatelessWidget {
           ),
         );
 
+    if (preAnalysis == null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Pré-análise',
+                  style: t.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 16),
+              Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.analytics_outlined, size: 48, color: Colors.grey[400]),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Análise em processamento',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // badge HIGH -----------------------------------------
+            // badge de urgência -----------------------------------------
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                  color: AppColors.orange, borderRadius: BorderRadius.circular(8)),
-              child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  color: _getUrgencyColor(preAnalysis!.urgencyLevel), 
+                  borderRadius: BorderRadius.circular(8)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(Icons.access_time, color: Colors.white, size: 14),
                 SizedBox(width: 4),
-                Text('HIGH',
+                Text(_getUrgencyLabel(preAnalysis!.urgencyLevel),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -44,7 +79,7 @@ class PreAnalysisSection extends StatelessWidget {
             const SizedBox(height: 12),
 
             // título ---------------------------------------------
-            Text('Direito Trabalhista',
+            Text(preAnalysis!.legalArea,
                 style: t.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
 
@@ -63,103 +98,183 @@ class PreAnalysisSection extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text('Análise Preliminar por IA\n'
-                  'Sujeita a conferência humana',
-                  style: t.bodyMedium!.copyWith(color: Colors.white),
-                  textAlign: TextAlign.center),
+              child: Column(
+                children: [
+                  Text('Análise Preliminar por IA',
+                      style: t.bodyMedium!.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center),
+                  Text('Sujeita a conferência humana',
+                      style: t.bodySmall!.copyWith(color: Colors.white70),
+                      textAlign: TextAlign.center),
+                  const SizedBox(height: 8),
+                  Text('Analisado em: ${_formatDate(preAnalysis!.analyzedAt)}',
+                      style: t.bodySmall!.copyWith(color: Colors.white70),
+                      textAlign: TextAlign.center),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
 
-            // prazo + urgência -----------------------------------
-            infoRow(Icons.schedule, 'Prazo Estimado', '15 dias úteis'),
-            const SizedBox(height: 8),
-            Text('Nível de Urgência',
-                style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w500)),
-            const SizedBox(height: 6),
-            Stack(children: [
-              // fundo cinza
-              Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                      color: AppColors.lightBorder,
-                      borderRadius: BorderRadius.circular(3))),
-              // 8/10 preenchido
-              FractionallySizedBox(
-                widthFactor: .8,
-                child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                        color: AppColors.orange,
-                        borderRadius: BorderRadius.circular(3))),
-              ),
-            ]),
-            const SizedBox(height: 24),
-
             // Análise preliminar ---------------------------------
-            Text('Análise Preliminar',
+            Text('Resumo da Análise',
                 style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             Text(
-              'Com base nas informações fornecidas, identifica-se uma possível '
-              'demissão sem justa causa com irregularidades no pagamento das '
-              'verbas rescisórias…',
+              preAnalysis!.summary,
               style: t.bodySmall,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Documentos necessários -----------------------------
-            Text('Documentos Necessários',
+            // Pontos-chave ---------------------------------------
+            Text('Pontos-chave Identificados',
                 style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            ...[
-              'Contrato de trabalho',
-              'Carta de demissão',
-              'Comprovantes de pagamento'
-            ]
-                .map((d) => Padding(
+            ...preAnalysis!.keyPoints
+                .map((point) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(children: [
-                        const Icon(Icons.description,
-                            size: 16, color: AppColors.green),
-                        const SizedBox(width: 6),
-                        Text(d),
-                      ]),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.arrow_right,
+                              size: 16, color: AppColors.green),
+                          const SizedBox(width: 6),
+                          Expanded(child: Text(point)),
+                        ],
+                      ),
                     ))
                 .toList(),
-            const SizedBox(height: 2),
-            Text('+2  documentos adicionais',
-                style:
-                    t.bodySmall!.copyWith(color: AppColors.lightText2)),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Estimativa de custos -------------------------------
+            // Documentos necessários (NOVO) ---------------------
+            if (preAnalysis!.requiredDocuments.isNotEmpty) ...[
+              Text('Documentos Necessários',
+                  style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              ...preAnalysis!.requiredDocuments
+                  .map((doc) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.description_outlined,
+                                size: 16, color: AppColors.lightText2),
+                            const SizedBox(width: 6),
+                            Expanded(child: Text(doc, style: t.bodySmall)),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+              const SizedBox(height: 20),
+            ],
+
+            // Estimativa de Custos -------------------------------
             Text('Estimativa de Custos',
                 style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Row(children: [
-              _costCard(context, 'Consulta', 'R\$ 350,00'),
+              _costCard(context, 'Consulta', 'R\$ ${preAnalysis!.estimatedCosts['Consulta']?.toStringAsFixed(2) ?? 'N/A'}'),
               const SizedBox(width: 12),
-              _costCard(context, 'Representação', 'R\$ 2.500,00'),
+              _costCard(context, 'Representação', 'R\$ ${preAnalysis!.estimatedCosts['Representação']?.toStringAsFixed(2) ?? 'N/A'}'),
             ]),
             const SizedBox(height: 24),
-
-            // Avaliação de risco --------------------------------
+            
+            // Avaliação de Risco ---------------------------------
             Text('Avaliação de Risco',
                 style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             Text(
-              'Risco baixo. Documentação sólida e jurisprudência favorável. '
-              'Recomenda-se prosseguir com a consulta especializada.',
+              preAnalysis!.riskAssessment,
               style: t.bodySmall,
+            ),
+            const SizedBox(height: 20),
+
+            // Recomendação ---------------------------------------
+            Text('Recomendação',
+                style: t.bodyMedium!.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Text(
+                preAnalysis!.recommendation,
+                style: t.bodySmall!.copyWith(color: Colors.blue[800]),
+              ),
             ),
             const SizedBox(height: 12),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () => _showFullAnalysis(context),
               icon: const Icon(Icons.visibility_outlined),
               label: const Text('Ver Análise Completa'),
             )
           ],
+                  ),
         ),
+      );
+  }
+
+  Color _getUrgencyColor(String urgencyLevel) {
+    switch (urgencyLevel.toLowerCase()) {
+      case 'alta':
+        return Colors.red;
+      case 'media':
+        return Colors.orange;
+      case 'baixa':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getUrgencyLabel(String urgencyLevel) {
+    switch (urgencyLevel.toLowerCase()) {
+      case 'alta':
+        return 'ALTA';
+      case 'media':
+        return 'MÉDIA';
+      case 'baixa':
+        return 'BAIXA';
+      default:
+        return urgencyLevel.toUpperCase();
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} às ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showFullAnalysis(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Análise Completa'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Área: ${preAnalysis!.legalArea}'),
+              const SizedBox(height: 8),
+              Text('Urgência: ${_getUrgencyLabel(preAnalysis!.urgencyLevel)}'),
+              const SizedBox(height: 8),
+              Text('Resumo:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(preAnalysis!.summary),
+              const SizedBox(height: 8),
+              Text('Recomendação:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(preAnalysis!.recommendation),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
       ),
     );
   }

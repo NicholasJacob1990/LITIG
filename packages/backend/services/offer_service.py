@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 def get_supabase_client() -> Client:
     """Retorna cliente Supabase configurado"""
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        raise ValueError("SUPABASE_URL e SUPABASE_SERVICE_KEY devem estar configurados")
     return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 async def create_offers_from_ranking(case: Case, ranking: List[Lawyer]) -> List[str]:
@@ -69,6 +71,242 @@ async def create_offers_from_ranking(case: Case, ranking: List[Lawyer]) -> List[
             
     except Exception as e:
         logger.error(f"Erro ao criar ofertas para o caso {case.id}: {e}")
+        raise
+
+async def create_offer_from_match(case_id: str, lawyer_id: str, choice_order: int, offer_details: Dict[str, Any]) -> str:
+    """
+    Cria uma oferta após o cliente escolher um advogado.
+    
+    Args:
+        case_id: ID do caso
+        lawyer_id: ID do advogado escolhido
+        choice_order: Ordem de escolha do cliente (1 = primeira escolha)
+        offer_details: Detalhes da oferta (resumo do caso, área jurídica, etc.)
+        
+    Returns:
+        ID da oferta criada
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        # Calcular expiração (48h para aceitar)
+        expires_at = datetime.now() + timedelta(hours=48)
+        
+        # Preparar dados da oferta
+        offer_data = {
+            "case_id": case_id,
+            "lawyer_id": lawyer_id,
+            "status": "pending",
+            "sent_at": datetime.now().isoformat(),
+            "expires_at": expires_at.isoformat(),
+            "client_choice_order": choice_order,
+            "offer_details": offer_details,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        # Inserir oferta no banco
+        response = supabase.table("offers").insert(offer_data).execute()
+        
+        if response.data:
+            offer_id = response.data[0]["id"]
+            logger.info(f"Oferta criada com sucesso: {offer_id} para caso {case_id}")
+            
+            # TODO: Enviar notificação para o advogado
+            # await NotificationService.send_new_offer_notification(lawyer_id, offer_id)
+            
+            return offer_id
+        else:
+            raise Exception("Erro ao criar oferta no banco de dados")
+            
+    except Exception as e:
+        logger.error(f"Erro ao criar oferta para caso {case_id}: {e}")
+        raise
+
+async def get_pending_offers(lawyer_id: str) -> List[Offer]:
+    """
+    Busca ofertas pendentes para um advogado.
+    
+    Args:
+        lawyer_id: ID do advogado
+        
+    Returns:
+        Lista de ofertas pendentes
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        # Buscar ofertas pendentes não expiradas
+        response = supabase.table("offers").select("*").eq("lawyer_id", lawyer_id).eq("status", "pending").gt("expires_at", datetime.now().isoformat()).order("created_at", desc=True).execute()
+        
+        if response.data:
+            offers = [Offer(**offer_data) for offer_data in response.data]
+            return offers
+        else:
+            return []
+            
+    except Exception as e:
+        logger.error(f"Erro ao buscar ofertas pendentes do advogado {lawyer_id}: {e}")
+        raise
+
+async def accept_offer(offer_id: UUID, lawyer_id: str, notes: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Aceita uma oferta de caso usando a stored procedure do banco.
+    
+    Args:
+        offer_id: ID da oferta
+        lawyer_id: ID do advogado
+        notes: Notas opcionais
+        
+    Returns:
+        Resultado da aceitação
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        # Chamar stored procedure para aceitar oferta
+        response = supabase.rpc("accept_offer", {
+            "p_offer_id": str(offer_id),
+            "p_lawyer_id": lawyer_id,
+            "p_notes": notes
+        }).execute()
+        
+        if response.data and len(response.data) > 0:
+            result = response.data[0]
+            
+            if result["success"]:
+                logger.info(f"Oferta {offer_id} aceita com sucesso pelo advogado {lawyer_id}")
+                
+                # TODO: Ativar o caso
+                # await CaseService.activate_case(result["case_id"], lawyer_id)
+                
+                # TODO: Notificar cliente
+                # await NotificationService.notify_client_lawyer_assigned(result["case_id"], lawyer_id)
+                
+                return {
+                    "success": True,
+                    "message": result["message"],
+                    "case_id": result["case_id"],
+                    "offer_id": str(offer_id)
+                }
+            else:
+                raise ValueError(result["message"])
+        else:
+            raise Exception("Erro na resposta da stored procedure")
+            
+    except Exception as e:
+        logger.error(f"Erro ao aceitar oferta {offer_id}: {e}")
+        raise
+
+async def reject_offer(offer_id: UUID, lawyer_id: str, reason: str) -> Dict[str, Any]:
+    """
+    Rejeita uma oferta de caso usando a stored procedure do banco.
+    
+    Args:
+        offer_id: ID da oferta
+        lawyer_id: ID do advogado
+        reason: Motivo da rejeição
+        
+    Returns:
+        Resultado da rejeição
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        # Chamar stored procedure para rejeitar oferta
+        response = supabase.rpc("reject_offer", {
+            "p_offer_id": str(offer_id),
+            "p_lawyer_id": lawyer_id,
+            "p_reason": reason
+        }).execute()
+        
+        if response.data and len(response.data) > 0:
+            result = response.data[0]
+            
+            if result["success"]:
+                logger.info(f"Oferta {offer_id} rejeitada pelo advogado {lawyer_id}: {reason}")
+                
+                # TODO: Reativar matching para o próximo advogado
+                # await MatchService.reactivate_matching_for_case(result["case_id"], [lawyer_id])
+                
+                return {
+                    "success": True,
+                    "message": result["message"],
+                    "case_id": result["case_id"],
+                    "offer_id": str(offer_id)
+                }
+            else:
+                raise ValueError(result["message"])
+        else:
+            raise Exception("Erro na resposta da stored procedure")
+            
+    except Exception as e:
+        logger.error(f"Erro ao rejeitar oferta {offer_id}: {e}")
+        raise
+
+async def get_lawyer_offer_statistics(lawyer_id: str) -> Dict[str, Any]:
+    """
+    Busca estatísticas de ofertas de um advogado.
+    
+    Args:
+        lawyer_id: ID do advogado
+        
+    Returns:
+        Estatísticas das ofertas
+    """
+    try:
+        supabase = get_supabase_client()
+        
+        # Buscar todas as ofertas do advogado
+        response = supabase.table("offers").select("*").eq("lawyer_id", lawyer_id).execute()
+        
+        if not response.data:
+            return {
+                "total_offers": 0,
+                "accepted": 0,
+                "rejected": 0,
+                "expired": 0,
+                "pending": 0,
+                "acceptance_rate": 0.0,
+                "avg_response_time_hours": 0.0
+            }
+        
+        offers = response.data
+        total = len(offers)
+        accepted = len([o for o in offers if o["status"] == "accepted"])
+        rejected = len([o for o in offers if o["status"] in ["rejected", "declined"]])
+        expired = len([o for o in offers if o["status"] == "expired"])
+        pending = len([o for o in offers if o["status"] == "pending"])
+        
+        # Calcular taxa de aceitação
+        acceptance_rate = accepted / total if total > 0 else 0.0
+        
+        # Calcular tempo médio de resposta
+        response_times = []
+        for offer in offers:
+            if offer.get("responded_at") and offer.get("sent_at"):
+                try:
+                    sent = datetime.fromisoformat(offer["sent_at"].replace('Z', '+00:00'))
+                    responded = datetime.fromisoformat(offer["responded_at"].replace('Z', '+00:00'))
+                    response_time = (responded - sent).total_seconds() / 3600  # em horas
+                    response_times.append(response_time)
+                except ValueError:
+                    continue
+        
+        avg_response_time = sum(response_times) / len(response_times) if response_times else 0.0
+        
+        return {
+            "total_offers": total,
+            "accepted": accepted,
+            "rejected": rejected,
+            "expired": expired,
+            "pending": pending,
+            "acceptance_rate": acceptance_rate,
+            "avg_response_time_hours": avg_response_time
+        }
+        
+    except Exception as e:
+        logger.error(f"Erro ao buscar estatísticas do advogado {lawyer_id}: {e}")
         raise
 
 async def get_lawyer_offers(lawyer_id: str, status: Optional[str] = None) -> List[Offer]:

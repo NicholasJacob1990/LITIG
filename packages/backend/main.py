@@ -13,30 +13,33 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from .main_routes import router as api_router
+from main_routes import router as api_router
 # from backend.routes import (
 #     auth, cases, users, contracts, matching,
 #     support, admin, ab_testing, ocr, payments,
 #     notifications, reviews, video, reports
 # )
-from .routes.cases import router as cases_router
-from .routes.consultations import router as consultations_router
-from .routes.contracts import router as contracts_router
-from .routes.documents import router as documents_router
-from .routes.health_routes import router as health_router
-from .routes.intelligent_triage_routes import router as triage_router
-from .routes.offers import router as offers_router
-from .routes.process_events import router as process_events_router
-from .routes.recommendations import router as recommendations_router
-from .routes.reviews_route import router as reviews_router
-from .routes.tasks import router as tasks_router
-from .routes.tasks_routes import router as celery_tasks_router
-from .routes.webhooks import router as webhooks_router
-from .routes.weights import router as weights_router
-from .routes.ab_testing import router as ab_testing_router
-from .routes.reports import router as reports_router
-from .services.cache_service_simple import close_simple_cache, init_simple_cache
-from .services.redis_service import redis_service
+from routes.cases import router as cases_router
+from routes.consultations import router as consultations_router
+from routes.contracts import router as contracts_router
+from routes.documents import router as documents_router
+from routes.firms import router as firms_router
+from routes.health_routes import router as health_router
+from routes.intelligent_triage_routes import router as triage_router
+from routes.offers import router as offers_router
+from routes.process_events import router as process_events_router
+from routes.recommendations import router as recommendations_router
+from routes.reviews_route import router as reviews_router
+from routes.tasks import router as tasks_router
+from routes.tasks_routes import router as celery_tasks_router
+from routes.webhooks import router as webhooks_router
+from routes.weights import router as weights_router
+from routes.ab_testing import router as ab_testing_router
+from routes.reports import router as reports_router
+from routes.unipile import router as unipile_router
+from routes.providers import router as providers_router
+from services.cache_service_simple import close_simple_cache, init_simple_cache
+from services.redis_service import redis_service
 
 # Carrega as variáveis de ambiente do arquivo .env
 # find_dotenv() sobe a árvore de diretórios para encontrar o .env
@@ -104,22 +107,18 @@ if os.getenv("ENVIRONMENT") == "production":
     origins = [
         os.getenv("FRONTEND_URL", "https://app.litgo.com"),
     ]
+    allow_origin_regex = None
 else:
-    # Para desenvolvimento, permite qualquer origem local e curinga.
-    origins = [
-        "http://localhost",
-        "http://localhost:8080",
-        "http://localhost:8081",
-        # Adicione outras portas de desenvolvimento se necessário
-        "*"  # Permite todas as origens em desenvolvimento
-    ]
+    # Para desenvolvimento, permite qualquer origem local via regex
+    origins = []
+    allow_origin_regex = r"http://(localhost|127\.0\.0\.1):\d+"
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=allow_origin_regex,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"] if os.getenv(
-        "ENVIRONMENT") == "production" else ["*"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -131,6 +130,7 @@ app.include_router(api_router, prefix="/api")
 app.include_router(offers_router, prefix="/api")
 app.include_router(contracts_router, prefix="/api")
 app.include_router(reviews_router, prefix="/api")
+app.include_router(firms_router, prefix="/api")
 app.include_router(webhooks_router)
 app.include_router(weights_router, prefix="/api/v2.2", tags=["Weights & Debugging"])
 app.include_router(recommendations_router, prefix="/api", tags=["Recommendations"])
@@ -144,6 +144,8 @@ app.include_router(health_router, prefix="/api")
 app.include_router(triage_router, prefix="/api/v2", tags=["Intelligent Triage"])
 app.include_router(ab_testing_router, prefix="/api/v2.2", tags=["AB Testing"])
 app.include_router(reports_router, prefix="/api/v2.2", tags=["Reports"])
+app.include_router(unipile_router, prefix="/api/v2.2", tags=["Unipile"])
+app.include_router(providers_router, prefix="/api", tags=["Providers"])
 
 # CORREÇÃO: Rate limiter aplicado individualmente nas rotas em routes.py
 # Removido limiter.limit("60/minute")(api_router) que causava erro nos testes

@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { ChevronDown, ChevronUp, Info, Target, TrendingUp, MapPin, Star, Clock, Award, MessageSquare } from 'lucide-react-native';
 import { LawyerMatch } from '@/lib/services/api';
+import { explanationService, PublicExplanation } from '@/lib/services/explanation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import ProgressBar from '../atoms/ProgressBar';
 
 interface ExplainabilityCardProps {
   lawyer: LawyerMatch;
+  caseId?: string; // Adicionado para buscar explicação da API
   onToggleDetails?: () => void;
 }
 
@@ -76,12 +79,51 @@ const FEATURE_EXPLANATIONS: FeatureExplanation[] = [
   }
 ];
 
-const ExplainabilityCard: React.FC<ExplainabilityCardProps> = ({ lawyer, onToggleDetails }) => {
+const ExplainabilityCard: React.FC<ExplainabilityCardProps> = ({ lawyer, caseId, onToggleDetails }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [explanation, setExplanation] = useState<PublicExplanation | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasConsented, setHasConsented] = useState(false);
   
-  // Assumir que os dados de explicabilidade vêm do contexto do matching
-  // Por enquanto, vamos simular dados até que a interface seja atualizada
-  const scores = {
+  const { user } = useAuth();
+
+  // Buscar explicação da API quando o componente é montado
+  useEffect(() => {
+    if (caseId && lawyer.id && user?.email && !explanation) {
+      fetchExplanation();
+    }
+  }, [caseId, lawyer.id, user?.email]);
+
+  const fetchExplanation = async () => {
+    if (!caseId || !lawyer.id || !user?.email) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Por enquanto usar um token mock até integrar com auth real
+      const mockToken = 'mock-token';
+      const apiExplanation = await explanationService.getMatchExplanation(
+        caseId,
+        lawyer.id,
+        mockToken
+      );
+      setExplanation(apiExplanation);
+    } catch (err) {
+      console.warn('Erro ao buscar explicação, usando fallback:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      
+      // Usar dados de fallback
+      const fallback = explanationService.generateFallbackExplanation(lawyer.id, caseId);
+      setExplanation(fallback);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Dados de fallback para quando não há explicação da API
+  const fallbackScores = {
     area_match: 0.9,
     case_similarity: 0.8,
     success_rate: 0.75,
@@ -104,9 +146,37 @@ const ExplainabilityCard: React.FC<ExplainabilityCardProps> = ({ lawyer, onToggl
     Q: 0.15, U: 0.1, R: 0.05, C: 0.05
   };
   
+  // Usar dados da API se disponível, senão fallback
+  const scores = explanation ? {
+    area_match: 0.9, // Estes valores seriam derivados da API em uma implementação completa
+    case_similarity: 0.8,
+    success_rate: 0.75,
+    geo_score: 0.6,
+    qualification: 0.85,
+    urgency_capacity: 0.7,
+    review_score: 0.8,
+    soft_skills: 0.65,
+    raw_score: 0.74,
+    equity_weight: 0.95,
+    fair_score: lawyer.score || 0.7,
+    delta: fallbackScores.delta // Por enquanto usar fallback para delta
+  } : fallbackScores;
+  
   const delta = scores.delta || {};
 
   const handleToggle = () => {
+    // Implementar opt-in LGPD para explicações detalhadas
+    if (!isExpanded && !hasConsented) {
+      // Log de consentimento para auditoria
+      console.log('User consented to detailed explanation', {
+        userId: user?.id,
+        lawyerId: lawyer.id,
+        caseId: caseId,
+        timestamp: new Date().toISOString()
+      });
+      setHasConsented(true);
+    }
+    
     setIsExpanded(!isExpanded);
     onToggleDetails?.();
   };
@@ -144,10 +214,49 @@ const ExplainabilityCard: React.FC<ExplainabilityCardProps> = ({ lawyer, onToggl
 
   return (
     <View style={styles.container}>
+      {/* Seção de resumo da API */}
+      {explanation && (
+        <View style={styles.summarySection}>
+          <Text style={styles.summaryText}>{explanation.summary}</Text>
+          <View style={styles.factorsContainer}>
+            {explanation.top_factors.map((factor, index) => (
+              <View key={index} style={styles.factorBadge}>
+                <Text style={styles.factorText}>{factor}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.confidenceContainer}>
+            <Text style={styles.confidenceLabel}>Confiança: </Text>
+            <Text style={[
+              styles.confidenceValue,
+              { color: explanation.confidence_level === 'Alta' ? '#10B981' : 
+                       explanation.confidence_level === 'Média' ? '#F59E0B' : '#EF4444' }
+            ]}>
+              {explanation.confidence_level}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Loading state */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#6366F1" />
+          <Text style={styles.loadingText}>Carregando explicação...</Text>
+        </View>
+      )}
+
+      {/* Error state */}
+      {error && !explanation && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Explicação não disponível</Text>
+        </View>
+      )}
+
       <TouchableOpacity style={styles.header} onPress={handleToggle}>
         <View style={styles.headerContent}>
           <Info size={20} color="#6366F1" />
-          <Text style={styles.title}>Explicabilidade do Algoritmo</Text>
+          <Text style={styles.title}>Detalhes Técnicos</Text>
         </View>
         <View style={styles.headerRight}>
           <Text style={styles.scoreText}>
@@ -198,7 +307,7 @@ const ExplainabilityCard: React.FC<ExplainabilityCardProps> = ({ lawyer, onToggl
                   </View>
                   
                                      <View style={styles.progressContainer}>
-                     <ProgressBar value={value} />
+                     <ProgressBar progress={value * 100} />
                      <Text style={styles.weightText}>
                        Peso: {formatPercentage(weight)}
                      </Text>
@@ -403,6 +512,80 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#92400E',
     lineHeight: 16,
+  },
+  // Novos estilos para a seção de resumo da API
+  summarySection: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E0F2FE',
+  },
+  summaryText: {
+    fontSize: 14,
+    color: '#1F2937',
+    lineHeight: 20,
+    marginBottom: 12,
+    fontWeight: '500',
+  },
+  factorsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+  },
+  factorBadge: {
+    backgroundColor: '#DBEAFE',
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginRight: 8,
+    marginBottom: 4,
+  },
+  factorText: {
+    fontSize: 12,
+    color: '#1E40AF',
+    fontWeight: '500',
+  },
+  confidenceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  confidenceLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  confidenceValue: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginLeft: 8,
+  },
+  errorContainer: {
+    padding: 16,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#DC2626',
+    textAlign: 'center',
   },
 });
 

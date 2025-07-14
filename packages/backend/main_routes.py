@@ -11,10 +11,10 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 # Importa a função de recarregamento
-from .algoritmo_match import load_weights as reload_algorithm_weights
-from .auth import get_current_user
-from .celery_app import celery_app
-from .models import (
+from algoritmo_match import load_weights as reload_algorithm_weights
+from auth import get_current_user
+from celery_app import celery_app
+from models import (
     ExplainRequest,
     ExplainResponse,
     MatchRequest,

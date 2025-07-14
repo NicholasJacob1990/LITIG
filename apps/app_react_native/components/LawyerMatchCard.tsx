@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Star, MapPin, Clock, Award, MessageCircle, Video, Users, CheckCircle, ArrowRight, Sparkles, BrainCircuit } from 'lucide-react-native';
@@ -6,6 +6,7 @@ import { LawyerSearchResult } from '@/lib/supabase';
 import { getExplanation , Match } from '@/lib/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import ContractForm from './organisms/ContractForm';
+import { explanationService, PublicExplanation } from '@/lib/services/explanation';
 
 interface LawyerMatchCardProps {
   lawyer: LawyerSearchResult;
@@ -15,11 +16,56 @@ interface LawyerMatchCardProps {
   caseTitle: string;
   onVideoCall?: () => void;
   onChat?: () => void;
+  authToken?: string; // Token de autenticação para API
 }
 
-const LawyerMatchCard: React.FC<LawyerMatchCardProps> = ({ lawyer, matchData, onSelect, caseId, caseTitle, onVideoCall, onChat }) => {
+const LawyerMatchCard: React.FC<LawyerMatchCardProps> = ({ 
+  lawyer, 
+  matchData, 
+  onSelect, 
+  caseId, 
+  caseTitle, 
+  onVideoCall, 
+  onChat,
+  authToken 
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showContractForm, setShowContractForm] = useState(false);
+  const [explanation, setExplanation] = useState<PublicExplanation | null>(null);
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanationError, setExplanationError] = useState<string | null>(null);
+
+  // Buscar explicação quando o componente monta
+  useEffect(() => {
+    if (authToken && caseId && lawyer.id) {
+      loadExplanation();
+    }
+  }, [authToken, caseId, lawyer.id]);
+
+  const loadExplanation = async () => {
+    if (!authToken) return;
+
+    setExplanationLoading(true);
+    setExplanationError(null);
+
+    try {
+      const result = await explanationService.getMatchExplanation(
+        caseId,
+        lawyer.id,
+        authToken
+      );
+      setExplanation(result);
+    } catch (error) {
+      console.warn('Erro ao carregar explicação:', error);
+      setExplanationError('Não foi possível carregar a explicação');
+      
+      // Usar fallback
+      const fallback = explanationService.generateFallbackExplanation(lawyer.id, caseId);
+      setExplanation(fallback);
+    } finally {
+      setExplanationLoading(false);
+    }
+  };
 
   const handleContractCreated = (contractId: string) => {
     Alert.alert(
@@ -39,8 +85,58 @@ const LawyerMatchCard: React.FC<LawyerMatchCardProps> = ({ lawyer, matchData, on
 
   const scoreParecer = matchData.features?.score_par || 0;
   const simParecer = matchData.features?.sim_par || 0;
-
   const isAutoridade = scoreParecer > 0.5 || simParecer > 0.6;
+
+  // Função para renderizar badges dinâmicos
+  const renderDynamicBadges = () => {
+    if (explanationLoading) {
+      return (
+        <View style={styles.badgeContainer}>
+          <ActivityIndicator size="small" color="#3b82f6" />
+          <Text style={styles.badgeLoadingText}>Analisando...</Text>
+        </View>
+      );
+    }
+
+    if (!explanation || !explanation.top_factors || explanation.top_factors.length === 0) {
+      // Fallback para badge estático se não houver explicação
+      if (isAutoridade) {
+        return (
+          <View style={styles.badgeContainer}>
+            <Text style={styles.badgeText}>⚖️ Autoridade no Assunto</Text>
+          </View>
+        );
+      }
+      return null;
+    }
+
+    // Mostrar até 2 badges dos top_factors
+    const topFactors = explanation.top_factors.slice(0, 2);
+    
+    return (
+      <View style={styles.dynamicBadgesContainer}>
+        {topFactors.map((factor, index) => (
+          <View key={index} style={styles.dynamicBadge}>
+            <Text style={styles.dynamicBadgeText}>{factor}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  // Função para obter cor do badge baseado no nível de confiança
+  const getConfidenceColor = (level: string) => {
+    switch (level?.toLowerCase()) {
+      case 'alta':
+        return '#10b981'; // Verde
+      case 'média':
+        return '#f59e0b'; // Amarelo
+      case 'baixa':
+        return '#ef4444'; // Vermelho
+      default:
+        return '#6b7280'; // Cinza
+    }
+  };
 
   return (
     <>
@@ -73,19 +169,27 @@ const LawyerMatchCard: React.FC<LawyerMatchCardProps> = ({ lawyer, matchData, on
             </View>
 
             <View style={styles.scoreContainer}>
-              <View style={styles.scoreCircle}>
+              <View style={[
+                styles.scoreCircle,
+                explanation && { borderColor: getConfidenceColor(explanation.confidence_level) }
+              ]}>
                 <Text style={styles.scoreNumber}>{Math.round((matchData.fair || 0) * 100)}</Text>
                 <Text style={styles.scoreLabel}>%</Text>
               </View>
               <Text style={styles.scoreSubtext}>Compatibilidade</Text>
+              {explanation && (
+                <Text style={[
+                  styles.confidenceText,
+                  { color: getConfidenceColor(explanation.confidence_level) }
+                ]}>
+                  {explanation.confidence_level}
+                </Text>
+              )}
             </View>
           </View>
 
-          {isAutoridade && (
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badgeText}>⚖️ Autoridade no Assunto</Text>
-            </View>
-          )}
+          {/* Badges dinâmicos */}
+          {renderDynamicBadges()}
 
           <View style={styles.metricsRow}>
             <View style={styles.metric}>
@@ -156,9 +260,18 @@ const LawyerMatchCard: React.FC<LawyerMatchCardProps> = ({ lawyer, matchData, on
 
           {isExpanded && (
             <View style={styles.explanationContainer}>
-              <Text style={styles.explanationText}>
-                Análise de compatibilidade baseada em experiência, localização, taxa de sucesso e perfil do caso.
-              </Text>
+              {explanation && explanation.summary ? (
+                <Text style={styles.explanationText}>{explanation.summary}</Text>
+              ) : (
+                <Text style={styles.explanationText}>
+                  Análise de compatibilidade baseada em experiência, localização, taxa de sucesso e perfil do caso.
+                </Text>
+              )}
+              {explanationError && (
+                <Text style={styles.explanationError}>
+                  {explanationError}
+                </Text>
+              )}
             </View>
           )}
 
@@ -292,6 +405,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 4,
+    borderWidth: 2,
+    borderColor: '#dbeafe',
   },
   scoreNumber: {
     fontSize: 20,
@@ -310,25 +425,71 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textAlign: 'center',
   },
+  confidenceText: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  // Badges dinâmicos
+  dynamicBadgesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+    gap: 8,
+  },
+  dynamicBadge: {
+    backgroundColor: '#e0f2fe',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+  },
+  dynamicBadgeText: {
+    color: '#0369a1',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  // Badge de loading
+  badgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#f0f9ff',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginBottom: 12,
+  },
+  badgeText: {
+    color: '#0369a1',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  badgeLoadingText: {
+    color: '#3b82f6',
+    fontWeight: '500',
+    fontSize: 12,
+    marginLeft: 6,
+  },
   metricsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 20,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   metric: {
     alignItems: 'center',
     flex: 1,
   },
   metricIcon: {
-    marginBottom: 6,
+    marginBottom: 8,
   },
   metricValue: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111827',
     textAlign: 'center',
-    lineHeight: 20,
   },
   metricLabel: {
     fontSize: 12,
@@ -337,12 +498,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   explainButton: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#f0f9ff',
     borderRadius: 12,
     padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#dbeafe',
+    marginBottom: 20,
   },
   explainButtonContent: {
     flexDirection: 'row',
@@ -350,100 +509,70 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   explainButtonText: {
-    fontSize: 14,
-    color: '#1d4ed8',
+    color: '#3b82f6',
     fontWeight: '600',
-    marginHorizontal: 8,
+    marginLeft: 8,
+    marginRight: 8,
   },
   explanationContainer: {
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#f8fafc',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
+    marginBottom: 20,
   },
   explanationText: {
     fontSize: 14,
     color: '#374151',
     lineHeight: 20,
   },
+  explanationError: {
+    fontSize: 12,
+    color: '#ef4444',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
   actions: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    gap: 12,
   },
   actionButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    flex: 1,
   },
   contractButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#3b82f6',
   },
   contractButtonText: {
-    fontSize: 14,
-    color: '#fff',
+    color: '#ffffff',
     fontWeight: '600',
+    marginLeft: 6,
   },
   chatButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f9ff',
     borderWidth: 1,
     borderColor: '#007bff',
   },
   chatButtonText: {
-    fontSize: 14,
     color: '#007bff',
-    fontWeight: '500',
+    fontWeight: '600',
+    marginLeft: 6,
   },
   videoButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f0fdf4',
     borderWidth: 1,
     borderColor: '#10b981',
   },
   videoButtonText: {
-    fontSize: 14,
     color: '#10b981',
-    fontWeight: '500',
-  },
-  badgeContainer: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E0F2FE',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginBottom: 12,
-  },
-  badgeText: {
-    color: '#0369A1',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  logosContainer: {
-    marginTop: 16,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  logosTitle: {
-    fontSize: 13,
     fontWeight: '600',
-    color: '#6B7280',
-    marginBottom: 8,
+    marginLeft: 6,
   },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logo: {
-    width: 80,
-    height: 25,
-    resizeMode: 'contain',
-    marginRight: 12,
-  }
 });
 
 export default LawyerMatchCard;

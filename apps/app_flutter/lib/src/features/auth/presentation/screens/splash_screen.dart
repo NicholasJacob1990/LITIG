@@ -15,33 +15,32 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateAfterDelay();
-  }
-
-  void _navigateAfterDelay() {
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is auth_states.Authenticated) {
-          context.go('/dashboard');
-        } else {
-          context.go('/login');
-        }
-      }
-    });
+    print('🌟 SplashScreen iniciado');
+    // Removendo o timer para evitar conflitos - o BlocListener irá gerenciar a navegação
   }
 
   @override
   Widget build(BuildContext context) {
+    print('🎨 Construindo SplashScreen...');
+    
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: BlocListener<AuthBloc, auth_states.AuthState>(
         listener: (context, state) {
-          if (state is auth_states.Authenticated) {
-            context.go('/dashboard');
-          } else if (state is auth_states.Unauthenticated) {
-            context.go('/login');
-          }
+          print('🔄 AuthState mudou no SplashScreen: ${state.runtimeType}');
+          
+          // Aguarda um mínimo de 2 segundos para uma experiência melhor
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              if (state is auth_states.Authenticated) {
+                print('✅ Navegando para dashboard (listener)');
+                context.go('/dashboard');
+              } else if (state is auth_states.Unauthenticated) {
+                print('❌ Navegando para login (listener)');
+                context.go('/login');
+              }
+            }
+          });
         },
         child: Center(
           child: Column(
@@ -90,6 +89,19 @@ class _SplashScreenState extends State<SplashScreen> {
               // Loading indicator
               const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+              const SizedBox(height: 16),
+              // Debug info
+              BlocBuilder<AuthBloc, auth_states.AuthState>(
+                builder: (context, state) {
+                  return Text(
+                    'Estado: ${state.runtimeType}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  );
+                },
               ),
             ],
           ),

@@ -4,11 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/features/auth/domain/entities/user.dart';
 
 class MainTabsShell extends StatelessWidget {
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
-  const MainTabsShell({super.key, required this.child});
+  const MainTabsShell({
+    super.key,
+    required this.navigationShell,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,88 +20,82 @@ class MainTabsShell extends StatelessWidget {
       builder: (context, state) {
         if (state is auth_states.Authenticated) {
           final userRole = state.user.role ?? 'client';
+          final navItems = _getNavItemsForRole(userRole);
+          
           return Scaffold(
-            body: child,
+            body: navigationShell,
             bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _calculateSelectedIndex(context, userRole),
-              onTap: (index) => _onItemTapped(index, context, userRole),
-              items: _getNavItems(userRole),
+              currentIndex: _getCurrentIndex(userRole, navigationShell.currentIndex),
+              onTap: (index) => _onItemTapped(index, navItems),
+              items: navItems.map((item) => BottomNavigationBarItem(icon: Icon(item.icon), label: item.label)).toList(),
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey,
             ),
           );
         }
-        return Scaffold(body: child);
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     );
   }
 
-  int _calculateSelectedIndex(BuildContext context, String userRole) {
-    final String location = GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
-    
-    if (_isLawyer(userRole)) {
-      if (location.startsWith('/dashboard')) return 0;
-      if (location.startsWith('/cases')) return 1;
-      if (location.startsWith('/schedule')) return 2;
-      if (location.startsWith('/messages')) return 3;
-      if (location.startsWith('/profile')) return 4;
-    } else { // Cliente
-      if (location.startsWith('/dashboard')) return 0;
-      if (location.startsWith('/cases')) return 1;
-      if (location.startsWith('/lawyers')) return 2;
-      if (location.startsWith('/client-messages')) return 3;
-      if (location.startsWith('/services')) return 4;
-      if (location.startsWith('/profile')) return 5;
+  void _onItemTapped(int index, List<NavItem> navItems) {
+    final branchIndex = navItems[index].branchIndex;
+    navigationShell.goBranch(
+      branchIndex,
+      initialLocation: branchIndex == navigationShell.currentIndex,
+    );
+  }
+
+  int _getCurrentIndex(String userRole, int currentBranchIndex) {
+    final navItems = _getNavItemsForRole(userRole);
+    for (int i = 0; i < navItems.length; i++) {
+      if (navItems[i].branchIndex == currentBranchIndex) {
+        return i;
+      }
     }
     return 0;
   }
 
-  void _onItemTapped(int index, BuildContext context, String userRole) {
-    if (_isLawyer(userRole)) {
-      switch (index) {
-        case 0: context.go('/dashboard'); break;
-        case 1: context.go('/cases'); break;
-        case 2: context.go('/schedule'); break;
-        case 3: context.go('/messages'); break;
-        case 4: context.go('/profile'); break;
-      }
-    } else { // Cliente
-      switch (index) {
-        case 0: context.go('/dashboard'); break;
-        case 1: context.go('/cases'); break;
-        case 2: context.go('/lawyers'); break;
-        case 3: context.go('/client-messages'); break;
-        case 4: context.go('/services'); break;
-        case 5: context.go('/profile'); break;
-      }
+  List<NavItem> _getNavItemsForRole(String userRole) {
+    switch (userRole) {
+      case 'lawyer_associated':
+        return [
+          NavItem(label: 'Painel', icon: LucideIcons.layoutDashboard, branchIndex: 0),
+          NavItem(label: 'Casos', icon: LucideIcons.folder, branchIndex: 1),
+          NavItem(label: 'Agenda', icon: LucideIcons.calendar, branchIndex: 2),
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 3),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 4),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 5),
+        ];
+      case 'lawyer_individual':
+      case 'lawyer_office':
+      case 'lawyer_platform_associate': // NOVO: Super Associado - usa mesma navegação de captação
+        return [
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 6),
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 7), // Sistema de ofertas
+          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 8),
+          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 9),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 10),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 11),
+        ];
+      default: // client
+        return [
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 12),
+          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 13),
+          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 14),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 15),
+          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 16),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 17),
+        ];
     }
   }
+}
 
-  bool _isLawyer(String? userRole) {
-    if (userRole == null) return false;
-    final role = userRole.toLowerCase();
-    return role == 'lawyer' || role == 'advogado';
-  }
+class NavItem {
+  final String label;
+  final IconData icon;
+  final int branchIndex;
 
-  List<BottomNavigationBarItem> _getNavItems(String userRole) {
-    if (_isLawyer(userRole)) {
-      return const [
-        BottomNavigationBarItem(icon: Icon(LucideIcons.gauge), label: 'Painel'),
-        BottomNavigationBarItem(icon: Icon(LucideIcons.briefcase), label: 'Casos'),
-        BottomNavigationBarItem(icon: Icon(LucideIcons.calendar), label: 'Agenda'),
-        BottomNavigationBarItem(icon: Icon(LucideIcons.messageCircle), label: 'Mensagens'),
-        BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Perfil'),
-      ];
-    }
-    // Cliente
-    return const [
-      BottomNavigationBarItem(icon: Icon(LucideIcons.home), label: 'Início'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.clipboardList), label: 'Meus Casos'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.search), label: 'Advogados'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.messageCircle), label: 'Mensagens'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.layoutGrid), label: 'Serviços'),
-      BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Perfil'),
-    ];
-  }
+  const NavItem({required this.label, required this.icon, required this.branchIndex});
 } 

@@ -29,6 +29,8 @@ class AuthRepositoryImpl {
     String? ethnicity,
     required bool isPcd,
     required bool agreedToTerms,
+    required String userType, // NOVO: Campo userType
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   }) async {
     try {
       await remoteDataSource.registerLawyer(
@@ -51,6 +53,8 @@ class AuthRepositoryImpl {
         ethnicity: ethnicity,
         isPcd: isPcd,
         agreedToTerms: agreedToTerms,
+        userType: userType, // NOVO: Campo userType
+        isPlatformAssociate: isPlatformAssociate, // NOVO: Campo Super Associado
       );
     } on supabase.AuthException catch (e) {
       throw Exception('Falha no registro: ${e.message}');

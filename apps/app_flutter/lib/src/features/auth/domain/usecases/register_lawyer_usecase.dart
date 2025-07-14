@@ -8,11 +8,12 @@ class RegisterLawyerUseCase {
   RegisterLawyerUseCase(this.repository);
 
   Future<void> call(RegisterLawyerParams params) async {
-    return await repository.registerLawyer(
+    await repository.registerLawyer(
       email: params.email,
       password: params.password,
       name: params.name,
       cpf: params.cpf,
+      cnpj: params.cnpj,
       phone: params.phone,
       oab: params.oab,
       areas: params.areas,
@@ -28,6 +29,8 @@ class RegisterLawyerUseCase {
       ethnicity: params.ethnicity,
       isPcd: params.isPcd,
       agreedToTerms: params.agreedToTerms,
+      userType: params.userType,
+      isPlatformAssociate: params.isPlatformAssociate, // NOVO: Campo Super Associado
     );
   }
 }
@@ -37,6 +40,7 @@ class RegisterLawyerParams extends Equatable {
   final String password;
   final String name;
   final String cpf;
+  final String? cnpj;
   final String phone;
   final String oab;
   final String areas;
@@ -52,12 +56,15 @@ class RegisterLawyerParams extends Equatable {
   final String? ethnicity;
   final bool isPcd;
   final bool agreedToTerms;
+  final String userType;
+  final bool isPlatformAssociate;
 
   const RegisterLawyerParams({
     required this.email,
     required this.password,
     required this.name,
     required this.cpf,
+    this.cnpj,
     required this.phone,
     required this.oab,
     required this.areas,
@@ -73,11 +80,13 @@ class RegisterLawyerParams extends Equatable {
     this.ethnicity,
     required this.isPcd,
     required this.agreedToTerms,
+    required this.userType,
+    required this.isPlatformAssociate,
   });
 
   @override
   List<Object?> get props => [
     email, password, name, cpf, phone, oab, areas, maxCases, cep, address, city, state,
-    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms
+    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType, isPlatformAssociate
   ];
 } 

@@ -10,7 +10,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.lightBackground,
       colorScheme: base.colorScheme.copyWith(
         primary:    AppColors.primaryBlue,
-        secondary:  AppColors.accentPurpleStart,
+        secondary:  AppColors.primaryBlue,
         surface:    AppColors.lightCard,
         background: AppColors.lightBackground,
       ),
@@ -53,7 +53,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.darkBackground,
       colorScheme: base.colorScheme.copyWith(
         primary:    AppColors.primaryBlue,
-        secondary:  AppColors.accentPurpleStart,
+        secondary:  AppColors.primaryBlue,
         surface:    AppColors.darkCard,
         background: AppColors.darkBackground,
       ),

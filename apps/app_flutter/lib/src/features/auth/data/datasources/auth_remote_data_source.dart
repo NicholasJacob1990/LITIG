@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthRemoteDataSource {
@@ -20,6 +19,7 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String name,
     required String cpf,
+    String? cnpj,
     required String phone,
     required String oab,
     required String areas,
@@ -35,6 +35,8 @@ abstract class AuthRemoteDataSource {
     String? ethnicity,
     required bool isPcd,
     required bool agreedToTerms,
+    required String userType,
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   });
   Future<void> signOut();
   User? getCurrentSupabaseUser();
@@ -42,24 +44,23 @@ abstract class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final SupabaseClient _supabaseClient;
-  final GoogleSignIn _googleSignIn;
+  final SupabaseClient _supabase;
+  // final GoogleSignIn _googleSignIn; // Removido
 
-  AuthRemoteDataSourceImpl(this._supabaseClient)
-      : _googleSignIn = GoogleSignIn();
+  AuthRemoteDataSourceImpl(this._supabase);
 
   @override
-  Stream<AuthState> get authStateChanges => _supabaseClient.auth.onAuthStateChange;
+  Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 
   @override
   User? getCurrentSupabaseUser() {
-    return _supabaseClient.auth.currentUser;
+    return _supabase.auth.currentUser;
   }
 
   @override
   Future<void> login({required String email, required String password}) async {
     try {
-      await _supabaseClient.auth.signInWithPassword(
+      await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
@@ -72,26 +73,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        // O usuário cancelou o fluxo de login
-        return;
-      }
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (accessToken == null) {
-        throw const AuthException('Google sign in failed: No Access Token found.');
-      }
-      if (idToken == null) {
-        throw const AuthException('Google sign in failed: No ID Token found.');
-      }
-
-      await _supabaseClient.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        // Opcional: Especifique um redirectTo para o fluxo web
+        // redirectTo: 'io.supabase.flutterquickstart://login-callback/',
       );
     } catch (e) {
       // O tratamento de erro será feito no repositório
@@ -102,7 +87,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> updateUser({required String fullName}) async {
     try {
-      await _supabaseClient.auth.updateUser(
+      await _supabase.auth.updateUser(
         UserAttributes(
           data: {'full_name': fullName},
         ),
@@ -122,7 +107,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String? cnpj,
   }) async {
     try {
-      await _supabaseClient.auth.signUp(
+      await _supabase.auth.signUp(
         email: email,
         password: password,
         data: {
@@ -143,6 +128,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String name,
     required String cpf,
+    String? cnpj,
     required String phone,
     required String oab,
     required String areas,
@@ -158,6 +144,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String? ethnicity,
     required bool isPcd,
     required bool agreedToTerms,
+    required String userType,
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   }) async {
     try {
        // O ideal é ter uma transação ou uma função de borda no Supabase
@@ -178,11 +166,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         residenceProofFileUrl = await _uploadFile(residenceProofFile, 'comprovantes_residencia', 'res_${DateTime.now().millisecondsSinceEpoch}');
       }
 
+      // Determinar o role correto baseado no isPlatformAssociate
+      String finalRole = userType;
+      if (userType == 'lawyer_associated' && isPlatformAssociate) {
+        finalRole = 'lawyer_platform_associate'; // Super Associado
+      }
 
       final metadata = {
           'full_name': name,
           'user_type': 'LAWYER',
+          'role': finalRole, // Usando o role determinado
           'cpf': cpf,
+          'cnpj': cnpj,
           'phone': phone,
           'oab': oab,
           'areas': areas,
@@ -204,9 +199,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             'is_pcd': isPcd,
           },
           'agreed_to_terms': agreedToTerms,
+          'is_platform_associate': isPlatformAssociate, // Adicionado ao metadata
       };
 
-      final response = await _supabaseClient.auth.signUp(
+      final response = await _supabase.auth.signUp(
         email: email,
         password: password,
         data: metadata,
@@ -230,9 +226,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final fileExt = file.path.split('.').last;
       final filePath = '$fileName.$fileExt';
       
-      await _supabaseClient.storage.from(bucket).upload(filePath, file);
+      await _supabase.storage.from(bucket).upload(filePath, file);
       
-      return _supabaseClient.storage.from(bucket).getPublicUrl(filePath);
+      return _supabase.storage.from(bucket).getPublicUrl(filePath);
     } catch (e) {
       // Não re-lançar a exceção necessariamente, pode ser opcional.
       // Ou, se for crítico, lançar uma exceção específica de storage.
@@ -245,7 +241,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      await _supabaseClient.auth.signOut();
+      await _supabase.auth.signOut();
     } catch (e) {
       rethrow;
     }

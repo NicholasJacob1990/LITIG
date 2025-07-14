@@ -1,18 +1,17 @@
 import 'dart:io';
-import 'package:dotted_border/dotted_border.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 
 class RegisterLawyerScreen extends StatefulWidget {
-  const RegisterLawyerScreen({super.key});
+  final String role;
+  
+  const RegisterLawyerScreen({super.key, this.role = 'lawyer_individual'});
 
   @override
   State<RegisterLawyerScreen> createState() => _RegisterLawyerScreenState();
@@ -22,9 +21,10 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   final _formKey = GlobalKey<FormState>();
   int _currentStep = 0;
 
-  // Controllers...
+  // Controllers
   final _nameController = TextEditingController();
   final _cpfController = TextEditingController();
+  final _cnpjController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,6 +35,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
+  final _officeCodeController = TextEditingController();
 
   File? _cvFile;
   File? _oabFile;
@@ -44,10 +45,24 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   String? _ethnicity;
   bool _isPcd = false;
   bool _agreedToTerms = false;
+  bool _isPlatformAssociate = false; // NOVO: Campo para Super Associado
 
   @override
   void dispose() {
-    // Dispose all controllers
+    _nameController.dispose();
+    _cpfController.dispose();
+    _cnpjController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _oabController.dispose();
+    _areasController.dispose();
+    _maxCasesController.dispose();
+    _cepController.dispose();
+    _addressController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    _officeCodeController.dispose();
     super.dispose();
   }
 
@@ -62,49 +77,68 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Você deve aceitar os termos para continuar.')),
       );
-      setState(() => _currentStep = 4); // Navigate to terms step
+      // Navega para a última etapa para o aceite
+      final steps = getSteps(isOffice: widget.role == 'lawyer_office', isAssociated: widget.role == 'lawyer_associated');
+      setState(() => _currentStep = steps.length - 1);
       return;
     }
 
     context.read<AuthBloc>().add(AuthRegisterLawyerRequested(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        name: _nameController.text.trim(),
-        cpf: _cpfController.text,
-        phone: _phoneController.text,
-        oab: _oabController.text.trim(),
-        areas: _areasController.text.trim(),
-        maxCases: int.tryParse(_maxCasesController.text.trim()) ?? 0,
-        cep: _cepController.text,
-        address: _addressController.text.trim(),
-        city: _cityController.text.trim(),
-        state: _stateController.text.trim(),
-        cvFile: _cvFile,
-        oabFile: _oabFile,
-        residenceProofFile: _residenceProofFile,
-        gender: _gender,
-        ethnicity: _ethnicity,
-        isPcd: _isPcd,
-        agreedToTerms: _agreedToTerms,
-      ));
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      name: _nameController.text.trim(),
+      cpf: widget.role != 'lawyer_office' ? _cpfController.text : '',
+      cnpj: widget.role == 'lawyer_office' ? _cnpjController.text : null,
+      phone: _phoneController.text,
+      oab: _oabController.text.trim(),
+      areas: _areasController.text.trim(),
+      maxCases: int.tryParse(_maxCasesController.text.trim()) ?? 0,
+      cep: _cepController.text,
+      address: _addressController.text.trim(),
+      city: _cityController.text.trim(),
+      state: _stateController.text.trim(),
+      cvFile: _cvFile,
+      oabFile: _oabFile,
+      residenceProofFile: _residenceProofFile,
+      gender: _gender,
+      ethnicity: _ethnicity,
+      isPcd: _isPcd,
+      agreedToTerms: _agreedToTerms,
+      userType: widget.role,
+      isPlatformAssociate: _isPlatformAssociate, // NOVO: Campo Super Associado
+    ));
   }
 
-  Future<void> _pickFile(Function(File) onFilePicked, {required List<String> allowedExtensions}) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: allowedExtensions,
+  Future<void> _pickFile(Function(File) onFilePicked) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = File(result.files.single.path!);
+        onFilePicked(file);
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao selecionar arquivo: $e')),
     );
-    if (result != null) {
-      setState(() => onFilePicked(File(result.files.single.path!)));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isOffice = widget.role == 'lawyer_office';
+    final isAssociated = widget.role == 'lawyer_associated';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cadastro de Advogado(a)'),
+        title: Text('Cadastro de ${isOffice ? 'Escritório' : isAssociated ? 'Advogado Associado' : 'Advogado Autônomo'}'),
       ),
       body: BlocListener<AuthBloc, auth_states.AuthState>(
         listener: (context, state) {
@@ -116,98 +150,221 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(const SnackBar(
-                    content: Text('Cadastro enviado para análise! Verifique seu e-mail.'),
+                    content: Text('Cadastro enviado! Verifique seu e-mail.'),
                     backgroundColor: Colors.green,
                   ));
-            context.go('/login');
+            
+            // NOVO: Redirecionar para tela de contrato se for Super Associado
+            if (_isPlatformAssociate) {
+              context.go('/contract-signature');
+            } else {
+              context.go('/login');
+            }
           }
         },
-        child: SafeArea(
-          bottom: false,
-          child: Form(
-            key: _formKey,
-            child: Stepper(
-              type: StepperType.vertical,
-              currentStep: _currentStep,
-              onStepContinue: () {
-                final isLastStep = _currentStep == getSteps().length - 1;
-                if (isLastStep) {
-                  _handleRegister();
-                } else {
-                  setState(() => _currentStep += 1);
+        child: Form(
+          key: _formKey,
+          child: Stepper(
+            type: StepperType.vertical,
+            currentStep: _currentStep,
+            onStepContinue: () {
+              final isLastStep = _currentStep == getSteps(isOffice: isOffice, isAssociated: isAssociated).length - 1;
+              if (isLastStep) {
+                _handleRegister();
+              } else {
+                if (_formKey.currentState!.validate()) {
+                   setState(() => _currentStep += 1);
                 }
-              },
-              onStepCancel: _currentStep == 0 ? null : () => setState(() => _currentStep -= 1),
-              onStepTapped: (step) => setState(() => _currentStep = step),
-              steps: getSteps(),
-              controlsBuilder: (context, details) {
-                final isLastStep = _currentStep == getSteps().length - 1;
-                return Padding(
-                  padding: const EdgeInsets.only(top: 32.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: details.onStepContinue,
-                          child: BlocBuilder<AuthBloc, auth_states.AuthState>(
-                              builder: (context, state) {
-                            if (isLastStep && state is auth_states.AuthLoading) {
-                              return const SizedBox(height: 24, width: 24, child: CircularProgressIndicator());
-                            }
-                            return Text(isLastStep ? 'Finalizar Cadastro' : 'Continuar');
-                          }),
-                        ),
+              }
+            },
+            onStepCancel: _currentStep == 0 ? null : () => setState(() => _currentStep -= 1),
+            onStepTapped: (step) => setState(() => _currentStep = step),
+            steps: getSteps(isOffice: isOffice, isAssociated: isAssociated),
+            controlsBuilder: (context, details) {
+              final isLastStep = _currentStep == getSteps(isOffice: isOffice, isAssociated: isAssociated).length - 1;
+              return Padding(
+                padding: const EdgeInsets.only(top: 32.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: details.onStepContinue,
+                        child: BlocBuilder<AuthBloc, auth_states.AuthState>(
+                            builder: (context, state) {
+                          if (isLastStep && state is auth_states.AuthLoading) {
+                            return const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white));
+                          }
+                          return Text(isLastStep ? 'Finalizar Cadastro' : 'Continuar');
+                        }),
                       ),
-                      if (details.onStepCancel != null) ...[
-                        const SizedBox(width: 12),
-                        Expanded(child: TextButton(onPressed: details.onStepCancel, child: const Text('Voltar'))),
-                      ]
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                    if (details.onStepCancel != null) ...[
+                      const SizedBox(width: 12),
+                      Expanded(child: OutlinedButton(onPressed: details.onStepCancel, child: const Text('Voltar'))),
+                    ]
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  List<Step> getSteps() => [
+  List<Step> getSteps({required bool isOffice, required bool isAssociated}) {
+    final steps = [
+      Step(
+        title: Text(isOffice ? 'Dados do Escritório' : 'Informações Pessoais'),
+        content: _buildStep1(isOffice: isOffice),
+        isActive: _currentStep >= 0,
+      ),
+      if (isAssociated)
         Step(
-          title: const Text('Informações Pessoais'),
-          content: _buildStep1(),
-          isActive: _currentStep >= 0,
-        ),
-        Step(
-          title: const Text('Dados Profissionais'),
-          content: _buildStep2(),
+          title: const Text('Vínculo com Escritório'),
+          content: _buildOfficeLinkStep(),
           isActive: _currentStep >= 1,
         ),
+      Step(
+        title: const Text('Dados Profissionais'),
+        content: _buildStep2(),
+        isActive: _currentStep >= (isAssociated ? 2 : 1),
+      ),
+      if (!isAssociated)
         Step(
           title: const Text('Documentos'),
           content: _buildStep3(),
-          isActive: _currentStep >= 2,
+          isActive: _currentStep >= (isAssociated ? 3 : 2),
         ),
-        Step(
-          title: const Text('Diversidade'),
-          content: _buildStep4(),
-          isActive: _currentStep >= 3,
-        ),
-        Step(
-          title: const Text('Termos de Uso'),
-          content: _buildStep5(),
-          isActive: _currentStep >= 4,
-        ),
-      ];
+      Step(
+        title: const Text('Diversidade (Opcional)'),
+        content: _buildStep4(),
+        isActive: _currentStep >= (isAssociated ? 4 : 3),
+      ),
+      Step(
+        title: Text(isAssociated ? 'Contrato de Associação' : 'Termos de Uso'),
+        content: _buildStep5(isAssociated: isAssociated),
+        isActive: _currentStep >= (isAssociated ? 5 : 4),
+      ),
+    ];
+    return steps;
+  }
       
-  Widget _buildStep1() => Column(children: [
-    _buildTextField(controller: _nameController, hintText: 'Nome Completo', textCapitalization: TextCapitalization.words, validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
-    _buildTextField(controller: _cpfController, hintText: 'CPF', keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly, CpfInputFormatter()], validator: (v) => v!.length != 14 ? 'CPF inválido' : null),
+  Widget _buildStep1({required bool isOffice}) => Column(children: [
+    _buildTextField(
+      controller: _nameController, 
+      hintText: isOffice ? 'Nome Fantasia do Escritório' : 'Nome Completo', 
+      textCapitalization: TextCapitalization.words, 
+      validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null
+    ),
+    if (!isOffice)
+      _buildTextField(
+        controller: _cpfController, 
+        hintText: 'CPF', 
+        keyboardType: TextInputType.number, 
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly, CpfInputFormatter()], 
+        validator: (v) => v!.length != 14 ? 'CPF inválido' : null,
+      ),
+     if (isOffice)
+      _buildTextField(
+        controller: _cnpjController, 
+        hintText: 'CNPJ', 
+        keyboardType: TextInputType.number, 
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly, CnpjInputFormatter()], 
+        validator: (v) => v!.length != 18 ? 'CNPJ inválido' : null,
+      ),
     _buildTextField(controller: _phoneController, hintText: 'Telefone com DDD', keyboardType: TextInputType.phone, inputFormatters: [PhoneInputFormatter()], validator: (v) => v!.length < 14 ? 'Telefone inválido' : null),
-    _buildTextField(controller: _emailController, hintText: 'E-mail', keyboardType: TextInputType.emailAddress, validator: (v) => (v!.isEmpty || !v.contains('@')) ? 'E-mail inválido' : null),
+    _buildTextField(controller: _emailController, hintText: 'E-mail de Contato', keyboardType: TextInputType.emailAddress, validator: (v) => (v!.isEmpty || !v.contains('@')) ? 'E-mail inválido' : null),
     _buildTextField(controller: _passwordController, hintText: 'Senha (mínimo 8 caracteres)', obscureText: true, validator: (v) => (v!.length < 8) ? 'Senha muito curta' : null),
   ]);
+
+   Widget _buildOfficeLinkStep() => Column(
+    children: [
+      // NOVO: Opção Super Associado
+      Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.blue.withOpacity(0.05),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Checkbox(
+                  value: _isPlatformAssociate,
+                  onChanged: (value) => setState(() {
+                    _isPlatformAssociate = value ?? false;
+                    if (_isPlatformAssociate) {
+                      _officeCodeController.clear(); // Limpa código do escritório
+                    }
+                  }),
+                ),
+                Expanded(
+                  child: Text(
+                    'Sou Super Associado da Plataforma LITGO',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Super Associados são advogados que trabalham diretamente com a plataforma LITGO, '
+              'recebendo casos através do sistema de ofertas e precisam assinar contrato de associação.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            if (_isPlatformAssociate) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Será necessário assinar contrato de associação após o registro',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange[800],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      
+      // Campo original - só aparece se NÃO for Super Associado
+      if (!_isPlatformAssociate) ...[
+        _buildTextField(
+          controller: _officeCodeController,
+          hintText: 'Código do Escritório',
+          validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Insira o código fornecido pelo escritório de advocacia ao qual você está se associando.',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
+    ],
+  );
 
   Widget _buildStep2() => Column(children: [
     _buildTextField(controller: _oabController, hintText: 'Nº da OAB (Ex: 123456/SP)', validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
@@ -225,9 +382,9 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   Widget _buildStep3() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Text('Anexe os documentos para validação.', style: Theme.of(context).textTheme.bodyLarge),
     const SizedBox(height: 24),
-    _buildFileUploadField(label: 'Currículo (PDF/DOC)', file: _cvFile, onTap: () => _pickFile((f) => _cvFile = f, allowedExtensions: ['pdf', 'doc', 'docx'])),
-    _buildFileUploadField(label: 'Cópia da OAB (PDF/JPG/PNG)', file: _oabFile, onTap: () => _pickFile((f) => _oabFile = f, allowedExtensions: ['pdf', 'jpg', 'png'])),
-    _buildFileUploadField(label: 'Comprov. de Residência (PDF/JPG/PNG)', file: _residenceProofFile, onTap: () => _pickFile((f) => _residenceProofFile = f, allowedExtensions: ['pdf', 'jpg', 'png'])),
+    _buildFileUploadField(label: 'Currículo (PDF/DOC)', file: _cvFile, onTap: () => _pickFile((f) => _cvFile = f)),
+    _buildFileUploadField(label: 'Cópia da OAB (PDF/JPG/PNG)', file: _oabFile, onTap: () => _pickFile((f) => _oabFile = f)),
+    _buildFileUploadField(label: 'Comprov. de Residência (PDF/JPG/PNG)', file: _residenceProofFile, onTap: () => _pickFile((f) => _residenceProofFile = f)),
   ]);
 
   Widget _buildStep4() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -246,39 +403,39 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
     ),
   ]);
 
-  Widget _buildStep5() => Column(children: [
-    Text('Termos de Uso e Contrato de Parceria', style: Theme.of(context).textTheme.bodyLarge),
-    const SizedBox(height: 16),
-    Container(
-      height: 200,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).inputDecorationTheme.fillColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Theme.of(context).dividerColor),
-      ),
-      child: const SingleChildScrollView(
-        child: Text(
-          'Ao clicar em "FINALIZAR CADASTRO", você concorda com os Termos de Parceria e a Política de Privacidade do LITIG. Você declara que todas as informações fornecidas são verdadeiras e que sua situação na OAB está regular. O LITIG se reserva o direito de verificar as informações e, caso encontre inconsistências, poderá suspender ou encerrar sua conta na plataforma...',
+  Widget _buildStep5({required bool isAssociated}) {
+    final text = isAssociated 
+      ? 'Ao clicar em "FINALIZAR CADASTRO", você concorda com os termos do Contrato de Associação do escritório, que será apresentado para aceite após a aprovação do seu cadastro. A sua relação será exclusivamente com o escritório contratante, nos termos da Lei nº 8.906/94.'
+      : 'Ao clicar em "FINALIZAR CADASTRO", você concorda com os Termos de Uso e a Política de Privacidade da plataforma LITIG. Você atuará como parceiro independente, sem vínculo empregatício, e será responsável por seus próprios atos profissionais.';
+    
+    return Column(children: [
+      Text(isAssociated ? 'Contrato de Associação' : 'Termos de Uso e Parceria', style: Theme.of(context).textTheme.bodyLarge),
+      const SizedBox(height: 16),
+      Container(
+        height: 200,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).inputDecorationTheme.fillColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Theme.of(context).dividerColor),
         ),
+        child: SingleChildScrollView(child: Text(text)),
       ),
-    ),
-    const SizedBox(height: 16),
-    CheckboxListTile(
-      title: const Text('Li e concordo com os termos'),
-      value: _agreedToTerms,
-      onChanged: (value) => setState(() => _agreedToTerms = value!),
-      controlAffinity: ListTileControlAffinity.leading,
-      activeColor: Theme.of(context).colorScheme.primary,
-      tileColor: Theme.of(context).inputDecorationTheme.fillColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-  ]);
+      const SizedBox(height: 16),
+      CheckboxListTile(
+        title: const Text('Li e concordo com os termos'),
+        value: _agreedToTerms,
+        onChanged: (value) => setState(() => _agreedToTerms = value!),
+        controlAffinity: ListTileControlAffinity.leading,
+        activeColor: Theme.of(context).colorScheme.primary,
+      ),
+    ]);
+  }
 
   Widget _buildTextField({required TextEditingController controller, required String hintText, bool obscureText = false, String? Function(String?)? validator, TextInputType? keyboardType, List<TextInputFormatter>? inputFormatters, TextCapitalization textCapitalization = TextCapitalization.none}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
-      child: TextFormField(controller: controller, obscureText: obscureText, decoration: InputDecoration(hintText: hintText), validator: validator, keyboardType: keyboardType, inputFormatters: inputFormatters, textCapitalization: textCapitalization),
+      child: TextFormField(controller: controller, obscureText: obscureText, decoration: InputDecoration(hintText: hintText, border: const OutlineInputBorder()), validator: validator, keyboardType: keyboardType, inputFormatters: inputFormatters, textCapitalization: textCapitalization),
     );
   }
 
@@ -286,31 +443,28 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
-      child: DottedBorder(
-        borderType: BorderType.RRect,
-        radius: const Radius.circular(12),
-        color: theme.colorScheme.onSurface.withOpacity(0.4),
-        strokeWidth: 1.5,
-        dashPattern: const [6, 6],
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            height: 100,
-            width: double.infinity,
-            decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: BorderRadius.circular(11)),
-            child: file == null
-                ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(LucideIcons.uploadCloud, color: theme.colorScheme.onSurface.withOpacity(0.6)),
-                    const SizedBox(height: 8),
-                    Text(label, style: theme.textTheme.bodyMedium),
-                  ])
-                : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(LucideIcons.fileCheck2, color: Colors.green.shade400),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(file.path.split('/').last, style: theme.textTheme.bodyLarge, overflow: TextOverflow.ellipsis)),
-                  ]),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 100,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface, 
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.dividerColor),
           ),
+          child: file == null
+              ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(Icons.upload_file, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  const SizedBox(height: 8),
+                  Text(label, style: theme.textTheme.bodyMedium),
+                ])
+              : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(Icons.check_circle_outline, color: Colors.green.shade400),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(file.path.split('/').last, style: theme.textTheme.bodyLarge, overflow: TextOverflow.ellipsis)),
+                ]),
         ),
       ),
     );
@@ -321,7 +475,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
       padding: const EdgeInsets.only(bottom: 16.0),
       child: DropdownButtonFormField<String>(
         value: value,
-        decoration: InputDecoration(hintText: label),
+        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
         items: items.map((item) => DropdownMenuItem<String>(value: item, child: Text(item))).toList(),
         onChanged: onChanged,
       ),
@@ -329,7 +483,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   }
 }
 
-// Formatters - Manter como estão, mas poderiam ser movidos para um arquivo de utils
+// Formatters
 class CpfInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -337,11 +491,27 @@ class CpfInputFormatter extends TextInputFormatter {
     final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     var formatted = '';
     for (var i = 0; i < text.length; i++) {
-      if (i == 3 || i == 6) {
-        formatted += '.';
-      } else if (i == 9) {
-        formatted += '-';
-      }
+      if (i == 3 || i == 6) formatted += '.';
+      else if (i == 9) formatted += '-';
+      formatted += text[i];
+    }
+    return newValue.copyWith(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class CnpjInputFormatter extends TextInputFormatter {
+   @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    var formatted = '';
+     for (var i = 0; i < text.length; i++) {
+       if (i == 2 || i == 5) formatted += '.';
+       else if (i == 8) formatted += '/';
+       else if (i == 12) formatted += '-';
       formatted += text[i];
     }
     return newValue.copyWith(
@@ -360,6 +530,7 @@ class PhoneInputFormatter extends TextInputFormatter {
     final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     if (text.length <= 2) return newValue.copyWith(text: '($text');
     if (text.length <= 7) return newValue.copyWith(text: '(${text.substring(0, 2)}) ${text.substring(2)}');
+    if (text.length > 11) return oldValue;
     return newValue.copyWith(text: '(${text.substring(0, 2)}) ${text.substring(2, 7)}-${text.substring(7, 11)}');
   }
 }
@@ -371,9 +542,7 @@ class CepInputFormatter extends TextInputFormatter {
     final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     var formatted = '';
      for (var i = 0; i < text.length; i++) {
-      if (i == 5) {
-        formatted += '-';
-      }
+      if (i == 5) formatted += '-';
       formatted += text[i];
     }
     return newValue.copyWith(

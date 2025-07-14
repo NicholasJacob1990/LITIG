@@ -98,14 +98,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> registerLawyer({
-    // Step 1
     required String email,
     required String password,
     required String name,
     required String cpf,
+    String? cnpj,
     required String phone,
-    
-    // Step 2
     required String oab,
     required String areas,
     required int maxCases,
@@ -113,19 +111,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String address,
     required String city,
     required String state,
-
-    // Step 3
     File? cvFile,
     File? oabFile,
     File? residenceProofFile,
-
-    // Step 4
     String? gender,
     String? ethnicity,
     required bool isPcd,
-    
-    // Step 5
     required bool agreedToTerms,
+    required String userType,
   }) async {
     try {
       await remoteDataSource.registerLawyer(
@@ -133,6 +126,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         name: name,
         cpf: cpf,
+        cnpj: cnpj,
         phone: phone,
         oab: oab,
         areas: areas,
@@ -148,16 +142,10 @@ class AuthRepositoryImpl implements AuthRepository {
         ethnicity: ethnicity,
         isPcd: isPcd,
         agreedToTerms: agreedToTerms,
+        userType: userType,
       );
     } on supabase.AuthException catch (e) {
-      if (e.message.toLowerCase().contains('already in use')) {
-        throw const EmailAlreadyInUseException();
-      } else if (e.message.toLowerCase().contains('weak password')) {
-        throw const WeakPasswordException();
-      }
-      throw ServerException(e.message);
-    } catch (e) {
-      throw const NetworkException();
+      throw Exception('Falha no registro: ${e.message}');
     }
   }
 

@@ -55,6 +55,9 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
             ),
             const SizedBox(height: 12),
             
+            // --- EXPERIÊNCIA E PRÊMIOS ---
+            _buildExperienceAndAwards(theme),
+            
             // --- BADGE DE AUTORIDADE ---
             if (isAutoridade) _buildAuthorityBadge(theme),
             
@@ -172,6 +175,160 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
           Text('⚖️ Autoridade no Assunto', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
         ],
       ),
+    );
+  }
+
+  Widget _buildExperienceAndAwards(ThemeData theme) {
+    if (widget.lawyer.experienceYears == null && widget.lawyer.awards.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            // Experiência
+            if (widget.lawyer.experienceYears != null) ...[
+              Icon(LucideIcons.briefcase, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                '${widget.lawyer.experienceYears} anos de experiência',
+                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+              const Spacer(),
+            ],
+            
+            // Botão Currículo
+            if (widget.lawyer.professionalSummary != null && widget.lawyer.professionalSummary!.isNotEmpty) ...[
+              TextButton.icon(
+                onPressed: () => _showCurriculumModal(context),
+                icon: const Icon(LucideIcons.fileText, size: 16),
+                label: const Text('Ver Currículo'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                ),
+              ),
+            ],
+          ],
+        ),
+        
+        // Prêmios/Selos
+        if (widget.lawyer.awards.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(LucideIcons.award, size: 16, color: Colors.amber),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: widget.lawyer.awards
+                      .take(3) // Limitar a 3 prêmios
+                      .map((award) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                            ),
+                            child: Text(
+                              award,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.amber.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  void _showCurriculumModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Currículo - ${widget.lawyer.nome}',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.lawyer.experienceYears != null) ...[
+                            Text(
+                              'Experiência: ${widget.lawyer.experienceYears} anos',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          
+                          if (widget.lawyer.awards.isNotEmpty) ...[
+                            Text(
+                              'Prêmios e Reconhecimentos:',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            ...widget.lawyer.awards.map((award) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text('• $award', style: Theme.of(context).textTheme.bodyMedium),
+                            )).toList(),
+                            const SizedBox(height: 16),
+                          ],
+                          
+                          Text(
+                            'Resumo Profissional:',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.lawyer.professionalSummary ?? 'Não disponível',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

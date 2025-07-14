@@ -13,7 +13,7 @@ from ..metrics import cache_hits_total, cache_misses_total
 from ..models import MatchRequest
 from .cache_service_simple import simple_cache_service as cache_service
 from .notify_service import send_notifications_to_lawyers
-from .offer_service import create_offers_from_ranking
+from .offer_service import create_offer_from_match
 from supabase import Client, create_client
 
 # --- Configuração ---
@@ -57,7 +57,8 @@ async def _persist_matches(case_id: str, ranked_lawyers: List[Lawyer]):
 
 async def find_and_notify_matches(req: MatchRequest) -> Optional[Dict[str, Any]]:
     """
-    Orquestra o processo de match e agora também persiste os resultados.
+    Orquestra o processo de match e retorna a lista de advogados para o cliente escolher.
+    NOVO FLUXO: Não cria ofertas automaticamente, apenas retorna matches para escolha do cliente.
     """
     # --- Cache de Matching ---
     # Busca no cache Redis
@@ -127,7 +128,7 @@ async def find_and_notify_matches(req: MatchRequest) -> Optional[Dict[str, Any]]
 
     # Aplicar exclusões solicitadas (ex: "ver outras opções")
     if getattr(req, "exclude_ids", None):
-        excl_set = set(req.exclude_ids)
+        excl_set = set(req.exclude_ids or [])
         candidates = [lw for lw in candidates if lw.id not in excl_set]
 
     # 3. Executar o algoritmo de ranking com preset
@@ -139,24 +140,13 @@ async def find_and_notify_matches(req: MatchRequest) -> Optional[Dict[str, Any]]
     # 4. Persistir os matches gerados no banco de dados (assíncrono)
     await _persist_matches(case.id, top_lawyers)
 
-    # 5. Criar ofertas para os advogados (Fase 4 - Sinal de Interesse)
-    offer_ids = await create_offers_from_ranking(case, top_lawyers)
+    # 5. NOVO FLUXO: Atualizar status do caso para "awaiting_client_choice"
+    supabase.table("cases").update({
+        "status": "awaiting_client_choice",
+        "matches_generated_at": time.time()
+    }).eq("id", case.id).execute()
 
-    # 6. Enviar notificações (assíncrono, não bloqueia a resposta)
-    lawyer_ids = [lw.id for lw in top_lawyers]
-    notification_payload = {
-        "case_id": case.id,
-        "headline": f"Novo caso na área de {case.area}",
-        "summary": f"Um novo caso com urgência de {case.urgency_h}h está disponível para seu perfil.",
-        "offer_ids": offer_ids  # Incluir IDs das ofertas para referência
-    }
-    await send_notifications_to_lawyers(lawyer_ids, notification_payload)
-
-    # 7. Persistir `last_offered_at` e formatar resposta
-    now = time.time()
-    supabase.table("lawyers").update(
-        {"last_offered_at": now}).in_("id", lawyer_ids).execute()
-
+    # 6. Formatar resposta para o cliente escolher
     lawyer_raw_data = {r['id']: r for r in lawyer_rows}
     response = format_match_response(case, top_lawyers, lawyer_raw_data)
 
@@ -168,6 +158,127 @@ async def find_and_notify_matches(req: MatchRequest) -> Optional[Dict[str, Any]]
     )
 
     return response
+
+
+async def process_client_choice(case_id: str, chosen_lawyer_id: str, choice_order: int) -> Dict[str, Any]:
+    """
+    Processa a escolha do cliente e cria a oferta para o advogado escolhido.
+    NOVO FLUXO: Cria oferta apenas para o advogado escolhido pelo cliente.
+    
+    Args:
+        case_id: ID do caso
+        chosen_lawyer_id: ID do advogado escolhido pelo cliente
+        choice_order: Ordem de escolha (1 = primeira escolha, 2 = segunda, etc.)
+        
+    Returns:
+        Resultado da criação da oferta
+    """
+    try:
+        # 1. Buscar dados do caso
+        case_row = supabase.table("cases").select("*").eq("id", case_id).single().execute().data
+        if not case_row:
+            raise ValueError("Caso não encontrado")
+        
+        if case_row["status"] != "awaiting_client_choice":
+            raise ValueError("Caso não está aguardando escolha do cliente")
+        
+        # 2. Buscar dados do advogado escolhido
+        lawyer_row = supabase.table("lawyers").select("*").eq("id", chosen_lawyer_id).single().execute().data
+        if not lawyer_row:
+            raise ValueError("Advogado não encontrado")
+        
+        if not lawyer_row.get("is_available", False):
+            raise ValueError("Advogado não está disponível")
+        
+        # 3. Preparar detalhes da oferta
+        offer_details = {
+            "case_summary": case_row.get("summary", ""),
+            "legal_area": case_row.get("area", ""),
+            "subarea": case_row.get("subarea", ""),
+            "urgency_level": case_row.get("urgency_h", 0),
+            "estimated_fee": case_row.get("estimated_fee", None),
+            "client_location": case_row.get("coords", []),
+            "complexity": case_row.get("complexity", "MEDIUM")
+        }
+        
+        # 4. Criar oferta usando o serviço
+        offer_id = await create_offer_from_match(
+            case_id=case_id,
+            lawyer_id=chosen_lawyer_id,
+            choice_order=choice_order,
+            offer_details=offer_details
+        )
+        
+        # 5. Atualizar status do caso
+        supabase.table("cases").update({
+            "status": "offer_pending",
+            "offer_sent_at": time.time(),
+            "chosen_lawyer_id": chosen_lawyer_id
+        }).eq("id", case_id).execute()
+        
+        # 6. Enviar notificação para o advogado
+        notification_payload = {
+            "case_id": case_id,
+            "offer_id": offer_id,
+            "headline": f"Nova oferta de caso na área de {case_row.get('area', '')}",
+            "summary": f"Você foi escolhido por um cliente para um caso de {case_row.get('area', '')}. Prazo para resposta: 48h.",
+            "urgency_level": case_row.get("urgency_h", 0)
+        }
+        
+        await send_notifications_to_lawyers([chosen_lawyer_id], notification_payload)
+        
+        return {
+            "success": True,
+            "message": "Oferta criada e enviada com sucesso",
+            "offer_id": offer_id,
+            "case_id": case_id,
+            "lawyer_id": chosen_lawyer_id
+        }
+        
+    except Exception as e:
+        print(f"Erro ao processar escolha do cliente: {e}")
+        raise
+
+
+async def reactivate_matching_for_case(case_id: str, exclude_lawyer_ids: List[str]) -> Dict[str, Any]:
+    """
+    Reativa o matching para um caso quando uma oferta é rejeitada.
+    
+    Args:
+        case_id: ID do caso
+        exclude_lawyer_ids: IDs dos advogados a serem excluídos do novo matching
+        
+    Returns:
+        Resultado do novo matching
+    """
+    try:
+        # 1. Buscar dados do caso
+        case_row = supabase.table("cases").select("*").eq("id", case_id).single().execute().data
+        if not case_row:
+            raise ValueError("Caso não encontrado")
+        
+        # 2. Criar request de match excluindo advogados que já rejeitaram
+        match_request = MatchRequest(
+            case_id=case_id,
+            exclude_ids=exclude_lawyer_ids,
+            k=5,  # Buscar próximos 5 advogados
+            preset="balanced"
+        )
+        
+        # 3. Executar novo matching
+        result = await find_and_notify_matches(match_request)
+        
+        # 4. Atualizar status do caso
+        supabase.table("cases").update({
+            "status": "awaiting_client_choice",
+            "rematched_at": time.time()
+        }).eq("id", case_id).execute()
+        
+        return result
+        
+    except Exception as e:
+        print(f"Erro ao reativar matching: {e}")
+        raise
 
 
 def format_match_response(
@@ -192,6 +303,7 @@ def format_match_response(
             "is_available": raw_data.get("is_available", False),
             "rating": lw.kpi.avaliacao_media,
             "distance_km": haversine(case.coords, lw.geo_latlon),
+            "primary_area": raw_data.get("tags_expertise", [None])[0] if raw_data.get("tags_expertise") else None,
         })
 
     return {"case_id": case.id, "matches": matches_response}
@@ -207,10 +319,14 @@ class MatchService:
         """Encontra matches para um caso específico."""
         return await find_and_notify_matches(req)
 
+    async def process_client_choice(self, case_id: str, chosen_lawyer_id: str, choice_order: int) -> Dict[str, Any]:
+        """Processa a escolha do cliente."""
+        return await process_client_choice(case_id, chosen_lawyer_id, choice_order)
+
+    async def reactivate_matching(self, case_id: str, exclude_lawyer_ids: List[str]) -> Dict[str, Any]:
+        """Reativa matching para caso rejeitado."""
+        return await reactivate_matching_for_case(case_id, exclude_lawyer_ids)
+
     async def persist_matches(self, case_id: str, ranked_lawyers: List[Lawyer]):
         """Persiste matches no banco de dados."""
         return await _persist_matches(case_id, ranked_lawyers)
-
-
-# Instância do serviço para importação
-match_service = MatchService()

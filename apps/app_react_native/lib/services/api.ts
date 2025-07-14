@@ -32,7 +32,7 @@ class AuthError extends Error {
  * Wrapper centralizado para todas as chamadas fetch à API.
  * Lida com autenticação, tratamento de erros e expiração de token.
  */
-async function apiFetch(endpoint: string, options: RequestInit = {}) {
+export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   // --- MOCK INTERCEPTION ---
   if (USE_MOCK_API) {
     console.log(`[MOCK] Intercepting API call to: ${endpoint}`);
