@@ -217,3 +217,21 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
     );
   }
 } 
+            description: 'Elaboração da estratégia jurídica',
+            isCompleted: false,
+            isCurrent: false,
+            completedAt: null,
+          ),
+          const ProcessPhase(
+            id: 'phase_005',
+            name: 'Finalização',
+            description: 'Entrega final dos documentos',
+            isCompleted: false,
+            isCurrent: false,
+            completedAt: null,
+          ),
+        ],
+      ),
+    );
+  }
+} 

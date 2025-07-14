@@ -55,6 +55,7 @@ abstract class AuthRepository {
     // Step 5
     required bool agreedToTerms,
     required String userType,
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   });
 
   Future<void> signOut();

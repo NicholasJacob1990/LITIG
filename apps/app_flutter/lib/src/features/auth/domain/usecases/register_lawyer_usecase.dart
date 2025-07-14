@@ -30,6 +30,7 @@ class RegisterLawyerUseCase {
       isPcd: params.isPcd,
       agreedToTerms: params.agreedToTerms,
       userType: params.userType,
+      isPlatformAssociate: params.isPlatformAssociate, // NOVO: Campo Super Associado
     );
   }
 }
@@ -56,6 +57,7 @@ class RegisterLawyerParams extends Equatable {
   final bool isPcd;
   final bool agreedToTerms;
   final String userType;
+  final bool isPlatformAssociate;
 
   const RegisterLawyerParams({
     required this.email,
@@ -79,11 +81,12 @@ class RegisterLawyerParams extends Equatable {
     required this.isPcd,
     required this.agreedToTerms,
     required this.userType,
+    required this.isPlatformAssociate,
   });
 
   @override
   List<Object?> get props => [
     email, password, name, cpf, phone, oab, areas, maxCases, cep, address, city, state,
-    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType
+    cvFile, oabFile, residenceProofFile, gender, ethnicity, isPcd, agreedToTerms, userType, isPlatformAssociate
   ];
 } 

@@ -45,6 +45,8 @@ dev_dependencies:
   # Adicionadas para testes
   bloc_test: ^9.1.7
   mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
   # Fim das dependências adicionadas
 
   flutter_lints: ^3.0.0

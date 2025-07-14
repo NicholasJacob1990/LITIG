@@ -37,6 +37,95 @@ groups:
     annotations:
       summary: "Nenhum match encontrado nos últimos 10 minutos"
       description: "O sistema não está encontrando matches, possível problema no algoritmo."
+
+  # =============================================================================
+  # ALERTAS B2B LAW FIRMS - Sistema de Escritórios
+  # =============================================================================
+  
+  - alert: B2BRankingHighLatency
+    expr: histogram_quantile(0.99, rate(litgo_match_rank_duration_seconds_bucket{entity="firm"}[5m])) > 0.2
+    for: 3m
+    labels:
+      severity: critical
+      team: backend
+      component: b2b_ranking
+    annotations:
+      summary: "Latência alta no ranking B2B ({{ $value }}s)"
+      description: "P99 da latência do ranking B2B está acima de 200ms por mais de 3 minutos."
+      runbook: "https://wiki.litgo.com/runbooks/b2b-ranking-latency"
+      dashboard: "https://grafana.litgo.com/d/b2b-funnel"
+  
+  - alert: B2BMatchingFailure
+    expr: rate(litgo_match_rank_total{entity="firm",status="error"}[5m]) > 0.05
+    for: 2m
+    labels:
+      severity: critical
+      team: backend
+      component: b2b_matching
+    annotations:
+      summary: "Alta taxa de falha no matching B2B ({{ $value | humanizePercentage }})"
+      description: "Taxa de erro no matching B2B está acima de 5% por mais de 2 minutos."
+      runbook: "https://wiki.litgo.com/runbooks/b2b-matching-failure"
+  
+  - alert: B2BSuccessRateLow
+    expr: rate(match_b2b_success_rate[1h]) < 0.7
+    for: 15m
+    labels:
+      severity: warning
+      team: backend
+      component: b2b_success
+    annotations:
+      summary: "Taxa de sucesso B2B baixa ({{ $value | humanizePercentage }})"
+      description: "Taxa de sucesso B2B está abaixo de 70% na última hora."
+      runbook: "https://wiki.litgo.com/runbooks/b2b-success-rate"
+  
+  - alert: FirmEndpointHighLatency
+    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{endpoint=~"/firms.*"}[5m])) > 1.0
+    for: 5m
+    labels:
+      severity: warning
+      team: backend
+      component: firms_api
+    annotations:
+      summary: "Latência alta nos endpoints de escritórios ({{ $value }}s)"
+      description: "P95 da latência dos endpoints /firms/* está acima de 1s por mais de 5 minutos."
+      runbook: "https://wiki.litgo.com/runbooks/firms-api-latency"
+  
+  - alert: FirmDataStale
+    expr: time() - firm_kpis_last_updated_timestamp > 86400
+    for: 1h
+    labels:
+      severity: warning
+      team: backend
+      component: firm_data
+    annotations:
+      summary: "Dados de KPIs de escritórios desatualizados"
+      description: "KPIs de escritórios não são atualizados há mais de 24 horas."
+      runbook: "https://wiki.litgo.com/runbooks/firm-data-stale"
+  
+  - alert: ConflictScanTimeout
+    expr: rate(conflict_scan_timeout_total[5m]) > 0.1
+    for: 3m
+    labels:
+      severity: warning
+      team: backend
+      component: conflict_scan
+    annotations:
+      summary: "Timeouts frequentes no conflict scan ({{ $value | humanizePercentage }})"
+      description: "Conflict scan está apresentando timeouts em mais de 10% das requisições."
+      runbook: "https://wiki.litgo.com/runbooks/conflict-scan-timeout"
+  
+  - alert: FeatureECalculationError
+    expr: rate(feature_e_calculation_errors_total[5m]) > 0.02
+    for: 2m
+    labels:
+      severity: warning
+      team: backend
+      component: feature_e
+    annotations:
+      summary: "Erros no cálculo da Feature-E ({{ $value | humanizePercentage }})"
+      description: "Feature-E (Firm Reputation) está apresentando erros em mais de 2% dos cálculos."
+      runbook: "https://wiki.litgo.com/runbooks/feature-e-errors"
   
   # =============================================================================
   # ALERTAS DE ALTA SEVERIDADE - Ação necessária em breve

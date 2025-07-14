@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/chat-triagem');
+                    context.push('/triage');
                   },
                   icon: const Icon(LucideIcons.sparkles),
                   label: const Text('Iniciar Consulta com IA'),

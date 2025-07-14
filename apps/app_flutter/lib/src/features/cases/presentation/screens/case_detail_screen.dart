@@ -121,3 +121,6 @@ class CaseDetailScreen extends StatelessWidget {
     );
   }
 }
+    );
+  }
+}

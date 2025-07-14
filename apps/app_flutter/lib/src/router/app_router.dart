@@ -28,6 +28,8 @@ import 'package:meu_app/src/features/offers/presentation/screens/case_offers_scr
 import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
 import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_screen.dart';
 import 'package:meu_app/src/features/services/presentation/screens/services_screen.dart';
+import 'package:meu_app/src/features/firms/presentation/screens/firm_detail_screen.dart';
+import 'routes.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -129,6 +131,26 @@ GoRouter appRouter(AuthBloc authBloc) {
         path: '/case-detail/:caseId',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => CaseDetailScreen(caseId: state.pathParameters['caseId']!),
+      ),
+      
+      // Rotas de Escritórios
+      GoRoute(
+        path: '/firm/:firmId',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => FirmDetailScreen(firmId: state.pathParameters['firmId']!),
+      ),
+      GoRoute(
+        path: '/firm/:firmId/lawyers',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final firmId = state.pathParameters['firmId']!;
+          return Scaffold(
+            appBar: AppBar(title: const Text('Advogados do Escritório')),
+            body: Center(
+              child: Text('Lista de advogados do escritório $firmId - Em desenvolvimento'),
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/triage',

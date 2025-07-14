@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 
 // Auth
 import 'package:meu_app/src/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -15,7 +16,10 @@ import 'package:meu_app/src/features/cases/domain/repositories/cases_repository.
 import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/get_case_detail_usecase.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
+import 'package:meu_app/src/features/cases/data/services/case_firm_recommendation_service.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_bloc.dart';
+import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_bloc.dart';
 
 // Lawyers/Matching
 import 'package:meu_app/src/features/lawyers/data/datasources/lawyers_remote_datasource.dart';
@@ -24,6 +28,11 @@ import 'package:meu_app/src/features/lawyers/domain/repositories/lawyers_reposit
 import 'package:meu_app/src/features/lawyers/domain/usecases/find_matches_usecase.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
 import 'package:meu_app/src/features/partnerships/data/partnership_service.dart';
+
+// Firms
+import 'package:meu_app/src/features/firms/data/datasources/firms_remote_datasource.dart';
+import 'package:meu_app/src/features/firms/data/repositories/firms_repository_impl.dart';
+import 'package:meu_app/src/features/firms/domain/repositories/firms_repository.dart';
 
 // Services
 import 'package:meu_app/src/core/services/dio_service.dart';
@@ -64,6 +73,10 @@ void configureDependencies() {
   getIt.registerLazySingleton<GetCaseDetailUseCase>(
       () => GetCaseDetailUseCase(getIt()));
 
+  // Services
+  getIt.registerLazySingleton<CaseFirmRecommendationService>(
+      () => CaseFirmRecommendationService());
+
   // Blocs
   getIt.registerFactory(() => CasesBloc(getMyCasesUseCase: getIt()));
 
@@ -83,12 +96,28 @@ void configureDependencies() {
   // Blocs
   getIt.registerFactory(() => MatchesBloc(findMatchesUseCase: getIt()));
 
+  // Firms
+  // Datasources
+  getIt.registerLazySingleton<FirmsRemoteDataSource>(
+      () => FirmsRemoteDataSourceImpl(
+        client: http.Client(),
+        baseUrl: 'http://localhost:8080',
+      ));
+
+  // Repositories
+  getIt.registerLazySingleton<FirmsRepository>(
+      () => FirmsRepositoryImpl(remoteDataSource: getIt()));
+
   // Partnerships
   // Services
   getIt.registerLazySingleton(() => PartnershipService(getIt<Dio>()));
   
   // Blocs
   getIt.registerFactory(() => PartnershipsBloc(getIt()));
+  getIt.registerFactory(() => HybridPartnershipsBloc(
+    firmsRepository: getIt(),
+  ));
+  getIt.registerFactory(() => LawyerFirmBloc(firmsRepository: getIt()));
 
   // Offers
   // Services

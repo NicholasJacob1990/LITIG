@@ -134,6 +134,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         isPcd: event.isPcd,
         agreedToTerms: event.agreedToTerms,
         userType: event.userType,
+        isPlatformAssociate: event.isPlatformAssociate, // NOVO: Campo Super Associado
       ));
       emit(const AuthSuccess('Registro de advogado realizado com sucesso! Sua conta está em análise.'));
     } on AuthException catch (e) {

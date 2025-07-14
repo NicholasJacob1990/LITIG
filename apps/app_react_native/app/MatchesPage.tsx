@@ -8,6 +8,7 @@ import LawyerMatchCard from '@/components/LawyerMatchCard';
 import PresetSelector from '@/components/molecules/PresetSelector';
 import { Match, getMatchesForCase, getPersistedMatches } from '@/lib/services/api';
 import { LawyerSearchResult } from '@/lib/supabase';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 type Preset = 'balanced' | 'fast' | 'expert' | 'economic';
 type ViewMode = 'list' | 'map';
@@ -29,6 +30,7 @@ const MatchesPage = () => {
   }>();
   
   const { caseId, fromRecs } = params;
+  const { session } = useAuth();
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,13 +62,9 @@ const MatchesPage = () => {
       } else {
         response = await getMatchesForCase(
           caseId as string,
-          preset,
-          5,
           {
-            area: area || undefined,
-            subarea: subarea || undefined,
-            radius_km: radiusKm,
-            exclude_ids: options.exclude_ids,
+            preset: preset,
+            k: 5,
           }
         );
       }
@@ -126,7 +124,16 @@ const MatchesPage = () => {
       consultation_types: [],
     };
   
-    return <LawyerMatchCard lawyer={lawyerForCard} onSelect={() => handleSelectLawyer(item.lawyer_id, item)} caseId={caseId as string} matchData={item} caseTitle="" />;
+    return (
+      <LawyerMatchCard 
+        lawyer={lawyerForCard} 
+        onSelect={() => handleSelectLawyer(item.lawyer_id, item)} 
+        caseId={caseId as string} 
+        matchData={item} 
+        caseTitle="" 
+        authToken={session?.access_token}
+      />
+    );
   };
 
   const renderContent = () => {

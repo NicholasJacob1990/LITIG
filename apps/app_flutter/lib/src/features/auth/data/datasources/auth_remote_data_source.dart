@@ -36,6 +36,7 @@ abstract class AuthRemoteDataSource {
     required bool isPcd,
     required bool agreedToTerms,
     required String userType,
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   });
   Future<void> signOut();
   User? getCurrentSupabaseUser();
@@ -144,6 +145,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required bool isPcd,
     required bool agreedToTerms,
     required String userType,
+    required bool isPlatformAssociate, // NOVO: Campo Super Associado
   }) async {
     try {
        // O ideal é ter uma transação ou uma função de borda no Supabase
@@ -164,11 +166,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         residenceProofFileUrl = await _uploadFile(residenceProofFile, 'comprovantes_residencia', 'res_${DateTime.now().millisecondsSinceEpoch}');
       }
 
+      // Determinar o role correto baseado no isPlatformAssociate
+      String finalRole = userType;
+      if (userType == 'lawyer_associated' && isPlatformAssociate) {
+        finalRole = 'lawyer_platform_associate'; // Super Associado
+      }
 
       final metadata = {
           'full_name': name,
           'user_type': 'LAWYER',
-          'role': userType, // Usando o userType dinâmico
+          'role': finalRole, // Usando o role determinado
           'cpf': cpf,
           'cnpj': cnpj,
           'phone': phone,
@@ -192,6 +199,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             'is_pcd': isPcd,
           },
           'agreed_to_terms': agreedToTerms,
+          'is_platform_associate': isPlatformAssociate, // Adicionado ao metadata
       };
 
       final response = await _supabase.auth.signUp(

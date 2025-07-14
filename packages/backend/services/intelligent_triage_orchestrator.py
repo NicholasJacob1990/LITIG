@@ -591,3 +591,19 @@ class IntelligentTriageOrchestrator:
 
 # Instância única do orquestrador
 intelligent_triage_orchestrator = IntelligentTriageOrchestrator()
+
+
+            orchestration["status"] = "completed"
+            orchestration["result"] = result
+            orchestration["completion_reason"] = reason
+
+            return result
+
+        except Exception as e:
+            orchestration["status"] = "error"
+            orchestration["error"] = f"Erro ao forçar finalização: {str(e)}"
+            return None
+
+
+# Instância única do orquestrador
+intelligent_triage_orchestrator = IntelligentTriageOrchestrator()

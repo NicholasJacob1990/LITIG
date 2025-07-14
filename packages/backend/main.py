@@ -23,6 +23,7 @@ from routes.cases import router as cases_router
 from routes.consultations import router as consultations_router
 from routes.contracts import router as contracts_router
 from routes.documents import router as documents_router
+from routes.firms import router as firms_router
 from routes.health_routes import router as health_router
 from routes.intelligent_triage_routes import router as triage_router
 from routes.offers import router as offers_router
@@ -35,6 +36,8 @@ from routes.webhooks import router as webhooks_router
 from routes.weights import router as weights_router
 from routes.ab_testing import router as ab_testing_router
 from routes.reports import router as reports_router
+from routes.unipile import router as unipile_router
+from routes.providers import router as providers_router
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
 
@@ -127,6 +130,7 @@ app.include_router(api_router, prefix="/api")
 app.include_router(offers_router, prefix="/api")
 app.include_router(contracts_router, prefix="/api")
 app.include_router(reviews_router, prefix="/api")
+app.include_router(firms_router, prefix="/api")
 app.include_router(webhooks_router)
 app.include_router(weights_router, prefix="/api/v2.2", tags=["Weights & Debugging"])
 app.include_router(recommendations_router, prefix="/api", tags=["Recommendations"])
@@ -140,6 +144,8 @@ app.include_router(health_router, prefix="/api")
 app.include_router(triage_router, prefix="/api/v2", tags=["Intelligent Triage"])
 app.include_router(ab_testing_router, prefix="/api/v2.2", tags=["AB Testing"])
 app.include_router(reports_router, prefix="/api/v2.2", tags=["Reports"])
+app.include_router(unipile_router, prefix="/api/v2.2", tags=["Unipile"])
+app.include_router(providers_router, prefix="/api", tags=["Providers"])
 
 # CORREÇÃO: Rate limiter aplicado individualmente nas rotas em routes.py
 # Removido limiter.limit("60/minute")(api_router) que causava erro nos testes

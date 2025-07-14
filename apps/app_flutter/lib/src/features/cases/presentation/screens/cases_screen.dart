@@ -60,6 +60,7 @@ class CasesScreen extends StatelessWidget {
                           status: caseData.status,
                           preAnalysisDate: caseData.createdAt.toIso8601String(),
                           lawyer: caseData.lawyer,
+                          caseData: caseData, // Passar dados completos do caso
                         );
                       },
                     );

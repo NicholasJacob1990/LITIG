@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
+import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
 
@@ -14,6 +15,7 @@ class CaseCard extends StatelessWidget {
   final String status;
   final String preAnalysisDate;
   final LawyerInfo? lawyer;
+  final Case? caseData; // Dados completos do caso para acessar recommendedFirm
 
   const CaseCard({
     super.key,
@@ -24,6 +26,7 @@ class CaseCard extends StatelessWidget {
     required this.status,
     required this.preAnalysisDate,
     this.lawyer,
+    this.caseData,
   });
 
   @override
@@ -53,6 +56,13 @@ class CaseCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _buildPreAnalysisSection(context),
+              
+              // Seção de recomendação de escritório (para casos corporativos)
+              if (caseData?.shouldShowFirmRecommendation == true) ...[
+                Divider(height: 32, thickness: 1, color: theme.dividerColor),
+                _buildFirmRecommendationSection(context),
+              ],
+              
               if (lawyer != null) ...[
                 Divider(height: 32, thickness: 1, color: theme.dividerColor),
                 _buildLawyerSection(),
@@ -91,6 +101,31 @@ class CaseCard extends StatelessWidget {
             )
           ),
         ),
+        // Indicador de complexidade para casos corporativos
+        if (caseData?.isHighComplexity == true) ...[
+          Chip(
+            avatar: Icon(
+              LucideIcons.briefcase, 
+              size: 14, 
+              color: theme.colorScheme.tertiary
+            ),
+            label: Text(
+              'Corporativo', 
+              style: TextStyle(
+                fontSize: 12, 
+                fontWeight: FontWeight.w500, 
+                color: theme.colorScheme.onSurface
+              )
+            ),
+            backgroundColor: theme.colorScheme.tertiary.withOpacity(0.1),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8), 
+              side: BorderSide.none
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
         Chip(
           avatar: Icon(
             clientType == 'PF' ? LucideIcons.user : LucideIcons.building, 
@@ -168,6 +203,182 @@ class CaseCard extends StatelessWidget {
                 color: theme.colorScheme.secondary, 
                 fontWeight: FontWeight.bold
               )
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFirmRecommendationSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final firm = caseData?.recommendedFirm;
+    final matchScore = caseData?.firmMatchScore;
+
+    if (firm == null) {
+      return _buildFirmRecommendationPlaceholder(context);
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: theme.colorScheme.tertiary, width: 4)),
+        color: theme.colorScheme.tertiary.withOpacity(0.05),
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.building2, color: theme.colorScheme.tertiary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Escritório Recomendado',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.tertiary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              if (matchScore != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.tertiary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${(matchScore * 100).toInt()}%',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.tertiary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  LucideIcons.briefcase,
+                  color: theme.colorScheme.tertiary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      firm.name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${firm.teamSize} advogados',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                    if (firm.kpis != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.star,
+                            size: 12,
+                            color: Colors.amber,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${(firm.kpis!.successRate * 100).toInt()}% sucesso',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => context.push('/firm/${firm.id}'),
+                icon: Icon(LucideIcons.externalLink, size: 16),
+                label: Text('Ver'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.tertiary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFirmRecommendationPlaceholder(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: theme.colorScheme.outline, width: 4)),
+        color: theme.colorScheme.outline.withOpacity(0.05),
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        children: [
+          Icon(LucideIcons.building2, color: theme.colorScheme.outline, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Analisando escritórios especializados...',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Recomendação será exibida após matching B2B',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: theme.colorScheme.outline,
             ),
           ),
         ],
@@ -257,26 +468,22 @@ class CaseCard extends StatelessWidget {
                   ),
                 ),
               ],
-            )
+            ),
         ],
       );
     });
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Em Andamento':
+    switch (status.toLowerCase()) {
+      case 'em andamento':
         return AppColors.primaryBlue;
-      case 'Concluído':
+      case 'concluído':
         return AppColors.green;
-      case 'Aguardando':
-        return AppColors.yellow;
-      case 'Cancelado':
-        return AppColors.lightText2;
-      case 'Urgente':
-        return AppColors.red;
+      case 'aguardando':
+        return AppColors.orange;
       default:
-        return AppColors.yellow; // Fallback
+        return AppColors.lightText2;
     }
   }
 } 

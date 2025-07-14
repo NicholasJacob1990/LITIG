@@ -638,3 +638,421 @@ http://127.0.0.1:8000/openapi.json
 **Última atualização:** Janeiro 2025  
 **Versão da API:** v1.0  
 **Suporte:** api-support@litgo.com 
+
+## Endpoints de Escritórios (B2B Law Firms)
+
+### POST /firms/
+Criar um novo escritório de advocacia.
+
+**Permissões:** Administrador
+
+**Request Body:**
+```json
+{
+  "name": "Advocacia Silva & Associados",
+  "team_size": 15,
+  "main_lat": -23.5505,
+  "main_lon": -46.6333
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Advocacia Silva & Associados",
+  "team_size": 15,
+  "main_lat": -23.5505,
+  "main_lon": -46.6333,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z",
+  "kpis": {
+    "success_rate": 0.0,
+    "nps": 0.0,
+    "reputation_score": 0.0,
+    "diversity_index": 0.0,
+    "active_cases": 0
+  },
+  "lawyers_count": 0
+}
+```
+
+### GET /firms/
+Listar escritórios com filtros opcionais.
+
+**Query Parameters:**
+- `limit`: Número máximo de resultados (1-100, padrão: 50)
+- `offset`: Número de registros para pular (padrão: 0)
+- `include_kpis`: Incluir KPIs dos escritórios (padrão: true)
+- `include_lawyers_count`: Incluir contagem de advogados (padrão: true)
+- `min_success_rate`: Taxa mínima de sucesso (0.0-1.0)
+- `min_team_size`: Tamanho mínimo da equipe
+
+**Response (200):**
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "Advocacia Silva & Associados",
+    "team_size": 15,
+    "main_lat": -23.5505,
+    "main_lon": -46.6333,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z",
+    "kpis": {
+      "success_rate": 0.85,
+      "nps": 0.72,
+      "reputation_score": 0.88,
+      "diversity_index": 0.65,
+      "active_cases": 12
+    },
+    "lawyers_count": 15
+  },
+  {
+    "id": "660f9511-f30c-52e5-b827-557766551111",
+    "name": "Escritório Advocacia Moderna Ltda",
+    "team_size": 8,
+    "main_lat": -22.9068,
+    "main_lon": -43.1729,
+    "created_at": "2024-01-15T11:00:00Z",
+    "updated_at": "2024-01-15T11:00:00Z",
+    "kpis": {
+      "success_rate": 0.78,
+      "nps": 0.68,
+      "reputation_score": 0.75,
+      "diversity_index": 0.70,
+      "active_cases": 8
+    },
+    "lawyers_count": 8
+  }
+]
+```
+
+### GET /firms/{firm_id}
+Obter detalhes de um escritório específico.
+
+**Path Parameters:**
+- `firm_id`: UUID do escritório
+
+**Response (200):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Advocacia Silva & Associados",
+  "team_size": 15,
+  "main_lat": -23.5505,
+  "main_lon": -46.6333,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z",
+  "kpis": {
+    "success_rate": 0.85,
+    "nps": 0.72,
+    "reputation_score": 0.88,
+    "diversity_index": 0.65,
+    "active_cases": 12,
+    "updated_at": "2024-01-15T15:30:00Z"
+  },
+  "lawyers_count": 15
+}
+```
+
+### PUT /firms/{firm_id}
+Atualizar informações de um escritório.
+
+**Permissões:** Escritório ou Administrador
+
+**Request Body:**
+```json
+{
+  "name": "Advocacia Silva & Associados - Novo Nome",
+  "team_size": 18,
+  "main_lat": -23.5505,
+  "main_lon": -46.6333
+}
+```
+
+**Response (200):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Advocacia Silva & Associados - Novo Nome",
+  "team_size": 18,
+  "main_lat": -23.5505,
+  "main_lon": -46.6333,
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T16:00:00Z",
+  "kpis": {
+    "success_rate": 0.85,
+    "nps": 0.72,
+    "reputation_score": 0.88,
+    "diversity_index": 0.65,
+    "active_cases": 12
+  },
+  "lawyers_count": 18
+}
+```
+
+### DELETE /firms/{firm_id}
+Deletar um escritório.
+
+**Permissões:** Administrador
+
+**Response (204):** Sem conteúdo
+
+**Nota:** Os advogados não são deletados, apenas têm o `firm_id` definido como NULL.
+
+### PUT /firms/{firm_id}/kpis
+Atualizar KPIs de um escritório.
+
+**Permissões:** Escritório ou Administrador
+
+**Request Body:**
+```json
+{
+  "success_rate": 0.87,
+  "nps": 0.75,
+  "reputation_score": 0.90,
+  "diversity_index": 0.68,
+  "active_cases": 15
+}
+```
+
+**Response (200):**
+```json
+{
+  "firm_id": "550e8400-e29b-41d4-a716-446655440000",
+  "success_rate": 0.87,
+  "nps": 0.75,
+  "reputation_score": 0.90,
+  "diversity_index": 0.68,
+  "active_cases": 15,
+  "updated_at": "2024-01-15T16:30:00Z"
+}
+```
+
+### POST /firms/{firm_id}/kpis
+Criar KPIs iniciais para um escritório.
+
+**Permissões:** Escritório ou Administrador
+
+**Request Body:**
+```json
+{
+  "success_rate": 0.80,
+  "nps": 0.70,
+  "reputation_score": 0.85,
+  "diversity_index": 0.60,
+  "active_cases": 10
+}
+```
+
+**Response (201):**
+```json
+{
+  "firm_id": "550e8400-e29b-41d4-a716-446655440000",
+  "success_rate": 0.80,
+  "nps": 0.70,
+  "reputation_score": 0.85,
+  "diversity_index": 0.60,
+  "active_cases": 10,
+  "updated_at": "2024-01-15T16:30:00Z"
+}
+```
+
+### GET /firms/{firm_id}/kpis
+Obter KPIs de um escritório.
+
+**Response (200):**
+```json
+{
+  "firm_id": "550e8400-e29b-41d4-a716-446655440000",
+  "success_rate": 0.85,
+  "nps": 0.72,
+  "reputation_score": 0.88,
+  "diversity_index": 0.65,
+  "active_cases": 12,
+  "updated_at": "2024-01-15T15:30:00Z"
+}
+```
+
+### GET /firms/{firm_id}/lawyers
+Listar advogados de um escritório.
+
+**Query Parameters:**
+- `limit`: Número máximo de resultados (1-100, padrão: 50)
+- `offset`: Número de registros para pular (padrão: 0)
+
+**Response (200):**
+```json
+{
+  "firm_id": "550e8400-e29b-41d4-a716-446655440000",
+  "lawyers": [
+    {
+      "id": "lawyer-1",
+      "nome": "Dr. João Silva",
+      "especialidade": "Direito Empresarial",
+      "experiencia_anos": 10,
+      "kpi": {
+        "success_rate": 0.88,
+        "avaliacao_media": 4.5,
+        "cases_30d": 5,
+        "tempo_resposta_h": 4
+      }
+    },
+    {
+      "id": "lawyer-2",
+      "nome": "Dra. Maria Santos",
+      "especialidade": "Direito Tributário",
+      "experiencia_anos": 8,
+      "kpi": {
+        "success_rate": 0.82,
+        "avaliacao_media": 4.2,
+        "cases_30d": 7,
+        "tempo_resposta_h": 6
+      }
+    }
+  ],
+  "total": 15,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+## Endpoint de Matching com Escritórios
+
+### GET /match?include_firms=true
+Buscar matches incluindo escritórios (automaticamente ativa preset B2B para casos corporativos).
+
+**Query Parameters:**
+- `case_id`: ID do caso
+- `include_firms`: Incluir escritórios no matching (padrão: false)
+- `preset`: Preset de pesos (automaticamente definido como 'b2b' para casos corporativos)
+
+**Response (200):**
+```json
+{
+  "matches": [
+    {
+      "type": "firm",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Advocacia Silva & Associados",
+      "score": 0.92,
+      "features": {
+        "A": 0.95,
+        "E": 0.88,
+        "T": 0.85,
+        "Q": 0.90
+      },
+      "kpis": {
+        "success_rate": 0.85,
+        "nps": 0.72,
+        "reputation_score": 0.88,
+        "diversity_index": 0.65
+      },
+      "lawyers_count": 15
+    },
+    {
+      "type": "lawyer",
+      "id": "lawyer-1",
+      "nome": "Dr. João Silva",
+      "firm_id": "550e8400-e29b-41d4-a716-446655440000",
+      "firm_name": "Advocacia Silva & Associados",
+      "score": 0.89,
+      "features": {
+        "A": 0.92,
+        "S": 0.85,
+        "T": 0.88,
+        "G": 0.90
+      }
+    }
+  ],
+  "algorithm": {
+    "version": "v2.7-rc3",
+    "preset": "b2b",
+    "two_pass": true,
+    "feature_e_enabled": true
+  }
+}
+```
+
+## Códigos de Erro
+
+### 400 Bad Request
+```json
+{
+  "error": "Validation Error",
+  "message": "Nome do escritório é obrigatório",
+  "details": {
+    "field": "name",
+    "code": "required"
+  }
+}
+```
+
+### 403 Forbidden
+```json
+{
+  "error": "Forbidden",
+  "message": "Permissão insuficiente para esta operação",
+  "details": {
+    "required_role": "admin",
+    "current_role": "user"
+  }
+}
+```
+
+### 404 Not Found
+```json
+{
+  "error": "Not Found",
+  "message": "Escritório não encontrado",
+  "details": {
+    "firm_id": "550e8400-e29b-41d4-a716-446655440000"
+  }
+}
+```
+
+### 409 Conflict
+```json
+{
+  "error": "Conflict",
+  "message": "Escritório com este nome já existe",
+  "details": {
+    "field": "name",
+    "value": "Advocacia Silva & Associados"
+  }
+}
+```
+
+## Variáveis de Ambiente B2B
+
+### Feature Flags
+```bash
+# Habilitar matching de escritórios
+ENABLE_FIRM_MATCH=true
+
+# Preset padrão para casos corporativos
+DEFAULT_PRESET_CORPORATE=b2b
+
+# Percentual de rollout gradual (0-100)
+B2B_ROLLOUT_PERCENTAGE=50
+
+# Cache segmentado por entidade
+ENABLE_SEGMENTED_CACHE=true
+```
+
+### Configurações do Algoritmo
+```bash
+# Timeout para verificação de conflitos
+CONFLICT_TIMEOUT=2.0
+
+# Timeout para verificação de disponibilidade
+AVAIL_TIMEOUT=1.5
+
+# Multiplicador para success fee
+SUCCESS_FEE_MULT=10.0
+
+# Parâmetros de diversidade
+DIVERSITY_TAU=0.30
+DIVERSITY_LAMBDA=0.05
+``` 

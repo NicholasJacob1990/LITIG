@@ -42,13 +42,14 @@ from backend.algoritmo_match import (
     MatchmakingAlgorithm,
 )
 from backend.routes import (
-    cases, recommendations, users, payments, offers, reviews_route, timeline, contracts, financials,
+    cases, recommendations, payments, offers, reviews_route, timeline, contracts, financials,
     availability
 )
 from backend.api.schemas import (
     CaseRequestSchema,
     EquityDataUpdate,
     ErrorResponseSchema,
+    ExplainabilitySchema,
     HealthCheckSchema,
     LawyerListResponseSchema,
     MatchedLawyerSchema,
@@ -56,6 +57,12 @@ from backend.api.schemas import (
     MatchResponseSchema,
     SyncStatusSchema,
 )
+
+# -------------------------------------------------------------
+# Armazenamento de resultados para explicability (Redis TTL 1h)
+# -------------------------------------------------------------
+EXPLAIN_TTL_SEC = 3600  # 1 hora
+
 from backend.auth import get_current_user
 from backend.services.ab_testing import ab_testing_service
 from backend.services.hybrid_integration import HybridLegalDataService
@@ -90,7 +97,6 @@ app.add_middleware(
 )
 
 # Incluir os roteadores
-app.include_router(users.router, prefix="/api")
 app.include_router(cases.router, prefix="/api")
 app.include_router(recommendations.router, prefix="/api")
 app.include_router(payments.router, prefix="/api")
@@ -205,7 +211,7 @@ def convert_lawyer_to_schema(lawyer: Lawyer, case_coords: tuple) -> MatchedLawye
         id=lawyer.id,
         nome=lawyer.nome,
         expertise_areas=lawyer.tags_expertise,
-        score=lawyer.scores.get('fair', 0.0) if lawyer.scores else 0.0,
+        score=lawyer.scores.get('fair_base', 0.0) if lawyer.scores else 0.0,
         distance_km=round(distance, 1),
         estimated_response_time_hours=lawyer.kpi.tempo_resposta_h,
         rating=lawyer.kpi.avaliacao_media,
@@ -503,10 +509,25 @@ async def match_lawyers(
             enrich_tasks = [enrich_lawyer(lawyer, hybrid_service) for lawyer in lawyers]
             enriched_lawyers = await asyncio.gather(*enrich_tasks)
 
-            algorithm = MatchmakingAlgorithm()
-            ranked_lawyers = await algorithm.rank(
+            matcher = MatchmakingAlgorithm()
+            ranking = await matcher.rank(
                 case, enriched_lawyers, request.top_n, request.preset.value, model_version=model_version
             )
+
+            # ---- Armazenar dados de explicabilidade ------------------
+            match_id = str(uuid.uuid4())
+            if redis:
+                try:
+                    explain_payload = [lw.scores for lw in ranking]
+                    await redis.set(
+                        f"match:result:{match_id}",
+                        json.dumps(explain_payload, default=str),
+                        ex=EXPLAIN_TTL_SEC,
+                    )
+                except Exception as e:
+                    logger.warning(f"Falha ao gravar resultado de match no Redis: {e}")
+            else:
+                match_id = "local-" + match_id
 
             # Converter para schema de resposta
             case_coords = (
@@ -514,7 +535,7 @@ async def match_lawyers(
                 request.case.coordinates.longitude)
             matched_lawyers = [
                 convert_lawyer_to_schema(lawyer, case_coords)
-                for lawyer in ranked_lawyers
+                for lawyer in ranking
             ]
 
             # Preparar resposta
@@ -523,13 +544,14 @@ async def match_lawyers(
             response = MatchResponseSchema(
                 success=True,
                 case_id=case_id,
+                match_id=match_id,
                 lawyers=matched_lawyers,
                 total_lawyers_evaluated=len(lawyers),
                 algorithm_version="v3.0-hybrid",
                 preset_used=request.preset,
                 execution_time_ms=round(execution_time_ms, 2),
-                weights_used=ranked_lawyers[0].scores.get(
-                    "weights_used", {}) if ranked_lawyers and ranked_lawyers[0].scores else {},
+                weights_used=ranking[0].scores.get(
+                    "weights_used", {}) if ranking and ranking[0].scores else {},
                 case_complexity=request.case.complexity,
                 # (v2.6) Adicionar dados do A/B Test na resposta
                 ab_test_group=test_group,
@@ -893,6 +915,42 @@ async def sync_lawyer_hybrid_task(lawyer_id: str):
 
     except Exception as e:
         logger.error(f"Erro na sincronização HÍBRIDA do advogado {lawyer_id}: {e}")
+
+# ============================================================================
+# EXPLAINABILITY ENDPOINT
+# ============================================================================
+
+
+@app.get(
+    "/api/explain/{match_id}",
+    response_model=ExplainabilitySchema,
+    summary="Explicabilidade de um ranking",
+    description="Retorna detalhes de features e pesos para um resultado de match previamente calculado."
+)
+async def explain_match(match_id: str, redis: Optional[aioredis.Redis] = Depends(get_redis)):
+    if not redis:
+        raise HTTPException(status_code=503, detail="Serviço de explicabilidade indisponível (Redis ausente)")
+
+    data = await redis.get(f"match:result:{match_id}")
+    if not data:
+        raise HTTPException(status_code=404, detail="Match id não encontrado ou expirado")
+
+    try:
+        payload = json.loads(data)
+        
+        # Estruturar resposta conforme schema
+        response = ExplainabilitySchema(
+            match_id=match_id,
+            lawyers=payload.get("lawyers", []),
+            weights_used=payload.get("weights_used", {}),
+            preset=payload.get("preset", "balanced"),
+            case_complexity=payload.get("case_complexity", "MEDIUM"),
+            algorithm_version=payload.get("algorithm_version", "v2.7-rc")
+        )
+        
+        return response
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Falha ao decodificar dados de explicabilidade")
 
 # ============================================================================
 # EXCEPTION HANDLERS

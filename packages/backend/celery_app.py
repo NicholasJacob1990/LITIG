@@ -25,6 +25,7 @@ celery_app = Celery(
         "backend.jobs.train_pca_embeddings",
         "backend.jobs.sentiment_reviews",
         "backend.jobs.automated_reports",
+        "backend.jobs.provider_notifications",
     ]  # Aponta para os módulos onde as tarefas estão definidas
 )
 
@@ -96,6 +97,16 @@ celery_app.conf.beat_schedule = {
     'cleanup-old-models': {
         'task': 'backend.jobs.auto_retrain.cleanup_old_models',
         'schedule': crontab(day_of_week=1, hour=3, minute=0),  # Segunda-feira às 3h
+        'options': {'queue': 'periodic'}
+    },
+    'provider-weekly-notifications': {
+        'task': 'provider_notifications.send_weekly_notifications',
+        'schedule': crontab(day_of_week=1, hour=9, minute=0),  # Segunda-feira às 9h
+        'options': {'queue': 'notifications'}
+    },
+    'cleanup-old-notifications': {
+        'task': 'provider_notifications.cleanup_old_notifications',
+        'schedule': crontab(day_of_month=1, hour=4, minute=0),  # Dia 1 do mês às 4h
         'options': {'queue': 'periodic'}
     },
 }

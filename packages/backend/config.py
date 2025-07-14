@@ -120,3 +120,13 @@ def get_supabase_client() -> Client:
         )
 
     return _supabase_client
+
+
+def get_database_url() -> str:
+    """
+    Retorna a URL de conexão com o banco de dados PostgreSQL
+    """
+    settings = get_settings()
+    
+    # Construir URL do PostgreSQL
+    return f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
