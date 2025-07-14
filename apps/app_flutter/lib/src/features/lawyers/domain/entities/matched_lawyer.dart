@@ -15,6 +15,7 @@ class MatchedLawyer extends Equatable {
   final int? experienceYears;
   final List<String> awards;
   final String? professionalSummary;
+  final List<String> specializations;
 
   MatchedLawyer({
     required this.id,
@@ -31,6 +32,7 @@ class MatchedLawyer extends Equatable {
     this.experienceYears,
     this.awards = const [],
     this.professionalSummary,
+    this.specializations = const [],
   });
 
   factory MatchedLawyer.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class MatchedLawyer extends Equatable {
       experienceYears: json['experience'] ?? json['experience_years'],
       awards: List<String>.from(json['awards'] ?? []),
       professionalSummary: json['professional_summary'] ?? json['bio'],
+      specializations: List<String>.from(json['specializations'] ?? []),
     );
   }
 
@@ -70,6 +73,7 @@ class MatchedLawyer extends Equatable {
         'C': features.softSkills,
         'U': features.responseTime,
       },
+      'specializations': specializations,
     };
   }
 
@@ -89,6 +93,7 @@ class MatchedLawyer extends Equatable {
         experienceYears,
         awards,
         professionalSummary,
+        specializations,
       ];
 }
 

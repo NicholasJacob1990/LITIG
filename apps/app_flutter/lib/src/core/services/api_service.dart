@@ -245,27 +245,137 @@ class ApiService {
   }
 
   // ===== MATCHES =====
-  static Future<List<dynamic>> getMatches(String caseId) async {
+  static Future<Map<String, dynamic>> getMatches(
+    String caseId, {
+    String preset = 'balanced',
+    int topN = 5,
+    double? customLatitude,
+    double? customLongitude,
+    double? radiusKm,
+  }) async {
     final headers = await _getHeaders();
-    final body = jsonEncode({
-      'case_id': caseId,
-      'k': 5,
-      'preset': 'balanced',
-    });
+    
+    // Buscar dados do caso primeiro
+    final caseData = await getCaseDetail(caseId);
+    
+    // Corpo da requisição seguindo o MatchRequestSchema
+    final body = <String, dynamic>{
+      'case': {
+        'title': caseData['title'] ?? 'Caso sem título',
+        'description': caseData['description'] ?? caseData['texto_cliente'] ?? 'Descrição não disponível',
+        'area': caseData['area'] ?? 'Civil',
+        'subarea': caseData['subarea'] ?? 'Geral',
+        'urgency_hours': caseData['urgency_h'] ?? 48,
+        'coordinates': {
+          'latitude': caseData['coords']?[0] ?? -23.5505,
+          'longitude': caseData['coords']?[1] ?? -46.6333,
+        },
+        'complexity': caseData['complexity'] ?? 'MEDIUM',
+        'estimated_value': caseData['estimated_value'],
+      },
+      'top_n': topN,
+      'preset': preset,
+    };
+    
+    // Adicionar coordenadas customizadas se fornecidas
+    if (customLatitude != null && customLongitude != null) {
+      body['custom_coords'] = {
+        'latitude': customLatitude,
+        'longitude': customLongitude,
+      };
+    }
+    
+    // Adicionar raio se fornecido
+    if (radiusKm != null) {
+      body['radius_km'] = radiusKm.toInt();
+    }
+    
     final url = '$_baseUrl/match';
+
+    print('DEBUG: Enviando requisição de match com preset: $preset');
+    print('DEBUG: Coordenadas customizadas: ${customLatitude != null ? '[$customLatitude, $customLongitude]' : 'Não fornecidas'}');
+    print('DEBUG: Raio: ${radiusKm ?? 'Padrão'}km');
 
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
-      body: body,
+      body: jsonEncode(body),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['matches'] ?? [];
+      return data; // Retorna o objeto completo da resposta
     } else {
-      throw Exception('Falha ao buscar recomendações');
+      throw Exception('Falha ao buscar recomendações: Status ${response.statusCode} - ${response.body}');
     }
+  }
+
+  // ===== MATCHES - MÉTODOS ESPECÍFICOS PARA BUSCA AVANÇADA =====
+  
+  /// Busca por correspondente em localização específica
+  static Future<Map<String, dynamic>> findCorrespondent(
+    String caseId, {
+    required double latitude,
+    required double longitude,
+    double radiusKm = 15.0,
+    int topN = 5,
+  }) async {
+    return getMatches(
+      caseId,
+      preset: 'correspondent',
+      topN: topN,
+      customLatitude: latitude,
+      customLongitude: longitude,
+      radiusKm: radiusKm,
+    );
+  }
+
+  /// Busca por especialista em área específica
+  static Future<Map<String, dynamic>> findExpert(
+    String caseId, {
+    int topN = 5,
+  }) async {
+    return getMatches(
+      caseId,
+      preset: 'expert',
+      topN: topN,
+    );
+  }
+
+  /// Busca por parecerista/opinião especializada
+  static Future<Map<String, dynamic>> findExpertOpinion(
+    String caseId, {
+    int topN = 3,
+  }) async {
+    return getMatches(
+      caseId,
+      preset: 'expert_opinion',
+      topN: topN,
+    );
+  }
+
+  /// Busca econômica (melhor custo-benefício)
+  static Future<Map<String, dynamic>> findEconomic(
+    String caseId, {
+    int topN = 5,
+  }) async {
+    return getMatches(
+      caseId,
+      preset: 'economic',
+      topN: topN,
+    );
+  }
+
+  /// Busca B2B (escritório para escritório)
+  static Future<Map<String, dynamic>> findB2B(
+    String caseId, {
+    int topN = 5,
+  }) async {
+    return getMatches(
+      caseId,
+      preset: 'b2b',
+      topN: topN,
+    );
   }
 
   static Future<Map<String, dynamic>> checkTriageStatus(String taskId) async {

@@ -29,6 +29,13 @@ import 'package:meu_app/src/features/lawyers/domain/usecases/find_matches_usecas
 import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
 import 'package:meu_app/src/features/partnerships/data/partnership_service.dart';
 
+// Search (Advanced Search)
+import 'package:meu_app/src/features/search/data/datasources/search_remote_data_source.dart';
+import 'package:meu_app/src/features/search/data/repositories/search_repository_impl.dart';
+import 'package:meu_app/src/features/search/domain/repositories/search_repository.dart';
+import 'package:meu_app/src/features/search/domain/usecases/search_lawyers_usecase.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_bloc.dart';
+
 // Firms
 import 'package:meu_app/src/features/firms/data/datasources/firms_remote_datasource.dart';
 import 'package:meu_app/src/features/firms/data/repositories/firms_repository_impl.dart';
@@ -122,4 +129,37 @@ void configureDependencies() {
   // Offers
   // Services
   getIt.registerLazySingleton(() => OffersService(getIt<Dio>()));
+
+  // Search (Advanced Search)
+  // Datasources
+  getIt.registerLazySingleton<SearchRemoteDataSource>(
+      () => SearchRemoteDataSourceImpl());
+
+  // Repositories
+  getIt.registerLazySingleton<SearchRepository>(
+      () => SearchRepositoryImpl(remoteDataSource: getIt()));
+
+  // Use Cases
+  getIt.registerLazySingleton<SearchLawyersUseCase>(
+      () => SearchLawyersUseCase(getIt()));
+  getIt.registerLazySingleton<FindCorrespondentUseCase>(
+      () => FindCorrespondentUseCase(getIt()));
+  getIt.registerLazySingleton<FindExpertUseCase>(
+      () => FindExpertUseCase(getIt()));
+  getIt.registerLazySingleton<FindExpertOpinionUseCase>(
+      () => FindExpertOpinionUseCase(getIt()));
+  getIt.registerLazySingleton<FindEconomicUseCase>(
+      () => FindEconomicUseCase(getIt()));
+  getIt.registerLazySingleton<FindB2BUseCase>(
+      () => FindB2BUseCase(getIt()));
+
+  // Blocs
+  getIt.registerFactory(() => SearchBloc(
+    searchLawyersUseCase: getIt(),
+    findCorrespondentUseCase: getIt(),
+    findExpertUseCase: getIt(),
+    findExpertOpinionUseCase: getIt(),
+    findEconomicUseCase: getIt(),
+    findB2BUseCase: getIt(),
+  ));
 } 
