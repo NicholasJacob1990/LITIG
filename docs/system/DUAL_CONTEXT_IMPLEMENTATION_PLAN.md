@@ -1,5 +1,7 @@
 # Plano de Implementação: Funcionalidade de Contexto Duplo
 
+> **📄 Documento Relacionado**: Este plano complementa o `PLANO_CONTEXTO_DUPLO_ADVOGADOS.md` fornecendo uma visão mais detalhada e estratégica da mesma implementação. Para uma abordagem mais concisa e focada na implementação, consulte o documento relacionado.
+
 ## 📋 **Visão Geral**
 
 Este documento detalha o plano de implementação da funcionalidade de "contexto duplo" para a plataforma LITGO, permitindo que advogados contratantes (`lawyer_individual`, `lawyer_office`, `lawyer_platform_associate`) possam criar e gerenciar casos como se fossem clientes.
@@ -46,9 +48,10 @@ Adicionar aba "Meus Casos" com FloatingActionButton para criação direta de cas
 
 ### **Padrões Seguidos**
 - ✅ `StatefulShellBranch` para nova rota
-- ✅ Consistência nos `branchIndex`
+- ✅ Consistência nos `branchIndex` com comentários descritivos
 - ✅ Reutilização de `CasesScreen` (DRY principle)
 - ✅ Integração com `go_router` estabelecida
+- ✅ Simplicidade sobre complexidade (evitar over-engineering)
 
 ---
 
@@ -63,11 +66,19 @@ Adicionar aba "Meus Casos" com FloatingActionButton para criação direta de cas
 **Alteração**: Inserir nova rota `/contractor-cases` no grupo de abas do "Advogado Contratante"
 
 ```dart
-// Advogado Contratante (índices 6-12 AGORA)
-StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),
+// --- Advogado Contratante (índices 6-12 APÓS ALTERAÇÃO) ---
+StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),                    // 6: Início
 // ⬇️ ADICIONAR NOVA ROTA AQUI ⬇️
-StatefulShellBranch(routes: [GoRoute(path: '/contractor-cases', builder: (context, state) => const CasesScreen())]),
-StatefulShellBranch(routes: [GoRoute(path: '/contractor-offers', builder: (context, state) => const CaseOffersScreen())]),
+StatefulShellBranch(routes: [GoRoute(path: '/contractor-cases', builder: (context, state) => const CasesScreen())]),      // 7: Meus Casos (NOVA)
+StatefulShellBranch(routes: [GoRoute(path: '/contractor-offers', builder: (context, state) => const CaseOffersScreen())]), // 8: Ofertas (antes era 7)
+StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const LawyerSearchScreen())]),       // 9: Parceiros (antes era 8)
+StatefulShellBranch(routes: [GoRoute(path: '/partnerships', builder: (context, state) => const PartnershipsScreen())]),   // 10: Parcerias (antes era 9)
+StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const MessagesScreen())]), // 11: Mensagens (antes era 10)
+StatefulShellBranch(routes: [GoRoute(path: '/contractor-profile', builder: (context, state) => const ProfileScreen())]),  // 12: Perfil (antes era 11)
+
+// --- Cliente (índices 13-18 APÓS ALTERAÇÃO) ---
+StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),       // 13: Início (antes era 12)
+StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),     // 14: Meus Casos (antes era 13)
 // ... demais rotas com índices ajustados
 ```
 
@@ -142,7 +153,8 @@ class CasesScreen extends StatelessWidget {
 ### **1. Risco dos Índices (`branchIndex`)**
 - **Criticidade**: ALTA
 - **Descrição**: Erro nos `branchIndex` fará abas apontarem para telas erradas
-- **Mitigação**: Verificação tripla do mapeamento de índices
+- **Mitigação**: Usar comentários descritivos inline (melhor prática) em vez de abstrações complexas como enums
+- **Boas Práticas**: Comentários claros no código são preferíveis a over-engineering
 
 ### **2. Comportamento do CasesBloc**
 - **Criticidade**: MÉDIA
@@ -158,7 +170,24 @@ class CasesScreen extends StatelessWidget {
 
 ## 🚀 **Melhorias Recomendadas**
 
-### **Melhoria 1: Contexto Inteligente no CasesBloc**
+> **💡 Princípio**: Manter simplicidade e evitar over-engineering. Comentários descritivos são preferíveis a abstrações complexas.
+
+### **Melhoria 1: Comentários Descritivos nas Branches**
+
+```dart
+branches: [
+  // --- Advogado Associado (índices 0-5) ---
+  StatefulShellBranch(routes: [GoRoute(path: '/dashboard', ...)]), // 0: Dashboard
+  StatefulShellBranch(routes: [GoRoute(path: '/cases', ...)]),    // 1: Casos
+  
+  // --- Advogado Contratante (índices 6-12) ---
+  StatefulShellBranch(routes: [GoRoute(path: '/home', ...)]),     // 6: Início
+  StatefulShellBranch(routes: [GoRoute(path: '/contractor-cases', ...)]), // 7: Meus Casos (NOVA)
+  // ...
+],
+```
+
+### **Melhoria 2: Contexto Inteligente no CasesBloc**
 
 ```dart
 class FetchCases extends CasesEvent {
@@ -167,7 +196,7 @@ class FetchCases extends CasesEvent {
 }
 ```
 
-### **Melhoria 2: FAB Condicional**
+### **Melhoria 3: FAB Condicional**
 
 ```dart
 floatingActionButton: _shouldShowCreateButton(userRole) 
@@ -180,7 +209,7 @@ bool _shouldShowCreateButton(String userRole) {
 }
 ```
 
-### **Melhoria 3: Título Dinâmico**
+### **Melhoria 4: Título Dinâmico**
 
 ```dart
 appBar: AppBar(
@@ -254,6 +283,7 @@ String _getScreenTitle(String userRole) {
 ## 📚 **Referências Técnicas**
 
 ### **Documentos Relacionados**
+- `PLANO_CONTEXTO_DUPLO_ADVOGADOS.md` - Versão concisa deste plano (foco na implementação)
 - `ANALISE_NAVEGACAO_FLUTTER.md` - Análise da navegação atual
 - `FLUTTER_MIGRATION_MASTER_PLAN.md` - Plano mestre de migração
 - `ATUALIZAÇÃO_STATUS.md` - Status atual do projeto
@@ -269,25 +299,25 @@ String _getScreenTitle(String userRole) {
 ## ✅ **Checklist de Implementação**
 
 ### **Navegação**
-- [ ] Adicionar rota `/contractor-cases` no `app_router.dart`
-- [ ] Adicionar item "Meus Casos" no `main_tabs_shell.dart`
-- [ ] Ajustar todos os `branchIndex` subsequentes
-- [ ] Verificar mapeamento de índices
+- [x] Adicionar rota `/contractor-cases` no `app_router.dart`
+- [x] Adicionar item "Meus Casos" no `main_tabs_shell.dart`
+- [x] Ajustar todos os `branchIndex` subsequentes
+- [x] Verificar mapeamento de índices
 
 ### **CasesScreen**
-- [ ] Importar `go_router`
-- [ ] Adicionar `FloatingActionButton.extended`
-- [ ] Remover botão duplicado do `_buildEmptyState`
-- [ ] Testar navegação para `/triage`
+- [x] Importar `go_router`
+- [x] Adicionar `FloatingActionButton.extended`
+- [x] Remover botão duplicado do `_buildEmptyState`
+- [x] Testar navegação para `/triage`
 
 ### **Testes**
-- [ ] Criar testes de integração para nova navegação
-- [ ] Testar fluxo completo de criação de casos
-- [ ] Verificar comportamento para diferentes perfis
-- [ ] Testes de regressão
+- [x] Criar testes de integração para nova navegação
+- [x] Testar fluxo completo de criação de casos
+- [x] Verificar comportamento para diferentes perfis
+- [x] Testar regressão
 
 ### **Documentação**
-- [ ] Atualizar `ATUALIZAÇÃO_STATUS.md`
+- [x] Atualizar `ATUALIZAÇÃO_STATUS.md`
 - [ ] Documentar mudanças na navegação
 - [ ] Atualizar guias de usuário
 

@@ -1,5 +1,7 @@
 # Plano de Ação: Implementação do Contexto Duplo para Advogados
 
+> **📄 Documento Relacionado**: Este plano complementa o `DUAL_CONTEXT_IMPLEMENTATION_PLAN.md` fornecendo uma abordagem mais concisa e focada na implementação. Para uma visão mais detalhada e estratégica, consulte o documento relacionado.
+
 **Data:** $(date)
 **Autor:** Sistema de Desenvolvimento IA
 **Status:** Planejado
@@ -21,10 +23,11 @@ Adicionar uma nova aba "Meus Casos" à barra de navegação dos perfis de Advoga
 
 ## 3. Princípios Técnicos
 
-- **Simplicidade e Clareza:** A implementação será direta, modificando os índices da `StatefulShellRoute` manualmente, sem adicionar camadas de abstração desnecessárias.
+- **Simplicidade e Clareza:** A implementação será direta, modificando os índices da `StatefulShellRoute` manualmente, sem adicionar camadas de abstração desnecessárias (evitar over-engineering).
 - **Fonte Única da Verdade:** A ordem das rotas na lista de `branches` do arquivo `app_router.dart` será a única fonte de verdade para os índices.
-- **Código Auto-Documentado:** Serão adicionados comentários claros no código para garantir que a lógica de indexação seja óbvia e a manutenção futura seja segura.
+- **Código Auto-Documentado:** Serão adicionados comentários descritivos inline no código para garantir que a lógica de indexação seja óbvia e a manutenção futura seja segura.
 - **Reutilização de Componentes:** A `CasesScreen` existente será reutilizada, mantendo a consistência da interface.
+- **Melhores Práticas Flutter:** Seguir as práticas recomendadas pela comunidade Flutter para `StatefulShellRoute`, priorizando comentários claros sobre abstrações complexas.
 
 ## 4. Plano de Implementação Passo a Passo
 
@@ -38,7 +41,7 @@ Adicionar uma nova aba "Meus Casos" à barra de navegação dos perfis de Advoga
 
 ```dart
         branches: [
-          // Advogado Associado (índices 0-5)
+          // --- Advogado Associado (índices 0-5) ---
           StatefulShellBranch(routes: [GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen())]), // 0: Dashboard
           StatefulShellBranch(routes: [GoRoute(path: '/cases', builder: (context, state) => const CasesScreen())]),       // 1: Casos
           StatefulShellBranch(routes: [GoRoute(path: '/agenda', builder: (context, state) => const AgendaScreen())]),      // 2: Agenda
@@ -46,7 +49,7 @@ Adicionar uma nova aba "Meus Casos" à barra de navegação dos perfis de Advoga
           StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const MessagesScreen())]),  // 4: Mensagens
           StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),    // 5: Perfil
           
-          // Advogado Contratante (índices 6-12 APÓS ALTERAÇÃO)
+          // --- Advogado Contratante (índices 6-12 APÓS ALTERAÇÃO) ---
           StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),                    // 6: Início
           // ⬇️ NOVA ROTA ADICIONADA ⬇️
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-cases', builder: (context, state) => const CasesScreen())]),      // 7: Meus Casos (Contratante)
@@ -56,13 +59,13 @@ Adicionar uma nova aba "Meus Casos" à barra de navegação dos perfis de Advoga
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const MessagesScreen())]), // 11: Mensagens (antes era 10)
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-profile', builder: (context, state) => const ProfileScreen())]),  // 12: Perfil (antes era 11)
 
-          // Cliente (índices 13-18 APÓS ALTERAÇÃO - antes eram 12-17)
-          StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),       // 13: Início
-          StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),     // 14: Meus Casos
-          StatefulShellBranch(routes: [GoRoute(path: '/find-lawyers', builder: (context, state) => const LawyersScreen())]),  // 15: Advogados
-          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const MessagesScreen())]), // 16: Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/services', builder: (context, state) => const ServicesScreen())]),     // 17: Serviços
-          StatefulShellBranch(routes: [GoRoute(path: '/client-profile', builder: (context, state) => const ProfileScreen())]), // 18: Perfil
+          // --- Cliente (índices 13-18 APÓS ALTERAÇÃO - antes eram 12-17) ---
+          StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),       // 13: Início (antes era 12)
+          StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),     // 14: Meus Casos (antes era 13)
+          StatefulShellBranch(routes: [GoRoute(path: '/find-lawyers', builder: (context, state) => const LawyersScreen())]),  // 15: Advogados (antes era 14)
+          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const MessagesScreen())]), // 16: Mensagens (antes era 15)
+          StatefulShellBranch(routes: [GoRoute(path: '/services', builder: (context, state) => const ServicesScreen())]),     // 17: Serviços (antes era 16)
+          StatefulShellBranch(routes: [GoRoute(path: '/client-profile', builder: (context, state) => const ProfileScreen())]), // 18: Perfil (antes era 17)
         ],
 ```
 
@@ -247,9 +250,10 @@ class CasesScreen extends StatelessWidget {
 ## 7. Considerações Futuras
 
 ### Melhorias Possíveis
-1. **Diferenciação Visual:** Adicionar indicadores visuais para distinguir casos criados como cliente vs. casos recebidos como advogado
-2. **Filtros Avançados:** Implementar filtros específicos para casos próprios vs. casos de terceiros
-3. **Notificações:** Sistema de notificações para casos criados pelo próprio usuário
+1. **Comentários Descritivos:** Manter comentários inline claros nas branches (melhor prática vs. enums)
+2. **Diferenciação Visual:** Adicionar indicadores visuais para distinguir casos criados como cliente vs. casos recebidos como advogado
+3. **Filtros Avançados:** Implementar filtros específicos para casos próprios vs. casos de terceiros
+4. **Notificações:** Sistema de notificações para casos criados pelo próprio usuário
 
 ### Manutenção
 - **Documentação:** Manter a documentação de navegação atualizada

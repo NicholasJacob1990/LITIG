@@ -119,6 +119,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required bool isPcd,
     required bool agreedToTerms,
     required String userType,
+    required bool isPlatformAssociate,
   }) async {
     try {
       await remoteDataSource.registerLawyer(
@@ -143,6 +144,7 @@ class AuthRepositoryImpl implements AuthRepository {
         isPcd: isPcd,
         agreedToTerms: agreedToTerms,
         userType: userType,
+        isPlatformAssociate: isPlatformAssociate,
       );
     } on supabase.AuthException catch (e) {
       throw Exception('Falha no registro: ${e.message}');

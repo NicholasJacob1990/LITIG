@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/presentation/widgets/case_card.dart';
 import 'package:meu_app/injection_container.dart';
@@ -16,6 +17,11 @@ class CasesScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Meus Casos'),
           centerTitle: true,
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => context.go('/triage'),
+          label: const Text('Criar Novo Caso'),
+          icon: const Icon(LucideIcons.plus),
         ),
         body: Column(
           children: [
@@ -114,14 +120,6 @@ class CasesScreen extends StatelessWidget {
           Text(
             'Não há casos com status "$activeFilter"',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Navegar para tela de nova triagem
-            },
-            icon: const Icon(LucideIcons.plus),
-            label: const Text('Iniciar Nova Consulta'),
           ),
         ],
       ),

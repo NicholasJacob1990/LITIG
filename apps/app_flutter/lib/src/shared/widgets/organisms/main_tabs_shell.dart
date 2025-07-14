@@ -73,20 +73,21 @@ class MainTabsShell extends StatelessWidget {
       case 'lawyer_platform_associate': // NOVO: Super Associado - usa mesma navegação de captação
         return [
           NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 6),
-          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 7), // Sistema de ofertas
-          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 8),
-          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 9),
-          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 10),
-          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 11),
+          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 7), // NOVA ABA
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 8), // Sistema de ofertas (antes era 7)
+          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 9), // antes era 8
+          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 10), // antes era 9
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 11), // antes era 10
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 12), // antes era 11
         ];
       default: // client
         return [
-          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 12),
-          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 13),
-          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 14),
-          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 15),
-          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 16),
-          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 17),
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 13), // antes era 12
+          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 14), // antes era 13
+          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 15), // antes era 14
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 16), // antes era 15
+          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 17), // antes era 16
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 18), // antes era 17
         ];
     }
   }

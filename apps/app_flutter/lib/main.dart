@@ -50,81 +50,54 @@ Future<void> main() async {
     print('❌ Erro ao configurar dependências: $e');
   }
 
+  final authBloc = getIt<AuthBloc>();
+  authBloc.add(AuthCheckStatusRequested());
+  final router = appRouter(authBloc);
+
   runApp(
-    BlocProvider(
-      create: (context) => ThemeCubit(),
-      child: const MyApp(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ThemeCubit()),
+        BlocProvider.value(value: authBloc),
+      ],
+      child: MyApp(router: router),
     ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late final AuthBloc _authBloc;
-  late final GoRouter _router;
-
-  @override
-  void initState() {
-    super.initState();
-    print('📱 Inicializando MyApp...');
-    
-    try {
-      _authBloc = getIt<AuthBloc>();
-      print('✅ AuthBloc criado');
-      
-      _authBloc.add(AuthCheckStatusRequested());
-      print('✅ AuthCheckStatusRequested enviado');
-      
-      _router = appRouter(_authBloc);
-      print('✅ Router configurado');
-    } catch (e) {
-      print('❌ Erro na inicialização: $e');
-    }
-  }
-
-  @override
-  void dispose() {
-    _authBloc.close();
-    super.dispose();
-  }
+class MyApp extends StatelessWidget {
+  final GoRouter router;
+  
+  const MyApp({super.key, required this.router});
 
   @override
   Widget build(BuildContext context) {
     print('🎨 Construindo MaterialApp...');
     
-    return BlocProvider.value(
-      value: _authBloc,
-      child: BlocListener<AuthBloc, auth_states.AuthState>(
-        listener: (context, state) {
-          print('🔄 AuthState mudou para: ${state.runtimeType}');
+    return BlocListener<AuthBloc, auth_states.AuthState>(
+      listener: (context, state) {
+        print('🔄 AuthState mudou para: ${state.runtimeType}');
+      },
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          print('🎨 Construindo com tema: $themeMode');
+          return MaterialApp.router(
+            routerConfig: router,
+            title: 'LITGO Flutter',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: themeMode,
+            builder: (context, widget) {
+              print('🏗️ Builder chamado, widget: ${widget.runtimeType}');
+              ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+                print('❌ Erro capturado: ${errorDetails.exception}');
+                return ErrorScreen(error: errorDetails.exception.toString());
+              };
+              return widget ?? const ErrorScreen(error: 'Widget nulo');
+            },
+          );
         },
-        child: BlocBuilder<ThemeCubit, ThemeMode>(
-          builder: (context, themeMode) {
-            print('🎨 Construindo com tema: $themeMode');
-            return MaterialApp.router(
-              routerConfig: _router,
-              title: 'LITGO Flutter',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light(),
-              darkTheme: AppTheme.dark(),
-              themeMode: themeMode,
-              builder: (context, widget) {
-                print('🏗️ Builder chamado, widget: ${widget.runtimeType}');
-                ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-                  print('❌ Erro capturado: ${errorDetails.exception}');
-                  return ErrorScreen(error: errorDetails.exception.toString());
-                };
-                return widget ?? const ErrorScreen(error: 'Widget nulo');
-              },
-            );
-          },
-        ),
       ),
     );
   }
