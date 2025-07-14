@@ -2,6 +2,30 @@
 
 ## Última Atualização: Janeiro 2025
 
+### 🔄 Novo Branch Criado - flutter-app-improvements
+
+**Data:** Janeiro 2025  
+**Commit:** 2acc9efbd  
+**URL:** https://github.com/NicholasJacob1990/LITIG/tree/flutter-app-improvements
+
+#### Alterações Incluídas:
+- Sistema completo de explicabilidade (Fase 1)
+- Limpeza de arquivos __pycache__ e otimizações
+- Novos documentos técnicos (B2B_MONITORING_GUIDE.md, EXPLICABILIDADE_IMPLEMENTATION_PLAN.md)
+- Componentes Flutter e React Native aprimorados
+- Migrações de banco de dados e novos serviços
+- Scripts de infraestrutura e monitoramento
+- Dashboards Grafana para B2B
+- Testes de integração e documentação atualizada
+
+#### Estatísticas:
+- 354 arquivos modificados
+- 19.751 inserções
+- 1.171 deleções
+- Principais áreas: Backend services, Frontend components, Docs, Infrastructure
+
+---
+
 ### Sistema de Explicabilidade - Fase 1 (CONCLUÍDO)
 
 #### ✅ Tarefa 1.1: Módulo de Explicabilidade Backend
