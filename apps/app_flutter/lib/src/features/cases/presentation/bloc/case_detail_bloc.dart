@@ -1,13 +1,15 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/case_detail.dart';
 
 sealed class CaseDetailEvent {}
+
 class LoadCaseDetail extends CaseDetailEvent {
   final String caseId;
   LoadCaseDetail(this.caseId);
 }
 
-class CaseDetailState {
+class CaseDetailState extends Equatable {
   const CaseDetailState({
     this.loading = false,
     this.error,
@@ -19,15 +21,18 @@ class CaseDetailState {
   final CaseDetail? caseDetail;
 
   CaseDetailState copyWith({
-    bool? loading, 
-    String? error, 
+    bool? loading,
+    String? error,
     CaseDetail? caseDetail,
   }) =>
       CaseDetailState(
-        loading: loading ?? this.loading, 
-        error: error ?? this.error,
+        loading: loading ?? this.loading,
+        error: error,
         caseDetail: caseDetail ?? this.caseDetail,
       );
+
+  @override
+  List<Object?> get props => [loading, error, caseDetail];
 }
 
 class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
@@ -44,6 +49,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         emit(state.copyWith(
           loading: false,
           caseDetail: mockCaseDetail,
+          error: null,
         ));
       } catch (e) {
         emit(state.copyWith(loading: false, error: e.toString()));
@@ -199,24 +205,6 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
           const ProcessPhase(
             id: 'phase_004',
             name: 'Elaboração',
-            description: 'Elaboração da estratégia jurídica',
-            isCompleted: false,
-            isCurrent: false,
-            completedAt: null,
-          ),
-          const ProcessPhase(
-            id: 'phase_005',
-            name: 'Finalização',
-            description: 'Entrega final dos documentos',
-            isCompleted: false,
-            isCurrent: false,
-            completedAt: null,
-          ),
-        ],
-      ),
-    );
-  }
-} 
             description: 'Elaboração da estratégia jurídica',
             isCompleted: false,
             isCurrent: false,
