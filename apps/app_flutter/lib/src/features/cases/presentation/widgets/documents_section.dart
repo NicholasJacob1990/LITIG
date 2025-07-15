@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/case_detail.dart';
 import '../../../../shared/utils/app_colors.dart';
+import '../../../../core/utils/logger.dart';
 
 class DocumentsSection extends StatelessWidget {
   final List<CaseDocument>? documents;
@@ -257,11 +258,11 @@ class DocumentsSection extends StatelessWidget {
 
   void _downloadDocument(CaseDocument document) {
     // TODO: Implementar download
-    print('Downloading: ${document.name}');
+    AppLogger.info('Downloading: ${document.name}');
   }
 
   void _previewDocument(CaseDocument document) {
     // TODO: Implementar preview
-    print('Previewing: ${document.name}');
+    AppLogger.info('Previewing: ${document.name}');
   }
 } 

@@ -2,35 +2,36 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide MultipartFile;
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class DioService {
   static Dio? _dio;
 
   static String get _baseUrl {
     // Debug logs para verificar a detecção de plataforma
-    print('🔍 DEBUG: kIsWeb = $kIsWeb');
+    AppLogger.debug('kIsWeb = $kIsWeb');
     
     // Detecção mais robusta de plataforma
     if (kIsWeb) {
-      print('🌐 DEBUG: Detectado Flutter Web - usando 127.0.0.1:8080');
+      AppLogger.debug('Detectado Flutter Web - usando 127.0.0.1:8080');
       return 'http://127.0.0.1:8080/api';
     }
     
     // Para plataformas nativas, verificar o Platform
     try {
       if (Platform.isAndroid) {
-        print('🤖 DEBUG: Detectado Android - usando 10.0.2.2:8080');
+        AppLogger.debug('Detectado Android - usando 10.0.2.2:8080');
         return 'http://10.0.2.2:8080/api'; // Emulador Android
       } else if (Platform.isIOS) {
-        print('🍎 DEBUG: Detectado iOS - usando 127.0.0.1:8080');
+        AppLogger.debug('Detectado iOS - usando 127.0.0.1:8080');
         return 'http://127.0.0.1:8080/api'; // Simulador iOS
       } else {
-        print('🖥️ DEBUG: Detectado Desktop - usando localhost:8080');
+        AppLogger.debug('Detectado Desktop - usando localhost:8080');
         return 'http://localhost:8080/api'; // Desktop
       }
     } catch (e) {
       // Se Platform não estiver disponível (ex: Web), usar localhost
-      print('⚠️ DEBUG: Platform não disponível, fallback para 127.0.0.1:8080');
+      AppLogger.warning('Platform não disponível, fallback para 127.0.0.1:8080');
       return 'http://127.0.0.1:8080/api';
     }
   }
@@ -38,7 +39,7 @@ class DioService {
   static Dio get dio {
     if (_dio == null) {
       final baseUrl = _baseUrl;
-      print('🚀 DEBUG: Inicializando Dio com baseUrl: $baseUrl');
+      AppLogger.debug('Inicializando Dio com baseUrl: $baseUrl');
       
       _dio = Dio(BaseOptions(
         baseUrl: baseUrl,
@@ -56,7 +57,7 @@ class DioService {
       _dio!.interceptors.add(LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (object) => print('DIO: $object'),
+        logPrint: (object) => AppLogger.debug('DIO: $object'),
       ));
     }
     return _dio!;
@@ -77,7 +78,7 @@ class DioService {
         if (coords != null) 'coords': coords,
       });
     } catch (e) {
-      print('Erro na triagem: $e');
+      AppLogger.error('Erro na triagem', error: e);
       rethrow;
     }
   }
@@ -87,7 +88,7 @@ class DioService {
     try {
       return await dio.get('/triage/status/$taskId');
     } catch (e) {
-      print('Erro ao verificar status da triagem: $e');
+      AppLogger.error('Erro ao verificar status da triagem', error: e);
       rethrow;
     }
   }
@@ -111,7 +112,7 @@ class DioService {
         if (excludeIds != null) 'exclude_ids': excludeIds,
       });
     } catch (e) {
-      print('Erro ao buscar matches: $e');
+      AppLogger.error('Erro ao buscar matches', error: e);
       rethrow;
     }
   }
@@ -127,7 +128,7 @@ class DioService {
         'lawyer_ids': lawyerIds,
       });
     } catch (e) {
-      print('Erro ao explicar matches: $e');
+      AppLogger.error('Erro ao explicar matches', error: e);
       rethrow;
     }
   }
@@ -158,7 +159,7 @@ class DioService {
       
       return await dio.get('/lawyers', queryParameters: params);
     } catch (e) {
-      print('Erro na busca de advogados: $e');
+      AppLogger.error('Erro na busca de advogados', error: e);
       rethrow;
     }
   }
@@ -170,7 +171,7 @@ class DioService {
     try {
       return await dio.get('/cases/my-cases');
     } catch (e) {
-      print('Erro ao buscar casos: $e');
+      AppLogger.error('Erro ao buscar casos', error: e);
       rethrow;
     }
   }
@@ -180,7 +181,7 @@ class DioService {
     try {
       return await dio.get('/cases/$caseId');
     } catch (e) {
-      print('Erro ao buscar detalhes do caso: $e');
+      AppLogger.error('Erro ao buscar detalhes do caso', error: e);
       rethrow;
     }
   }
@@ -197,7 +198,7 @@ class DioService {
         if (notes != null) 'notes': notes,
       });
     } catch (e) {
-      print('Erro ao atualizar status do caso: $e');
+      AppLogger.error('Erro ao atualizar status do caso', error: e);
       rethrow;
     }
   }
@@ -209,7 +210,7 @@ class DioService {
     try {
       return await dio.get('/cases/$caseId/messages');
     } catch (e) {
-      print('Erro ao buscar mensagens: $e');
+      AppLogger.error('Erro ao buscar mensagens', error: e);
       rethrow;
     }
   }
@@ -226,7 +227,7 @@ class DioService {
         if (attachments != null) 'attachments': attachments,
       });
     } catch (e) {
-      print('Erro ao enviar mensagem: $e');
+      AppLogger.error('Erro ao enviar mensagem', error: e);
       rethrow;
     }
   }
@@ -246,7 +247,7 @@ class DioService {
       
       return await dio.post('/documents/upload/$caseId', data: formData);
     } catch (e) {
-      print('Erro ao fazer upload de documento: $e');
+      AppLogger.error('Erro ao fazer upload de documento', error: e);
       rethrow;
     }
   }
@@ -256,7 +257,7 @@ class DioService {
     try {
       return await dio.get('/documents/case/$caseId');
     } catch (e) {
-      print('Erro ao buscar documentos: $e');
+      AppLogger.error('Erro ao buscar documentos', error: e);
       rethrow;
     }
   }
@@ -266,7 +267,7 @@ class DioService {
     try {
       return await dio.get('/documents/$documentId/download');
     } catch (e) {
-      print('Erro ao baixar documento: $e');
+      AppLogger.error('Erro ao baixar documento', error: e);
       rethrow;
     }
   }
@@ -293,7 +294,7 @@ class DioService {
         'category': category,
       });
     } catch (e) {
-      print('Erro ao registrar tempo: $e');
+      AppLogger.error('Erro ao registrar tempo', error: e);
       rethrow;
     }
   }
@@ -303,7 +304,7 @@ class DioService {
     try {
       return await dio.get('/cases/$caseId/time_entries');
     } catch (e) {
-      print('Erro ao buscar entradas de tempo: $e');
+      AppLogger.error('Erro ao buscar entradas de tempo', error: e);
       rethrow;
     }
   }
@@ -326,7 +327,7 @@ class DioService {
         if (adjustments != null) 'adjustments': adjustments,
       });
     } catch (e) {
-      print('Erro ao ajustar honorários: $e');
+      AppLogger.error('Erro ao ajustar honorários', error: e);
       rethrow;
     }
   }
@@ -346,7 +347,7 @@ class DioService {
         'case_id': caseId,
       });
     } catch (e) {
-      print('Erro ao criar intenção de pagamento: $e');
+      AppLogger.error('Erro ao criar intenção de pagamento', error: e);
       rethrow;
     }
   }
@@ -362,7 +363,7 @@ class DioService {
         'case_id': caseId,
       });
     } catch (e) {
-      print('Erro ao criar pagamento PIX: $e');
+      AppLogger.error('Erro ao criar pagamento PIX', error: e);
       rethrow;
     }
   }
@@ -384,7 +385,7 @@ class DioService {
         'case_id': caseId,
       });
     } catch (e) {
-      print('Erro ao criar avaliação: $e');
+      AppLogger.error('Erro ao criar avaliação', error: e);
       rethrow;
     }
   }
@@ -402,41 +403,41 @@ class AuthInterceptor extends Interceptor {
         options.headers['Authorization'] = 'Bearer $accessToken';
       } else {
         // Para testes, adicionar um token mockado quando não há autenticação
-        print('⚠️  Sem token de autenticação - usando modo teste');
+        AppLogger.warning('Sem token de autenticação - usando modo teste');
         options.headers['X-Test-Mode'] = 'true';
       }
     } catch (e) {
-      print('⚠️  Erro ao obter token: $e - usando modo teste');
+      AppLogger.warning('Erro ao obter token - usando modo teste', error: e);
       options.headers['X-Test-Mode'] = 'true';
     }
     
-    print('DEBUG: Request ${options.method} ${options.uri}');
-    print('DEBUG: Headers: ${options.headers}');
+    AppLogger.debug('Request ${options.method} ${options.uri}');
+    AppLogger.debug('Headers: ${options.headers}');
     
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('DEBUG: Response ${response.statusCode} from ${response.requestOptions.uri}');
+    AppLogger.debug('Response ${response.statusCode} from ${response.requestOptions.uri}');
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('DEBUG: Error ${err.response?.statusCode} from ${err.requestOptions.uri}');
-    print('DEBUG: Error message: ${err.message}');
+    AppLogger.debug('Error ${err.response?.statusCode} from ${err.requestOptions.uri}');
+    AppLogger.debug('Error message: ${err.message}');
     
     // Tratar erros de autenticação de forma mais flexível
     if (err.response?.statusCode == 401) {
-      print('DEBUG: Token inválido ou expirado - mas continuando...');
+      AppLogger.debug('Token inválido ou expirado - mas continuando...');
     }
     
     // Tratar erros de conectividade específicos para Flutter Web
     if (err.type == DioExceptionType.connectionError) {
-      print('⚠️  AVISO: Backend não está acessível em localhost:8080');
-      print('💡 O app vai usar dados mock para demonstração');
-      print('🔧 Para conectar ao backend real, certifique-se que ele está rodando');
+      AppLogger.warning('AVISO: Backend não está acessível em localhost:8080');
+      AppLogger.info('O app vai usar dados mock para demonstração');
+      AppLogger.info('Para conectar ao backend real, certifique-se que ele está rodando');
     }
     
     handler.next(err);

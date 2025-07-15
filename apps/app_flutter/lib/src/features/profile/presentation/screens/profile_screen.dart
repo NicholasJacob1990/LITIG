@@ -150,7 +150,7 @@ class _LawyerFirmSection extends StatelessWidget {
                   )
                 else if (state is LawyerFirmLoaded)
                   _buildFirmInfo(context, state)
-                else if (state is LawyerFirmNotLinked)
+                else if (state is LawyerFirmNotAssociated)
                   _buildNotLinkedInfo(context)
                 else if (state is LawyerFirmError)
                   _buildErrorInfo(context, state.message)
@@ -182,7 +182,7 @@ class _LawyerFirmSection extends StatelessWidget {
             const Icon(LucideIcons.userCheck, size: 16),
             const SizedBox(width: 4),
             Text(
-              'Função: ${_getRoleDisplayName(state.lawyerRole)}',
+              'Função: Advogado Associado',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
@@ -216,30 +216,16 @@ class _LawyerFirmSection extends StatelessWidget {
         
         const SizedBox(height: 16),
         
-        if (state.canManage)
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Navegar para tela de gestão do escritório
-                // context.go('/firm/${firm.id}/manage');
-              },
-              icon: const Icon(LucideIcons.settings),
-              label: const Text('Gerenciar Escritório'),
-            ),
-          )
-        else
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Navegar para detalhes do escritório
-                // context.go('/firm/${firm.id}');
-              },
-              icon: const Icon(LucideIcons.eye),
-              label: const Text('Ver Detalhes do Escritório'),
-            ),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              context.push('/firm/${firm.id}');
+            },
+            icon: const Icon(LucideIcons.eye),
+            label: const Text('Ver Detalhes do Escritório'),
           ),
+        ),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 abstract class AuthRemoteDataSource {
   Future<void> login({required String email, required String password});
@@ -232,7 +233,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       // Não re-lançar a exceção necessariamente, pode ser opcional.
       // Ou, se for crítico, lançar uma exceção específica de storage.
-      print('Erro no upload do arquivo para o bucket $bucket: $e');
+      AppLogger.error('Erro no upload do arquivo para o bucket $bucket', error: e);
       return null;
     }
   }

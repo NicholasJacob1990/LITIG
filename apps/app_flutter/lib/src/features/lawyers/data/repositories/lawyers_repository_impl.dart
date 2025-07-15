@@ -2,6 +2,7 @@ import 'package:meu_app/src/features/lawyers/data/datasources/lawyers_remote_dat
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/repositories/lawyers_repository.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class LawyersRepositoryImpl implements LawyersRepository {
   final LawyersRemoteDataSource remoteDataSource;
@@ -39,7 +40,7 @@ class LawyersRepositoryImpl implements LawyersRepository {
         ),
       )).toList();
     } catch (e) {
-      print('Erro no repositório de lawyers: $e');
+      AppLogger.error('Erro no repositório de lawyers', error: e);
       rethrow;
     }
   }

@@ -4,6 +4,7 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/features/dashboard/presentation/widgets/client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_dashboard.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -25,7 +26,7 @@ class DashboardScreen extends StatelessWidget {
           final user = state.user;
           
           // Debug: imprimir o role para verificar o valor
-          print('DEBUG Dashboard: User role = ${user.role}');
+          AppLogger.debug('Dashboard: User role = ${user.role}');
           
           if (_isLawyer(user.role)) {
             return LawyerDashboard(userName: user.name ?? 'Advogado');

@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart' as lucide;
+import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 
 class LawyerMatchCard extends StatelessWidget {
-  final Map<String, dynamic> lawyer;
+  final MatchedLawyer lawyer;
   final VoidCallback onSelect;
   final VoidCallback onExplain;
 
@@ -17,7 +18,7 @@ class LawyerMatchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final score = (lawyer['fair'] as num? ?? 0.0) * 100;
+    final score = lawyer.fair * 100;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -32,8 +33,8 @@ class LawyerMatchCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: lawyer['avatar_url'] != null ? CachedNetworkImageProvider(lawyer['avatar_url']) : null,
-                  child: lawyer['avatar_url'] == null ? Icon(lucide.LucideIcons.user, size: 30) : null,
+                  backgroundImage: lawyer.avatarUrl != null ? CachedNetworkImageProvider(lawyer.avatarUrl!) : null,
+                  child: lawyer.avatarUrl == null ? Icon(lucide.LucideIcons.user, size: 30) : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -41,12 +42,12 @@ class LawyerMatchCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        lawyer['nome'] ?? 'Advogado',
+                        lawyer.nome,
                         style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        lawyer['primary_area'] ?? 'Especialista',
+                        lawyer.primaryArea,
                         style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary),
                       ),
                     ],
@@ -84,18 +85,18 @@ class LawyerMatchCard extends StatelessWidget {
                 _buildInfoChip(
                   context,
                   icon: lucide.LucideIcons.star,
-                  label: '${lawyer['rating']?.toStringAsFixed(1) ?? 'N/A'} Avaliação',
+                  label: '${lawyer.rating?.toStringAsFixed(1) ?? 'N/A'} Avaliação',
                 ),
                 _buildInfoChip(
                   context,
                   icon: lucide.LucideIcons.mapPin,
-                  label: lawyer['distance_km'] != null ? '${(lawyer['distance_km'] as num).toStringAsFixed(1)} km' : 'N/A',
+                  label: '${lawyer.distanceKm?.toStringAsFixed(1) ?? 'N/A'} km',
                 ),
                 _buildInfoChip(
                   context,
-                  icon: (lawyer['is_available'] ?? false) ? lucide.LucideIcons.checkCircle : lucide.LucideIcons.xCircle,
-                  label: (lawyer['is_available'] ?? false) ? 'Disponível' : 'Indisponível',
-                  iconColor: (lawyer['is_available'] ?? false) ? Colors.green : Colors.red,
+                  icon: lawyer.isAvailable ? lucide.LucideIcons.checkCircle : lucide.LucideIcons.xCircle,
+                  label: lawyer.isAvailable ? 'Disponível' : 'Indisponível',
+                  iconColor: lawyer.isAvailable ? Colors.green : Colors.red,
                 ),
               ],
             ),
@@ -138,11 +139,11 @@ class LawyerMatchCard extends StatelessWidget {
 
   Widget _buildExperienceAndAwards(BuildContext context) {
     final theme = Theme.of(context);
-    final experienceYears = lawyer['experience_years'] as int?;
-    final awards = lawyer['awards'] as List?;
-    final professionalSummary = lawyer['professional_summary'] as String?;
+    final experienceYears = lawyer.experienceYears;
+    final awards = lawyer.awards;
+    final professionalSummary = lawyer.professionalSummary;
 
-    if (experienceYears == null && (awards == null || awards.isEmpty)) {
+    if ((experienceYears ?? 0) == 0 && (awards == null || awards.isEmpty)) {
       return const SizedBox.shrink();
     }
 
@@ -152,7 +153,7 @@ class LawyerMatchCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (experienceYears != null)
+            if ((experienceYears ?? 0) > 0)
               Row(
                 children: [
                   Icon(lucide.LucideIcons.briefcase, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
@@ -174,7 +175,7 @@ class LawyerMatchCard extends StatelessWidget {
             runSpacing: 8,
             children: awards.take(3).map((award) => Chip(
               avatar: Icon(lucide.LucideIcons.award, size: 14, color: Colors.amber),
-              label: Text(award.toString(), style: theme.textTheme.labelSmall),
+              label: Text(award, style: theme.textTheme.labelSmall),
               backgroundColor: Colors.amber.withOpacity(0.1),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             )).toList(),
@@ -206,7 +207,7 @@ class LawyerMatchCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Perfil - ${lawyer['nome']}', style: theme.textTheme.headlineSmall),
+                      Text('Perfil - ${lawyer.nome}', style: theme.textTheme.headlineSmall),
                       IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
                     ],
                   ),
@@ -217,9 +218,9 @@ class LawyerMatchCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildModalSection(theme, title: 'Resumo Profissional', content: lawyer['professional_summary']),
-                          _buildModalSection(theme, title: 'Experiência', content: '${lawyer['experience_years']} anos'),
-                          _buildModalSection(theme, title: 'Prêmios e Reconhecimentos', items: lawyer['awards']),
+                          _buildModalSection(theme, title: 'Resumo Profissional', content: lawyer.professionalSummary),
+                          _buildModalSection(theme, title: 'Experiência', content: '${lawyer.experienceYears ?? 0} anos'),
+                          _buildModalSection(theme, title: 'Prêmios e Reconhecimentos', items: lawyer.awards),
                         ],
                       ),
                     ),
@@ -233,14 +234,14 @@ class LawyerMatchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildModalSection(ThemeData theme, {required String title, String? content, List? items}) {
+  Widget _buildModalSection(ThemeData theme, {required String title, String? content, List<String>? items}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        if (content != null) Text(content, style: theme.textTheme.bodyLarge),
-        if (items != null)
+        if (content != null && content.isNotEmpty) Text(content, style: theme.textTheme.bodyLarge),
+        if (items != null && items.isNotEmpty)
           ...items.map((item) => Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Text('• $item', style: theme.textTheme.bodyMedium),

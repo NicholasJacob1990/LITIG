@@ -12,6 +12,9 @@ import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/src/core/theme/app_theme.dart';
 import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:meu_app/injection_container.dart' as di;
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:meu_app/src/core/utils/logger.dart';
 
 String get _supabaseUrl {
   if (kIsWeb) {
@@ -26,29 +29,33 @@ String get _supabaseUrl {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  print('🚀 Iniciando aplicação...');
+  AppLogger.init('Iniciando aplicação...');
 
   try {
     await Supabase.initialize(
       url: _supabaseUrl,
       anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQw54IsKbscS7Cs8_wnwU',
     );
-    print('✅ Supabase inicializado com sucesso');
+    AppLogger.success('Supabase inicializado com sucesso');
   } catch (e) {
     if (e.toString().contains('already initialized')) {
-      print('✅ Supabase já estava inicializado (hot restart)');
+      AppLogger.info('Supabase já estava inicializado (hot restart)');
     } else {
-      print('❌ Erro ao inicializar Supabase: $e');
-      print('⚠️  Continuando sem Supabase - usando modo offline');
+      AppLogger.error('Erro ao inicializar Supabase', error: e);
+      AppLogger.warning('Continuando sem Supabase - usando modo offline');
     }
   }
 
   try {
     configureDependencies();
-    print('✅ Dependências configuradas');
+    AppLogger.success('Dependências configuradas');
   } catch (e) {
-    print('❌ Erro ao configurar dependências: $e');
+    AppLogger.error('Erro ao configurar dependências', error: e);
   }
+
+  // Initialize timeago locales
+  timeago.setLocaleMessages('pt_BR', timeago.PtBrMessages());
+  timeago.setDefaultLocale('pt_BR');
 
   runApp(
     BlocProvider(
@@ -72,19 +79,19 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    print('📱 Inicializando MyApp...');
+    AppLogger.init('Inicializando MyApp...');
     
     try {
       _authBloc = getIt<AuthBloc>();
-      print('✅ AuthBloc criado');
+      AppLogger.success('AuthBloc criado');
       
       _authBloc.add(AuthCheckStatusRequested());
-      print('✅ AuthCheckStatusRequested enviado');
+      AppLogger.success('AuthCheckStatusRequested enviado');
       
       _router = appRouter(_authBloc);
-      print('✅ Router configurado');
+      AppLogger.success('Router configurado');
     } catch (e) {
-      print('❌ Erro na inicialização: $e');
+      AppLogger.error('Erro na inicialização', error: e);
     }
   }
 
@@ -96,17 +103,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print('🎨 Construindo MaterialApp...');
+    AppLogger.debug('Construindo MaterialApp...');
     
     return BlocProvider.value(
       value: _authBloc,
       child: BlocListener<AuthBloc, auth_states.AuthState>(
         listener: (context, state) {
-          print('🔄 AuthState mudou para: ${state.runtimeType}');
+          AppLogger.debug('AuthState mudou para: ${state.runtimeType}');
         },
         child: BlocBuilder<ThemeCubit, ThemeMode>(
           builder: (context, themeMode) {
-            print('🎨 Construindo com tema: $themeMode');
+            AppLogger.debug('Construindo com tema: $themeMode');
             return MaterialApp.router(
               routerConfig: _router,
               title: 'LITGO Flutter',
@@ -115,9 +122,9 @@ class _MyAppState extends State<MyApp> {
               darkTheme: AppTheme.dark(),
               themeMode: themeMode,
               builder: (context, widget) {
-                print('🏗️ Builder chamado, widget: ${widget.runtimeType}');
+                AppLogger.debug('Builder chamado, widget: ${widget.runtimeType}');
                 ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-                  print('❌ Erro capturado: ${errorDetails.exception}');
+                  AppLogger.error('Erro capturado', error: errorDetails.exception);
                   return ErrorScreen(error: errorDetails.exception.toString());
                 };
                 return widget ?? const ErrorScreen(error: 'Widget nulo');

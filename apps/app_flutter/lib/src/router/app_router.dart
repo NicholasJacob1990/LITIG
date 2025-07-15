@@ -8,28 +8,31 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as 
 import 'package:meu_app/src/features/auth/presentation/screens/login_screen.dart';
 import 'package:meu_app/src/features/auth/presentation/screens/register_client_screen.dart';
 import 'package:meu_app/src/features/auth/presentation/screens/register_lawyer_screen.dart';
-import 'package:meu_app/src/features/auth/presentation/screens/contract_signature_screen.dart';
-import 'package:meu_app/src/features/auth/presentation/screens/contract_activation_screen.dart';
+// import 'package:meu_app/src/features/auth/presentation/screens/contract_signature_screen.dart';
+// import 'package:meu_app/src/features/auth/presentation/screens/contract_activation_screen.dart';
 import 'package:meu_app/src/features/auth/presentation/screens/splash_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/case_detail_screen.dart';
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/lawyers_screen.dart';
-import 'package:meu_app/src/features/partnerships/presentation/screens/lawyer_search_screen.dart';
 import 'package:meu_app/src/features/messages/presentation/screens/messages_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/settings_screen.dart';
-import 'package:meu_app/src/features/schedule/presentation/screens/agenda_screen.dart';
+// import 'package:meu_app/src/features/schedule/presentation/screens/agenda_screen.dart';
 import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart';
-import 'package:meu_app/src/features/partnerships/presentation/screens/offers_screen.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
+// import 'package:meu_app/src/features/partnerships/presentation/screens/offers_screen.dart';
 import 'package:meu_app/src/features/partnerships/presentation/screens/partnerships_screen.dart';
-import 'package:meu_app/src/features/offers/presentation/screens/case_offers_screen.dart';
+import 'package:meu_app/src/features/partnerships/presentation/screens/partners_search_screen.dart';
+// import 'package:meu_app/src/features/offers/presentation/screens/case_offers_screen.dart';
 import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
 import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_screen.dart';
 import 'package:meu_app/src/features/services/presentation/screens/services_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_detail_screen.dart';
-import 'routes.dart';
+import 'package:meu_app/injection_container.dart';
+
+// import 'routes.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -77,23 +80,23 @@ GoRouter appRouter(AuthBloc authBloc) {
           return RegisterLawyerScreen(role: role);
         },
       ),
-      GoRoute(
-        path: '/contract-signature',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          final userId = extra?['userId'] as String?;
-          return ContractSignatureScreen(userId: userId);
-        },
-      ),
-      GoRoute(
-        path: '/contract-activation',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          final userId = extra?['userId'] as String?;
-          final contractId = extra?['contractId'] as String?;
-          return ContractActivationScreen(userId: userId, contractId: contractId);
-        },
-      ),
+      // GoRoute(
+      //   path: '/contract-signature',
+      //   builder: (context, state) {
+      //     final extra = state.extra as Map<String, dynamic>?;
+      //     final userId = extra?['userId'] as String?;
+      //     return ContractSignatureScreen(userId: userId);
+      //   },
+      // ),
+      // GoRoute(
+      //   path: '/contract-activation',
+      //   builder: (context, state) {
+      //     final extra = state.extra as Map<String, dynamic>?;
+      //     final userId = extra?['userId'] as String?;
+      //     final contractId = extra?['contractId'] as String?;
+      //     return ContractActivationScreen(userId: userId, contractId: contractId);
+      //   },
+      // ),
       
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -103,16 +106,26 @@ GoRouter appRouter(AuthBloc authBloc) {
           // Advogado Associado (índices 0-5)
           StatefulShellBranch(routes: [GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen())]),
           StatefulShellBranch(routes: [GoRoute(path: '/cases', builder: (context, state) => const CasesScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/agenda', builder: (context, state) => const AgendaScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
+          // StatefulShellBranch(routes: [GoRoute(path: '/agenda', builder: (context, state) => const AgendaScreen())]),
+          // StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
           StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const MessagesScreen())]),
           StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),
           
           // Advogado Contratante (índices 6-11)
           StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/contractor-offers', builder: (context, state) => const CaseOffersScreen())]), // NOVA ABA
-          StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const LawyerSearchScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/partnerships', builder: (context, state) => const PartnershipsScreen())]),
+          // StatefulShellBranch(routes: [GoRoute(path: '/contractor-offers', builder: (context, state) => const CaseOffersScreen())]), // NOVA ABA
+          StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const LawyersScreen())]), // Alterado para reutilizar LawyersScreen
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/partnerships',
+                builder: (context, state) => BlocProvider(
+                  create: (context) => getIt<PartnershipsBloc>(),
+                  child: const PartnershipsScreen(),
+                ),
+              ),
+            ],
+          ),
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const MessagesScreen())]),
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-profile', builder: (context, state) => const ProfileScreen())]),
 
@@ -133,9 +146,15 @@ GoRouter appRouter(AuthBloc authBloc) {
         builder: (context, state) => CaseDetailScreen(caseId: state.pathParameters['caseId']!),
       ),
       
-      // Rotas de Escritórios
+      // Rotas de Escritórios (navegação interna)
       GoRoute(
         path: '/firm/:firmId',
+        builder: (context, state) => FirmDetailScreen(firmId: state.pathParameters['firmId']!),
+      ),
+      
+      // Rotas de Escritórios (navegação externa/modal)
+      GoRoute(
+        path: '/firm-modal/:firmId',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => FirmDetailScreen(firmId: state.pathParameters['firmId']!),
       ),

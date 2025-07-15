@@ -173,6 +173,14 @@ A nova abordagem mantém os fluxos atuais como base e adiciona as ferramentas de
 
 ---
 
+### 🧭 Arquitetura de Navegação e Perfis
+
+A navegação e a interação dos diferentes perfis de usuário com o sistema de busca avançada estão detalhadas no documento central de arquitetura do sistema.
+
+**[➡️ Consulte aqui a Arquitetura Geral do Sistema para detalhes sobre Perfis e Navegação](ARQUITETURA_GERAL_DO_SISTEMA.md)**
+
+---
+
 ## 🚀 LISTA DE TAREFAS ATUALIZADA (PÓS-ANÁLISE)
 
 Esta lista de tarefas foi **adaptada** para refletir a estratégia de aprimoramento das telas existentes.
@@ -268,6 +276,44 @@ Esta lista de tarefas foi **adaptada** para refletir a estratégia de aprimorame
 - **Simplicidade Mantida, Poder Adicionado:** O fluxo simples continua disponível, mas ferramentas avançadas estão a um clique de distância.
 - **Flexibilidade Total:** Permite combinar busca por texto, por localização e por intenção na mesma tela.
 - **Resultados Mais Precisos:** Fornecer mais contexto ao algoritmo leva a matches de maior qualidade.
+
+---
+
+### 🚪 Ponto de Entrada do Cliente: A Aba "Advogados"
+
+Para garantir que o cliente tenha um acesso claro e intuitivo ao sistema de busca, a navegação principal manterá a aba **"Advogados"**, em vez de uma aba genérica "Buscar". Esta decisão, embora pareça simples, é fundamental para a experiência do usuário e se alinha com a estratégia de aprimoramento.
+
+#### Justificativa da Nomenclatura
+- **Clareza de Propósito:** O termo "Advogados" é mais específico e direto sobre o que o cliente encontrará.
+- **Consistência e Intuitividade:** Respeita a implementação atual e o modelo mental do usuário, que busca por profissionais, não por uma "ferramenta de busca".
+- **Diferenciação de Contexto:** Evita confusão com outras funcionalidades de busca (casos, documentos, etc.) que podem ser implementadas no futuro.
+
+#### Fluxo de Usuário e Integração
+A aba "Advogados" não é apenas um link, mas sim o **início do funil do sistema de busca avançada** para o cliente.
+
+1.  **Ponto de Partida:** O cliente clica na aba "Advogados" no menu principal.
+2.  **Tela de Ação:** É direcionado para a `LawyersScreen`, que já integra a interface do sistema de busca (campo de texto, filtros e o seletor de estilo de busca).
+3.  **Engajamento:** O cliente interage com os componentes da busca para encontrar os profissionais mais adequados.
+
+```
+Cliente → Menu Principal → Aba "Advogados" → LawyersScreen → [Busca/Filtros] → Resultados
+```
+
+#### Estrutura do Menu do Cliente
+A estrutura de navegação que suporta este fluxo é a seguinte:
+
+```dart
+// Implementação em main_tabs_shell.dart
+case 'client':
+  return [
+    NavigationItem(label: 'Início', icon: Icons.home, branchIndex: 0),
+    NavigationItem(label: 'Advogados', icon: Icons.people, branchIndex: 1), // Ponto de entrada para a busca
+    NavigationItem(label: 'Meus Casos', icon: Icons.folder, branchIndex: 2),
+    NavigationItem(label: 'Mensagens', icon: Icons.message, branchIndex: 3),
+    NavigationItem(label: 'Perfil', icon: Icons.person, branchIndex: 4),
+  ];
+```
+Esta abordagem garante que o sistema de busca avançada, poderoso e complexo em sua lógica interna, seja apresentado ao cliente da forma mais simples e direta possível.
 
 ---
 
