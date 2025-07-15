@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+# Instalar dependências do sistema necessárias para LightGBM
+RUN apt-get update && apt-get install -y \
+    libgomp1 \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configurar diretório de trabalho
+WORKDIR /app
+
+# Copiar e instalar dependências
+COPY packages/backend/ltr_pipeline/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código fonte do serviço LTR
+COPY packages/backend/ltr_pipeline/src/ src/
+
+# Copiar modelos pré-treinados para o local esperado
+COPY packages/backend/ltr_pipeline/models/dev/ /opt/models/
+
+# Expor porta do serviço
+EXPOSE 8080
+
+# Comando para iniciar o serviço FastAPI
+CMD ["uvicorn", "src.ltr_service.main:app", "--host", "0.0.0.0", "--port", "8080"] 

@@ -90,6 +90,9 @@ class CaseCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
 
+    // NOVO: Adiciona o badge de alocação, se existir
+    final allocationBadge = _buildAllocationBadge(context);
+
     return Row(
       children: [
         Expanded(
@@ -101,6 +104,11 @@ class CaseCard extends StatelessWidget {
             )
           ),
         ),
+        // NOVO: Renderiza o badge
+        if (allocationBadge != null) ...[
+          allocationBadge,
+          const SizedBox(width: 8),
+        ],
         // Indicador de complexidade para casos corporativos
         if (caseData?.isHighComplexity == true) ...[
           Chip(
@@ -165,6 +173,50 @@ class CaseCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  // NOVO WIDGET PARA O BADGE DE ALOCAÇÃO
+  Widget? _buildAllocationBadge(BuildContext context) {
+    if (caseData?.allocationType == null || caseData!.allocationType!.isEmpty) {
+      return null;
+    }
+
+    final theme = Theme.of(context);
+    final type = caseData!.allocationType!;
+
+    final Map<String, Map<String, dynamic>> badgeConfig = {
+      'direct': {'label': 'Direto', 'icon': LucideIcons.userCheck, 'color': Colors.green},
+      'partnership': {'label': 'Parceria', 'icon': LucideIcons.users, 'color': Colors.orange},
+      'proactive': {'label': 'Proativo', 'icon': LucideIcons.zap, 'color': Colors.purple},
+      'suggestion': {'label': 'Sugestão', 'icon': LucideIcons.sparkles, 'color': Colors.cyan},
+      'delegation': {'label': 'Delegação', 'icon': LucideIcons.gitBranchPlus, 'color': Colors.blueGrey}, // Ícone corrigido
+      'dual': {'label': 'Duplo', 'icon': LucideIcons.copy, 'color': Colors.indigo},
+    };
+
+    final config = badgeConfig[type] ?? {'label': type, 'icon': LucideIcons.file, 'color': Colors.grey};
+
+    return Chip(
+      key: Key('allocation_badge_$type'), // Chave para os testes de integração
+      avatar: Icon(
+        config['icon'], 
+        size: 14, 
+        color: config['color']
+      ),
+      label: Text(
+        config['label'],
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
+      backgroundColor: (config['color'] as Color).withOpacity(0.1),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide.none,
+      ),
     );
   }
 
@@ -475,15 +527,17 @@ class CaseCard extends StatelessWidget {
   }
 
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'em andamento':
-        return AppColors.primaryBlue;
-      case 'concluído':
-        return AppColors.green;
-      case 'aguardando':
-        return AppColors.orange;
+    switch (status) {
+      case 'Em Andamento':
+        return Colors.blue;
+      case 'Concluído':
+        return Colors.green;
+      case 'Aguardando':
+        return Colors.orange;
+      case 'Cancelado':
+        return Colors.red;
       default:
-        return AppColors.lightText2;
+        return Colors.grey;
     }
   }
 } 

@@ -39,6 +39,10 @@ class PresetPesos(str, Enum):
     FAST = "fast"
     EXPERT = "expert"
     BALANCED = "balanced"
+    ECONOMIC = "economic"
+    B2B = "b2b"
+    CORRESPONDENT = "correspondent"
+    EXPERT_OPINION = "expert_opinion"
 
 
 class StatusCaso(str, Enum):
@@ -98,6 +102,8 @@ class MatchRequestSchema(BaseModel):
         description="Preset de pesos do algoritmo")
     include_jusbrasil_data: bool = Field(
         True, description="Incluir dados históricos do Jusbrasil")
+    custom_coords: Optional[CoordenadaSchema] = Field(None, description="Coordenadas customizadas para busca geográfica")
+    radius_km: Optional[int] = Field(None, ge=1, le=500, description="Raio de busca em km")
 
 
 class LawyerKPISchema(BaseModel):

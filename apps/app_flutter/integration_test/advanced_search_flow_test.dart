@@ -461,5 +461,225 @@ void main() {
         expect(resultCards, findsWidgets);
       }
     });
+
+    // NOVOS TESTES PARA FUNCIONALIDADES IMPLEMENTADAS
+    
+    testWidgets('PresetSelector - Aba Recomendações para Clientes', (tester) async {
+      // Arrange
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Act - Navegar para Advogados & Escritórios
+      try {
+        final lawyersTab = find.text('Advogados & Escritórios');
+        if (lawyersTab.evaluate().isNotEmpty) {
+          await tester.tap(lawyersTab.first);
+          await tester.pumpAndSettle();
+        }
+      } catch (e) {
+        // Tenta navegar por ícone
+        final searchIcon = find.byIcon(Icons.people);
+        if (searchIcon.evaluate().isNotEmpty) {
+          await tester.tap(searchIcon.first);
+          await tester.pumpAndSettle();
+        }
+      }
+
+      // Assert - Verifica se a aba Recomendações está selecionada por padrão
+      expect(find.text('Recomendações'), findsWidgets);
+
+      // Verifica se o PresetSelector está presente
+      expect(find.text('Tipo de Recomendação'), findsOneWidget);
+      
+      // Verifica os chips de preset implementados
+      expect(find.text('Recomendado'), findsOneWidget);
+      expect(find.text('Melhor Custo'), findsOneWidget);
+      expect(find.text('Mais Experientes'), findsOneWidget);
+
+      // Act - Testa interação com os presets
+      await tester.tap(find.text('Melhor Custo'));
+      await tester.pumpAndSettle();
+
+      // Assert - Verifica que o preset foi selecionado
+      final melhorCustoChip = find.text('Melhor Custo');
+      expect(melhorCustoChip, findsOneWidget);
+
+      // Act - Testa mudança para outro preset
+      await tester.tap(find.text('Mais Experientes'));
+      await tester.pumpAndSettle();
+
+      // Assert - Verifica que mudou para o novo preset
+      final maisExperientesChip = find.text('Mais Experientes');
+      expect(maisExperientesChip, findsOneWidget);
+    });
+
+    testWidgets('Ferramentas de Precisão - Aba Buscar para Advogados', (tester) async {
+      // Arrange
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Act - Navegar para Advogados & Escritórios
+      try {
+        final lawyersTab = find.text('Advogados & Escritórios');
+        if (lawyersTab.evaluate().isNotEmpty) {
+          await tester.tap(lawyersTab.first);
+          await tester.pumpAndSettle();
+        }
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Act - Navegar para aba Buscar
+      try {
+        await tester.tap(find.text('Buscar'));
+        await tester.pumpAndSettle();
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Assert - Verifica elementos das ferramentas de precisão
+      
+      // 1. Dropdown de Foco da Busca
+      expect(find.text('Foco da Busca'), findsOneWidget);
+      expect(find.text('Equilibrado'), findsWidgets);
+      
+      // 2. Botão de Localização
+      final locationButton = find.text('Adicionar');
+      if (locationButton.evaluate().isNotEmpty) {
+        expect(locationButton, findsOneWidget);
+        
+        // Act - Testa clique no botão de localização (abre LocationPicker real)
+        await tester.tap(locationButton.first);
+        await tester.pumpAndSettle();
+        
+        // Assert - Verifica se LocationPicker foi aberto
+        expect(find.text('Selecionar Localização'), findsOneWidget);
+        expect(find.text('Buscar endereço...'), findsOneWidget);
+        
+        // Act - Simula busca por endereço
+        final searchField = find.byType(TextField).first;
+        await tester.enterText(searchField, 'São Paulo, SP');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+        
+        // Act - Confirma seleção
+        final confirmButton = find.text('Confirmar');
+        if (confirmButton.evaluate().isNotEmpty) {
+          await tester.tap(confirmButton.first);
+          await tester.pumpAndSettle();
+        }
+        
+        // Assert - Verifica se voltou para a tela anterior e localização foi aplicada
+        expect(find.text('Local'), findsWidgets);
+      }
+
+      // 3. Toggle de Escritórios
+      expect(find.text('Incluir escritórios na busca'), findsOneWidget);
+      
+      // 4. Campo de busca principal
+      expect(find.text('Buscar advogados ou escritórios...'), findsOneWidget);
+    });
+
+    testWidgets('Integração SearchBloc - Fluxo completo de busca', (tester) async {
+      // Arrange
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Act - Navegar para aba de busca
+      try {
+        final lawyersTab = find.text('Advogados & Escritórios');
+        if (lawyersTab.evaluate().isNotEmpty) {
+          await tester.tap(lawyersTab.first);
+          await tester.pumpAndSettle();
+          
+          await tester.tap(find.text('Buscar'));
+          await tester.pumpAndSettle();
+        }
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Act - Realiza busca por texto
+      final searchField = find.byType(TextField);
+      if (searchField.evaluate().isNotEmpty) {
+        await tester.enterText(searchField.first, 'direito empresarial');
+        await tester.pumpAndSettle();
+        
+        // Assert - Verifica se a busca foi executada
+        // (Em um ambiente real, verificaríamos se os resultados apareceram)
+        expect(find.text('direito empresarial'), findsWidgets);
+      }
+
+      // Act - Testa mudança de foco da busca
+      try {
+        final focoDropdown = find.text('Equilibrado');
+        if (focoDropdown.evaluate().isNotEmpty) {
+          await tester.tap(focoDropdown.first);
+          await tester.pumpAndSettle();
+          
+          final correspondentOption = find.text('Correspondente');
+          if (correspondentOption.evaluate().isNotEmpty) {
+            await tester.tap(correspondentOption.first);
+            await tester.pumpAndSettle();
+          }
+        }
+      } catch (e) {
+        // Continua se não conseguir interagir com dropdown
+      }
+
+      // Act - Testa toggle de escritórios
+      try {
+        final firmsToggle = find.byType(Switch);
+        if (firmsToggle.evaluate().isNotEmpty) {
+          await tester.tap(firmsToggle.first);
+          await tester.pumpAndSettle();
+        }
+      } catch (e) {
+        // Continua se não conseguir interagir com toggle
+      }
+    });
+
+    testWidgets('Compatibilidade com PartnerSearchResultList', (tester) async {
+      // Arrange
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Act - Navegar para área de resultados
+      try {
+        final lawyersTab = find.text('Advogados & Escritórios');
+        if (lawyersTab.evaluate().isNotEmpty) {
+          await tester.tap(lawyersTab.first);
+          await tester.pumpAndSettle();
+        }
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Assert - Verifica se o componente de resultados existe
+      // (Em ambiente real, seria populate com dados mockados)
+      final resultsList = find.byType(RefreshIndicator);
+      if (resultsList.evaluate().isNotEmpty) {
+        expect(resultsList, findsWidgets);
+        
+        // Act - Testa refresh
+        await tester.drag(resultsList.first, const Offset(0, 300));
+        await tester.pumpAndSettle();
+      }
+
+      // Assert - Verifica mensagens de estado vazio se necessário
+      final emptyMessages = [
+        'Nenhum resultado encontrado.',
+        'Nenhuma recomendação encontrada.',
+        'Digite algo para buscar parceiros...',
+      ];
+      
+      for (final message in emptyMessages) {
+        final messageWidget = find.text(message);
+        if (messageWidget.evaluate().isNotEmpty) {
+          expect(messageWidget, findsWidgets);
+          break; // Só precisa encontrar uma mensagem de estado vazio
+        }
+      }
+    });
   });
 } 

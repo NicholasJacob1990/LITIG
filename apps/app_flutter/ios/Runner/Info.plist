@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Permissões para LocationPicker -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Este app precisa acessar sua localização para ajudar você a encontrar advogados e escritórios próximos.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Este app precisa acessar sua localização para ajudar você a encontrar advogados e escritórios próximos.</string>
 </dict>
 </plist>

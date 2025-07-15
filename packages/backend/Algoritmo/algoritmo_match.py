@@ -132,6 +132,16 @@ PRESET_WEIGHTS = {
         "A": 0.12, "S": 0.15, "T": 0.15, "Q": 0.17,
         "E": 0.10, "G": 0.05, "U": 0.05, "R": 0.03,
         "C": 0.03, "P": 0.10, "M": 0.05
+    },
+    "correspondent": {
+        "A": 0.10, "S": 0.05, "T": 0.05, "G": 0.25,
+        "Q": 0.10, "U": 0.20, "R": 0.03, "C": 0.05,
+        "E": 0.02, "P": 0.15, "M": 0.00
+    },
+    "expert_opinion": {
+        "A": 0.10, "S": 0.30, "T": 0.03, "G": 0.00,
+        "Q": 0.35, "U": 0.00, "R": 0.00, "C": 0.00,
+        "E": 0.02, "P": 0.00, "M": 0.20
     }
 }
 
@@ -476,6 +486,7 @@ class LawFirm(Lawyer):
     team_size: int = 0
     main_latlon: Tuple[float, float] = (0.0, 0.0)
     kpi_firm: FirmKPI = field(default_factory=FirmKPI)
+    is_boutique: bool = False  # Novo campo para identificar escritórios boutique
 
 
 @dataclass(slots=True)

@@ -509,9 +509,13 @@ async def match_lawyers(
             enrich_tasks = [enrich_lawyer(lawyer, hybrid_service) for lawyer in lawyers]
             enriched_lawyers = await asyncio.gather(*enrich_tasks)
 
+            # ⭐️ ADICIONADO: Exclui o próprio usuário da lista de candidatos
+            user_id_to_exclude = str(current_user.id)
+            filtered_lawyers = [lawyer for lawyer in enriched_lawyers if lawyer.id != user_id_to_exclude]
+
             matcher = MatchmakingAlgorithm()
             ranking = await matcher.rank(
-                case, enriched_lawyers, request.top_n, request.preset.value, model_version=model_version
+                case, filtered_lawyers, request.top_n, request.preset.value, model_version=model_version
             )
 
             # ---- Armazenar dados de explicabilidade ------------------

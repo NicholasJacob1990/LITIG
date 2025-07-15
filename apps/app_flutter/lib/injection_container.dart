@@ -47,6 +47,21 @@ import 'package:meu_app/src/features/partnerships/domain/repositories/partnershi
 import 'package:meu_app/src/features/partnerships/domain/usecases/get_partnerships.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
 
+// Search
+import 'package:meu_app/src/features/search/data/datasources/search_remote_data_source.dart';
+import 'package:meu_app/src/features/search/data/repositories/search_repository_impl.dart';
+import 'package:meu_app/src/features/search/domain/repositories/search_repository.dart';
+import 'package:meu_app/src/features/search/domain/usecases/perform_search.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_bloc.dart';
+
+// Offers
+import 'package:meu_app/src/features/offers/data/datasources/offers_remote_data_source.dart';
+import 'package:meu_app/src/features/offers/data/datasources/offers_remote_data_source_impl.dart';
+import 'package:meu_app/src/features/offers/data/repositories/offers_repository_impl.dart';
+import 'package:meu_app/src/features/offers/domain/repositories/offers_repository.dart';
+import 'package:meu_app/src/features/offers/domain/usecases/offers_usecases.dart';
+import 'package:meu_app/src/features/offers/presentation/bloc/offers_bloc.dart';
+
 // Services
 import 'package:meu_app/src/core/services/dio_service.dart';
 
@@ -156,6 +171,39 @@ void configureDependencies() {
   // Blocs
   getIt.registerFactory(() => PartnershipsBloc(getPartnerships: getIt()));
 
+  // Search
+  // Datasources
+  getIt.registerLazySingleton<SearchRemoteDataSource>(
+      () => SearchRemoteDataSourceImpl());
+  // Repositories
+  getIt.registerLazySingleton<SearchRepository>(
+      () => SearchRepositoryImpl(remoteDataSource: getIt()));
+  // Use Cases
+  getIt.registerLazySingleton(() => PerformSearch(getIt()));
+  // Blocs
+  getIt.registerFactory(() => SearchBloc(performSearch: getIt()));
+
+  // Offers
+  // Datasources
+  getIt.registerLazySingleton<OffersRemoteDataSource>(
+      () => OffersRemoteDataSourceImpl(dio: getIt()));
+  // Repositories
+  getIt.registerLazySingleton<OffersRepository>(
+      () => OffersRepositoryImpl(remoteDataSource: getIt()));
+  // Use Cases
+  getIt.registerLazySingleton(() => GetPendingOffersUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetOfferHistoryUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetOfferStatsUseCase(getIt()));
+  getIt.registerLazySingleton(() => AcceptOfferUseCase(getIt()));
+  getIt.registerLazySingleton(() => RejectOfferUseCase(getIt()));
+  // Blocs
+  getIt.registerFactory(() => OffersBloc(
+        getPendingOffersUseCase: getIt(),
+        getOfferHistoryUseCase: getIt(),
+        getOfferStatsUseCase: getIt(),
+        acceptOfferUseCase: getIt(),
+        rejectOfferUseCase: getIt(),
+      ));
 
   getIt.registerFactory(() => LawyerFirmBloc(firmsRepository: getIt()));
 } 

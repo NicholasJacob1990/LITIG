@@ -3,8 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyers_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
-import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_bloc.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_bloc.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_event.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_state.dart';
+import 'package:meu_app/src/features/search/domain/entities/search_params.dart';
+import 'package:meu_app/src/features/search/presentation/widgets/partner_search_result_list.dart';
+import 'package:meu_app/src/features/search/presentation/widgets/location_picker.dart';
+import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
+import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:meu_app/injection_container.dart';
 
 class LawyersScreen extends StatelessWidget {
@@ -20,6 +28,7 @@ class LawyersScreen extends StatelessWidget {
           firmsRepository: getIt(),
         )),
         BlocProvider(create: (context) => getIt<FirmBloc>()),
+        BlocProvider(create: (context) => getIt<SearchBloc>()),
       ],
       child: const LawyersView(),
     );
@@ -116,49 +125,159 @@ class HybridRecommendationsTabView extends StatefulWidget {
 }
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
+  String _selectedPreset = 'balanced';
   
   @override
   void initState() {
     super.initState();
-    // Buscar recomendações híbridas ao inicializar
-    context.read<HybridMatchBloc>().add(const FetchHybridMatches(
-      caseId: 'mock_case_id', // TODO: Usar caso real do contexto
+    // Buscar recomendações usando SearchBloc
+    _fetchRecommendations();
+  }
+
+  void _fetchRecommendations() {
+    final params = SearchParams(
+      preset: _selectedPreset,
       includeFirms: true,
-      preset: 'balanced',
-    ));
+    );
+    context.read<SearchBloc>().add(SearchRequested(params));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HybridMatchBloc, HybridMatchState>(
-      builder: (context, state) {
-        if (state is HybridMatchLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Column(
+      children: [
+        // PresetSelector para clientes
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Tipo de Recomendação',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Chips de seleção de preset
+              Wrap(
+                spacing: 8,
+                children: [
+                  _buildPresetChip(
+                    'balanced', 
+                    'Recomendado', 
+                    'Equilibra experiência e custo',
+                    LucideIcons.star,
+                  ),
+                  _buildPresetChip(
+                    'correspondent', 
+                    'Melhor Custo', 
+                    'Foca em economia',
+                    LucideIcons.dollarSign,
+                  ),
+                  _buildPresetChip(
+                    'expert_opinion', 
+                    'Mais Experientes', 
+                    'Prioriza expertise',
+                    LucideIcons.award,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         
-        if (state is HybridMatchError) {
-          return _buildErrorState(context, state.message);
-        }
-        
-        if (state is HybridMatchLoaded) {
-          return HybridMatchList(
-            lawyers: state.lawyers,
-            firms: state.firms,
-            showSectionHeaders: !state.mixedRendering,
-            showMixedResults: state.mixedRendering,
-            emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
-            onRefresh: () {
-              context.read<HybridMatchBloc>().add(const RefreshHybridMatches(
-                caseId: 'mock_case_id',
-                includeFirms: true,
-                preset: 'balanced',
-              ));
+        // Resultados das recomendações
+        Expanded(
+          child: BlocBuilder<SearchBloc, SearchState>(
+            builder: (context, state) {
+              if (state is SearchLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              if (state is SearchError) {
+                return _buildErrorState(context, state.message);
+              }
+              
+              if (state is SearchLoaded) {
+                final lawyers = state.results.whereType<Lawyer>().toList();
+                final firms = state.results.whereType<LawFirm>().toList();
+
+                return PartnerSearchResultList(
+                  lawyers: lawyers,
+                  firms: firms,
+                  emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
+                  onRefresh: _fetchRecommendations,
+                );
+              }
+              
+              return _buildEmptyState(context);
             },
-          );
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPresetChip(String preset, String label, String description, IconData icon) {
+    final isSelected = _selectedPreset == preset;
+    
+    return FilterChip(
+      selected: isSelected,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: isSelected 
+              ? Theme.of(context).colorScheme.onPrimary
+              : Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: isSelected 
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: isSelected 
+                    ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8)
+                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _selectedPreset = preset;
+          });
+          _fetchRecommendations();
         }
-        
-        return _buildEmptyState(context);
       },
+      selectedColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+      side: BorderSide(
+        color: isSelected 
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+      ),
     );
   }
 
@@ -186,11 +305,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              context.read<HybridMatchBloc>().add(const FetchHybridMatches(
-                caseId: 'mock_case_id',
-                includeFirms: true,
-                preset: 'balanced',
-              ));
+              _fetchRecommendations();
             },
             icon: const Icon(LucideIcons.refreshCw),
             label: const Text('Tentar Novamente'),
@@ -232,6 +347,12 @@ class HybridSearchTabView extends StatefulWidget {
 class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   final TextEditingController _searchController = TextEditingController();
   bool _searchingFirms = false;
+  
+  // Novas variáveis para ferramentas de precisão
+  String? _selectedLocation;
+  double? _selectedLatitude;
+  double? _selectedLongitude;
+  String _searchFocus = 'balanced'; // 'balanced', 'correspondent', 'expert_opinion'
 
   @override
   void dispose() {
@@ -243,11 +364,13 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Barra de busca
+        // Barra de busca e ferramentas
         Container(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Campo de busca principal
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
@@ -266,7 +389,76 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                 ),
                 onChanged: (value) => _performSearch(),
               ),
+              const SizedBox(height: 16),
+              
+              // Ferramentas de precisão
+              Row(
+                children: [
+                  // Dropdown de Foco da Busca
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      value: _searchFocus,
+                      decoration: InputDecoration(
+                        labelText: 'Foco da Busca',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'balanced',
+                          child: Text('Equilibrado'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'correspondent',
+                          child: Text('Correspondente'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'expert_opinion',
+                          child: Text('Parecer Técnico'),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _searchFocus = value!;
+                        });
+                        _performSearch();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  // Botão de Localização
+                  Expanded(
+                    flex: 1,
+                    child: OutlinedButton.icon(
+                      onPressed: _showLocationPicker,
+                      icon: Icon(
+                        _selectedLocation != null 
+                          ? LucideIcons.mapPin 
+                          : LucideIcons.plus,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _selectedLocation != null 
+                          ? 'Local' 
+                          : 'Adicionar',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                        backgroundColor: _selectedLocation != null 
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : null,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
+              
               // Toggle para buscar escritórios
               Row(
                 children: [
@@ -284,29 +476,75 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                     'Incluir escritórios na busca',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  if (_selectedLocation != null) ...[
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: _clearLocation,
+                      icon: const Icon(LucideIcons.x, size: 16),
+                      label: Text('Limpar Local', style: TextStyle(fontSize: 12)),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
                 ],
               ),
+              
+              // Indicador de localização selecionada
+              if (_selectedLocation != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        LucideIcons.mapPin,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Buscando próximo a: $_selectedLocation',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
         
         // Resultados da busca
         Expanded(
-          child: BlocBuilder<HybridMatchBloc, HybridMatchState>(
+          child: BlocBuilder<SearchBloc, SearchState>(
             builder: (context, state) {
-              if (state is HybridMatchLoading) {
+              if (state is SearchLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
               
-              if (state is HybridMatchError) {
+              if (state is SearchError) {
                 return _buildSearchError(context, state.message);
               }
               
-              if (state is HybridMatchLoaded) {
-                return HybridMatchList(
-                  lawyers: state.lawyers,
-                  firms: state.firms,
-                  showSectionHeaders: true,
+              if (state is SearchLoaded) {
+                final lawyers = state.results.whereType<Lawyer>().toList();
+                final firms = state.results.whereType<LawFirm>().toList();
+
+                return PartnerSearchResultList(
+                  lawyers: lawyers,
+                  firms: firms,
                   emptyMessage: 'Nenhum resultado encontrado.\nTente usar termos diferentes.',
                   onRefresh: () => _performSearch(),
                 );
@@ -320,16 +558,53 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
     );
   }
 
+  void _showLocationPicker() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (context) => LocationPicker(
+          initialLocation: _selectedLatitude != null && _selectedLongitude != null
+              ? LatLng(_selectedLatitude!, _selectedLongitude!)
+              : null,
+          initialAddress: _selectedLocation,
+          onLocationSelected: (location, address) {
+            setState(() {
+              _selectedLocation = address;
+              _selectedLatitude = location.latitude;
+              _selectedLongitude = location.longitude;
+              _searchFocus = 'correspondent'; // Mudar automaticamente para correspondente
+            });
+            _performSearch();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _clearLocation() {
+    setState(() {
+      _selectedLocation = null;
+      _selectedLatitude = null;
+      _selectedLongitude = null;
+      _searchFocus = 'balanced'; // Volta ao foco equilibrado
+    });
+    _performSearch();
+  }
+
   void _performSearch() {
     final query = _searchController.text.trim();
-    if (query.isEmpty) {
-      return;
+    
+    // Se há query ou localização, faz a busca usando o SearchBloc
+    if (query.isNotEmpty || _selectedLocation != null) {
+      final params = SearchParams(
+        query: query.isNotEmpty ? query : null,
+        preset: _searchFocus,
+        latitude: _selectedLatitude,
+        longitude: _selectedLongitude,
+        includeFirms: _searchingFirms,
+      );
+      
+      context.read<SearchBloc>().add(SearchRequested(params));
     }
-
-    context.read<HybridMatchBloc>().add(SearchHybridMatches(
-      query: query,
-      includeFirms: _searchingFirms,
-    ));
   }
 
   Widget _buildSearchError(BuildContext context, String message) {
@@ -391,7 +666,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   }
 }
 
-/// Modal de Filtros Híbridos
+/// Modal de Filtros Híbridos - Super-Filtro
 class HybridFiltersModal extends StatefulWidget {
   const HybridFiltersModal({super.key});
 
@@ -405,6 +680,11 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
   double _maxDistance = 50.0;
   bool _showOnlyAvailable = false;
   bool _showOnlyFirms = false;
+  
+  // Novos filtros de preço
+  double _minPrice = 0.0;
+  double _maxPrice = 2000.0;
+  String _priceType = 'consultation'; // 'consultation' ou 'hourly'
 
   final List<String> _specialties = [
     'Direito Civil',
@@ -413,6 +693,10 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
     'Direito Penal',
     'Direito Tributário',
     'Direito Imobiliário',
+    'Direito de Família',
+    'Direito Previdenciário',
+    'Direito Ambiental',
+    'Direito Digital',
   ];
 
   @override
@@ -427,9 +711,21 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Filtros',
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                children: [
+                  Icon(
+                    LucideIcons.filter,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Super-Filtro',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
@@ -442,12 +738,20 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
           // Especialidade
           Text(
             'Especialidade',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             value: _selectedSpecialty,
             hint: const Text('Selecione uma especialidade'),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
             items: _specialties.map((specialty) {
               return DropdownMenuItem(
                 value: specialty,
@@ -460,68 +764,155 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
               });
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Avaliação mínima
           Text(
-            'Avaliação mínima: ${_minRating.toStringAsFixed(1)}',
-            style: Theme.of(context).textTheme.titleMedium,
+            'Avaliação mínima: ${_minRating.toStringAsFixed(1)} ⭐',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: 8),
           Slider(
             value: _minRating,
             max: 5.0,
             divisions: 50,
+            activeColor: Theme.of(context).colorScheme.primary,
             onChanged: (value) {
               setState(() {
                 _minRating = value;
               });
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+
+          // Filtros de Preço - NOVO
+          Text(
+            'Faixa de Preço',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          
+          // Tipo de preço
+          Row(
+            children: [
+              Expanded(
+                child: RadioListTile<String>(
+                  title: const Text('Consulta'),
+                  value: 'consultation',
+                  groupValue: _priceType,
+                  onChanged: (value) {
+                    setState(() {
+                      _priceType = value!;
+                      if (value == 'consultation') {
+                        _maxPrice = 2000.0;
+                      } else {
+                        _maxPrice = 1000.0;
+                      }
+                    });
+                  },
+                ),
+              ),
+              Expanded(
+                child: RadioListTile<String>(
+                  title: const Text('Por hora'),
+                  value: 'hourly',
+                  groupValue: _priceType,
+                  onChanged: (value) {
+                    setState(() {
+                      _priceType = value!;
+                      if (value == 'consultation') {
+                        _maxPrice = 2000.0;
+                      } else {
+                        _maxPrice = 1000.0;
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          
+          // Range de preço
+          Text(
+            'R\$ ${_minPrice.toStringAsFixed(0)} - R\$ ${_maxPrice.toStringAsFixed(0)}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          RangeSlider(
+            values: RangeValues(_minPrice, _maxPrice),
+            max: _priceType == 'consultation' ? 2000.0 : 1000.0,
+            divisions: 20,
+            activeColor: Theme.of(context).colorScheme.primary,
+            onChanged: (values) {
+              setState(() {
+                _minPrice = values.start;
+                _maxPrice = values.end;
+              });
+            },
+          ),
+          const SizedBox(height: 20),
 
           // Distância máxima
           Text(
             'Distância máxima: ${_maxDistance.toStringAsFixed(0)} km',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: 8),
           Slider(
             value: _maxDistance,
-            max: 100.0,
-            divisions: 20,
+            max: 200.0,
+            divisions: 40,
+            activeColor: Theme.of(context).colorScheme.primary,
             onChanged: (value) {
               setState(() {
                 _maxDistance = value;
               });
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-          // Switches
-          SwitchListTile(
-            title: const Text('Apenas disponíveis'),
-            value: _showOnlyAvailable,
-            onChanged: (value) {
-              setState(() {
-                _showOnlyAvailable = value;
-              });
-            },
-          ),
-          SwitchListTile(
-            title: const Text('Apenas escritórios'),
-            value: _showOnlyFirms,
-            onChanged: (value) {
-              setState(() {
-                _showOnlyFirms = value;
-              });
-            },
+          // Switches aprimorados
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Apenas disponíveis'),
+                    subtitle: const Text('Advogados que podem aceitar novos casos'),
+                    value: _showOnlyAvailable,
+                    onChanged: (value) {
+                      setState(() {
+                        _showOnlyAvailable = value;
+                      });
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('Incluir escritórios'),
+                    subtitle: const Text('Mostrar escritórios de advocacia nos resultados'),
+                    value: _showOnlyFirms,
+                    onChanged: (value) {
+                      setState(() {
+                        _showOnlyFirms = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 24),
 
-          // Botões
+          // Botões aprimorados
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
                   onPressed: () {
                     setState(() {
                       _selectedSpecialty = null;
@@ -529,27 +920,36 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
                       _maxDistance = 50.0;
                       _showOnlyAvailable = false;
                       _showOnlyFirms = false;
+                      _minPrice = 0.0;
+                      _maxPrice = _priceType == 'consultation' ? 2000.0 : 1000.0;
                     });
                   },
-                  child: const Text('Limpar'),
+                  icon: const Icon(LucideIcons.rotateCcw),
+                  label: const Text('Limpar'),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () {
-                    // TODO: Implementar lógica de filtro completa no BLoC e Repositório.
-                    // A infraestrutura (evento, handler no BLoC, parâmetros no repositório)
-                    // para os filtros avançados (rating, distance, etc.) precisa ser criada.
-                    // Por enquanto, usamos a busca com a especialidade como query para manter a funcionalidade.
-                    context.read<HybridMatchBloc>().add(SearchHybridMatches(
-                      query: _selectedSpecialty ?? '',
-                      // Respeita o toggle de "apenas escritórios", mantendo parte da lógica.
+                    // Implementação completa usando SearchBloc com todos os filtros
+                    final params = SearchParams(
+                      query: _selectedSpecialty,
+                      preset: 'balanced', // Preset base, filtros aplicados depois
+                      minRating: _minRating,
+                      maxDistance: _maxDistance,
+                      onlyAvailable: _showOnlyAvailable,
                       includeFirms: _showOnlyFirms,
-                    ));
+                      minPrice: _minPrice,
+                      maxPrice: _maxPrice,
+                      priceType: _priceType,
+                    );
+                    
+                    context.read<SearchBloc>().add(SearchRequested(params));
                     Navigator.pop(context);
                   },
-                  child: const Text('Aplicar'),
+                  icon: const Icon(LucideIcons.search),
+                  label: const Text('Aplicar Filtros'),
                 ),
               ),
             ],

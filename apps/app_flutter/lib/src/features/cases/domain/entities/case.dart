@@ -13,6 +13,7 @@ class Case extends Equatable {
   final LawFirm? recommendedFirm; // Escritório recomendado para o caso
   final double? firmMatchScore; // Score do match com o escritório
   final String? caseType; // Tipo do caso (CORPORATE, PERSONAL, etc.)
+  final String? allocationType; // NOVO: Tipo de alocação (direct, partnership, etc.)
 
   const Case({
     required this.id,
@@ -25,6 +26,7 @@ class Case extends Equatable {
     this.recommendedFirm,
     this.firmMatchScore,
     this.caseType,
+    this.allocationType, // NOVO
   });
 
   factory Case.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class Case extends Equatable {
       recommendedFirm: null,
       firmMatchScore: json['firm_match_score']?.toDouble(),
       caseType: json['case_type'],
+      allocationType: json['allocation_type'], // NOVO
     );
   }
 
@@ -60,6 +63,7 @@ class Case extends Equatable {
       recommendedFirm: recommendedFirm,
       firmMatchScore: matchScore,
       caseType: originalCase.caseType,
+      allocationType: originalCase.allocationType, // NOVO
     );
   }
 
@@ -79,8 +83,6 @@ class Case extends Equatable {
   @override
   List<Object?> get props => [
     id, title, status, lawyerName, lawyerId, createdAt, lawyer, 
-    recommendedFirm, firmMatchScore, caseType
+    recommendedFirm, firmMatchScore, caseType, allocationType // NOVO e corrigido
   ];
-  @override
-  List<Object?> get props => [id, title, status, lawyerName, lawyerId, createdAt, lawyer];
 } 
