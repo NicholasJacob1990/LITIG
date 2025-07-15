@@ -491,8 +491,9 @@ class CpfInputFormatter extends TextInputFormatter {
     final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     var formatted = '';
     for (var i = 0; i < text.length; i++) {
-      if (i == 3 || i == 6) formatted += '.';
-      else if (i == 9) formatted += '-';
+      if (i == 3 || i == 6) {
+        formatted += '.';
+      } else if (i == 9) formatted += '-';
       formatted += text[i];
     }
     return newValue.copyWith(
@@ -509,8 +510,9 @@ class CnpjInputFormatter extends TextInputFormatter {
     final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     var formatted = '';
      for (var i = 0; i < text.length; i++) {
-       if (i == 2 || i == 5) formatted += '.';
-       else if (i == 8) formatted += '/';
+       if (i == 2 || i == 5) {
+         formatted += '.';
+       } else if (i == 8) formatted += '/';
        else if (i == 12) formatted += '-';
       formatted += text[i];
     }

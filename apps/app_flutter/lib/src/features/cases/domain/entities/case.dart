@@ -81,4 +81,6 @@ class Case extends Equatable {
     id, title, status, lawyerName, lawyerId, createdAt, lawyer, 
     recommendedFirm, firmMatchScore, caseType
   ];
+  @override
+  List<Object?> get props => [id, title, status, lawyerName, lawyerId, createdAt, lawyer];
 } 

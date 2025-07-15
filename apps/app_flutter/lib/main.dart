@@ -12,6 +12,8 @@ import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/src/core/theme/app_theme.dart';
 import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:meu_app/src/core/utils/logger.dart';
 
 String get _supabaseUrl {
   if (kIsWeb) {
@@ -26,78 +28,109 @@ String get _supabaseUrl {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  print('🚀 Iniciando aplicação...');
+  AppLogger.init('Iniciando aplicação...');
 
   try {
     await Supabase.initialize(
       url: _supabaseUrl,
       anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQw54IsKbscS7Cs8_wnwU',
     );
-    print('✅ Supabase inicializado com sucesso');
+    AppLogger.success('Supabase inicializado com sucesso');
   } catch (e) {
     if (e.toString().contains('already initialized')) {
-      print('✅ Supabase já estava inicializado (hot restart)');
+      AppLogger.info('Supabase já estava inicializado (hot restart)');
     } else {
-      print('❌ Erro ao inicializar Supabase: $e');
-      print('⚠️  Continuando sem Supabase - usando modo offline');
+      AppLogger.error('Erro ao inicializar Supabase', error: e);
+      AppLogger.warning('Continuando sem Supabase - usando modo offline');
     }
   }
 
   try {
     configureDependencies();
-    print('✅ Dependências configuradas');
+    AppLogger.success('Dependências configuradas');
   } catch (e) {
-    print('❌ Erro ao configurar dependências: $e');
+    AppLogger.error('Erro ao configurar dependências', error: e);
   }
 
-  final authBloc = getIt<AuthBloc>();
-  authBloc.add(AuthCheckStatusRequested());
-  final router = appRouter(authBloc);
+  // Initialize timeago locales
+  timeago.setLocaleMessages('pt_BR', timeago.PtBrMessages());
+  timeago.setDefaultLocale('pt_BR');
 
   runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => ThemeCubit()),
-        BlocProvider.value(value: authBloc),
-      ],
-      child: MyApp(router: router),
+    BlocProvider(
+      create: (context) => ThemeCubit(),
+      child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  final GoRouter router;
-  
-  const MyApp({super.key, required this.router});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AuthBloc _authBloc;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    AppLogger.init('Inicializando MyApp...');
+    
+    try {
+      _authBloc = getIt<AuthBloc>();
+      AppLogger.success('AuthBloc criado');
+      
+      _authBloc.add(AuthCheckStatusRequested());
+      AppLogger.success('AuthCheckStatusRequested enviado');
+      
+      _router = appRouter(_authBloc);
+      AppLogger.success('Router configurado');
+    } catch (e) {
+      AppLogger.error('Erro na inicialização', error: e);
+    }
+  }
+
+  @override
+  void dispose() {
+    _authBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    print('🎨 Construindo MaterialApp...');
+    AppLogger.debug('Construindo MaterialApp...');
     
-    return BlocListener<AuthBloc, auth_states.AuthState>(
-      listener: (context, state) {
-        print('🔄 AuthState mudou para: ${state.runtimeType}');
-      },
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
-          print('🎨 Construindo com tema: $themeMode');
-          return MaterialApp.router(
-            routerConfig: router,
-            title: 'LITGO Flutter',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            themeMode: themeMode,
-            builder: (context, widget) {
-              print('🏗️ Builder chamado, widget: ${widget.runtimeType}');
-              ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-                print('❌ Erro capturado: ${errorDetails.exception}');
-                return ErrorScreen(error: errorDetails.exception.toString());
-              };
-              return widget ?? const ErrorScreen(error: 'Widget nulo');
-            },
-          );
+    return BlocProvider.value(
+      value: _authBloc,
+      child: BlocListener<AuthBloc, auth_states.AuthState>(
+        listener: (context, state) {
+          AppLogger.debug('AuthState mudou para: ${state.runtimeType}');
         },
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            AppLogger.debug('Construindo com tema: $themeMode');
+            return MaterialApp.router(
+              routerConfig: _router,
+              title: 'LITGO Flutter',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              themeMode: themeMode,
+              builder: (context, widget) {
+                AppLogger.debug('Builder chamado, widget: ${widget.runtimeType}');
+                ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+                  AppLogger.error('Erro capturado', error: errorDetails.exception);
+                  return ErrorScreen(error: errorDetails.exception.toString());
+                };
+                return widget ?? const ErrorScreen(error: 'Widget nulo');
+              },
+            );
+          },
+        ),
       ),
     );
   }

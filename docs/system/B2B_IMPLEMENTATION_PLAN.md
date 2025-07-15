@@ -1,4 +1,5 @@
 
+
 # 📋 Plano de Ação: Implementação de Escritórios (B2B Matching)
 
 **Documento Versão 1.1 - 2024-07-26**
@@ -20,11 +21,11 @@ A implementação será faseada para mitigar riscos, utilizando uma **feature fl
 3.  **Fase 3: Frontend (Integração por Interface):** Conectar a UI com a API para cada tipo de usuário.
 4.  **Fase 4: Testes & Lançamento:** Executar testes E2E, documentar e lançar via deploy canário.
 
-### 1.2. Impacto por Interface de Usuário
+### 1.2. Arquitetura de Navegação e Perfis
 
--   **Cliente:** Poderá buscar, ver e contratar escritórios.
--   **Advogado de Captação:** Poderá buscar e firmar parcerias com escritórios.
--   **Advogado Associado:** Terá seu perfil vinculado ao escritório, com visibilidade no dashboard.
+A forma como as funcionalidades B2B se integram aos diferentes perfis de usuário, suas abas de navegação e fluxos de trabalho específicos, está detalhada no documento central de arquitetura do sistema.
+
+**[➡️ Consulte aqui a Arquitetura Geral do Sistema para detalhes sobre Perfis e Navegação](../ARQUITETURA_GERAL_DO_SISTEMA.md)**
 
 ---
 

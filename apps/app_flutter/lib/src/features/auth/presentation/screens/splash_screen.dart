@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,28 +16,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    print('🌟 SplashScreen iniciado');
+    AppLogger.info('SplashScreen iniciado');
     // Removendo o timer para evitar conflitos - o BlocListener irá gerenciar a navegação
   }
 
   @override
   Widget build(BuildContext context) {
-    print('🎨 Construindo SplashScreen...');
+    AppLogger.debug('Construindo SplashScreen...');
     
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: BlocListener<AuthBloc, auth_states.AuthState>(
         listener: (context, state) {
-          print('🔄 AuthState mudou no SplashScreen: ${state.runtimeType}');
+          AppLogger.debug('AuthState mudou no SplashScreen: ${state.runtimeType}');
           
           // Aguarda um mínimo de 2 segundos para uma experiência melhor
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               if (state is auth_states.Authenticated) {
-                print('✅ Navegando para dashboard (listener)');
+                AppLogger.success('Navegando para dashboard (listener)');
                 context.go('/dashboard');
               } else if (state is auth_states.Unauthenticated) {
-                print('❌ Navegando para login (listener)');
+                AppLogger.info('Navegando para login (listener)');
                 context.go('/login');
               }
             }

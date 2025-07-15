@@ -12,7 +12,6 @@ class AppTheme {
         primary:    AppColors.primaryBlue,
         secondary:  AppColors.primaryBlue,
         surface:    AppColors.lightCard,
-        background: AppColors.lightBackground,
       ),
       textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
         bodyColor:    AppColors.lightText,
@@ -55,7 +54,6 @@ class AppTheme {
         primary:    AppColors.primaryBlue,
         secondary:  AppColors.primaryBlue,
         surface:    AppColors.darkCard,
-        background: AppColors.darkBackground,
       ),
       textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
         bodyColor:    AppColors.darkText,

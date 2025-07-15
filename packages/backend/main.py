@@ -38,6 +38,7 @@ from routes.ab_testing import router as ab_testing_router
 from routes.reports import router as reports_router
 from routes.unipile import router as unipile_router
 from routes.providers import router as providers_router
+from routes.users import router as users_router
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
 
@@ -146,6 +147,7 @@ app.include_router(ab_testing_router, prefix="/api/v2.2", tags=["AB Testing"])
 app.include_router(reports_router, prefix="/api/v2.2", tags=["Reports"])
 app.include_router(unipile_router, prefix="/api/v2.2", tags=["Unipile"])
 app.include_router(providers_router, prefix="/api", tags=["Providers"])
+app.include_router(users_router, prefix="/api", tags=["Users"])
 
 # CORREÇÃO: Rate limiter aplicado individualmente nas rotas em routes.py
 # Removido limiter.limit("60/minute")(api_router) que causava erro nos testes

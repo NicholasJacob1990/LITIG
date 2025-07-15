@@ -8,7 +8,7 @@ import '../widgets/consultation_info_section.dart';
 import '../widgets/pre_analysis_section.dart';
 import '../widgets/next_steps_section.dart';
 import '../widgets/documents_section.dart';
-import '../widgets/process_status_section.dart';
+// import '../widgets/process_status_section.dart'; // TODO: Implementar ProcessStatusSection
 import '../../../../shared/utils/app_colors.dart';
 
 class CaseDetailScreen extends StatelessWidget {
@@ -44,14 +44,7 @@ class CaseDetailScreen extends StatelessWidget {
           ),
           flexibleSpace: Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.primaryGradientTop,
-                  AppColors.primaryGradientBot,
-                ],
-              ),
+              gradient: AppColors.primaryGradient,
             ),
           ),
         ),
@@ -108,10 +101,11 @@ class CaseDetailScreen extends StatelessWidget {
                     caseId: caseDetail.id,
                   ),
                   const SizedBox(height: 16),
-                  ProcessStatusSection(
-                    processStatus: caseDetail.processStatus,
-                    caseId: caseDetail.id,
-                  ),
+                  // TODO: Implementar ProcessStatusSection
+                  // ProcessStatusSection(
+                  //   processStatus: caseDetail.processStatus,
+                  //   caseId: caseDetail.id,
+                  // ),
                 ],
               ),
             );

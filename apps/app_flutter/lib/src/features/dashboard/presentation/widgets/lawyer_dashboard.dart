@@ -158,19 +158,8 @@ class LawyerDashboard extends StatelessWidget {
             if (state is LawyerFirmLoaded) {
               return LawyerFirmInfoCard(
                 firm: state.firm,
-                lawyerRole: state.lawyerRole,
-                onViewFirm: () {
-                  context.go('/firms/${state.firm.id}');
-                },
-                onManageFirm: state.canManage ? () {
-                  // TODO: Implementar navegação para gerenciamento do escritório
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Gerenciamento do escritório em desenvolvimento'),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
-                } : null,
+                hasActiveCases: state.hasActiveCases,
+                totalCases: state.totalCases,
               );
             }
             

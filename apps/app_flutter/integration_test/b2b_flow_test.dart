@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:meu_app/main.dart' as app;
-import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
-import 'package:meu_app/src/features/firms/domain/entities/firm_kpi.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

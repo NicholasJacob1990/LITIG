@@ -26,7 +26,7 @@ class LawyersBloc extends Bloc<LawyersEvent, LawyersState> {
         {"id": "lw-003", "name": "Dra. Carla Dias", "specialties": ["Consumidor"], "rating": 4.7, "distance_km": 8.0, "is_available": true, "avatar_url": "https://ui-avatars.com/api/?name=Carla+Dias&background=F59E0B&color=fff"},
         {"id": "lw-004", "name": "Dr. Daniel Farias", "specialties": ["Trabalhista", "Previdenciário"], "rating": 4.8, "distance_km": 12.3, "is_available": true, "avatar_url": "https://ui-avatars.com/api/?name=Daniel+Farias&background=8B5CF6&color=fff"},
       ];
-      emit(LawyersLoaded(mockLawyers));
+      emit(const LawyersLoaded(mockLawyers));
     } catch (e) {
       emit(const LawyersError('Falha ao buscar advogados.'));
     }

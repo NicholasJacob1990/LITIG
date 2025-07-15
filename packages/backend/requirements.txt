@@ -4,6 +4,7 @@ pydantic[email]
 python-dotenv
 supabase
 psycopg2-binary
+asyncpg
 jinja2
 numpy
 scikit-learn

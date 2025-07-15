@@ -54,13 +54,18 @@ Criar novo módulo em `/routes/partnerships.py` com rotas:
 * `PATCH /partnerships/{id}/reject`: Recusar proposta
 * `POST /partnerships/{id}/generate-contract`: Gerar contrato
 * `PATCH /partnerships/{id}/accept-contract`: Aceitar contrato
-* `GET /partnerships`: Listar parcerias do usuário logado
 
 Incluir no arquivo principal de rotas (`/main.py`):
 
 ```python
 app.include_router(partnerships_router, prefix="/partnerships")
 ```
+
+### 🧭 Arquitetura de Navegação e Perfis
+
+A navegação para a funcionalidade de parcerias e a forma como ela se integra aos diferentes perfis de usuário estão detalhadas no documento central de arquitetura do sistema.
+
+**[➡️ Consulte aqui a Arquitetura Geral do Sistema para detalhes sobre Perfis e Navegação](system/ARQUITETURA_GERAL_DO_SISTEMA.md)**
 
 ---
 

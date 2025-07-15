@@ -1,4 +1,12 @@
 -sempre leia todo diretório antes de realizar alterações 
 -anote todas as criações e alterações de novos componentes ou arquivos no @status.md e consulte-as sempre que continuar ou criar novas ações. Não delete conteúdo do arquivo, apenas acrescente para documentar todo o histórico de alterações
 -tenha uma análise holística para o diretório flutter em cotejo com o diretório antigo em react @litgo6
--Quando houver um código problemático tente entende-lo e corrigi-lo. Apagá-lo é a última solução.
+-ODEIO SIMPLIFICAÇÕES
+-NÃO SIMPLIFIQUE
+-NÃO BUSCA ATALHOS FÁCEIS PARA ENTREGAR CÓDIGO RASO
+-ODEIO SIMPLIFICAÇÕES E PREGUIÇA
+-CORRIJA PROBLEMAS, AO INVÉS DE CONTORNÁ-LOS
+-NÃO SEJA PREGUIÇOSO
+--sempre use lista to-dos com extensão conforme complexidade
+-CONSIDERE SOMENTE O FRONTEND FLUTTER. IGNORE O REACT
+-DOCUMENTE TODOS OS TO-DOS

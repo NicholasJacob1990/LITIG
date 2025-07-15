@@ -71,16 +71,16 @@ class ConsultationInfoSection extends StatelessWidget {
               'Plano', 
               _getPlanLabel(consultation!.plan)
             ),
-            if (consultation!.notes != null) ...[
-              const SizedBox(height: 8),
-              const Divider(),
-              const SizedBox(height: 8),
-              _infoRow(
-                Icons.note_outlined, 
-                'Observações', 
-                consultation!.notes!
-              ),
-            ],
+            ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            _infoRow(
+              Icons.note_outlined, 
+              'Observações', 
+              consultation!.notes
+            ),
+          ],
           ],
         ),
       ),

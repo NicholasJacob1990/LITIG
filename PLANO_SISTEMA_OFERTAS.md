@@ -42,6 +42,12 @@ graph TD
     K --> L[Oferecido ao próximo advogado da lista]
 ```
 
+### 🧭 Arquitetura de Navegação e Perfis
+
+A forma como o sistema de ofertas se integra aos diferentes perfis de usuário, suas abas de navegação e fluxos de trabalho específicos, está detalhada no documento central de arquitetura do sistema.
+
+**[➡️ Consulte aqui a Arquitetura Geral do Sistema para detalhes sobre Perfis e Navegação](docs/system/ARQUITETURA_GERAL_DO_SISTEMA.md)**
+
 ---
 
 ## 🚀 FASE 1: Sistema de Ofertas para Perfis Atuais

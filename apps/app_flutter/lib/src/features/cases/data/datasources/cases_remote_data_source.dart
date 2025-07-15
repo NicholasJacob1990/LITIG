@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/features/cases/data/models/case_model.dart';
-import 'package:meu_app/src/core/services/dio_service.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 abstract class CasesRemoteDataSource {
   Future<List<Case>> getMyCases();
@@ -40,7 +40,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       if (e.type == DioExceptionType.connectionError || 
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        print('API não disponível, usando dados mock como fallback');
+        AppLogger.warning('API não disponível, usando dados mock como fallback');
         return _getMockCases();
       }
       
@@ -52,7 +52,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       }
     } catch (e) {
       // Fallback para qualquer outro erro não previsto
-      print('Erro inesperado na API, usando dados mock: ${e.toString()}');
+      AppLogger.error('Erro inesperado na API, usando dados mock', error: e);
       return _getMockCases();
     }
   }
@@ -72,7 +72,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       if (e.type == DioExceptionType.connectionError || 
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        print('API não disponível, usando caso mock como fallback');
+        AppLogger.warning('API não disponível, usando caso mock como fallback');
         return _getMockCaseById(caseId);
       }
       
@@ -89,7 +89,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       }
     } catch (e) {
       // Fallback para qualquer outro erro não previsto
-      print('Erro inesperado na API, usando caso mock: ${e.toString()}');
+      AppLogger.error('Erro inesperado na API, usando caso mock', error: e);
       return _getMockCaseById(caseId);
     }
   }

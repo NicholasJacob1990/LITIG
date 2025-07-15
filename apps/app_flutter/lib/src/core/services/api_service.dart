@@ -3,62 +3,63 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class ApiService {
   static String get _baseUrl {
     // Debug logs para verificar a detecção de plataforma
-    print('🔍 DEBUG ApiService: kIsWeb = $kIsWeb');
+    AppLogger.debug('ApiService: kIsWeb = $kIsWeb');
     
     // Detecção mais robusta de plataforma
     if (kIsWeb) {
-      print('🌐 DEBUG ApiService: Detectado Flutter Web - usando localhost:8080');
+      AppLogger.debug('ApiService: Detectado Flutter Web - usando localhost:8080');
       return 'http://localhost:8080/api';
     }
     
     // Para plataformas nativas, verificar o Platform
     try {
       if (Platform.isAndroid) {
-        print('🤖 DEBUG ApiService: Detectado Android - usando 10.0.2.2:8080');
+        AppLogger.debug('ApiService: Detectado Android - usando 10.0.2.2:8080');
         return 'http://10.0.2.2:8080/api'; // Emulador Android
       } else if (Platform.isIOS) {
-        print('🍎 DEBUG ApiService: Detectado iOS - usando 127.0.0.1:8080');
+        AppLogger.debug('ApiService: Detectado iOS - usando 127.0.0.1:8080');
         return 'http://127.0.0.1:8080/api'; // Simulador iOS
       } else {
-        print('🖥️ DEBUG ApiService: Detectado Desktop - usando localhost:8080');
+        AppLogger.debug('ApiService: Detectado Desktop - usando localhost:8080');
         return 'http://localhost:8080/api'; // Desktop
       }
     } catch (e) {
       // Se Platform não estiver disponível (ex: Web), usar localhost
-      print('⚠️ DEBUG ApiService: Platform não disponível, fallback para localhost:8080');
+      AppLogger.warning('ApiService: Platform não disponível, fallback para localhost:8080');
       return 'http://localhost:8080/api';
     }
   }
 
   static String get _baseUrlV2 {
     // Debug logs para verificar a detecção de plataforma
-    print('🔍 DEBUG ApiService V2: kIsWeb = $kIsWeb');
+    AppLogger.debug('ApiService V2: kIsWeb = $kIsWeb');
     
     // Detecção mais robusta de plataforma
     if (kIsWeb) {
-      print('🌐 DEBUG ApiService V2: Detectado Flutter Web - usando localhost:8080');
+      AppLogger.debug('ApiService V2: Detectado Flutter Web - usando localhost:8080');
       return 'http://localhost:8080/api/v2';
     }
     
     // Para plataformas nativas, verificar o Platform
     try {
       if (Platform.isAndroid) {
-        print('🤖 DEBUG ApiService V2: Detectado Android - usando 10.0.2.2:8080');
+        AppLogger.debug('ApiService V2: Detectado Android - usando 10.0.2.2:8080');
         return 'http://10.0.2.2:8080/api/v2'; // Emulador Android
       } else if (Platform.isIOS) {
-        print('🍎 DEBUG ApiService V2: Detectado iOS - usando 127.0.0.1:8080');
+        AppLogger.debug('ApiService V2: Detectado iOS - usando 127.0.0.1:8080');
         return 'http://127.0.0.1:8080/api/v2'; // Simulador iOS
       } else {
-        print('🖥️ DEBUG ApiService V2: Detectado Desktop - usando localhost:8080');
+        AppLogger.debug('ApiService V2: Detectado Desktop - usando localhost:8080');
         return 'http://localhost:8080/api/v2'; // Desktop
       }
     } catch (e) {
       // Se Platform não estiver disponível (ex: Web), usar localhost
-      print('⚠️ DEBUG ApiService V2: Platform não disponível, fallback para localhost:8080');
+      AppLogger.warning('ApiService V2: Platform não disponível, fallback para localhost:8080');
       return 'http://localhost:8080/api/v2';
     }
   }
@@ -82,16 +83,16 @@ class ApiService {
       final headers = await _getHeaders();
       final url = '$_baseUrl/cases/my-cases';
       
-      print('DEBUG: Tentando acessar URL: $url');
-      print('DEBUG: Headers: $headers');
+      AppLogger.debug(' Tentando acessar URL: $url');
+      AppLogger.debug(' Headers: $headers');
 
       final response = await http.get(
         Uri.parse(url),
         headers: headers,
       );
       
-      print('DEBUG: Status code: ${response.statusCode}');
-      print('DEBUG: Response body: ${response.body}');
+      AppLogger.debug(' Status code: ${response.statusCode}');
+      AppLogger.debug(' Response body: ${response.body}');
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -99,8 +100,8 @@ class ApiService {
         throw Exception('Falha ao buscar casos: Status ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('DEBUG: Erro capturado: $e');
-      print('DEBUG: Tipo do erro: ${e.runtimeType}');
+      AppLogger.debug(' Erro capturado: $e');
+      AppLogger.debug(' Tipo do erro: ${e.runtimeType}');
       throw Exception('Erro ao buscar casos: $e');
     }
   }
@@ -110,15 +111,15 @@ class ApiService {
       final headers = await _getHeaders();
       final url = '$_baseUrl/cases/$caseId';
       
-      print('DEBUG: Tentando acessar URL: $url');
+      AppLogger.debug(' Tentando acessar URL: $url');
 
       final response = await http.get(
         Uri.parse(url),
         headers: headers,
       );
       
-      print('DEBUG: Status code: ${response.statusCode}');
-      print('DEBUG: Response body: ${response.body}');
+      AppLogger.debug(' Status code: ${response.statusCode}');
+      AppLogger.debug(' Response body: ${response.body}');
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -126,7 +127,7 @@ class ApiService {
         throw Exception('Falha ao buscar detalhes do caso: Status ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('DEBUG: Erro capturado: $e');
+      AppLogger.debug(' Erro capturado: $e');
       throw Exception('Erro ao buscar detalhes do caso: $e');
     }
   }
@@ -143,9 +144,9 @@ class ApiService {
       final body = jsonEncode({'user_id': user.id});
       final url = '$_baseUrlV2/triage/start';
       
-      print('DEBUG: Tentando acessar URL: $url');
-      print('DEBUG: Headers: $headers');
-      print('DEBUG: Body: $body');
+      AppLogger.debug(' Tentando acessar URL: $url');
+      AppLogger.debug(' Headers: $headers');
+      AppLogger.debug(' Body: $body');
 
       final response = await http.post(
         Uri.parse(url),
@@ -153,8 +154,8 @@ class ApiService {
         body: body,
       );
       
-      print('DEBUG: Status code: ${response.statusCode}');
-      print('DEBUG: Response body: ${response.body}');
+      AppLogger.debug(' Status code: ${response.statusCode}');
+      AppLogger.debug(' Response body: ${response.body}');
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -162,8 +163,8 @@ class ApiService {
         throw Exception('Falha ao iniciar a conversa de triagem: Status ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      print('DEBUG: Erro capturado: $e');
-      print('DEBUG: Tipo do erro: ${e.runtimeType}');
+      AppLogger.debug(' Erro capturado: $e');
+      AppLogger.debug(' Tipo do erro: ${e.runtimeType}');
       throw Exception('Erro ao iniciar conversa: $e');
     }
   }
@@ -174,9 +175,9 @@ class ApiService {
       final body = jsonEncode({'case_id': caseId, 'message': message});
       final url = '$_baseUrlV2/triage/continue';
 
-      print('DEBUG: Tentando acessar URL (continue): $url');
-      print('DEBUG: Headers (continue): $headers');
-      print('DEBUG: Body (continue): $body');
+      AppLogger.debug(' Tentando acessar URL (continue): $url');
+      AppLogger.debug(' Headers (continue): $headers');
+      AppLogger.debug(' Body (continue): $body');
 
       final response = await http.post(
         Uri.parse(url),
@@ -184,8 +185,8 @@ class ApiService {
         body: body,
       );
 
-      print('DEBUG: Status code (continue): ${response.statusCode}');
-      print('DEBUG: Response body (continue): ${response.body}');
+      AppLogger.debug(' Status code (continue): ${response.statusCode}');
+      AppLogger.debug(' Response body (continue): ${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -194,8 +195,8 @@ class ApiService {
         throw Exception('Erro ${response.statusCode}: ${errorData['detail'] ?? response.reasonPhrase}');
       }
     } catch (e) {
-      print('DEBUG: Erro capturado em continueTriageConversation: $e');
-      print('DEBUG: Tipo do erro: ${e.runtimeType}');
+      AppLogger.debug(' Erro capturado em continueTriageConversation: $e');
+      AppLogger.debug(' Tipo do erro: ${e.runtimeType}');
       // Retransmite a exceção para ser tratada na UI
       rethrow;
     }
