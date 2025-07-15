@@ -33,8 +33,8 @@ class LawyerMatchCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: lawyer.avatarUrl != null ? CachedNetworkImageProvider(lawyer.avatarUrl!) : null,
-                  child: lawyer.avatarUrl == null ? Icon(lucide.LucideIcons.user, size: 30) : null,
+                  backgroundImage: lawyer.avatarUrl != null ? CachedNetworkImageProvider(lawyer.avatarUrl) : null,
+                  child: lawyer.avatarUrl == null ? const Icon(lucide.LucideIcons.user, size: 30) : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -90,7 +90,7 @@ class LawyerMatchCard extends StatelessWidget {
                 _buildInfoChip(
                   context,
                   icon: lucide.LucideIcons.mapPin,
-                  label: '${lawyer.distanceKm?.toStringAsFixed(1) ?? 'N/A'} km',
+                  label: '${lawyer.distanceKm.toStringAsFixed(1) ?? 'N/A'} km',
                 ),
                 _buildInfoChip(
                   context,
@@ -106,7 +106,7 @@ class LawyerMatchCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onExplain,
-                    icon: Icon(lucide.LucideIcons.helpCircle, size: 16),
+                    icon: const Icon(lucide.LucideIcons.helpCircle, size: 16),
                     label: const Text('Por que este advogado?'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -143,7 +143,7 @@ class LawyerMatchCard extends StatelessWidget {
     final awards = lawyer.awards;
     final professionalSummary = lawyer.professionalSummary;
 
-    if ((experienceYears ?? 0) == 0 && (awards == null || awards.isEmpty)) {
+    if ((experienceYears ?? 0) == 0 && (awards.isEmpty)) {
       return const SizedBox.shrink();
     }
 
@@ -168,13 +168,13 @@ class LawyerMatchCard extends StatelessWidget {
               ),
           ],
         ),
-        if (awards != null && awards.isNotEmpty) ...[
+        if (awards.isNotEmpty) ...[
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: awards.take(3).map((award) => Chip(
-              avatar: Icon(lucide.LucideIcons.award, size: 14, color: Colors.amber),
+              avatar: const Icon(lucide.LucideIcons.award, size: 14, color: Colors.amber),
               label: Text(award, style: theme.textTheme.labelSmall),
               backgroundColor: Colors.amber.withOpacity(0.1),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

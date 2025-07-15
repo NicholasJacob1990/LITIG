@@ -26,7 +26,7 @@ void main() {
   });
 
   group('PartnershipsBloc', () {
-    final testLawyer = Lawyer(
+    const testLawyer = Lawyer(
       id: 'lawyer-1',
       name: 'Dr. João Silva',
       avatarUrl: 'https://i.pravatar.cc/150?img=1',
@@ -80,8 +80,8 @@ void main() {
         'should emit [PartnershipsLoading, PartnershipsError] when getting data fails',
         build: () {
           when(() => mockGetPartnerships.call())
-              .thenAnswer((_) async => Result.failure(
-                const ServerFailure(message: 'Erro no servidor')));
+              .thenAnswer((_) async => const Result.failure(
+                ServerFailure(message: 'Erro no servidor')));
           return bloc;
         },
         act: (bloc) => bloc.add(FetchPartnerships()),
@@ -98,8 +98,8 @@ void main() {
         'should emit [PartnershipsLoading, PartnershipsError] when connection fails',
         build: () {
           when(() => mockGetPartnerships.call())
-              .thenAnswer((_) async => Result.failure(
-                const ConnectionFailure(message: 'Sem conexão com a internet')));
+              .thenAnswer((_) async => const Result.failure(
+                ConnectionFailure(message: 'Sem conexão com a internet')));
           return bloc;
         },
         act: (bloc) => bloc.add(FetchPartnerships()),
@@ -116,7 +116,7 @@ void main() {
         'should emit [PartnershipsLoading, PartnershipsLoaded] with empty list when no partnerships exist',
         build: () {
           when(() => mockGetPartnerships.call())
-              .thenAnswer((_) async => Result.success(<Partnership>[]));
+              .thenAnswer((_) async => const Result.success(<Partnership>[]));
           return bloc;
         },
         act: (bloc) => bloc.add(FetchPartnerships()),

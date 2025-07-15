@@ -12,7 +12,6 @@ import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/src/core/theme/app_theme.dart';
 import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:meu_app/injection_container.dart' as di;
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:meu_app/src/core/utils/logger.dart';
 

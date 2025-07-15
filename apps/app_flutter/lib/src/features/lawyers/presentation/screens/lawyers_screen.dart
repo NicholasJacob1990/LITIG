@@ -4,14 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyers_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
-import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_filters_modal.dart';
-import 'package:meu_app/src/features/recommendations/presentation/widgets/lawyer_match_card.dart';
-import 'package:meu_app/src/features/firms/presentation/widgets/firm_card.dart';
-import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_bloc.dart';
 import 'package:meu_app/injection_container.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:async';
 
 class LawyersScreen extends StatelessWidget {
   const LawyersScreen({super.key});

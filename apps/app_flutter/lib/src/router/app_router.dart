@@ -24,7 +24,6 @@ import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart'
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
 // import 'package:meu_app/src/features/partnerships/presentation/screens/offers_screen.dart';
 import 'package:meu_app/src/features/partnerships/presentation/screens/partnerships_screen.dart';
-import 'package:meu_app/src/features/partnerships/presentation/screens/partners_search_screen.dart';
 // import 'package:meu_app/src/features/offers/presentation/screens/case_offers_screen.dart';
 import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
 import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_screen.dart';

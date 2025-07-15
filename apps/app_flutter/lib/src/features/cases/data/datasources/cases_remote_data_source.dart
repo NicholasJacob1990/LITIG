@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/features/cases/data/models/case_model.dart';
-import 'package:meu_app/src/core/services/dio_service.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 
 abstract class CasesRemoteDataSource {

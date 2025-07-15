@@ -48,7 +48,7 @@ class NextStepsSection extends StatelessWidget {
         Text('Próximos Passos',
             style: t.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
-        ...nextSteps!.map((step) => _stepCard(step)).toList(),
+        ...nextSteps!.map((step) => _stepCard(step)),
       ],
     );
   }
@@ -82,15 +82,15 @@ class NextStepsSection extends StatelessWidget {
             const Spacer(),
             _badge(step.isCompleted ? 'CONCLUÍDO' : 'PENDENTE', statusColor),
           ]),
-          if (step.responsibleParty != null) ...[
-            const SizedBox(height: 8),
-            Row(children: [
-              const Icon(Icons.person, size: 14, color: AppColors.lightText2),
-              const SizedBox(width: 4),
-              Text('Responsável: ${_getResponsibleLabel(step.responsibleParty!)}', 
-                   style: const TextStyle(color: AppColors.lightText2, fontSize: 12)),
-            ]),
-          ],
+          ...[
+          const SizedBox(height: 8),
+          Row(children: [
+            const Icon(Icons.person, size: 14, color: AppColors.lightText2),
+            const SizedBox(width: 4),
+            Text('Responsável: ${_getResponsibleLabel(step.responsibleParty)}', 
+                 style: const TextStyle(color: AppColors.lightText2, fontSize: 12)),
+          ]),
+        ],
         ]),
       ),
     );

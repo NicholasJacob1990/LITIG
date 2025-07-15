@@ -12,7 +12,7 @@ void main() {
     timeago.setDefaultLocale('pt_BR');
   });
 
-  final testLawyer = Lawyer(
+  const testLawyer = Lawyer(
     id: 'lawyer-1',
     name: 'Dr. Teste da Silva',
     avatarUrl: 'https://i.pravatar.cc/150?img=4',

@@ -85,21 +85,21 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         summary: 'Contrato apresenta cláusulas que podem ser questionadas juridicamente.',
         legalArea: 'Direito do Trabalho',
         urgencyLevel: 'media',
-        keyPoints: [
+        keyPoints: const [
           'Cláusula de não competição excessiva',
           'Horas extras não especificadas',
           'Benefícios abaixo do padrão de mercado',
         ],
         recommendation: 'Recomenda-se renegociação de algumas cláusulas específicas.',
         analyzedAt: DateTime.now().subtract(const Duration(days: 1)),
-        requiredDocuments: [
+        requiredDocuments: const [
           'Contrato de trabalho original assinado',
           'Últimos 6 holerites',
           'Comunicação de dispensa (se houver)',
           'Extrato do FGTS',
         ],
         riskAssessment: 'Baixo. A documentação parece robusta e a jurisprudência é favorável.',
-        estimatedCosts: { // Modificado
+        estimatedCosts: const { // Modificado
           'Consulta': 350.00,
           'Representação': 2500.00,
         },
@@ -170,8 +170,8 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         description: 'Análise inicial dos documentos em andamento',
         progressPercentage: 35.0,
         lastUpdate: DateTime.now().subtract(const Duration(hours: 2)),
-        phases: [
-          const ProcessPhase(
+        phases: const [
+          ProcessPhase(
             id: 'phase_001',
             name: 'Recebimento',
             description: 'Recebimento e catalogação dos documentos',
@@ -183,7 +183,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
               CaseDocumentPreview(id: 'doc_002', name: 'Comprovante de Renda.pdf'),
             ],
           ),
-          const ProcessPhase(
+          ProcessPhase(
             id: 'phase_002',
             name: 'Análise Inicial',
             description: 'Análise preliminar da documentação',
@@ -194,7 +194,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
               CaseDocumentPreview(id: 'doc_003', name: 'Análise Preliminar.docx'),
             ],
           ),
-          const ProcessPhase(
+          ProcessPhase(
             id: 'phase_003',
             name: 'Consulta',
             description: 'Consulta com o cliente',
@@ -202,7 +202,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
             isCurrent: false,
             completedAt: null,
           ),
-          const ProcessPhase(
+          ProcessPhase(
             id: 'phase_004',
             name: 'Elaboração',
             description: 'Elaboração da estratégia jurídica',
@@ -210,7 +210,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
             isCurrent: false,
             completedAt: null,
           ),
-          const ProcessPhase(
+          ProcessPhase(
             id: 'phase_005',
             name: 'Finalização',
             description: 'Entrega final dos documentos',

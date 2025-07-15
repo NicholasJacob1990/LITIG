@@ -162,14 +162,14 @@ class DocumentsSection extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${_formatFileSize(document.sizeBytes)}  •  ${_formatDate(document.uploadedAt)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.lightText2,
                   ),
                 ),
                 Text(
                   'Enviado por: ${_getUploaderLabel(document.uploadedBy)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.lightText2,
                   ),

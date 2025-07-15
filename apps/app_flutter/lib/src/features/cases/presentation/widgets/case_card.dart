@@ -301,7 +301,7 @@ class CaseCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             LucideIcons.star,
                             size: 12,
                             color: Colors.amber,
@@ -321,8 +321,8 @@ class CaseCard extends StatelessWidget {
               ),
               TextButton.icon(
                 onPressed: () => context.push('/firm/${firm.id}'),
-                icon: Icon(LucideIcons.externalLink, size: 16),
-                label: Text('Ver'),
+                icon: const Icon(LucideIcons.externalLink, size: 16),
+                label: const Text('Ver'),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.tertiary,
                 ),

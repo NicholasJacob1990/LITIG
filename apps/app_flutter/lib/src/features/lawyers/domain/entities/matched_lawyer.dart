@@ -16,7 +16,7 @@ class MatchedLawyer extends Equatable {
   final List<String> awards;
   final String? professionalSummary;
 
-  MatchedLawyer({
+  const MatchedLawyer({
     required this.id,
     required this.nome,
     required this.primaryArea,

@@ -31,7 +31,6 @@ final ThemeData appTheme = ThemeData(
   colorScheme: ColorScheme.fromSwatch().copyWith(
     primary: AppColors.primaryBlue,
     secondary: AppColors.highlightPurple,
-    background: AppColors.background,
     surface: AppColors.surface,
     onSurface: AppColors.primaryText,
   ),

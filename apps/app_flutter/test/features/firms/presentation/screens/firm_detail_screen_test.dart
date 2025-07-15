@@ -42,29 +42,29 @@ void main() {
 
     testWidgets('should create FirmDetailScreen widget', (WidgetTester tester) async {
       // Teste simples para verificar se o widget pode ser criado
-      expect(() => FirmDetailScreen(firmId: 'firm_1'), returnsNormally);
+      expect(() => const FirmDetailScreen(firmId: 'firm_1'), returnsNormally);
     });
 
     testWidgets('should accept firmId parameter', (WidgetTester tester) async {
       const firmId = 'test_firm_id';
-      final screen = FirmDetailScreen(firmId: firmId);
+      const screen = FirmDetailScreen(firmId: firmId);
       
       expect(screen.firmId, equals(firmId));
     });
 
     testWidgets('should accept key parameter', (WidgetTester tester) async {
       const key = Key('test_key');
-      final screen = FirmDetailScreen(key: key, firmId: 'firm_1');
+      const screen = FirmDetailScreen(key: key, firmId: 'firm_1');
       
       expect(screen.key, equals(key));
     });
 
     testWidgets('should handle empty firmId', (WidgetTester tester) async {
-      expect(() => FirmDetailScreen(firmId: ''), returnsNormally);
+      expect(() => const FirmDetailScreen(firmId: ''), returnsNormally);
     });
 
     testWidgets('should handle null firmId as empty string', (WidgetTester tester) async {
-      expect(() => FirmDetailScreen(firmId: ''), returnsNormally);
+      expect(() => const FirmDetailScreen(firmId: ''), returnsNormally);
     });
   });
 } 

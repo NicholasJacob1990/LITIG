@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/src/features/firms/domain/entities/firm_kpi.dart';
 import 'package:meu_app/src/features/firms/presentation/widgets/firm_card.dart';

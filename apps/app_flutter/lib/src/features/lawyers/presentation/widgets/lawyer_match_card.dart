@@ -217,7 +217,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(LucideIcons.award, size: 16, color: Colors.amber),
+              const Icon(LucideIcons.award, size: 16, color: Colors.amber),
               const SizedBox(width: 8),
               Expanded(
                 child: Wrap(
@@ -306,7 +306,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
                             ...widget.lawyer.awards.map((award) => Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text('• $award', style: Theme.of(context).textTheme.bodyMedium),
-                            )).toList(),
+                            )),
                             const SizedBox(height: 16),
                           ],
                           

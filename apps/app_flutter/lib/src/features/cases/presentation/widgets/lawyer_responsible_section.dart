@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/entities/case_detail.dart';
-import '../../../../shared/utils/app_colors.dart';
 import '../../../../shared/widgets/atoms/initials_avatar.dart';
 
 class LawyerResponsibleSection extends StatelessWidget {
@@ -91,7 +90,7 @@ class LawyerResponsibleSection extends StatelessWidget {
                         color: Colors.orange.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Indisponível',
                         style: TextStyle(
                           color: Colors.orange,

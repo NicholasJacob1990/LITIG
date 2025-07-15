@@ -67,10 +67,10 @@ class PreAnalysisSection extends StatelessWidget {
                   color: _getUrgencyColor(preAnalysis!.urgencyLevel), 
                   borderRadius: BorderRadius.circular(8)),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.access_time, color: Colors.white, size: 14),
-                SizedBox(width: 4),
+                const Icon(Icons.access_time, color: Colors.white, size: 14),
+                const SizedBox(width: 4),
                 Text(_getUrgencyLabel(preAnalysis!.urgencyLevel),
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.w600)),
@@ -142,7 +142,7 @@ class PreAnalysisSection extends StatelessWidget {
                         ],
                       ),
                     ))
-                .toList(),
+                ,
             const SizedBox(height: 20),
 
             // Documentos necessários (NOVO) ---------------------
@@ -163,7 +163,7 @@ class PreAnalysisSection extends StatelessWidget {
                           ],
                         ),
                       ))
-                  .toList(),
+                  ,
               const SizedBox(height: 20),
             ],
 
@@ -261,10 +261,10 @@ class PreAnalysisSection extends StatelessWidget {
               const SizedBox(height: 8),
               Text('Urgência: ${_getUrgencyLabel(preAnalysis!.urgencyLevel)}'),
               const SizedBox(height: 8),
-              Text('Resumo:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Resumo:', style: TextStyle(fontWeight: FontWeight.bold)),
               Text(preAnalysis!.summary),
               const SizedBox(height: 8),
-              Text('Recomendação:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Recomendação:', style: TextStyle(fontWeight: FontWeight.bold)),
               Text(preAnalysis!.recommendation),
             ],
           ),
