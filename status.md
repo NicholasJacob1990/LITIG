@@ -2,6 +2,38 @@
 
 ## Última Atualização: Janeiro 2025
 
+### 🔄 Novo Branch Criado - advanced-search-system
+
+**Data:** Janeiro 2025  
+**Commit:** 58415e3d7  
+**URL:** https://github.com/NicholasJacob1990/LITIG/tree/advanced-search-system
+
+#### Funcionalidades Implementadas:
+- Sistema de busca por diretório complementando o matchmaking por IA
+- Plano de ação completo do Super-Filtro com filtros granulares
+- Análise da arquitetura de navegação Flutter
+- Presets de busca expandidos com validação automática
+- Campo boutique implementado na dataclass LawFirm
+- Endpoint /api/match expandido com coordenadas e raio dinâmicos
+- Teste de integração advanced_search_flow_test.dart
+- Busca híbrida: semântica + consulta direta ao diretório
+- Interface adaptativa por perfil de usuário (Cliente/Advogado)
+- Documentação técnica completa do sistema
+
+#### Arquitetura Técnica:
+- NavigationShell com GoRouter
+- Menus dinâmicos por perfil
+- Contexto duplo confirmado para advogados contratantes
+- Estrutura de navegação robusta e dinâmica
+
+#### Estatísticas:
+- 15 arquivos modificados
+- 1.712 inserções
+- 199 deleções
+- **Próxima fase:** Implementação da UI do Super-Filtro
+
+---
+
 ### 🔄 Novo Branch Criado - flutter-app-improvements
 
 **Data:** Janeiro 2025  
