@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:meu_app/src/features/auth/presentation/screens/login_screen.dart';
-import 'package:meu_app/src/features/auth/presentation/screens/splash_screen.dart';
-import 'package:meu_app/src/features/auth/presentation/screens/register_client_screen.dart';
-import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/router/app_router.dart';
+import 'package:meu_app/injection_container.dart' as di;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   runApp(const MyApp());
 }
 
@@ -13,21 +15,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LITIG',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return BlocProvider<AuthBloc>(
+      create: (context) => di.getIt<AuthBloc>()..add(AuthAppStarted()),
+      child: Builder(
+        builder: (context) {
+          final authBloc = context.watch<AuthBloc>();
+          final router = appRouter(authBloc);
+
+          return MaterialApp.router(
+            routerConfig: router,
+            title: 'LITIG',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+          );
+        },
       ),
-      home: const SplashScreen(),
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/register-client': (context) => const RegisterClientScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
     );
-  }
-}     );
   }
 } 

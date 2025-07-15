@@ -267,23 +267,7 @@ OVERLOAD_FLOOR = float(os.getenv("OVERLOAD_FLOOR", "0.01"))  # Reduzido de 0.05 
 # =============================================================================
 # 2. Logging em JSON
 # =============================================================================
-
-
-class JsonFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord) -> str:  # noqa: D401
-        return json.dumps({
-            "timestamp": self.formatTime(record, self.datefmt),
-            "level": record.levelname,
-            "message": record.getMessage(),
-            "context": record.args,
-        })
-
-
-_handler = logging.StreamHandler()
-_handler.setFormatter(JsonFormatter())
-AUDIT_LOGGER = logging.getLogger("audit.match")
-AUDIT_LOGGER.addHandler(_handler)
-AUDIT_LOGGER.setLevel(logging.INFO)
+from .logger import AUDIT_LOGGER
 
 # =============================================================================
 # 3. Utilitários
@@ -1054,15 +1038,25 @@ class MatchmakingAlgorithm:
         async def _single_ltr_request(client: httpx.AsyncClient, lw: Lawyer) -> None:
             features = lw.scores["features"]
             try:
+                payload = {"features": features}
+                print(f"🔍 DEBUG: Enviando para LTR - Lawyer {lw.id}")
+                print(f"    Endpoint: {LTR_ENDPOINT}")
+                print(f"    Payload: {payload}")
+                
                 resp = await client.post(
                     LTR_ENDPOINT, 
-                    json={"features": features}, 
-                    timeout=0.2
+                    json=payload, 
+                    timeout=2.0
                 )
+                print(f"    Status: {resp.status_code}")
                 resp.raise_for_status()
                 score_ltr = resp.json()["score"]
                 lw.scores["source"] = "ltr"
-            except Exception:
+                print(f"    ✅ LTR Score: {score_ltr}")
+            except Exception as e:
+                print(f"    ❌ Erro LTR: {type(e).__name__}: {e}")
+                if hasattr(e, 'response') and hasattr(e.response, 'text'):
+                    print(f"    Response: {e.response.text}")
                 # Fallback para soma ponderada
                 score_ltr = sum(features.get(k, 0) * weights.get(k, 0) for k in weights)
                 lw.scores["source"] = "weights"
@@ -1387,9 +1381,13 @@ class MatchmakingAlgorithm:
                     feats["A"] = calculator.area_match()
                     feats["S"] = calculator.case_similarity()
                     feats["T"] = calculator.success_rate()
+                    feats["G"] = calculator.geo_score()         # recálculo para geografia
                     feats["U"] = calculator.urgency_capacity()  # recálculo para urgência
                     feats["C"] = calculator.soft_skill()        # recálculo de soft-skills
                     feats["R"] = calculator.review_score()
+                    feats["E"] = calculator.firm_reputation()   # recálculo para firm reputation
+                    feats["P"] = calculator.price_fit()         # recálculo para price fit
+                    feats["M"] = calculator.maturity_score()    # recálculo para maturity
                 else:
                     # Se não há cache, calcular tudo e salvar features estáticas
                     calculator = FeatureCalculator(case, lw)

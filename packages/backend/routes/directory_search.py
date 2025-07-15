@@ -45,3 +45,4 @@ async def directory_search(
             status_code=500,
             detail="Ocorreu um erro ao processar a busca no diretório."
         ) 
+ 

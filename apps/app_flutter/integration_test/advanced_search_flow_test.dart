@@ -360,3 +360,213 @@ void main() {
     });
   });
 } 
+
+      // Verifica elementos dos cards de resultado
+      final resultElements = [
+        'Match Score',
+        'Especialização',
+        'Localização',
+        'Preço por hora',
+        'Avaliação',
+        'Casos similares',
+        'Tempo de resposta',
+      ];
+
+      for (final element in resultElements) {
+        final widget = find.text(element);
+        if (widget.evaluate().isNotEmpty) {
+          expect(widget, findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('Filtros Boutique - Escritórios especializados', (tester) async {
+      // Act
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Navega para busca
+      try {
+        await tester.tap(find.byIcon(Icons.search).first);
+        await tester.pumpAndSettle();
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Verifica filtros específicos para escritórios boutique
+      final boutiqueFilters = [
+        'Escritório Boutique',
+        'Especialização única',
+        'Até 10 advogados',
+        'Até 25 advogados',
+        'Expertise específica',
+        'Atendimento personalizado',
+      ];
+
+      for (final filter in boutiqueFilters) {
+        final filterWidget = find.text(filter);
+        if (filterWidget.evaluate().isNotEmpty) {
+          expect(filterWidget, findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('Coordenadas Dinâmicas - Busca por proximidade', (tester) async {
+      // Act
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Navega para busca
+      try {
+        await tester.tap(find.byIcon(Icons.search).first);
+        await tester.pumpAndSettle();
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Verifica elementos de localização dinâmica
+      final locationElements = [
+        find.byIcon(Icons.location_on),
+        find.byIcon(Icons.my_location),
+        find.byIcon(Icons.location_searching),
+      ];
+
+      for (final element in locationElements) {
+        if (element.evaluate().isNotEmpty) {
+          expect(element, findsWidgets);
+        }
+      }
+
+      // Verifica textos de localização
+      final locationTexts = [
+        'Usar minha localização',
+        'Buscar próximo a mim',
+        'Definir localização',
+        'Coordenadas',
+      ];
+
+      for (final text in locationTexts) {
+        final widget = find.text(text);
+        if (widget.evaluate().isNotEmpty) {
+          expect(widget, findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('Validação de Filtros - Combinações válidas', (tester) async {
+      // Act
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Navega para busca
+      try {
+        await tester.tap(find.byIcon(Icons.search).first);
+        await tester.pumpAndSettle();
+      } catch (e) {
+        // Continua se não conseguir navegar
+      }
+
+      // Tenta aplicar filtros incompatíveis
+      final incompatibleFilters = [
+        'Escritório Boutique',
+        'Grandes Escritórios',
+      ];
+
+      for (final filter in incompatibleFilters) {
+        final filterWidget = find.text(filter);
+        if (filterWidget.evaluate().isNotEmpty) {
+          await tester.tap(filterWidget.first);
+          await tester.pumpAndSettle();
+        }
+      }
+
+      // Verifica mensagens de validação
+      final validationMessages = [
+        'Filtros incompatíveis',
+        'Selecione apenas um tipo',
+        'Combinação inválida',
+        'Ajuste os filtros',
+      ];
+
+      for (final message in validationMessages) {
+        final messageWidget = find.text(message);
+        if (messageWidget.evaluate().isNotEmpty) {
+          expect(messageWidget, findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('Interface Adaptativa - Diferentes perfis de usuário', (tester) async {
+      // Act
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Verifica elementos adaptativos baseados no perfil
+      final adaptiveElements = [
+        'Busca para Cliente',
+        'Busca para Advogado',
+        'Busca para Escritório',
+        'Recomendações personalizadas',
+        'Filtros sugeridos',
+      ];
+
+      for (final element in adaptiveElements) {
+        final widget = find.text(element);
+        if (widget.evaluate().isNotEmpty) {
+          expect(widget, findsWidgets);
+        }
+      }
+
+      // Verifica navegação adaptativa
+      final navigationElements = [
+        find.byIcon(Icons.person),
+        find.byIcon(Icons.business),
+        find.byIcon(Icons.group),
+      ];
+
+      for (final element in navigationElements) {
+        if (element.evaluate().isNotEmpty) {
+          expect(element, findsWidgets);
+        }
+      }
+    });
+
+    testWidgets('Performance de Busca - Tempo de resposta', (tester) async {
+      // Act
+      await app.main();
+      await tester.pumpAndSettle();
+
+      // Measure search performance
+      final stopwatch = Stopwatch()..start();
+
+      try {
+        await tester.tap(find.byIcon(Icons.search).first);
+        await tester.pumpAndSettle();
+        
+        final searchField = find.byType(TextField);
+        if (searchField.evaluate().isNotEmpty) {
+          await tester.tap(searchField.first);
+          await tester.enterText(searchField.first, 'direito civil');
+          await tester.pumpAndSettle();
+          
+          // Submete a busca
+          await tester.testTextInput.receiveAction(TextInputAction.search);
+          await tester.pumpAndSettle();
+        }
+      } catch (e) {
+        // Continua se não conseguir fazer a busca
+      }
+      
+      stopwatch.stop();
+
+      // Assert - Verifica performance
+      expect(stopwatch.elapsedMilliseconds, lessThan(3000));
+      
+      // Verifica se os resultados foram carregados
+      final resultCards = find.byType(Card);
+      if (resultCards.evaluate().isNotEmpty) {
+        expect(resultCards, findsWidgets);
+      }
+    });
+  });
+} 

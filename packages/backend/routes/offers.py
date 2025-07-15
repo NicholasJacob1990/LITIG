@@ -15,10 +15,11 @@ from ..services.offer_service import (
     reject_offer, 
     get_lawyer_offer_statistics,
     get_lawyer_offers, 
-    update_offer_status
+    update_offer_status,
 )
 from ..auth import get_current_user
 from ..models import Offer, OfferStatusUpdate
+from ..logger import AUDIT_LOGGER
 
 router = APIRouter(
     prefix="/offers",
@@ -48,6 +49,14 @@ async def get_pending_offers_endpoint(
 
     try:
         offers = await get_pending_offers(user_id)
+        # Log LTR para cada impressão de oferta
+        for offer in offers:
+            AUDIT_LOGGER.info("offer_impression", {
+                "action": "impression",
+                "case_id": offer.case_id,
+                "lawyer_id": user_id,
+                "offer_id": offer.id
+            })
         return offers
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -167,6 +176,16 @@ async def update_my_offer_status_route(
         updated_offer = await update_offer_status(offer_id, update_data, user_id)
         if not updated_offer:
             raise HTTPException(status_code=404, detail="Oferta não encontrada ou não pertence a você.")
+        
+        # Log de feedback para LTR quando há interesse
+        if update_data.status == "interested":
+            AUDIT_LOGGER.info("offer_feedback", {
+                "action": "contact",
+                "case_id": updated_offer.case_id,
+                "lawyer_id": user_id,
+                "offer_id": offer_id,
+            })
+
         return updated_offer
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

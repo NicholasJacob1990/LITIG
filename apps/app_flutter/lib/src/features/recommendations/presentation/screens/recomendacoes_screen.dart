@@ -12,7 +12,7 @@ class RecomendacoesScreen extends StatefulWidget {
 }
 
 class _RecomendacoesScreenState extends State<RecomendacoesScreen> {
-  late Future<Map<String, dynamic>> _matchesFuture;
+  late Future<List<dynamic>> _matchesFuture;
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _RecomendacoesScreenState extends State<RecomendacoesScreen> {
       appBar: AppBar(
         title: const Text('Advogados Recomendados'),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<List<dynamic>>(
         future: _matchesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -37,16 +37,11 @@ class _RecomendacoesScreenState extends State<RecomendacoesScreen> {
             return Center(child: Text('Erro ao buscar recomendações: ${snapshot.error}'));
           }
 
-          if (!snapshot.hasData) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Nenhum advogado encontrado.'));
           }
 
-          final data = snapshot.data!;
-          final matches = data['matches'] as List<dynamic>? ?? [];
-          
-          if (matches.isEmpty) {
-            return const Center(child: Text('Nenhum advogado encontrado.'));
-          }
+          final matches = snapshot.data!;
 
           return ListView.builder(
             itemCount: matches.length,

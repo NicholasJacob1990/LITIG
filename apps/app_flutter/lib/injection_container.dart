@@ -35,8 +35,11 @@ import 'package:meu_app/src/features/firms/presentation/bloc/firm_bloc.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_detail_bloc.dart';
 
 // Lawyers
+import 'package:meu_app/src/features/lawyers/data/datasources/lawyers_remote_data_source.dart';
 import 'package:meu_app/src/features/lawyers/domain/repositories/lawyers_repository.dart';
 import 'package:meu_app/src/features/lawyers/data/repositories/lawyers_repository_impl.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/find_matches_usecase.dart';
+import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
 
 // Partnerships
@@ -146,11 +149,20 @@ void configureDependencies() {
   ));
 
   // Lawyers
+  // Datasources
+  getIt.registerLazySingleton<LawyersRemoteDataSource>(
+      () => LawyersRemoteDataSourceImpl(dio: getIt()));
+      
   // Repositories
   getIt.registerLazySingleton<LawyersRepository>(
       () => LawyersRepositoryImpl(remoteDataSource: getIt()));
 
+  // Use Cases
+  getIt.registerLazySingleton(() => FindMatchesUseCase(getIt()));
+
   // Blocs
+  getIt.registerFactory(() => MatchesBloc(findMatchesUseCase: getIt()));
+  
   getIt.registerFactory(() => HybridMatchBloc(
     lawyersRepository: getIt(),
     firmsRepository: getIt(),

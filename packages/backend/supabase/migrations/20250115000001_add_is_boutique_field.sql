@@ -16,3 +16,4 @@ COMMENT ON COLUMN public.law_firms.is_boutique IS 'Indica se o escritório é cl
 -- UPDATE public.law_firms 
 -- SET is_boutique = true 
 -- WHERE team_size <= 15 AND name LIKE '%Especializado%'; 
+ 

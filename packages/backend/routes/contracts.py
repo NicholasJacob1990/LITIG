@@ -12,6 +12,7 @@ from ..auth import get_current_user
 from ..models import Contract, ContractStatus, FeeModel
 from ..services.contract_service import ContractService
 from ..services.sign_service import SignService
+from ..logger import AUDIT_LOGGER
 
 router = APIRouter(prefix="/contracts", tags=["contracts"])
 
@@ -248,23 +249,32 @@ async def sign_contract(
             )
 
         # Verificar se já assinou
-        if user_role == "client" and contract.signed_client:
+        if (user_role == "client" and contract.signed_client) or \
+           (user_role == "lawyer" and contract.signed_lawyer):
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Cliente já assinou este contrato"
-            )
-        elif user_role == "lawyer" and contract.signed_lawyer:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Advogado já assinou este contrato"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Usuário já assinou este contrato"
             )
 
-        # Assinar contrato
+        # Assinar e verificar se o contrato ficou ativo
         updated_contract = await contract_service.sign_contract(
             contract_id=contract_id,
-            role=user_role,
-            signature_data=sign_data.signature_data
+            user_id=current_user["id"],
+            role=user_role
         )
+
+        # Log de feedback para LTR se o contrato foi ativado
+        if updated_contract.status == ContractStatus.ACTIVE:
+            AUDIT_LOGGER.info("offer_feedback", {
+                "action": "contract",
+                "case_id": updated_contract.case_id,
+                "lawyer_id": updated_contract.lawyer_id,
+                "client_id": updated_contract.client_id,
+                "contract_id": updated_contract.id,
+            })
+
+        # Chamar Docusign ou outro serviço de assinatura eletrônica, se aplicável
+        # ...
 
         return ContractResponse(**updated_contract.dict())
 

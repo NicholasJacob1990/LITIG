@@ -1,0 +1,53 @@
+# ⚡ Configuração do Pipeline LTR 100% Automatizado
+# Copie para .env e ajuste conforme seu ambiente
+
+# ==========================================
+# CHAVE 1: Ingestão Automática (Kafka)
+# ==========================================
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+KAFKA_TOPIC=match_events
+KAFKA_GROUP_ID=ltr_etl_consumer
+
+# ==========================================
+# CHAVE 2: Agendamento Airflow
+# ==========================================
+AIRFLOW_VAR_ltr_ndcg_min=0.65
+AIRFLOW_VAR_ltr_fairness_max=0.05
+AIRFLOW_VAR_ltr_min_samples=100
+
+# ==========================================
+# CHAVE 3: Publicação S3/MinIO
+# ==========================================
+S3_BUCKET=litgo-models
+S3_PREFIX=ltr
+# Para MinIO local - remover para AWS S3 real
+S3_ENDPOINT=http://localhost:9000
+AWS_ACCESS_KEY_ID=minioadmin
+AWS_SECRET_ACCESS_KEY=minioadmin
+
+# ==========================================
+# CHAVE 4: Recarga Automática de Pesos
+# ==========================================
+WEIGHTS_POLL_SECONDS=300
+WEIGHTS_PATH=packages/backend/models/ltr_weights.json
+FASTAPI_RELOAD_WEBHOOK=http://localhost:8080/api/debug/reload_weights
+
+# ==========================================
+# Configurações Gerais
+# ==========================================
+LTR_ENDPOINT=http://ltr-service:8080/ltr/score
+REDIS_URL=redis://localhost:6379/0
+DATABASE_URL=postgresql://user:pass@localhost:5432/litgo
+
+# ==========================================
+# Notificações (Opcional)
+# ==========================================
+SLACK_WEBHOOK_URL=
+EMAIL_ALERTS=ml-alerts@litgo.com
+
+# ==========================================
+# Pipeline de Desenvolvimento
+# ==========================================
+MODEL_DEV_PATH=packages/backend/ltr_pipeline/models/dev/ltr_model.txt
+DATA_PATH=packages/backend/ltr_pipeline/data
+LOGS_PATH=logs/audit.log 

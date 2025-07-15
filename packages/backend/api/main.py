@@ -40,6 +40,7 @@ from backend.algoritmo_match import (
     DiversityMeta,
     Lawyer,
     MatchmakingAlgorithm,
+    load_weights, # ⚡ Adicionar import da função load_weights
 )
 from backend.routes import (
     cases, recommendations, payments, offers, reviews_route, timeline, contracts, financials,
@@ -57,6 +58,15 @@ from backend.api.schemas import (
     MatchResponseSchema,
     SyncStatusSchema,
 )
+
+# -------------------------------------------------------------
+# ⚡ CHAVE 4: Recarregamento automático de pesos sem downtime
+# -------------------------------------------------------------
+import pathlib
+
+# Configuração de polling de pesos
+WEIGHTS_POLL_SECONDS = int(os.getenv("WEIGHTS_POLL_SECONDS", "300"))  # 5 minutos padrão
+WEIGHTS_PATH = pathlib.Path(os.getenv("WEIGHTS_PATH", "packages/backend/models/ltr_weights.json"))
 
 # -------------------------------------------------------------
 # Armazenamento de resultados para explicability (Redis TTL 1h)
@@ -95,6 +105,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ⚡ CHAVE 4: Background task para polling automático de pesos
+@app.on_event("startup")
+async def start_weights_polling():
+    """
+    Inicia o polling automático de pesos LTR.
+    Verifica mudanças no arquivo de pesos a cada WEIGHTS_POLL_SECONDS.
+    """
+    async def _poll_weights():
+        """Task de polling que roda em background."""
+        last_mtime = 0
+        logger.info(f"Iniciando polling de pesos: {WEIGHTS_PATH} (intervalo: {WEIGHTS_POLL_SECONDS}s)")
+        
+        while True:
+            try:
+                if WEIGHTS_PATH.exists():
+                    current_mtime = WEIGHTS_PATH.stat().st_mtime
+                    if current_mtime != last_mtime and last_mtime != 0:
+                        logger.info("Arquivo de pesos modificado - recarregando...")
+                        new_weights = load_weights()
+                        logger.info(f"Pesos atualizados: {new_weights}")
+                    last_mtime = current_mtime
+                else:
+                    logger.warning(f"Arquivo de pesos não encontrado: {WEIGHTS_PATH}")
+            except Exception as e:
+                logger.error(f"Erro no polling de pesos: {e}")
+            
+            await asyncio.sleep(WEIGHTS_POLL_SECONDS)
+    
+    # Criar task em background
+    asyncio.create_task(_poll_weights())
 
 # Incluir os roteadores
 app.include_router(cases.router, prefix="/api")

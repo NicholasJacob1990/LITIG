@@ -59,3 +59,4 @@ class DirectorySearchService:
             return []
 
 from psycopg2.extras import RealDictCursor 
+ 
