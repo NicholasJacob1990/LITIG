@@ -40,12 +40,12 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 50,
-                            child: user.name != null && user.name!.isNotEmpty
-                                ? Text(user.name!.substring(0, 2).toUpperCase(), style: const TextStyle(fontSize: 40))
+                            child: user.fullName != null && user.fullName!.isNotEmpty
+                                ? Text(user.fullName!.substring(0, 2).toUpperCase(), style: const TextStyle(fontSize: 40))
                                 : const Icon(LucideIcons.user, size: 40),
                           ),
                           const SizedBox(height: 20),
-                          Text(user.name ?? 'Usuário', style: Theme.of(context).textTheme.headlineSmall),
+                          Text(user.fullName ?? 'Usuário', style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(height: 8),
                           Text(user.email ?? 'E-mail não informado', style: Theme.of(context).textTheme.bodyLarge),
                           const SizedBox(height: 8),

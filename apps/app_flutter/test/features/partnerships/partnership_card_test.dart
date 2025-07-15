@@ -17,6 +17,10 @@ void main() {
     name: 'Dr. Teste da Silva',
     avatarUrl: 'https://i.pravatar.cc/150?img=4',
     oab: 'SP123456',
+    expertiseAreas: ['Direito Civil', 'Direito Empresarial'],
+    rating: 4.5,
+    isAvailable: true,
+    distanceKm: 5.0,
   );
 
   final testPartnership = Partnership(

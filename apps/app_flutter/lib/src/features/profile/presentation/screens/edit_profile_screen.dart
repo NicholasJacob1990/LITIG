@@ -34,7 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
         setState(() {
-          _nameController.text = user.name ?? '';
+          _nameController.text = user.fullName ?? '';
           _emailController.text = user.email ?? '';
           _isLoadingData = false;
         });

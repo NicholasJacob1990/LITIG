@@ -31,6 +31,10 @@ import re
 # type: ignore - para ignorar erros de importação não resolvidos
 import numpy as np
 import redis.asyncio as aioredis
+import httpx
+
+# LTR Service Integration
+LTR_ENDPOINT = os.getenv("LTR_ENDPOINT", "http://ltr-service:8080/ltr/score")
 try:
     from .services.availability_service import get_lawyers_availability_status
 except ImportError:
@@ -1041,6 +1045,47 @@ class MatchmakingAlgorithm:
             return False
 
     # ------------------------------------------------------------------
+    async def _calculate_ltr_scores_parallel(self, lawyers: List[Lawyer], weights: Dict[str, float], 
+                                           case: Case, preset: str, degraded_mode: bool) -> None:
+        """
+        Calcula scores LTR em paralelo usando httpx.AsyncClient.
+        Faz fallback para soma ponderada em caso de erro/timeout.
+        """
+        async def _single_ltr_request(client: httpx.AsyncClient, lw: Lawyer) -> None:
+            features = lw.scores["features"]
+            try:
+                resp = await client.post(
+                    LTR_ENDPOINT, 
+                    json={"features": features}, 
+                    timeout=0.2
+                )
+                resp.raise_for_status()
+                score_ltr = resp.json()["score"]
+                lw.scores["source"] = "ltr"
+            except Exception:
+                # Fallback para soma ponderada
+                score_ltr = sum(features.get(k, 0) * weights.get(k, 0) for k in weights)
+                lw.scores["source"] = "weights"
+            
+            # Atribuir scores e deltas
+            lw.scores["ltr"] = score_ltr
+            lw.scores["delta"] = {
+                k: features.get(k, 0) * weights.get(k, 0) for k in weights
+            }
+            
+            # Guardar preset/complexidade e modo degradado para logs
+            lw.scores.update({
+                "preset": preset, 
+                "complexity": case.complexity,
+                "degraded_mode": degraded_mode
+            })
+
+        # Executar todas as requisições LTR em paralelo
+        async with httpx.AsyncClient() as client:
+            tasks = [_single_ltr_request(client, lw) for lw in lawyers]
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    # ------------------------------------------------------------------
     async def _rank_firms(self, case: Case, firms: List[LawFirm], *, top_n: int = 3) -> List[LawFirm]:
         """
         Ranking específico de escritórios para o passo 1 do algoritmo B2B.
@@ -1357,21 +1402,8 @@ class MatchmakingAlgorithm:
                 # Atribuição unificada de features
                 lw.scores["features"] = feats
 
-            # 4. Calcular score LTR e Delta
-            features = lw.scores["features"]
-            # Garantir que todas as features existem para não dar KeyError
-            score_ltr = sum(features.get(k, 0) * weights.get(k, 0) for k in weights)
-            lw.scores["ltr"] = score_ltr
-            lw.scores["delta"] = {
-                k: features.get(k, 0) * weights.get(k, 0) for k in weights
-            }
-
-            # Guardar preset/complexidade e modo degradado para logs
-            lw.scores.update({
-                "preset": preset, 
-                "complexity": case.complexity,
-                "degraded_mode": degraded_mode
-            })
+        # 4. Calcular scores LTR em paralelo com fallback para pesos
+        await self._calculate_ltr_scores_parallel(available_lawyers, weights, case, preset, degraded_mode)
 
         if not available_lawyers:
             return []

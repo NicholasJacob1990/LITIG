@@ -222,7 +222,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
       if (isAssociated)
         Step(
           title: const Text('Vínculo com Escritório'),
-          content: _buildOfficeLinkStep(),
+          content: _buildOfficeLinkStep(), // Este método será modificado
           isActive: _currentStep >= 1,
         ),
       Step(
@@ -278,93 +278,51 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
     _buildTextField(controller: _passwordController, hintText: 'Senha (mínimo 8 caracteres)', obscureText: true, validator: (v) => (v!.length < 8) ? 'Senha muito curta' : null),
   ]);
 
-   Widget _buildOfficeLinkStep() => Column(
-    children: [
-      // NOVO: Opção Super Associado
-      Container(
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.blue.withOpacity(0.3)),
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.blue.withOpacity(0.05),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Checkbox(
-                  value: _isPlatformAssociate,
-                  onChanged: (value) => setState(() {
-                    _isPlatformAssociate = value ?? false;
-                    if (_isPlatformAssociate) {
-                      _officeCodeController.clear(); // Limpa código do escritório
-                    }
-                  }),
-                ),
-                Expanded(
-                  child: Text(
-                    'Sou Super Associado da Plataforma LITGO',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Super Associados são advogados que trabalham diretamente com a plataforma LITGO, '
-              'recebendo casos através do sistema de ofertas e precisam assinar contrato de associação.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            if (_isPlatformAssociate) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: Colors.orange, size: 16),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Será necessário assinar contrato de associação após o registro',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.orange[800],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-      
-      // Campo original - só aparece se NÃO for Super Associado
-      if (!_isPlatformAssociate) ...[
-        _buildTextField(
+  Widget _buildOfficeLinkStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
           controller: _officeCodeController,
-          hintText: 'Código do Escritório',
-          validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null
+          decoration: const InputDecoration(
+            labelText: 'Código do Escritório',
+            hintText: 'Insira o código fornecido pelo escritório',
+            prefixIcon: Icon(Icons.qr_code),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Por favor, insira o código do escritório.';
+            }
+            return null;
+          },
         ),
-        const SizedBox(height: 8),
-        const Text(
-          'Insira o código fornecido pelo escritório de advocacia ao qual você está se associando.',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.blue.withOpacity(0.05),
+          ),
+          child: CheckboxListTile(
+            title: const Text('Sou associado do escritório titular LITGO'),
+            subtitle: Text(
+              'Super-Associados captam casos diretamente da plataforma e precisam assinar um contrato de associação específico.',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            value: _isPlatformAssociate,
+            onChanged: (value) {
+              setState(() {
+                _isPlatformAssociate = value ?? false;
+              });
+            },
+            controlAffinity: ListTileControlAffinity.leading,
+            activeColor: Colors.blue,
+          ),
         ),
       ],
-    ],
-  );
+    );
+  }
 
   Widget _buildStep2() => Column(children: [
     _buildTextField(controller: _oabController, hintText: 'Nº da OAB (Ex: 123456/SP)', validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),

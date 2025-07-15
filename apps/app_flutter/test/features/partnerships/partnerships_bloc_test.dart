@@ -31,6 +31,9 @@ void main() {
       name: 'Dr. João Silva',
       avatarUrl: 'https://i.pravatar.cc/150?img=1',
       oab: 'SP123456',
+      expertiseAreas: ['Direito Civil'],
+      rating: 4.0,
+      isAvailable: true,
     );
 
     final testPartnerships = [

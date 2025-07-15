@@ -4,8 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
+import 'package:dio/dio.dart';
+import 'package:meu_app/src/features/search/domain/entities/search_params.dart';
+import 'package:meu_app/src/features/lawyers/data/models/lawyer_model.dart';
+import '../error/exceptions.dart';
 
 class ApiService {
+  static final Dio _dio = Dio();
+  static final SupabaseClient _supabase = Supabase.instance.client;
+
   static String get _baseUrl {
     // Debug logs para verificar a detecção de plataforma
     AppLogger.debug('ApiService: kIsWeb = $kIsWeb');
@@ -432,6 +439,26 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Falha ao continuar a conversa de triagem: Status ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  static Future<List<dynamic>> directorySearch(SearchParams params) async {
+    try {
+      final response = await _dio.get(
+        '/lawyers/directory-search',
+        queryParameters: params.toQuery(),
+      );
+      if (response.statusCode == 200) {
+        final lawyers = (response.data as List)
+            .map((data) => LawyerModel.fromJson(data))
+            .toList();
+        // Aqui também poderíamos tratar LawFirmModel se o endpoint retornar
+        return lawyers;
+      } else {
+        throw ServerException(message: 'Erro na busca por diretório');
+      }
+    } on DioError catch (e) {
+      throw ServerException.fromDioError(e);
     }
   }
 } 

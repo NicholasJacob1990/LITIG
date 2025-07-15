@@ -60,7 +60,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           case 'lawyer_individual':
           case 'lawyer_office':
           case 'lawyer_platform_associate': // NOVO: Super Associado - usa mesma rota de captação
-            return '/contractor-offers'; // MUDANÇA: Direciona para ofertas
+            return '/home'; // MUDANÇA: Direciona para home, como os outros contratantes
           default: // cliente
             return '/client-home';
         }

@@ -29,9 +29,9 @@ class DashboardScreen extends StatelessWidget {
           AppLogger.debug('Dashboard: User role = ${user.role}');
           
           if (_isLawyer(user.role)) {
-            return LawyerDashboard(userName: user.name ?? 'Advogado');
+            return LawyerDashboard(userName: user.fullName ?? 'Advogado');
           } else {
-            return ClientDashboard(userName: user.name ?? 'Cliente');
+            return ClientDashboard(userName: user.fullName ?? 'Cliente');
           }
         }
         // Exibe um loader enquanto o estado de autenticação é resolvido
