@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/shared/config/navigation_config.dart';
@@ -24,6 +25,13 @@ class MainTabsShell extends StatelessWidget {
           
           // Sistema de navegação baseado em permissões
           final navTabs = _getNavItemsForPermissions(userPermissions, userRole);
+          
+          // DEBUG: Log para diagnosticar o problema
+          print('DEBUG - UserRole: $userRole');
+          print('DEBUG - UserPermissions: $userPermissions');
+          print('DEBUG - NavTabs count: ${navTabs.length}');
+          print('DEBUG - NavTabs: ${navTabs.map((t) => t.label).toList()}');
+          
           return Scaffold(
             body: navigationShell,
             bottomNavigationBar: BottomNavigationBar(
@@ -106,10 +114,219 @@ class MainTabsShell extends StatelessWidget {
 
   /// Nova lógica baseada em permissões
   List<NavigationTab> _getNavItemsForPermissions(List<String> userPermissions, String userRole) {
-    return getVisibleTabsForUser(
+    final tabs = getVisibleTabsForUser(
       userPermissions: userPermissions,
       userRole: userRole,
     );
+    
+    // FALLBACK DIRETO: Se não há abas suficientes, usar configuração padrão por perfil
+    if (tabs.length < 2) {
+      return _getFallbackTabsForRole(userRole);
+    }
+    
+    return tabs;
+  }
+  
+    /// Fallback com abas padrão por perfil quando o sistema de permissões falha
+  /// Baseado no código legado comentado (linhas 204-242)
+  List<NavigationTab> _getFallbackTabsForRole(String userRole) {
+    print('DEBUG - Usando fallback para userRole: $userRole');
+    
+    switch (userRole) {
+      case 'lawyer_associated':
+        return [
+          NavigationTab(
+            label: 'Painel',
+            icon: LucideIcons.layoutDashboard,
+            branchIndex: 0,
+            requiredPermission: 'nav.view.dashboard',
+            route: '/dashboard',
+          ),
+          NavigationTab(
+            label: 'Casos',
+            icon: LucideIcons.folder,
+            branchIndex: 1,
+            requiredPermission: 'nav.view.cases',
+            route: '/cases',
+          ),
+          NavigationTab(
+            label: 'Agenda',
+            icon: LucideIcons.calendar,
+            branchIndex: 2,
+            requiredPermission: 'nav.view.schedule',
+            route: '/schedule',
+          ),
+          NavigationTab(
+            label: 'Ofertas',
+            icon: LucideIcons.inbox,
+            branchIndex: 3,
+            requiredPermission: 'nav.view.offers',
+            route: '/offers',
+          ),
+          NavigationTab(
+            label: 'Mensagens',
+            icon: LucideIcons.messageSquare,
+            branchIndex: 4,
+            requiredPermission: 'nav.view.messages',
+            route: '/messages',
+          ),
+          NavigationTab(
+            label: 'Perfil',
+            icon: LucideIcons.user,
+            branchIndex: 5,
+            requiredPermission: 'nav.view.profile',
+            route: '/profile',
+          ),
+        ];
+        
+      case 'lawyer_individual':
+      case 'lawyer_office':
+        return [
+          NavigationTab(
+            label: 'Início',
+            icon: LucideIcons.home,
+            branchIndex: 6,
+            requiredPermission: 'nav.view.home',
+            route: '/home',
+          ),
+          NavigationTab(
+            label: 'Casos',
+            icon: LucideIcons.folder,
+            branchIndex: 1,
+            requiredPermission: 'nav.view.cases',
+            route: '/cases',
+          ),
+          NavigationTab(
+            label: 'Ofertas',
+            icon: LucideIcons.inbox,
+            branchIndex: 7,
+            requiredPermission: 'nav.view.offers',
+            route: '/offers',
+          ),
+          NavigationTab(
+            label: 'Parceiros',
+            icon: LucideIcons.search,
+            branchIndex: 8,
+            requiredPermission: 'nav.view.partners',
+            route: '/partners',
+          ),
+          NavigationTab(
+            label: 'Parcerias',
+            icon: LucideIcons.users,
+            branchIndex: 9,
+            requiredPermission: 'nav.view.partnerships',
+            route: '/partnerships',
+          ),
+          NavigationTab(
+            label: 'Mensagens',
+            icon: LucideIcons.messageSquare,
+            branchIndex: 10,
+            requiredPermission: 'nav.view.messages',
+            route: '/messages',
+          ),
+          NavigationTab(
+            label: 'Perfil',
+            icon: LucideIcons.user,
+            branchIndex: 11,
+            requiredPermission: 'nav.view.profile',
+            route: '/profile',
+          ),
+        ];
+        
+      case 'lawyer_platform_associate':
+        return [
+          NavigationTab(
+            label: 'Início',
+            icon: LucideIcons.home,
+            branchIndex: 6,
+            requiredPermission: 'nav.view.home',
+            route: '/home',
+          ),
+          NavigationTab(
+            label: 'Casos',
+            icon: LucideIcons.folder,
+            branchIndex: 1,
+            requiredPermission: 'nav.view.cases',
+            route: '/cases',
+          ),
+          NavigationTab(
+            label: 'Ofertas',
+            icon: LucideIcons.inbox,
+            branchIndex: 3,
+            requiredPermission: 'nav.view.offers',
+            route: '/offers',
+          ),
+          NavigationTab(
+            label: 'Parceiros',
+            icon: LucideIcons.search,
+            branchIndex: 8,
+            requiredPermission: 'nav.view.partners',
+            route: '/partners',
+          ),
+          NavigationTab(
+            label: 'Parcerias',
+            icon: LucideIcons.users,
+            branchIndex: 9,
+            requiredPermission: 'nav.view.partnerships',
+            route: '/partnerships',
+          ),
+          NavigationTab(
+            label: 'Mensagens',
+            icon: LucideIcons.messageSquare,
+            branchIndex: 4,
+            requiredPermission: 'nav.view.messages',
+            route: '/messages',
+          ),
+        ];
+        
+      case 'client':
+      case 'CLIENT':
+      default:
+        return [
+          NavigationTab(
+            label: 'Início',
+            icon: LucideIcons.home,
+            branchIndex: 12,
+            requiredPermission: 'nav.view.client_home',
+            route: '/client-home',
+          ),
+          NavigationTab(
+            label: 'Meus Casos',
+            icon: LucideIcons.clipboardList,
+            branchIndex: 13,
+            requiredPermission: 'nav.view.client_cases',
+            route: '/client-cases',
+          ),
+          NavigationTab(
+            label: 'Advogados',
+            icon: LucideIcons.search,
+            branchIndex: 14,
+            requiredPermission: 'nav.view.find_lawyers',
+            route: '/find-lawyers',
+          ),
+          NavigationTab(
+            label: 'Mensagens',
+            icon: LucideIcons.messageCircle,
+            branchIndex: 15,
+            requiredPermission: 'nav.view.client_messages',
+            route: '/client-messages',
+          ),
+          NavigationTab(
+            label: 'Serviços',
+            icon: LucideIcons.layoutGrid,
+            branchIndex: 16,
+            requiredPermission: 'nav.view.client_services',
+            route: '/client-services',
+          ),
+          NavigationTab(
+            label: 'Perfil',
+            icon: LucideIcons.user,
+            branchIndex: 17,
+            requiredPermission: 'nav.view.client_profile',
+            route: '/client-profile',
+          ),
+        ];
+    }
   }
 
   // LEGADO: Função comentada após migração para sistema de permissões

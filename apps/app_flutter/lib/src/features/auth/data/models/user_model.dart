@@ -4,10 +4,14 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 class UserModel extends User {
   const UserModel({
     required super.id,
-    required super.email,
-    super.name,
-    super.avatarUrl,
+    super.email,
+    super.fullName,
     super.role,
+    super.userRole,
+    super.permissions = const [],
+    super.metadata,
+    super.createdAt,
+    super.updatedAt,
   });
 
   factory UserModel.fromSupabase(supabase.User supabaseUser) {
@@ -25,9 +29,8 @@ class UserModel extends User {
     
     return UserModel(
       id: supabaseUser.id,
-      email: supabaseUser.email ?? '',
-      name: supabaseUser.userMetadata?['full_name'],
-      avatarUrl: supabaseUser.userMetadata?['avatar_url'],
+      email: supabaseUser.email,
+      fullName: supabaseUser.userMetadata?['full_name'],
       role: userRole,
     );
   }

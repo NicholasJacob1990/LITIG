@@ -407,7 +407,7 @@ class AuthInterceptor extends Interceptor {
         options.headers['X-Test-Mode'] = 'true';
       }
     } catch (e) {
-      AppLogger.warning('Erro ao obter token - usando modo teste', error: e);
+      AppLogger.error('Erro ao obter token - usando modo teste', error: e);
       options.headers['X-Test-Mode'] = 'true';
     }
     
