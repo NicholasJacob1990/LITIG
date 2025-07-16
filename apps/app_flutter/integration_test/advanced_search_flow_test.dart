@@ -380,7 +380,7 @@ void main() {
       }
     });
 
-    testWidgets('Filtros Boutique - Escritórios especializados', (tester) async {
+    testWidgets('Filtros Boutique - Escritórios especializados', (WidgetTester tester) async {
       // Act
       await app.main();
       await tester.pumpAndSettle();

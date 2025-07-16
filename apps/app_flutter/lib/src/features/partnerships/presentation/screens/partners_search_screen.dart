@@ -307,19 +307,3 @@ class _PartnersSearchTabViewState extends State<PartnersSearchTabView> {
     context.read<SearchBloc>().add(SearchRequested(params));
   }
 } 
-    if (query.trim().isEmpty) {
-      // Se busca vazia, voltar ao estado inicial
-      context.read<HybridMatchBloc>().add(const FetchHybridMatches(
-        caseId: 'partnership_search',
-        includeFirms: true,
-        preset: 'correspondent',
-      ));
-    } else {
-      // Buscar com o termo
-      context.read<HybridMatchBloc>().add(SearchHybridMatches(
-        query: query,
-        includeFirms: true,
-      ));
-    }
-  }
-} 

@@ -126,6 +126,7 @@ class HybridRecommendationsTabView extends StatefulWidget {
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
   String _selectedPreset = 'balanced';
+  bool _showMapView = false; // Nova variável para controlar visualização
   
   @override
   void initState() {
@@ -146,47 +147,86 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // PresetSelector para clientes
+        // Header com toggle de visualização
         Container(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Toggle de visualização Lista/Mapa (apenas ícones)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildViewToggle(
+                          icon: LucideIcons.list,
+                          isSelected: !_showMapView,
+                          onTap: () => setState(() => _showMapView = false),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 32,
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                        ),
+                        _buildViewToggle(
+                          icon: LucideIcons.map,
+                          isSelected: _showMapView,
+                          onTap: () => setState(() => _showMapView = true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Título da seção
               Text(
                 'Tipo de Recomendação',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
               
-              // Chips de seleção de preset
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildPresetChip(
+              // Chips de seleção de preset (melhorados)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildPresetChip(
                       'balanced', 
                       'Recomendado', 
+                      'Equilibra experiência e custo',
                       LucideIcons.star,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildPresetChip(
+                    const SizedBox(width: 8),
+                    _buildPresetChip(
                       'correspondent', 
                       'Melhor Custo', 
+                      'Foca em economia',
                       LucideIcons.dollarSign,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildPresetChip(
+                    const SizedBox(width: 8),
+                    _buildPresetChip(
                       'expert_opinion', 
                       'Mais Experientes', 
+                      'Prioriza expertise',
                       LucideIcons.award,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -208,12 +248,17 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                 final lawyers = state.results.whereType<Lawyer>().toList();
                 final firms = state.results.whereType<LawFirm>().toList();
 
-                return PartnerSearchResultList(
-                  lawyers: lawyers,
-                  firms: firms,
-                  emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
-                  onRefresh: _fetchRecommendations,
-                );
+                // Escolher visualização baseada no toggle
+                if (_showMapView) {
+                  return _buildMapView(lawyers, firms);
+                } else {
+                  return PartnerSearchResultList(
+                    lawyers: lawyers,
+                    firms: firms,
+                    emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
+                    onRefresh: _fetchRecommendations,
+                  );
+                }
               }
               
               return _buildEmptyState(context);
@@ -224,52 +269,210 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
     );
   }
 
-  Widget _buildPresetChip(String preset, String label, IconData icon) {
+  Widget _buildPresetChip(String preset, String label, String description, IconData icon) {
     final isSelected = _selectedPreset == preset;
     
-    return ChoiceChip(
-      selected: isSelected,
-      label: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 16,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedPreset = preset;
+        });
+        _fetchRecommendations();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected 
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
             color: isSelected 
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.primary,
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+            width: 1.5,
           ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ] : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
               color: isSelected 
                 ? Theme.of(context).colorScheme.onPrimary
                 : Theme.of(context).colorScheme.primary,
             ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-      onSelected: (selected) {
-        if (selected) {
-          setState(() {
-            _selectedPreset = preset;
-          });
-          _fetchRecommendations();
-        }
-      },
-      selectedColor: Theme.of(context).colorScheme.primary,
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: isSelected ? Colors.transparent : Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            const SizedBox(width: 12),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: isSelected 
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isSelected 
+                      ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8)
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-      showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+
+  // Widget para construir o toggle de visualização (apenas ícones)
+  Widget _buildViewToggle({
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected 
+            ? Theme.of(context).colorScheme.primary
+            : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: isSelected 
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+        ),
+      ),
+    );
+  }
+
+  // Widget para construir a visualização em mapa
+  Widget _buildMapView(List<Lawyer> lawyers, List<LawFirm> firms) {
+    // Coordenadas mock para demonstração
+    final mockLocations = [
+      const LatLng(-23.5505, -46.6333), // São Paulo
+      const LatLng(-22.9068, -43.1729), // Rio de Janeiro
+      const LatLng(-19.9167, -43.9345), // Belo Horizonte
+      const LatLng(-15.7942, -47.8822), // Brasília
+      const LatLng(-30.0346, -51.2177), // Porto Alegre
+    ];
+
+    final Set<Marker> markers = {};
+
+    // Adicionar marcadores para advogados (azuis)
+    for (int i = 0; i < lawyers.length && i < mockLocations.length; i++) {
+      final lawyer = lawyers[i];
+      final location = mockLocations[i];
+      
+      markers.add(
+        Marker(
+          markerId: MarkerId('lawyer_${lawyer.id}'),
+          position: location,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          infoWindow: InfoWindow(
+            title: lawyer.name,
+            snippet: 'OAB: ${lawyer.oab}',
+          ),
+        ),
+      );
+    }
+
+    // Adicionar marcadores para escritórios (verdes)
+    for (int i = 0; i < firms.length && i < mockLocations.length; i++) {
+      final firm = firms[i];
+      final location = mockLocations[i];
+      
+      markers.add(
+        Marker(
+          markerId: MarkerId('firm_${firm.id}'),
+          position: location,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          infoWindow: InfoWindow(
+            title: firm.name,
+            snippet: '${firm.teamSize} advogados',
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // Legenda do mapa
+        Container(
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${lawyers.length} Advogados'),
+                ],
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${firms.length} Escritórios'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        
+        // Mapa
+        Expanded(
+          child: GoogleMap(
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(-23.5505, -46.6333), // São Paulo
+              zoom: 10,
+            ),
+            markers: markers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            zoomControlsEnabled: true,
+            mapToolbarEnabled: false,
+          ),
+        ),
+      ],
     );
   }
 
@@ -339,6 +542,7 @@ class HybridSearchTabView extends StatefulWidget {
 class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   final TextEditingController _searchController = TextEditingController();
   bool _searchingFirms = false;
+  bool _showMapView = false; // Nova variável para controlar visualização
   
   // Novas variáveis para ferramentas de precisão
   String? _selectedLocation;
@@ -356,12 +560,49 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Barra de busca e ferramentas
+        // Header com toggle de visualização
         Container(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Toggle de visualização Lista/Mapa (apenas ícones)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildViewToggle(
+                          icon: LucideIcons.list,
+                          isSelected: !_showMapView,
+                          onTap: () => setState(() => _showMapView = false),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 32,
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                        ),
+                        _buildViewToggle(
+                          icon: LucideIcons.map,
+                          isSelected: _showMapView,
+                          onTap: () => setState(() => _showMapView = true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
               // Campo de busca principal
               TextField(
                 controller: _searchController,
@@ -534,12 +775,17 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                 final lawyers = state.results.whereType<Lawyer>().toList();
                 final firms = state.results.whereType<LawFirm>().toList();
 
-                return PartnerSearchResultList(
-                  lawyers: lawyers,
-                  firms: firms,
-                  emptyMessage: 'Nenhum resultado encontrado.\nTente usar termos diferentes.',
-                  onRefresh: () => _performSearch(),
-                );
+                // Escolher visualização baseada no toggle
+                if (_showMapView) {
+                  return _buildMapView(lawyers, firms);
+                } else {
+                  return PartnerSearchResultList(
+                    lawyers: lawyers,
+                    firms: firms,
+                    emptyMessage: 'Nenhum resultado encontrado.\nTente usar termos diferentes.',
+                    onRefresh: () => _performSearch(),
+                  );
+                }
               }
               
               return _buildSearchEmptyState(context);
@@ -654,6 +900,140 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
           ),
         ],
       ),
+    );
+  }
+
+  // Widget para construir o toggle de visualização (apenas ícones)
+  Widget _buildViewToggle({
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected 
+            ? Theme.of(context).colorScheme.primary
+            : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: isSelected 
+            ? Theme.of(context).colorScheme.onPrimary
+            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+        ),
+      ),
+    );
+  }
+
+  // Widget para construir a visualização em mapa
+  Widget _buildMapView(List<Lawyer> lawyers, List<LawFirm> firms) {
+    // Coordenadas mock para demonstração
+    final mockLocations = [
+      const LatLng(-23.5505, -46.6333), // São Paulo
+      const LatLng(-22.9068, -43.1729), // Rio de Janeiro
+      const LatLng(-19.9167, -43.9345), // Belo Horizonte
+      const LatLng(-15.7942, -47.8822), // Brasília
+      const LatLng(-30.0346, -51.2177), // Porto Alegre
+    ];
+
+    final Set<Marker> markers = {};
+
+    // Adicionar marcadores para advogados (azuis)
+    for (int i = 0; i < lawyers.length && i < mockLocations.length; i++) {
+      final lawyer = lawyers[i];
+      final location = mockLocations[i];
+      
+      markers.add(
+        Marker(
+          markerId: MarkerId('lawyer_${lawyer.id}'),
+          position: location,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          infoWindow: InfoWindow(
+            title: lawyer.name,
+            snippet: 'OAB: ${lawyer.oab}',
+          ),
+        ),
+      );
+    }
+
+    // Adicionar marcadores para escritórios (verdes)
+    for (int i = 0; i < firms.length && i < mockLocations.length; i++) {
+      final firm = firms[i];
+      final location = mockLocations[i];
+      
+      markers.add(
+        Marker(
+          markerId: MarkerId('firm_${firm.id}'),
+          position: location,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          infoWindow: InfoWindow(
+            title: firm.name,
+            snippet: '${firm.teamSize} advogados',
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // Legenda do mapa
+        Container(
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${lawyers.length} Advogados'),
+                ],
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${firms.length} Escritórios'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        
+        // Mapa
+        Expanded(
+          child: GoogleMap(
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(-23.5505, -46.6333), // São Paulo
+              zoom: 10,
+            ),
+            markers: markers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            zoomControlsEnabled: true,
+            mapToolbarEnabled: false,
+          ),
+        ),
+      ],
     );
   }
 }

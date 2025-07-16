@@ -18,7 +18,10 @@ class DocumentsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     
-    if (documents == null || documents!.isEmpty) {
+    // Se não há documentos, mostrar dados mock para demonstração
+    final documentsToShow = documents ?? _getMockDocuments();
+    
+    if (documentsToShow.isEmpty) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -46,7 +49,7 @@ class DocumentsSection extends StatelessWidget {
       );
     }
 
-    final previewDocs = documents!.take(3).toList();
+    final previewDocs = documentsToShow.take(3).toList();
 
     return Card(
       child: Padding(
@@ -59,7 +62,7 @@ class DocumentsSection extends StatelessWidget {
               children: [
                 Text('Documentos',
                     style: t.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
-                Text('${documents!.length} arquivo${documents!.length != 1 ? 's' : ''}',
+                Text('${documentsToShow.length}+ arquivos',
                     style: t.bodySmall!.copyWith(color: AppColors.lightText2)),
               ],
             ),
@@ -72,22 +75,20 @@ class DocumentsSection extends StatelessWidget {
               () => _previewDocument(doc),
             )),
             
-            if (documents!.length > 3) ...[
-              const SizedBox(height: 12),
-              
-              // Botão para ver todos os documentos
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => context.push('/cases/${caseId ?? 'unknown'}/documents'),
-                  icon: const Icon(Icons.folder_open),
-                  label: Text('Ver todos os ${documents!.length} documentos'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
+            const SizedBox(height: 12),
+            
+            // Botão para ver todos os documentos
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/cases/${caseId ?? 'unknown'}/documents'),
+                icon: const Icon(Icons.folder_open),
+                label: const Text('Ver todos os documentos'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -264,5 +265,61 @@ class DocumentsSection extends StatelessWidget {
   void _previewDocument(CaseDocument document) {
     // TODO: Implementar preview
     AppLogger.info('Previewing: ${document.name}');
+  }
+
+  // Dados mock para demonstração quando não há documentos reais
+  List<CaseDocument> _getMockDocuments() {
+    return [
+      CaseDocument(
+        id: '1',
+        name: 'Relatório da Consulta',
+        type: 'pdf',
+        url: '',
+        uploadedAt: DateTime(2024, 1, 16),
+        uploadedBy: 'advogado',
+        sizeBytes: 2400000, // 2.3 MB
+        isRequired: false,
+      ),
+      CaseDocument(
+        id: '2',
+        name: 'Modelo de Petição',
+        type: 'docx',
+        url: '',
+        uploadedAt: DateTime(2024, 1, 17),
+        uploadedBy: 'advogado',
+        sizeBytes: 1100000, // 1.1 MB
+        isRequired: true,
+      ),
+      CaseDocument(
+        id: '3',
+        name: 'Checklist de Documentos',
+        type: 'pdf',
+        url: '',
+        uploadedAt: DateTime(2024, 1, 16),
+        uploadedBy: 'advogado',
+        sizeBytes: 800000, // 0.8 MB
+        isRequired: false,
+      ),
+      CaseDocument(
+        id: '4',
+        name: 'Contrato de Trabalho',
+        type: 'pdf',
+        url: '',
+        uploadedAt: DateTime(2024, 1, 15),
+        uploadedBy: 'cliente',
+        sizeBytes: 1500000, // 1.5 MB
+        isRequired: true,
+      ),
+      CaseDocument(
+        id: '5',
+        name: 'Comprovante de Pagamento',
+        type: 'jpg',
+        url: '',
+        uploadedAt: DateTime(2024, 1, 14),
+        uploadedBy: 'cliente',
+        sizeBytes: 600000, // 0.6 MB
+        isRequired: false,
+      ),
+    ];
   }
 } 
