@@ -253,7 +253,7 @@ class MainTabsShell extends StatelessWidget {
       case 'PF': // ADICIONADO: Fallback para Cliente (Pessoa Física)
       default:
         return [
-           NavigationTab(
+          NavigationTab(
             label: 'Início',
             icon: LucideIcons.home,
             branchIndex: 13,
@@ -288,7 +288,7 @@ class MainTabsShell extends StatelessWidget {
             requiredPermission: 'nav.view.client.services',
             route: '/services',
           ),
-           NavigationTab(
+          NavigationTab(
             label: 'Perfil',
             icon: LucideIcons.user,
             branchIndex: 18,

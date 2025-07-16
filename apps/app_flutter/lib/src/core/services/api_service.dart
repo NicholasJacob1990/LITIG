@@ -142,70 +142,31 @@ class ApiService {
   // ===== TRIAGEM =====
   static Future<Map<String, dynamic>> startTriageConversation() async {
     try {
-      final headers = await _getHeaders();
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) {
-        throw Exception('Usuário não autenticado');
-      }
-
-      final body = jsonEncode({'user_id': user.id});
-      final url = '$_baseUrlV2/triage/start';
-      
-      AppLogger.debug(' Tentando acessar URL: $url');
-      AppLogger.debug(' Headers: $headers');
-      AppLogger.debug(' Body: $body');
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      );
-      
-      AppLogger.debug(' Status code: ${response.statusCode}');
-      AppLogger.debug(' Response body: ${response.body}');
-      
+      final response = await _dio.post('/triage/start');
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
-        throw Exception('Falha ao iniciar a conversa de triagem: Status ${response.statusCode} - ${response.body}');
+        throw Exception('Falha ao iniciar a conversa de triagem: Status ${response.statusCode}');
       }
     } catch (e) {
-      AppLogger.debug(' Erro capturado: $e');
-      AppLogger.debug(' Tipo do erro: ${e.runtimeType}');
-      throw Exception('Erro ao iniciar conversa: $e');
+      throw Exception('Falha ao iniciar a conversa de triagem: $e');
     }
   }
 
   static Future<Map<String, dynamic>> continueTriageConversation(String caseId, String message) async {
     try {
-      final headers = await _getHeaders();
-      final body = jsonEncode({'case_id': caseId, 'message': message});
-      final url = '$_baseUrlV2/triage/continue';
-
-      AppLogger.debug(' Tentando acessar URL (continue): $url');
-      AppLogger.debug(' Headers (continue): $headers');
-      AppLogger.debug(' Body (continue): $body');
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
+      final response = await _dio.post(
+        '/triage/continue',
+        data: {'case_id': caseId, 'message': message},
       );
-
-      AppLogger.debug(' Status code (continue): ${response.statusCode}');
-      AppLogger.debug(' Response body (continue): ${response.body}');
-
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
-        final errorData = jsonDecode(response.body);
-        throw Exception('Erro ${response.statusCode}: ${errorData['detail'] ?? response.reasonPhrase}');
+        throw Exception('Falha ao continuar a conversa de triagem: Status ${response.statusCode}');
       }
     } catch (e) {
       AppLogger.debug(' Erro capturado em continueTriageConversation: $e');
-      AppLogger.debug(' Tipo do erro: ${e.runtimeType}');
-      // Retransmite a exceção para ser tratada na UI
-      rethrow;
+      throw Exception('Falha ao continuar a conversa de triagem: $e');
     }
   }
 

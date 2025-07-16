@@ -75,20 +75,20 @@ class DocumentsSection extends StatelessWidget {
               () => _previewDocument(doc),
             )),
             
-            const SizedBox(height: 12),
-            
-            // Botão para ver todos os documentos
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => context.push('/cases/${caseId ?? 'unknown'}/documents'),
-                icon: const Icon(Icons.folder_open),
+              const SizedBox(height: 12),
+              
+              // Botão para ver todos os documentos
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push('/cases/${caseId ?? 'unknown'}/documents'),
+                  icon: const Icon(Icons.folder_open),
                 label: const Text('Ver todos os documentos'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
