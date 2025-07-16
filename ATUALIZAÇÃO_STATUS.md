@@ -157,3 +157,40 @@ flutter build web --release
 
 **Status:** ✅ **MELHORIAS DE UI IMPLEMENTADAS COM SUCESSO**
 **Próxima Revisão:** 15/01/2025 - 16:00 
+
+## ATUALIZAÇÃO DE STATUS - 15/07/2025 - 22:15
+
+### Módulo de Advogados (`partners_screen.dart`)
+
+#### 🚀 Concluído
+
+1.  **Refatoração da Arquitetura de UI:**
+    *   **Estado Centralizado:** O controle de visualização (lista vs. mapa) foi elevado para o widget pai (`_LawyersViewState`), unificando o estado entre as abas "Recomendações" e "Buscar".
+    *   **Controle na AppBar:** O seletor de visualização agora está localizado na `AppBar` principal, eliminando controles duplicados e melhorando a consistência da interface.
+    *   As abas filhas (`HybridRecommendationsTabView`, `HybridSearchTabView`) recebem o estado de visualização como parâmetro, tornando-as mais limpas e focadas em sua função.
+
+2.  **Melhoria da Responsividade dos Cards:**
+    *   Os cards de "Tipo de Recomendação" na aba de recomendações agora usam um widget `Wrap`, permitindo que se ajustem e quebrem a linha automaticamente em telas de diferentes tamanhos, corrigindo problemas de layout.
+
+3.  **Correção de Erro na Visualização de Mapa (Web):**
+    *   Implementado um placeholder informativo que é exibido na plataforma web quando a API Key do Google Maps não está configurada. Isso evita que o aplicativo quebre e informa o usuário sobre a ação necessária.
+    *   A lógica de renderização do mapa foi centralizada no widget pai para evitar duplicação de código.
+
+4.  **Restauração da Funcionalidade da Aba de Busca:**
+    *   A interface da aba "Buscar" foi completamente restaurada, incluindo o campo de busca único, o seletor de "Foco da Busca" e o interruptor para "Incluir escritórios".
+    *   A lógica de busca (`_handleSearch`) foi atualizada para incorporar todos os filtros disponíveis, restaurando a funcionalidade completa da pesquisa avançada.
+
+#### 🚧 Em Andamento
+
+*   N/A
+
+#### 🐞 Bugs Corrigidos
+
+*   Resolvido erro `JSNoSuchMethodError` que causava o crash da aplicação na web ao tentar renderizar o `GoogleMap` sem uma chave de API.
+*   Corrigido o layout dos cards de recomendação que não se adaptavam a telas menores.
+*   Resolvida a regressão que removeu os filtros avançados da aba de busca.
+
+#### Próximos Passos
+
+*   Validar a implementação em ambiente de produção (com chaves de API configuradas).
+*   Aguardar novas diretrizes do time de produto ou UI/UX. 
