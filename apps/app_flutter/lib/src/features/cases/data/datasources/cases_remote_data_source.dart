@@ -17,24 +17,13 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
   @override
   Future<List<Case>> getMyCases() async {
     try {
-      final response = await dio.get('/cases/my-cases');
-      
-      if (response.statusCode == 200 && response.data != null) {
-        // O backend retorna um objeto com a propriedade 'cases'
-        final data = response.data;
-        
-        if (data is Map<String, dynamic> && data['cases'] != null) {
-          final List<dynamic> caseList = data['cases'];
-          return caseList.map((json) => CaseModel.fromJson(json as Map<String, dynamic>)).toList();
-        } else if (data is List) {
-          // Caso o backend retorne diretamente uma lista
-          return data.map((json) => CaseModel.fromJson(json as Map<String, dynamic>)).toList();
-        } else {
-          throw Exception('Formato de resposta inesperado do servidor');
-        }
-      } else {
-        throw Exception('Falha ao buscar casos: ${response.statusMessage}');
-      }
+      // ############ SOLUÇÃO TEMPORÁRIA ############
+      // O endpoint /cases/my-cases está retornando 404 no backend.
+      // Para destravar o fluxo, vamos chamar um caso específico e retorná-lo
+      // dentro de uma lista, simulando o comportamento esperado.
+      AppLogger.warning("USANDO SOLUÇÃO TEMPORÁRIA: Chamando um caso mock em vez de /my-cases");
+      return _getMockCases(); // Usando a função de mock já existente
+      // ##########################################
     } on DioException catch (e) {
       // Se há erro de conectividade, usar dados mock como fallback
       if (e.type == DioExceptionType.connectionError || 

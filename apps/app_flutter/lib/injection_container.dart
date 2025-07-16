@@ -21,6 +21,16 @@ import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.
 import 'package:meu_app/src/features/cases/domain/usecases/get_case_detail_usecase.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/data/services/case_firm_recommendation_service.dart';
+
+// Documents
+import 'package:meu_app/src/features/cases/data/datasources/documents_remote_data_source.dart';
+import 'package:meu_app/src/features/cases/data/repositories/documents_repository_impl.dart';
+import 'package:meu_app/src/features/cases/domain/repositories/documents_repository.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/get_case_documents_usecase.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/upload_document_usecase.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/delete_document_usecase.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/case_documents_bloc.dart';
+
 import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_bloc.dart';
 
 // Firms
@@ -114,6 +124,32 @@ void configureDependencies() {
   // Blocs
   getIt.registerFactory(() => CasesBloc(getMyCasesUseCase: getIt()));
 
+  // Documents
+  // Datasources
+  getIt.registerLazySingleton<DocumentsRemoteDataSource>(
+      () => DocumentsRemoteDataSourceImpl(dio: getIt()));
+
+  // Repositories
+  getIt.registerLazySingleton<DocumentsRepository>(
+      () => DocumentsRepositoryImpl(remoteDataSource: getIt()));
+
+  // Use Cases
+  getIt.registerLazySingleton<GetCaseDocumentsUseCase>(
+      () => GetCaseDocumentsUseCase(getIt()));
+  
+  getIt.registerLazySingleton<UploadDocumentUseCase>(
+      () => UploadDocumentUseCase(getIt()));
+      
+  getIt.registerLazySingleton<DeleteDocumentUseCase>(
+      () => DeleteDocumentUseCase(getIt()));
+
+  // Blocs
+  getIt.registerFactory(() => CaseDocumentsBloc(
+    getCaseDocumentsUseCase: getIt(),
+    uploadDocumentUseCase: getIt(),
+    deleteDocumentUseCase: getIt(),
+  ));
+
   // Firms
   // Datasources
   getIt.registerLazySingleton<FirmRemoteDataSource>(
@@ -122,7 +158,7 @@ void configureDependencies() {
         baseUrl: 'http://localhost:8080/api',
       ));
 
-  // Repositories
+  
   getIt.registerLazySingleton<FirmRepository>(
       () => FirmRepositoryImpl(remoteDataSource: getIt()));
 
@@ -190,7 +226,7 @@ void configureDependencies() {
   // Repositories
   getIt.registerLazySingleton<SearchRepository>(
       () => SearchRepositoryImpl(remoteDataSource: getIt()));
-  // Use Cases
+  
   getIt.registerLazySingleton(() => PerformSearch(getIt()));
   // Blocs
   getIt.registerFactory(() => SearchBloc(performSearch: getIt()));

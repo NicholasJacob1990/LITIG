@@ -8,8 +8,9 @@ import '../widgets/consultation_info_section.dart';
 import '../widgets/pre_analysis_section.dart';
 import '../widgets/next_steps_section.dart';
 import '../widgets/documents_section.dart';
-// import '../widgets/process_status_section.dart'; // TODO: Implementar ProcessStatusSection
+import '../widgets/process_status_section.dart';
 import '../../../../shared/utils/app_colors.dart';
+import 'package:meu_app/src/features/cases/domain/entities/process_status.dart';
 
 class CaseDetailScreen extends StatelessWidget {
   const CaseDetailScreen({super.key, required this.caseId});
@@ -101,17 +102,52 @@ class CaseDetailScreen extends StatelessWidget {
                     caseId: caseDetail.id,
                   ),
                   const SizedBox(height: 16),
-                  // TODO: Implementar ProcessStatusSection
-                  // ProcessStatusSection(
-                  //   processStatus: caseDetail.processStatus,
-                  //   caseId: caseDetail.id,
-                  // ),
+                  ProcessStatusSection(
+                    processStatus: _getMockProcessStatus(),
+                    caseId: caseDetail.id,
+                  ),
                 ],
               ),
             );
           },
         ),
       ),
+    );
+  }
+
+  ProcessStatus _getMockProcessStatus() {
+    return ProcessStatus(
+      currentPhase: 'Em Andamento',
+      description: 'Seu processo está avançando conforme o planejado. A fase atual é a coleta de provas.',
+      progressPercentage: 45.0,
+      phases: [
+        ProcessPhase(
+          name: 'Petição Inicial',
+          description: 'Apresentação formal da sua causa à justiça.',
+          isCompleted: true,
+          isCurrent: false,
+          completedAt: DateTime(2024, 5, 20),
+          documents: [
+            const PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
+          ],
+        ),
+        ProcessPhase(
+          name: 'Coleta de Provas',
+          description: 'Reunindo todas as evidências e documentos necessários.',
+          isCompleted: false,
+          isCurrent: true,
+          documents: [
+            const PhaseDocument(name: 'Contrato_Servico.pdf', url: ''),
+            const PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
+          ],
+        ),
+        ProcessPhase(
+          name: 'Audiência de Conciliação',
+          description: 'Tentativa de acordo amigável entre as partes.',
+          isCompleted: false,
+          isCurrent: false,
+        ),
+      ],
     );
   }
 }

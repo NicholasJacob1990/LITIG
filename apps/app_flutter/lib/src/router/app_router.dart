@@ -13,7 +13,6 @@ import 'package:meu_app/src/features/auth/presentation/screens/splash_screen.dar
 import 'package:meu_app/src/features/cases/presentation/screens/case_detail_screen.dart';
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
-import 'package:meu_app/src/features/lawyers/presentation/screens/matches_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/partners_screen.dart';
 import 'package:meu_app/src/features/messages/presentation/screens/messages_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
@@ -27,6 +26,7 @@ import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
 import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_screen.dart';
 import 'package:meu_app/src/features/services/presentation/screens/services_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_detail_screen.dart';
+import 'package:meu_app/src/features/cases/presentation/screens/case_documents_screen.dart';
 import 'package:meu_app/injection_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -129,8 +129,8 @@ GoRouter appRouter(AuthBloc authBloc) {
           StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),
           // 14: Cliente - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),
-          // 15: Cliente - Advogados (Matches)
-          StatefulShellBranch(routes: [GoRoute(path: '/matches', builder: (context, state) => const MatchesScreen())]),
+          // 15: Cliente - Advogados (Busca Híbrida)
+          StatefulShellBranch(routes: [GoRoute(path: '/advogados', builder: (context, state) => const LawyersScreen())]),
           // 16: Cliente - Mensagens
           StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const MessagesScreen())]),
           // 17: Cliente - Serviços
@@ -145,6 +145,11 @@ GoRouter appRouter(AuthBloc authBloc) {
         path: '/case-detail/:caseId',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => CaseDetailScreen(caseId: state.pathParameters['caseId']!),
+      ),
+      GoRoute(
+        path: '/cases/:caseId/documents',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => CaseDocumentsScreen(caseId: state.pathParameters['caseId']!),
       ),
       GoRoute(
         path: '/firm/:firmId',

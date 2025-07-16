@@ -1,0 +1,282 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
+import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
+
+class CaseCard extends StatelessWidget {
+  final String caseId;
+  final String title;
+  final String subtitle;
+  final String clientType;
+  final String status;
+  final String preAnalysisDate;
+  final LawyerInfo? lawyer;
+
+  const CaseCard({
+    super.key,
+    required this.caseId,
+    required this.title,
+    required this.subtitle,
+    required this.clientType,
+    required this.status,
+    required this.preAnalysisDate,
+    this.lawyer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 2,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: InkWell(
+        onTap: () => context.go('/cases/$caseId'),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 8),
+              Text(
+                subtitle, 
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)
+                )
+              ),
+              const SizedBox(height: 16),
+              _buildPreAnalysisSection(context),
+              if (lawyer != null) ...[
+                Divider(height: 32, thickness: 1, color: theme.dividerColor),
+                _buildLawyerSection(),
+              ] else ...[
+                const SizedBox(height: 16),
+              ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => context.go('/cases/$caseId'),
+                  icon: const Icon(LucideIcons.eye, size: 16),
+                  label: const Text('Ver Detalhes'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primaryBlue,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title, 
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold, 
+              color: theme.colorScheme.onSurface
+            )
+          ),
+        ),
+        Chip(
+          avatar: Icon(
+            clientType == 'PF' ? LucideIcons.user : LucideIcons.building, 
+            size: 14, 
+            color: theme.colorScheme.primary
+          ),
+          label: Text(
+            clientType, 
+            style: TextStyle(
+              fontSize: 12, 
+              fontWeight: FontWeight.w500, 
+              color: theme.colorScheme.onSurface
+            )
+          ),
+          backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8), 
+            side: BorderSide.none
+          ),
+        ),
+        const SizedBox(width: 8),
+        Chip(
+          label: Text(
+            status, 
+            style: TextStyle(
+              fontSize: 12, 
+              fontWeight: FontWeight.w500, 
+              color: _getStatusColor(status)
+            )
+          ),
+          backgroundColor: _getStatusColor(status).withOpacity(0.1),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8), 
+            side: BorderSide.none
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPreAnalysisSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: theme.colorScheme.secondary, width: 4)),
+        color: theme.colorScheme.secondary.withOpacity(0.05),
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          Icon(LucideIcons.bot, color: theme.colorScheme.secondary, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Pré-análise IA gerada em $preAnalysisDate',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7)
+              ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              // TODO: Navigate to AI analysis screen
+            },
+            icon: Icon(LucideIcons.fileJson, size: 16, color: theme.colorScheme.secondary),
+            label: Text(
+              'Ver', 
+              style: TextStyle(
+                color: theme.colorScheme.secondary, 
+                fontWeight: FontWeight.bold
+              )
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLawyerSection() {
+    return Builder(builder: (context) {
+      final theme = Theme.of(context);
+      if (lawyer == null) return const SizedBox.shrink();
+
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CachedNetworkImage(
+            imageUrl: lawyer!.avatarUrl,
+            imageBuilder: (context, imageProvider) => CircleAvatar(
+              backgroundImage: imageProvider, 
+              radius: 24
+            ),
+            placeholder: (context, url) => const CircleAvatar(
+              radius: 24, 
+              child: CircularProgressIndicator()
+            ),
+            errorWidget: (context, url, error) => InitialsAvatar(
+              text: lawyer!.name, 
+              radius: 24
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  lawyer!.name, 
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    color: theme.colorScheme.onSurface
+                  )
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  lawyer!.specialty, 
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7)
+                  )
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Criado em ${lawyer!.createdDate}', 
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: theme.colorScheme.onSurface.withOpacity(0.7)
+                  )
+                ),
+              ],
+            ),
+          ),
+          if (lawyer!.unreadMessages > 0)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  LucideIcons.messageCircle, 
+                  color: theme.colorScheme.onSurface.withOpacity(0.5), 
+                  size: 28
+                ),
+                Positioned(
+                  top: -2,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppColors.red, 
+                      shape: BoxShape.circle
+                    ),
+                    child: Text(
+                      '${lawyer!.unreadMessages}',
+                      style: const TextStyle(
+                        color: Colors.white, 
+                        fontSize: 10, 
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+        ],
+      );
+    });
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Em Andamento':
+        return AppColors.primaryBlue;
+      case 'Concluído':
+        return AppColors.green;
+      case 'Aguardando':
+        return AppColors.yellow;
+      case 'Cancelado':
+        return AppColors.lightText2;
+      case 'Urgente':
+        return AppColors.red;
+      default:
+        return AppColors.yellow; // Fallback
+    }
+  }
+} 

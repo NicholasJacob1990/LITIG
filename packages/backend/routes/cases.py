@@ -166,20 +166,6 @@ async def get_case_details(
         )
 
 
-"""
-Rotas para gerenciamento de casos.
-"""
-router = APIRouter(
-    prefix="/cases",
-    tags=["Cases"],
-    responses={404: {"description": "Not found"}},
-)
-
-# Modelos para requests
-# ============================================================================
-# Endpoint de Explicabilidade
-# ============================================================================
-
 @router.get("/{case_id}/matches/{lawyer_id}/explanation", 
            response_model=PublicExplanation,
            summary="Explicação do Match",

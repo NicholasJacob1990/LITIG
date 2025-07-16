@@ -272,7 +272,7 @@ class MainTabsShell extends StatelessWidget {
             icon: LucideIcons.search,
             branchIndex: 15,
             requiredPermission: 'nav.view.client.find_lawyers',
-            route: '/matches',
+            route: '/advogados',
           ),
           NavigationTab(
             label: 'Mensagens',

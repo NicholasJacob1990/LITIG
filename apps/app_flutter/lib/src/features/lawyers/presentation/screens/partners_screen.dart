@@ -161,26 +161,30 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               const SizedBox(height: 12),
               
               // Chips de seleção de preset
-              Wrap(
-                spacing: 8,
+              Row(
                 children: [
-                  _buildPresetChip(
-                    'balanced', 
-                    'Recomendado', 
-                    'Equilibra experiência e custo',
-                    LucideIcons.star,
+                  Expanded(
+                    child: _buildPresetChip(
+                      'balanced', 
+                      'Recomendado', 
+                      LucideIcons.star,
+                    ),
                   ),
-                  _buildPresetChip(
-                    'correspondent', 
-                    'Melhor Custo', 
-                    'Foca em economia',
-                    LucideIcons.dollarSign,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildPresetChip(
+                      'correspondent', 
+                      'Melhor Custo', 
+                      LucideIcons.dollarSign,
+                    ),
                   ),
-                  _buildPresetChip(
-                    'expert_opinion', 
-                    'Mais Experientes', 
-                    'Prioriza expertise',
-                    LucideIcons.award,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildPresetChip(
+                      'expert_opinion', 
+                      'Mais Experientes', 
+                      LucideIcons.award,
+                    ),
                   ),
                 ],
               ),
@@ -220,13 +224,13 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
     );
   }
 
-  Widget _buildPresetChip(String preset, String label, String description, IconData icon) {
+  Widget _buildPresetChip(String preset, String label, IconData icon) {
     final isSelected = _selectedPreset == preset;
     
-    return FilterChip(
+    return ChoiceChip(
       selected: isSelected,
       label: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
@@ -236,30 +240,15 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               : Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: 8),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: isSelected 
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: isSelected 
-                    ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8)
-                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: isSelected 
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.primary,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -272,12 +261,15 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
         }
       },
       selectedColor: Theme.of(context).colorScheme.primary,
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
-      side: BorderSide(
-        color: isSelected 
-          ? Theme.of(context).colorScheme.primary
-          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected ? Colors.transparent : Theme.of(context).colorScheme.primary.withOpacity(0.5),
+        ),
       ),
+      showCheckmark: false,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
 
