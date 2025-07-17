@@ -6,6 +6,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Core
 import 'package:meu_app/src/core/network/network_info.dart';
+import 'package:meu_app/src/core/services/dio_service.dart';
+import 'package:meu_app/src/core/services/simple_api_service.dart';
+import 'package:meu_app/src/core/services/storage_service.dart';
 
 // Auth
 import 'package:meu_app/src/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -21,6 +24,16 @@ import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.
 import 'package:meu_app/src/features/cases/domain/usecases/get_case_detail_usecase.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/data/services/case_firm_recommendation_service.dart';
+
+// Contextual Cases
+import 'package:meu_app/src/features/cases/data/datasources/contextual_case_remote_data_source.dart';
+import 'package:meu_app/src/features/cases/data/repositories/contextual_case_repository_impl.dart';
+import 'package:meu_app/src/features/cases/domain/repositories/contextual_case_repository.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_case_data_usecase.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_kpis_usecase.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_actions_usecase.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/update_case_allocation.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/contextual_case_bloc.dart';
 
 // Documents
 import 'package:meu_app/src/features/cases/data/datasources/documents_remote_data_source.dart';
@@ -74,20 +87,36 @@ import 'package:meu_app/src/features/offers/data/repositories/offers_repository_
 import 'package:meu_app/src/features/offers/domain/repositories/offers_repository.dart';
 import 'package:meu_app/src/features/offers/domain/usecases/offers_usecases.dart';
 import 'package:meu_app/src/features/offers/presentation/bloc/offers_bloc.dart';
+import 'package:meu_app/src/features/offers/domain/usecases/get_pending_offers_usecase.dart';
+import 'package:meu_app/src/features/offers/domain/usecases/get_offer_history_usecase.dart';
+import 'package:meu_app/src/features/offers/domain/usecases/get_offer_stats_usecase.dart';
+import 'package:meu_app/src/features/offers/domain/usecases/accept_offer_usecase.dart';
+import 'package:meu_app/src/features/offers/domain/usecases/reject_offer_usecase.dart';
 
-// Services
-import 'package:meu_app/src/core/services/dio_service.dart';
+// Notifications
+import 'package:meu_app/src/features/notifications/data/repositories/notification_repository_impl.dart';
+import 'package:meu_app/src/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
+
+// SLA Settings
+import 'package:meu_app/src/features/sla_settings/data/datasources/sla_settings_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_settings/data/repositories/sla_settings_repository_impl.dart';
+import 'package:meu_app/src/features/sla_settings/domain/repositories/sla_settings_repository.dart';
+import 'package:meu_app/src/features/sla_settings/presentation/bloc/sla_settings_bloc.dart';
 
 final getIt = GetIt.instance;
 
 void configureDependencies() {
-  // External
-  getIt.registerSingleton<SupabaseClient>(Supabase.instance.client);
-  getIt.registerSingleton<Dio>(DioService.dio);
+  // External dependencies
+  getIt.registerLazySingleton(() => http.Client());
   getIt.registerLazySingleton(() => Connectivity());
+  getIt.registerLazySingleton<Dio>(() => Dio());
+  getIt.registerLazySingleton(() => Supabase.instance.client);
 
-  // Core
+  // Core services
   getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(getIt()));
+  getIt.registerLazySingleton<SimpleApiService>(() => SimpleApiService(getIt()));
+  getIt.registerLazySingleton<StorageService>(() => StorageService());
 
   // Auth
   // Datasources
@@ -123,6 +152,36 @@ void configureDependencies() {
 
   // Blocs
   getIt.registerFactory(() => CasesBloc(getMyCasesUseCase: getIt()));
+
+  // Contextual Cases
+  // Datasources
+  getIt.registerLazySingleton<ContextualCaseRemoteDataSource>(
+      () => ContextualCaseRemoteDataSourceImpl(dio: getIt()));
+
+  // Repositories
+  getIt.registerLazySingleton<ContextualCaseRepository>(
+      () => ContextualCaseRepositoryImpl(remoteDataSource: getIt()));
+
+  // Use Cases
+  getIt.registerLazySingleton<GetContextualCaseDataUseCase>(
+      () => GetContextualCaseDataUseCase(getIt()));
+  
+  getIt.registerLazySingleton<GetContextualKPIsUseCase>(
+      () => GetContextualKPIsUseCase(getIt()));
+      
+  getIt.registerLazySingleton<GetContextualActionsUseCase>(
+      () => GetContextualActionsUseCase(getIt()));
+      
+  getIt.registerLazySingleton<UpdateCaseAllocation>(
+      () => UpdateCaseAllocation(getIt()));
+
+  // Blocs
+  getIt.registerFactory(() => ContextualCaseBloc(
+      getContextualCaseData: getIt(),
+      getContextualKPIs: getIt(),
+      getContextualActions: getIt(),
+      updateCaseAllocation: getIt(),
+      ));
 
   // Documents
   // Datasources
@@ -252,6 +311,29 @@ void configureDependencies() {
         acceptOfferUseCase: getIt(),
         rejectOfferUseCase: getIt(),
       ));
+
+  // Notifications
+  // Repository
+  getIt.registerLazySingleton<NotificationRepository>(() => 
+    NotificationRepositoryImpl(
+      apiService: getIt(),
+      storageService: getIt(),
+    ));
+  
+  // Bloc
+  getIt.registerFactory(() => NotificationBloc(repository: getIt()));
+
+  // SLA Settings
+  // Datasources
+  getIt.registerLazySingleton<SlaSettingsRemoteDataSource>(
+      () => SlaSettingsRemoteDataSourceImpl(apiService: getIt<SimpleApiService>()));
+
+  // Repositories
+  getIt.registerLazySingleton<SlaSettingsRepository>(
+      () => SlaSettingsRepositoryImpl(remoteDataSource: getIt()));
+
+  // Blocs
+  getIt.registerFactory(() => SlaSettingsBloc(repository: getIt()));
 
   getIt.registerFactory(() => LawyerFirmBloc(firmsRepository: getIt()));
 } 

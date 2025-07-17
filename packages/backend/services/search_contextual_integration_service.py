@@ -90,7 +90,7 @@ class SearchContextualIntegrationService:
                     allocation_type="platform_match_direct",
                     requires_partnership=False,
                     requires_firm_context=False,
-                    sla_hours=24,
+                    sla_hours=24,  # Corrigido para 24 horas
                     priority_level=1
                 ),
             
@@ -150,7 +150,7 @@ class SearchContextualIntegrationService:
                     allocation_type="internal_delegation",
                     requires_partnership=False,
                     requires_firm_context=True,
-                    sla_hours=48,
+                    sla_hours=48,  # SLA customizável - padrão 48h, mas pode ser sobrescrito
                     priority_level=2
                 ),
         }
@@ -414,7 +414,7 @@ class SearchContextualIntegrationService:
                 allocation_type="platform_match_direct",
                 requires_partnership=False,
                 requires_firm_context=False,
-                sla_hours=24,
+                sla_hours=24,  # Corrigido para 24 horas
                 priority_level=1
             )
         

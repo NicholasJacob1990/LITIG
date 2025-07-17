@@ -8,7 +8,12 @@ class SearchParams extends Equatable {
   final double? radiusKm;
   final bool includeFirms;
   
+  // Campo para busca específica por caso
+  final String? caseId;
+  
   // Novos campos para filtros avançados
+  final String? area;
+  final String? specialty;
   final double? minRating;
   final double? maxDistance;
   final bool? onlyAvailable;
@@ -23,7 +28,10 @@ class SearchParams extends Equatable {
     this.longitude,
     this.radiusKm,
     this.includeFirms = true,
+    this.caseId,
     // Novos parâmetros opcionais
+    this.area,
+    this.specialty,
     this.minRating,
     this.maxDistance,
     this.onlyAvailable,
@@ -35,6 +43,9 @@ class SearchParams extends Equatable {
   Map<String, dynamic> toQuery() {
     final Map<String, dynamic> queryParams = {};
     if (query != null) queryParams['query'] = query;
+    if (caseId != null) queryParams['case_id'] = caseId;
+    if (area != null) queryParams['area'] = area;
+    if (specialty != null) queryParams['specialty'] = specialty;
     if (minRating != null) queryParams['min_rating'] = minRating;
     if (maxDistance != null) queryParams['max_distance'] = maxDistance;
     if (onlyAvailable != null) queryParams['is_available'] = onlyAvailable;
@@ -52,6 +63,9 @@ class SearchParams extends Equatable {
         longitude,
         radiusKm,
         includeFirms,
+        caseId,
+        area,
+        specialty,
         minRating,
         maxDistance,
         onlyAvailable,

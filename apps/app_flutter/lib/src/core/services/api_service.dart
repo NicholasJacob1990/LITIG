@@ -248,7 +248,7 @@ class ApiService {
     
     // Adicionar coordenadas customizadas se fornecidas
     if (customLatitude != null && customLongitude != null) {
-      body['custom_coords'] = {
+      body['case']['coordinates'] = {
         'latitude': customLatitude,
         'longitude': customLongitude,
       };
@@ -256,15 +256,11 @@ class ApiService {
     
     // Adicionar raio se fornecido
     if (radiusKm != null) {
-      body['radius_km'] = radiusKm.toInt();
+      body['radius_km'] = radiusKm;
     }
-    
+
     final url = '$_baseUrl/match';
-
-    print('DEBUG: Enviando requisição de match com preset: $preset');
-    print('DEBUG: Coordenadas customizadas: ${customLatitude != null ? '[$customLatitude, $customLongitude]' : 'Não fornecidas'}');
-    print('DEBUG: Raio: ${radiusKm ?? 'Padrão'}km');
-
+    
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
@@ -272,10 +268,34 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data; // Retorna o objeto completo da resposta
+      return jsonDecode(response.body);
     } else {
-      throw Exception('Falha ao buscar recomendações: Status ${response.statusCode} - ${response.body}');
+      throw Exception('Falha ao buscar matches: Status ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  // Novo método: buscar matches direto por case_id (mais eficiente)
+  static Future<Map<String, dynamic>> getMatchesByCase(
+    String caseId, {
+    String preset = 'balanced',
+    int topN = 5,
+  }) async {
+    final headers = await _getHeaders();
+    
+    final url = '$_baseUrl/cases/$caseId/matches';
+    final queryParams = {
+      'preset': preset,
+      'top_n': topN.toString(),
+    };
+    
+    final uri = Uri.parse(url).replace(queryParameters: queryParams);
+    
+    final response = await http.get(uri, headers: headers);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Falha ao buscar matches do caso: Status ${response.statusCode} - ${response.body}');
     }
   }
 

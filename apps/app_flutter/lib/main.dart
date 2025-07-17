@@ -14,6 +14,10 @@ import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:meu_app/src/core/utils/logger.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:meu_app/src/core/services/notification_service.dart';
+import 'package:meu_app/src/features/notification/presentation/bloc/notification_bloc.dart';
 
 String get _supabaseUrl {
   if (kIsWeb) {
@@ -28,8 +32,59 @@ String get _supabaseUrl {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  AppLogger.init('Iniciando aplicação...');
+  // Firebase initialization
+  await Firebase.initializeApp();
+  
+  // Configure Firebase Messaging for background messages
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  
+  // Setup dependency injection
+  await setupInjection();
+  
+  // Initialize notification service
+  await _initializeNotificationService();
+  
+  runApp(const MyApp());
+}
 
+/// Handler para mensagens Firebase em background
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Handling a background message: ${message.messageId}');
+  
+  // Processar dados da notificação se necessário
+  if (message.data.isNotEmpty) {
+    print('Message data: ${message.data}');
+  }
+}
+
+/// Inicializa o serviço de notificações
+Future<void> _initializeNotificationService() async {
+  try {
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    
+    // Configurar callbacks
+    notificationService.setOnNotificationReceived((data) {
+      print('Notificação recebida: $data');
+      // Aqui você pode adicionar lógica para atualizar o BLoC
+    });
+    
+    notificationService.setOnNotificationTapped((data) {
+      print('Notificação tocada: $data');
+      // Aqui você pode adicionar lógica de navegação
+    });
+    
+  } catch (e) {
+    print('Erro ao inicializar notificações: $e');
+  }
+}
+
+/// Configura injeção de dependências integrando sistema antigo com notificações
+Future<void> setupInjection() async {
+  AppLogger.init('Iniciando aplicação...');
+  
   try {
     await Supabase.initialize(
       url: _supabaseUrl,
@@ -55,13 +110,6 @@ Future<void> main() async {
   // Initialize timeago locales
   timeago.setLocaleMessages('pt_BR', timeago.PtBrMessages());
   timeago.setDefaultLocale('pt_BR');
-
-  runApp(
-    BlocProvider(
-      create: (context) => ThemeCubit(),
-      child: const MyApp(),
-    ),
-  );
 }
 
 class MyApp extends StatefulWidget {
@@ -73,64 +121,59 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final AuthBloc _authBloc;
-  late final GoRouter _router;
+  late final ThemeCubit _themeCubit;
+  late final NotificationBloc _notificationBloc;
 
   @override
   void initState() {
     super.initState();
-    AppLogger.init('Inicializando MyApp...');
+    _authBloc = getIt<AuthBloc>();
+    _themeCubit = ThemeCubit();
+    _notificationBloc = getIt<NotificationBloc>();
     
-    try {
-      _authBloc = getIt<AuthBloc>();
-      AppLogger.success('AuthBloc criado');
-      
-      _authBloc.add(AuthCheckStatusRequested());
-      AppLogger.success('AuthCheckStatusRequested enviado');
-      
-      _router = appRouter(_authBloc);
-      AppLogger.success('Router configurado');
-    } catch (e) {
-      AppLogger.error('Erro na inicialização', error: e);
-    }
+    // Inicializar busca de notificações para usuários logados
+    _authBloc.stream.listen((authState) {
+      if (authState is auth_states.Authenticated) {
+        // Buscar notificações quando usuário faz login
+        _notificationBloc.add(const NotificationFetchRequested());
+        _notificationBloc.add(const NotificationUnreadCountRequested());
+      }
+    });
   }
 
   @override
   void dispose() {
     _authBloc.close();
+    _themeCubit.close();
+    _notificationBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    AppLogger.debug('Construindo MaterialApp...');
-    
-    return BlocProvider.value(
-      value: _authBloc,
-      child: BlocListener<AuthBloc, auth_states.AuthState>(
-        listener: (context, state) {
-          AppLogger.debug('AuthState mudou para: ${state.runtimeType}');
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>.value(value: _authBloc),
+        BlocProvider<ThemeCubit>.value(value: _themeCubit),
+        BlocProvider<NotificationBloc>.value(value: _notificationBloc),
+        // Outros BLoCs existentes...
+      ],
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp.router(
+            title: 'LITGO',
+            themeMode: themeMode,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            routerConfig: appRouter(_authBloc),
+            debugShowCheckedModeBanner: false,
+            locale: const Locale('pt', 'BR'),
+            supportedLocales: const [
+              Locale('pt', 'BR'),
+              Locale('en', 'US'),
+            ],
+          );
         },
-        child: BlocBuilder<ThemeCubit, ThemeMode>(
-          builder: (context, themeMode) {
-            AppLogger.debug('Construindo com tema: $themeMode');
-            return MaterialApp.router(
-              routerConfig: _router,
-              title: 'LITGO Flutter',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light(),
-              darkTheme: AppTheme.dark(),
-              themeMode: themeMode,
-              builder: (context, widget) {
-                AppLogger.debug('Builder chamado, widget: ${widget.runtimeType}');
-                ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-                  AppLogger.error('Erro capturado', error: errorDetails.exception);
-                  return ErrorScreen(error: errorDetails.exception.toString());
-                };
-                return widget ?? const ErrorScreen(error: 'Widget nulo');
-              },
-            );
-          },
-        ),
       ),
     );
   }

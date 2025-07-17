@@ -33,26 +33,20 @@ CREATE POLICY "Users can view contextual offers" ON offers
         )
     );
 
-CREATE POLICY "Users can create contextual offers" ON offers
-    FOR INSERT WITH CHECK (
-        -- Users can create offers for cases they own
-        EXISTS (
-            SELECT 1 FROM cases 
-            WHERE cases.id = offers.case_id 
-            AND cases.client_id = auth.uid()
-        ) OR
-        -- Or internal delegations from their firm
-        (
-            allocation_type = 'internal_delegation' AND
-            EXISTS (
-                SELECT 1 FROM users 
-                WHERE users.id = auth.uid() 
-                AND users.firm_id IS NOT NULL
-            )
-        )
+-- Create ENUM type for allocation types
+DO $$ BEGIN
+    CREATE TYPE allocation_type AS ENUM (
+        'internal_delegation',
+        'platform_match_direct', 
+        'partnership_proactive_search',
+        'partnership_platform_suggestion',
+        'client_direct_choice'
     );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
--- Create function to automatically set context metadata
+-- Function to automatically set context metadata and deadlines
 CREATE OR REPLACE FUNCTION set_offer_context_metadata()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -60,17 +54,17 @@ BEGIN
     CASE NEW.allocation_type
         WHEN 'internal_delegation' THEN
             NEW.context_metadata = jsonb_build_object(
-                'delegated_by', auth.uid(),
-                'delegation_type', COALESCE(NEW.delegation_details->>'type', 'case_assignment'),
-                'expected_hours', COALESCE(NEW.delegation_details->>'expected_hours', 0),
-                'hourly_rate', COALESCE(NEW.delegation_details->>'hourly_rate', 0)
+                'delegation_type', 'internal',
+                'delegated_by', COALESCE(NEW.delegation_details->>'delegated_by', ''),
+                'delegation_reason', COALESCE(NEW.delegation_details->>'reason', ''),
+                'priority_override', COALESCE(NEW.delegation_details->>'priority_override', false)
             );
         WHEN 'partnership_proactive_search' THEN
             NEW.context_metadata = jsonb_build_object(
-                'partnership_type', 'proactive',
-                'initiated_by', auth.uid(),
-                'share_percentage', COALESCE(NEW.partnership_details->>'share_percentage', 50),
-                'collaboration_terms', COALESCE(NEW.partnership_details->>'collaboration_terms', '')
+                'partnership_type', 'proactive_search',
+                'partner_id', COALESCE(NEW.partnership_details->>'partner_id', ''),
+                'search_criteria', COALESCE(NEW.partnership_details->>'criteria', '{}'),
+                'expected_collaboration', COALESCE(NEW.partnership_details->>'collaboration_type', '')
             );
         WHEN 'partnership_platform_suggestion' THEN
             NEW.context_metadata = jsonb_build_object(
@@ -90,20 +84,10 @@ BEGIN
             NEW.context_metadata = COALESCE(NEW.context_metadata, '{}');
     END CASE;
 
-    -- Set response deadline based on allocation type
+    -- Set response deadline to standardized 24 hours for all allocation types
     IF NEW.response_deadline IS NULL THEN
-        CASE NEW.allocation_type
-            WHEN 'internal_delegation' THEN
-                NEW.response_deadline = NOW() + INTERVAL '24 hours';
-            WHEN 'platform_match_direct' THEN
-                NEW.response_deadline = NOW() + INTERVAL '2 hours';
-            WHEN 'partnership_proactive_search' THEN
-                NEW.response_deadline = NOW() + INTERVAL '72 hours';
-            WHEN 'partnership_platform_suggestion' THEN
-                NEW.response_deadline = NOW() + INTERVAL '48 hours';
-            ELSE
-                NEW.response_deadline = NOW() + INTERVAL '24 hours';
-        END CASE;
+        -- UNIFORMIZED TO 24 HOURS FOR ALL TYPES
+        NEW.response_deadline = NOW() + INTERVAL '24 hours';
     END IF;
 
     -- Set priority level based on allocation type and case urgency
@@ -174,87 +158,107 @@ BEGIN
             AVG(CASE WHEN o.status = 'accepted' THEN 
                 EXTRACT(EPOCH FROM (o.updated_at - o.created_at))/3600 
             END) as avg_response_hours,
-            jsonb_object_agg(
-                o.priority_level::text, 
-                COUNT(CASE WHEN o.priority_level = priority_level THEN 1 END)
-            ) as priority_dist
+            jsonb_object_agg(o.priority_level, COUNT(*)) as priority_dist
         FROM offers o
         WHERE o.target_lawyer_id = p_user_id
-        AND o.created_at >= NOW() - (p_days_back || ' days')::INTERVAL
-        AND (p_allocation_type IS NULL OR o.allocation_type = p_allocation_type)
+            AND o.created_at >= NOW() - INTERVAL '1 day' * p_days_back
+            AND (p_allocation_type IS NULL OR o.allocation_type = p_allocation_type)
+        GROUP BY o.allocation_type
+    ),
+    rejection_reasons AS (
+        SELECT 
+            o.allocation_type,
+            jsonb_object_agg(
+                COALESCE(o.context_metadata->>'rejection_reason', 'No reason provided'),
+                COUNT(*)
+            ) as reasons
+        FROM offers o
+        WHERE o.target_lawyer_id = p_user_id
+            AND o.status = 'declined'
+            AND o.created_at >= NOW() - INTERVAL '1 day' * p_days_back
+            AND (p_allocation_type IS NULL OR o.allocation_type = p_allocation_type)
+        GROUP BY o.allocation_type
+    ),
+    trend_data AS (
+        SELECT 
+            o.allocation_type,
+            jsonb_object_agg(
+                TO_CHAR(DATE_TRUNC('day', o.created_at), 'YYYY-MM-DD'),
+                COUNT(*)
+            ) as daily_counts
+        FROM offers o
+        WHERE o.target_lawyer_id = p_user_id
+            AND o.created_at >= NOW() - INTERVAL '1 day' * p_days_back
+            AND (p_allocation_type IS NULL OR o.allocation_type = p_allocation_type)
         GROUP BY o.allocation_type
     )
     SELECT 
         os.allocation_type,
         os.total,
-        CASE WHEN os.total > 0 THEN 
-            ROUND((os.accepted::NUMERIC / os.total) * 100, 2) 
-        ELSE 0 END,
-        COALESCE(os.avg_response_hours, 0),
+        CASE WHEN os.total > 0 THEN ROUND((os.accepted::NUMERIC / os.total) * 100, 2) ELSE 0 END,
+        ROUND(os.avg_response_hours, 2),
         os.priority_dist,
-        '{}'::jsonb, -- Placeholder for rejection reasons
-        '{}'::jsonb  -- Placeholder for performance trend
-    FROM offer_stats os;
+        COALESCE(rr.reasons, '{}'::jsonb),
+        COALESCE(td.daily_counts, '{}'::jsonb)
+    FROM offer_stats os
+    LEFT JOIN rejection_reasons rr ON os.allocation_type = rr.allocation_type
+    LEFT JOIN trend_data td ON os.allocation_type = td.allocation_type;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Create function to get contextual offer recommendations
 CREATE OR REPLACE FUNCTION get_contextual_offer_recommendations(
-    p_user_id UUID,
-    p_allocation_type allocation_type
+    p_user_id UUID
 )
 RETURNS TABLE (
     recommendation_type TEXT,
-    title TEXT,
-    description TEXT,
-    action_required BOOLEAN,
-    priority INTEGER
+    message TEXT,
+    priority INTEGER,
+    action_required BOOLEAN
 ) AS $$
+DECLARE
+    user_stats RECORD;
 BEGIN
+    -- Get user statistics for the last 30 days
+    SELECT 
+        COUNT(*) as total_offers,
+        COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted_offers,
+        COUNT(CASE WHEN status = 'declined' THEN 1 END) as declined_offers,
+        COUNT(CASE WHEN response_deadline < NOW() AND status = 'pending' THEN 1 END) as expired_offers,
+        AVG(CASE WHEN status = 'accepted' THEN 
+            EXTRACT(EPOCH FROM (updated_at - created_at))/3600 
+        END) as avg_response_time
+    INTO user_stats
+    FROM offers 
+    WHERE target_lawyer_id = p_user_id 
+        AND created_at >= NOW() - INTERVAL '30 days';
+
+    -- Generate recommendations based on statistics
     RETURN QUERY
-    WITH user_stats AS (
-        SELECT 
-            COUNT(*) as total_offers,
-            COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted_offers,
-            COUNT(CASE WHEN response_deadline < NOW() AND status = 'pending' THEN 1 END) as expired_offers,
-            AVG(CASE WHEN status = 'accepted' THEN 
-                EXTRACT(EPOCH FROM (updated_at - created_at))/3600 
-            END) as avg_response_time
-        FROM offers
-        WHERE target_lawyer_id = p_user_id
-        AND allocation_type = p_allocation_type
-        AND created_at >= NOW() - INTERVAL '30 days'
-    )
     SELECT 
         CASE 
-            WHEN us.expired_offers > 0 THEN 'response_time'
-            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN 'acceptance_rate'
-            WHEN us.avg_response_time > 24 THEN 'efficiency'
-            ELSE 'optimization'
+            WHEN us.expired_offers > 0 THEN 'expired_offers'
+            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN 'low_acceptance_rate'
+            WHEN us.avg_response_time > 24 THEN 'slow_response'
+            ELSE 'performance_good'
         END,
         CASE 
-            WHEN us.expired_offers > 0 THEN 'Ofertas Expiradas'
-            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN 'Taxa de Aceitação Baixa'
-            WHEN us.avg_response_time > 24 THEN 'Tempo de Resposta Alto'
-            ELSE 'Otimização Disponível'
-        END,
-        CASE 
-            WHEN us.expired_offers > 0 THEN 'Você possui ' || us.expired_offers || ' ofertas expiradas. Configure notificações para não perder oportunidades.'
-            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN 'Sua taxa de aceitação está baixa. Revise seus critérios de seleção.'
-            WHEN us.avg_response_time > 24 THEN 'Seu tempo médio de resposta é ' || ROUND(us.avg_response_time, 1) || ' horas. Responda mais rapidamente para melhorar seu ranking.'
-            ELSE 'Continue mantendo sua performance atual.'
-        END,
-        CASE 
-            WHEN us.expired_offers > 0 THEN true
-            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN true
-            WHEN us.avg_response_time > 24 THEN true
-            ELSE false
+            WHEN us.expired_offers > 0 THEN 'Você tem ofertas expiradas. Configure notificações para não perder oportunidades.'
+            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN 'Sua taxa de aceitação está baixa. Considere revisar os critérios de casos.'
+            WHEN us.avg_response_time > 24 THEN 'Você está demorando para responder ofertas. Tempo médio ideal: dentro de 24 horas.'
+            ELSE 'Sua performance está boa! Continue assim.'
         END,
         CASE 
             WHEN us.expired_offers > 0 THEN 5
             WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN 4
             WHEN us.avg_response_time > 24 THEN 3
             ELSE 1
+        END,
+        CASE 
+            WHEN us.expired_offers > 0 THEN true
+            WHEN us.total_offers > 0 AND (us.accepted_offers::NUMERIC / us.total_offers) < 0.5 THEN true
+            WHEN us.avg_response_time > 24 THEN true
+            ELSE false
         END
     FROM user_stats us;
 END;
@@ -264,7 +268,7 @@ $$ LANGUAGE plpgsql;
 COMMENT ON COLUMN offers.allocation_type IS 'Type of case allocation that generated this offer';
 COMMENT ON COLUMN offers.context_metadata IS 'Contextual information specific to the allocation type';
 COMMENT ON COLUMN offers.priority_level IS 'Priority level from 1 (lowest) to 5 (highest)';
-COMMENT ON COLUMN offers.response_deadline IS 'Deadline for lawyer to respond to this offer';
+COMMENT ON COLUMN offers.response_deadline IS 'Deadline for lawyer to respond to this offer - STANDARDIZED TO 24 HOURS';
 COMMENT ON COLUMN offers.delegation_details IS 'Details specific to internal delegation offers';
 COMMENT ON COLUMN offers.partnership_details IS 'Details specific to partnership offers';
 COMMENT ON COLUMN offers.match_details IS 'Details specific to algorithmic match offers'; 

@@ -279,7 +279,7 @@ async def get_allocation_types(
                 "description": "Match direto da plataforma",
                 "typical_origins": ["client_search"],
                 "typical_types": ["semantic_match", "directory_match"],
-                "default_sla_hours": 24,
+                "default_sla_hours": 24,  # Corrigido para 24 horas
                 "priority_level": 1
             },
             "platform_match_partnership": {
@@ -307,7 +307,7 @@ async def get_allocation_types(
                 "description": "Delegação interna de escritório",
                 "typical_origins": ["firm_search"],
                 "typical_types": ["directory_match"],
-                "default_sla_hours": 48,
+                "default_sla_hours": 48,  # SLA customizável - este é apenas o padrão
                 "priority_level": 2
             }
         }

@@ -126,16 +126,83 @@ class HybridRecommendationsTabView extends StatefulWidget {
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
   String _selectedPreset = 'balanced';
-  bool _showMapView = false; // Nova variável para controlar visualização
+  bool _showMapView = false;
+  final TextEditingController _searchController = TextEditingController();
+  bool _hasPerformedSearch = false; // ✅ NOVA FLAG para controlar se já pesquisou
+  
+  // ✅ NOVO: Estado para case highlighting
+  String? _highlightedCaseId;
+  bool _isHighlightingCase = false;
   
   @override
   void initState() {
     super.initState();
-    // Buscar recomendações usando SearchBloc
-    _fetchRecommendations();
+    // ✅ REATIVO: NÃO carrega automaticamente
+    // _fetchRecommendations(); // ❌ REMOVIDO
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkForCaseParameters(); // ✅ MELHOR PRÁTICA: Acesso seguro ao ModalRoute
+  }
+  
+  // ✅ NOVO: Verificar parâmetros de caso na URL
+  void _checkForCaseParameters() {
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      final uri = Uri.parse(route.settings.name ?? '');
+      final caseHighlight = uri.queryParameters['case_highlight'];
+      final caseId = uri.queryParameters['case_id'];
+      
+      if (caseHighlight != null || caseId != null) {
+        setState(() {
+          _highlightedCaseId = caseHighlight ?? caseId;
+          _isHighlightingCase = true;
+          _hasPerformedSearch = true;
+        });
+        _loadMatchesForCase(_highlightedCaseId!);
+      }
+    }
+  }
+  
+  // ✅ NOVO: Carregar matches específicos para um caso
+  void _loadMatchesForCase(String caseId) {
+    // Usar SearchParams com caseId para buscar matches específicos
+    final params = SearchParams(
+      caseId: caseId, // Assumindo que SearchParams suporta caseId
+      preset: _selectedPreset,
+      includeFirms: true,
+    );
+    context.read<SearchBloc>().add(SearchRequested(params));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _fetchRecommendations() {
+    final query = _searchController.text.trim();
+    
+    // ✅ REATIVO: Só busca se há query OU se o usuário explicitamente clicou em "buscar por preset"
+    if (query.isNotEmpty || _hasPerformedSearch) {
+      final params = SearchParams(
+        query: query.isNotEmpty ? query : null,
+        preset: _selectedPreset,
+        includeFirms: true,
+      );
+      context.read<SearchBloc>().add(SearchRequested(params));
+    }
+  }
+
+  void _performPresetSearch() {
+    // ✅ Permite busca por preset mesmo sem texto (quando usuário explicitamente escolhe)
+    setState(() {
+      _hasPerformedSearch = true;
+    });
+    
     final params = SearchParams(
       preset: _selectedPreset,
       includeFirms: true,
@@ -147,7 +214,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header com toggle de visualização
+        // Header com controles de pesquisa
         Container(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -187,6 +254,93 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              
+              // ✅ NOVO: Banner para caso destacado
+              if (_isHighlightingCase && _highlightedCaseId != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        LucideIcons.target,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Recomendações para seu caso',
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '#${_highlightedCaseId!.substring(0, 8)}...',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isHighlightingCase = false;
+                            _highlightedCaseId = null;
+                            _hasPerformedSearch = false;
+                          });
+                          context.read<SearchBloc>().add(SearchCleared());
+                        },
+                        icon: Icon(
+                          LucideIcons.x,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              
+              // ✅ NOVO: Campo de pesquisa
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Buscar por especialização, nome...',
+                  prefixIcon: const Icon(LucideIcons.search),
+                  suffixIcon: IconButton(
+                    icon: const Icon(LucideIcons.x),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _hasPerformedSearch = false;
+                      });
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onChanged: (value) => _fetchRecommendations(),
+                onSubmitted: (value) => _fetchRecommendations(),
               ),
               const SizedBox(height: 16),
               
@@ -236,6 +390,11 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
         Expanded(
           child: BlocBuilder<SearchBloc, SearchState>(
             builder: (context, state) {
+              // ✅ REATIVO: Mostra estado inicial se não pesquisou
+              if (!_hasPerformedSearch && _searchController.text.isEmpty) {
+                return _buildInitialState(context);
+              }
+              
               if (state is SearchLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -269,6 +428,39 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
     );
   }
 
+  // ✅ NOVO: Estado inicial antes de qualquer pesquisa
+  Widget _buildInitialState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            LucideIcons.users,
+            size: 64,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Encontre Parceiros Ideais',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Digite uma especialização ou\nescolha um tipo de recomendação',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _performPresetSearch,
+            icon: const Icon(LucideIcons.star),
+            label: const Text('Ver Recomendações Gerais'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPresetChip(String preset, String label, String description, IconData icon) {
     final isSelected = _selectedPreset == preset;
     
@@ -277,7 +469,12 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
         setState(() {
           _selectedPreset = preset;
         });
-        _fetchRecommendations();
+        // ✅ REATIVO: Só busca se já havia pesquisado antes OU se forçar busca por preset
+        if (_hasPerformedSearch || _searchController.text.isNotEmpty) {
+          _fetchRecommendations();
+        } else {
+          _performPresetSearch(); // Busca por preset quando usuário escolhe explicitamente
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

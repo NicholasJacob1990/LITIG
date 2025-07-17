@@ -27,6 +27,7 @@ import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_scr
 import 'package:meu_app/src/features/services/presentation/screens/services_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_detail_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/case_documents_screen.dart';
+import 'package:meu_app/src/features/sla_settings/presentation/screens/sla_settings_screen.dart';
 import 'package:meu_app/injection_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -174,6 +175,14 @@ GoRouter appRouter(AuthBloc authBloc) {
         path: '/profile/settings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/sla-settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<SlaSettingsBloc>(),
+          child: const SlaSettingsScreen(),
+        ),
       ),
     ],
   );

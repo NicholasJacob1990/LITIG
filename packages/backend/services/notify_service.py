@@ -110,6 +110,67 @@ async def send_notifications_to_lawyers(lawyer_ids: List[str], payload: Dict[str
         logger.error(f"Erro ao buscar dados dos advogados para notificação: {e}")
 
 
+async def send_notification_to_client(client_id: str, notification_type: str, payload: Dict[str, Any]):
+    """
+    Envia notificação push para um cliente específico.
+    
+    Args:
+        client_id: ID do cliente
+        notification_type: Tipo da notificação (caseUpdate, matchesFound, etc.)
+        payload: Dados da notificação
+    """
+    if not client_id:
+        logger.warning("Client ID não fornecido para notificação")
+        return False
+
+    # 1. Verificar cooldown para evitar spam
+    cache_key = f"client_notification_cooldown:{client_id}:{notification_type}"
+    is_on_cooldown = await cache_service.get(cache_key)
+    if is_on_cooldown:
+        logger.info(f"Cliente {client_id} em cooldown para notificação {notification_type}")
+        return False
+
+    # 2. Buscar dados do cliente
+    supabase = get_supabase_client()
+    try:
+        client_response = supabase.table("profiles") \
+            .select("id, expo_push_token, email, full_name") \
+            .eq("id", client_id) \
+            .single() \
+            .execute()
+
+        client_data = client_response.data
+        if not client_data:
+            logger.warning(f"Cliente {client_id} não encontrado")
+            return False
+
+        push_token = client_data.get("expo_push_token")
+        email = client_data.get("email")
+        
+        title = payload.get("title", "Nova Atualização")
+        message = payload.get("body", "Temos novidades sobre seu caso.")
+        extra_data = payload.get("data", {})
+
+        # 3. Enviar notificação
+        success = False
+        if push_token:
+            success = await send_push_notification(push_token, title, message, extra_data)
+        elif email:
+            success = await send_email_notification(email, title, message)
+
+        # 4. Marcar cooldown se enviado com sucesso
+        if success:
+            # Cooldown de 2 minutos para clientes (menos que advogados)
+            await cache_service.set(cache_key, {"notified": True}, ttl=120)
+            logger.info(f"Notificação {notification_type} enviada para cliente {client_id}")
+
+        return success
+
+    except Exception as e:
+        logger.error(f"Erro ao enviar notificação para cliente {client_id}: {e}")
+        return False
+
+
 async def send_push_notification(token: str, title: str, message: str, data: dict = None) -> bool:
     """Envia uma notificação push via Expo."""
     try:

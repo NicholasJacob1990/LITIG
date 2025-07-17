@@ -6,20 +6,17 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from .redis_service import redis_service
-
-from .conversation_state_manager import conversation_state_manager
-from .embedding_service import generate_embedding
-from .intelligent_interviewer_service import (
-    ComplexityLevel,
-    Strategy,
-    TriageResult,
-    intelligent_interviewer_service,
-)
-from .lex9000_integration_service import lex9000_integration_service
+from .intelligent_interviewer_service import intelligent_interviewer_service
 from .triage_service import triage_service
+from .lex9000_integration_service import lex9000_integration_service
+from .conversation_state_manager import conversation_state_manager
+from .redis_service import redis_service
+from .notify_service import send_notification_to_client
 from .match_service import find_and_notify_matches
 from ..models import MatchRequest
+from ..models.triage_result import TriageResult, OrchestrationResult
+from ..models.strategy import Strategy
+from ..core.embedding_utils import generate_embedding
 
 
 @dataclass
@@ -152,6 +149,27 @@ class IntelligentTriageOrchestrator:
                 await self.state_manager.save_orchestration_state(case_id, orchestration)
 
                 await self._publish_event(case_id, "triage_completed", {"result_id": case_id})
+
+                # Notificar cliente sobre matches disponíveis
+                try:
+                    user_id = orchestration.get("user_id")
+                    if user_id and result:
+                        from .notify_service import send_notification_to_client
+                        await send_notification_to_client(
+                            client_id=user_id,
+                            notification_type="caseUpdate",
+                            payload={
+                                "title": "Advogados Encontrados!",
+                                "body": "Encontramos advogados recomendados para seu caso. Toque para ver.",
+                                "data": {
+                                    "case_id": case_id,
+                                    "action": "view_matches",
+                                    "screen": f"/advogados?case_highlight={case_id}"
+                                }
+                            }
+                        )
+                except Exception as e:
+                    print(f"Erro ao enviar notificação para cliente: {e}")
 
                 return {
                     "case_id": case_id,
@@ -576,22 +594,6 @@ class IntelligentTriageOrchestrator:
 
             # Processar resultado
             result = await self._process_completed_conversation(case_id)
-
-            orchestration["status"] = "completed"
-            orchestration["result"] = result
-            orchestration["completion_reason"] = reason
-
-            return result
-
-        except Exception as e:
-            orchestration["status"] = "error"
-            orchestration["error"] = f"Erro ao forçar finalização: {str(e)}"
-            return None
-
-
-# Instância única do orquestrador
-intelligent_triage_orchestrator = IntelligentTriageOrchestrator()
-
 
             orchestration["status"] = "completed"
             orchestration["result"] = result

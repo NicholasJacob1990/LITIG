@@ -12,6 +12,9 @@ DEFAULT_CACHE_TTL = 21600  # 6 horas
 # Versão da API
 api_version = "v3.0-hybrid"
 
+# Configurações de SLA padronizadas
+OFFER_SLA_HOURS = 24  # SLA padrão de 24 horas para todas as ofertas
+
 # Configurações de cache
 CACHE_TTL_SECONDS = {
     "static_features": 21600,  # 6 horas

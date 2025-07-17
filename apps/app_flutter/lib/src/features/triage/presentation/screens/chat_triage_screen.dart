@@ -38,15 +38,42 @@ class _ChatTriageViewState extends State<ChatTriageView> {
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      Timer(const Duration(milliseconds: 100), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
-      });
-    }
+      }
+    });
+  }
+
+  void _showTriageCompletedNotification(BuildContext context, String caseId) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Triagem concluída! Encontramos advogados para seu caso.',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green[600],
+        action: SnackBarAction(
+          label: 'Ver Recomendações',
+          textColor: Colors.white,
+          onPressed: () => context.go('/advogados?tab=recomendacoes&case_id=$caseId'),
+        ),
+        duration: const Duration(seconds: 8),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -61,7 +88,9 @@ class _ChatTriageViewState extends State<ChatTriageView> {
           if (state is ChatTriageActive) {
             _scrollToBottom();
           } else if (state is ChatTriageFinished) {
-            context.go('/matches/${state.caseId}');
+            _showTriageCompletedNotification(context, state.caseId);
+            // Navegar para aba advogados com highlight do caso
+            context.go('/advogados?case_highlight=${state.caseId}');
           } else if (state is ChatTriageError) {
              ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.red),

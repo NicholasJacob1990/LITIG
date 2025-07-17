@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
+import 'package:meu_app/src/features/notifications/presentation/widgets/notification_badge.dart';
 import 'package:meu_app/src/shared/config/navigation_config.dart';
 
 class MainTabsShell extends StatelessWidget {
@@ -60,10 +62,7 @@ class MainTabsShell extends StatelessWidget {
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _getCurrentIndexForTabs(navTabs, navigationShell.currentIndex),
               onTap: (index) => _onItemTappedForTabs(index, navTabs),
-              items: navTabs.map((tab) => BottomNavigationBarItem(
-                icon: Icon(tab.icon), 
-                label: tab.label,
-              )).toList(),
+              items: navTabs.map((tab) => _buildBottomNavigationBarItem(context, tab, userRole)).toList(),
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey,
@@ -93,6 +92,51 @@ class MainTabsShell extends StatelessWidget {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     );
+  }
+
+  /// Constrói item da bottom navigation com badge de notificação quando necessário
+  BottomNavigationBarItem _buildBottomNavigationBarItem(
+    BuildContext context, 
+    NavigationTab tab, 
+    String userRole
+  ) {
+    // Verificar se deve exibir badge de notificação
+    final shouldShowBadge = _shouldShowNotificationBadge(tab, userRole);
+    
+    Widget iconWidget = Icon(tab.icon);
+    
+    if (shouldShowBadge) {
+      iconWidget = BlocBuilder<NotificationBloc, NotificationState>(
+        builder: (context, notificationState) {
+          return NotificationBadge(
+            count: notificationState.unreadCount,
+            child: Icon(tab.icon),
+          );
+        },
+      );
+    }
+    
+    return BottomNavigationBarItem(
+      icon: iconWidget,
+      label: tab.label,
+    );
+  }
+
+  /// Determina se deve exibir badge de notificação para uma aba específica
+  bool _shouldShowNotificationBadge(NavigationTab tab, String userRole) {
+    // Apenas advogados recebem notificações por enquanto
+    if (!_isLawyer(userRole)) return false;
+    
+    // Badge aparece em abas relacionadas a ofertas ou mensagens
+    return tab.route.contains('offers') || 
+           tab.route.contains('messages') ||
+           tab.label.toLowerCase() == 'ofertas' ||
+           tab.label.toLowerCase() == 'mensagens';
+  }
+
+  /// Verifica se o usuário é advogado
+  bool _isLawyer(String userRole) {
+    return userRole.contains('lawyer') || userRole == 'LAWYER';
   }
 
   /// Métodos para NavigationTab (nova lógica)
@@ -313,6 +357,50 @@ class MainTabsShell extends StatelessWidget {
           NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 4),
           NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 5),
         ];
+      case 'lawyer_individual':
+      case 'lawyer_office':
+        return [
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 6),
+          NavItem(label: 'Casos', icon: LucideIcons.folder, branchIndex: 1), // Adicionado
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 7), // Sistema de ofertas
+          NavItem(label: 'Parceiros', icon: LucideIcons.search, branchIndex: 8),
+          NavItem(label: 'Parcerias', icon: LucideIcons.users, branchIndex: 9),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 10),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 11),
+        ];
+      case 'lawyer_platform_associate': // NOVO: Super Associado - usa mesma navegação de captação
+        return [
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 6),
+          NavItem(label: 'Casos', icon: LucideIcons.folder, branchIndex: 1), // Adicionado
+          NavItem(label: 'Ofertas', icon: LucideIcons.inbox, branchIndex: 3), // Usa branch 3 (offers)
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageSquare, branchIndex: 4),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 5),
+        ];
+      default: // client
+        return [
+          NavItem(label: 'Início', icon: LucideIcons.home, branchIndex: 12),
+          NavItem(label: 'Meus Casos', icon: LucideIcons.clipboardList, branchIndex: 13),
+          NavItem(label: 'Advogados', icon: LucideIcons.search, branchIndex: 14),
+          NavItem(label: 'Mensagens', icon: LucideIcons.messageCircle, branchIndex: 15),
+          NavItem(label: 'Serviços', icon: LucideIcons.layoutGrid, branchIndex: 16),
+          NavItem(label: 'Perfil', icon: LucideIcons.user, branchIndex: 17),
+        ];
+    }
+  }
+  */
+}
+
+// LEGADO: Classe comentada após migração para sistema de permissões
+// TODO: Remover após validação completa do novo sistema
+/*
+class NavItem {
+  final String label;
+  final IconData icon;
+  final int branchIndex;
+
+  const NavItem({required this.label, required this.icon, required this.branchIndex});
+}
+*/ 
       case 'lawyer_individual':
       case 'lawyer_office':
         return [
