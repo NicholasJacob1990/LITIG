@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 class NextOpportunitiesSection extends BaseInfoSection {
@@ -824,8 +823,6 @@ class NextOpportunitiesSection extends BaseInfoSection {
     );
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 class NextOpportunitiesSection extends BaseInfoSection {
   const NextOpportunitiesSection({

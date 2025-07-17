@@ -6,7 +6,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaAuditWidget extends StatefulWidget {
-  const SlaAuditWidget({Key? key}) : super(key: key);
+  const SlaAuditWidget({super.key});
 
   @override
   State<SlaAuditWidget> createState() => _SlaAuditWidgetState();
@@ -794,7 +794,7 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Detalhes do Evento'),
+        title: const Text('Detalhes do Evento'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -895,7 +895,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaAuditWidget extends StatefulWidget {
-  const SlaAuditWidget({Key? key}) : super(key: key);
+  const SlaAuditWidget({super.key});
 
   @override
   State<SlaAuditWidget> createState() => _SlaAuditWidgetState();
@@ -1683,7 +1683,7 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Detalhes do Evento'),
+        title: const Text('Detalhes do Evento'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

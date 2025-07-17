@@ -388,9 +388,6 @@ class SlaSettingsMultiStepOperation extends SlaSettingsState {
   bool get isLastStep => currentStep == totalSteps;
   double get progressPercent => progress * 100;
 } 
-import '../../domain/entities/sla_settings_entity.dart';
-import '../../domain/entities/sla_preset_entity.dart';
-import '../../domain/usecases/validate_sla_settings.dart';
 
 abstract class SlaSettingsState extends Equatable {
   const SlaSettingsState();

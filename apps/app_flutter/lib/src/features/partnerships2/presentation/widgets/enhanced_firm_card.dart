@@ -184,15 +184,15 @@ class EnhancedFirmCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Deseja contratar este escritório para o caso atual?'),
+            const Text('Deseja contratar este escritório para o caso atual?'),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Detalhes:',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             Text('• ${firm.teamSize} profissionais'),
-            if (firm.hasLocation) Text('• Localização disponível'),
-            if (firm.kpis != null) Text('• Com avaliações'),
+            if (firm.hasLocation) const Text('• Localização disponível'),
+            if (firm.kpis != null) const Text('• Com avaliações'),
           ],
         ),
         actions: [

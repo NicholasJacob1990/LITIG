@@ -392,8 +392,6 @@ class SlaAnalyticsError extends SlaAnalyticsState {
   bool get isPermissionError => errorCode?.contains('PERMISSION') ?? false;
   bool get isRetryableError => isNetworkError || isServerError;
 } 
-import '../../domain/entities/sla_metrics_entity.dart';
-import 'sla_analytics_event.dart';
 
 abstract class SlaAnalyticsState extends Equatable {
   const SlaAnalyticsState();

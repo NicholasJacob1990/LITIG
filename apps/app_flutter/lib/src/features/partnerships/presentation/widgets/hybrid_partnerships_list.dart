@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/src/features/partnerships/domain/entities/partnership.dart';
 import 'package:meu_app/src/features/partnerships/presentation/widgets/partnership_card.dart';
-import 'package:meu_app/src/features/firms/presentation/widgets/firm_card.dart';
 
 enum HybridPartnershipsListType {
   active,

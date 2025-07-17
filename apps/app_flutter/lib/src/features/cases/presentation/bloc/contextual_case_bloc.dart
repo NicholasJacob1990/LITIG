@@ -143,7 +143,7 @@ class ContextualDataCache {
   static const int maxCacheSize = 50;
   static const Duration cacheExpiration = Duration(minutes: 10);
   
-  final Map<String, _CacheEntry> _cache = LinkedHashMap();
+  final Map<String, _CacheEntry> _cache = {};
   
   void put(String key, ContextualCaseData data) {
     // Remove entradas antigas se cache estiver cheio
@@ -231,7 +231,7 @@ class ContextualCaseBloc extends Bloc<ContextualCaseEvent, ContextualCaseState> 
       AppLogger.info('Using cached contextual data for case ${event.caseId}');
       emit(ContextualCaseLoaded(
         contextualData: cachedData,
-        kpis: [], // KPIs podem ser carregados lazy
+        kpis: const [], // KPIs podem ser carregados lazy
         actions: _getDefaultActions(cachedData.allocationType),
         highlight: _getDefaultHighlight(cachedData.allocationType),
       ));
@@ -591,7 +591,7 @@ class ContextualDataCache {
   static const int maxCacheSize = 50;
   static const Duration cacheExpiration = Duration(minutes: 10);
   
-  final Map<String, _CacheEntry> _cache = LinkedHashMap();
+  final Map<String, _CacheEntry> _cache = {};
   
   void put(String key, ContextualCaseData data) {
     // Remove entradas antigas se cache estiver cheio
@@ -679,7 +679,7 @@ class ContextualCaseBloc extends Bloc<ContextualCaseEvent, ContextualCaseState> 
       AppLogger.info('Using cached contextual data for case ${event.caseId}');
       emit(ContextualCaseLoaded(
         contextualData: cachedData,
-        kpis: [], // KPIs podem ser carregados lazy
+        kpis: const [], // KPIs podem ser carregados lazy
         actions: _getDefaultActions(cachedData.allocationType),
         highlight: _getDefaultHighlight(cachedData.allocationType),
       ));

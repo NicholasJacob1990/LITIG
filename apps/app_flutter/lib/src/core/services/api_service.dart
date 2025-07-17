@@ -367,6 +367,53 @@ class ApiService {
     );
   }
 
+  /// Escolhe um advogado para um caso específico (implementação do PLANO_ACAO_CONTRATACAO.md)
+  static Future<Map<String, dynamic>> chooseLawyerForCase({
+    required String caseId,
+    required String lawyerId,
+    int choiceOrder = 1,
+  }) async {
+    try {
+      AppLogger.info('Choosing lawyer for case - caseId: $caseId, lawyerId: $lawyerId');
+      
+      final headers = await _getHeaders();
+      final url = '$_baseUrl/cases/$caseId/choose-lawyer';
+      final body = jsonEncode({
+        'case_id': caseId,
+        'chosen_lawyer_id': lawyerId,
+        'choice_order': choiceOrder,
+      });
+
+      AppLogger.debug('POST $url');
+      AppLogger.debug('Request body: $body');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: body,
+      );
+
+      AppLogger.debug('Response status: ${response.statusCode}');
+      AppLogger.debug('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        AppLogger.success('Lawyer choice successful: $result');
+        return result;
+      } else {
+        AppLogger.error('Failed to choose lawyer: Status ${response.statusCode}');
+        AppLogger.error('Error response: ${response.body}');
+        throw ServerException(message: 'Falha ao enviar proposta para o advogado.');
+      }
+    } catch (e) {
+      AppLogger.error('Exception in chooseLawyerForCase: $e');
+      if (e is ServerException) {
+        rethrow;
+      }
+      throw ServerException(message: 'Erro de conexão ao enviar proposta.');
+    }
+  }
+
   static Future<Map<String, dynamic>> checkTriageStatus(String taskId) async {
     final headers = await _getHeaders();
     final url = '$_baseUrl/triage/status/$taskId';
@@ -438,7 +485,7 @@ class ApiService {
       } else {
         throw ServerException(message: 'Erro na busca por diretório');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       throw ServerException.fromDioError(e);
     }
   }

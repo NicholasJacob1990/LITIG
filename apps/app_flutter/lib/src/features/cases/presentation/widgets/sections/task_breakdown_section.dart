@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir TaskBreakdownSection placeholder para advogados associados
 /// - Foco em produtividade e execução de tarefas delegadas
 class TaskBreakdownSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const TaskBreakdownSection({
@@ -664,14 +665,14 @@ class TaskBreakdownSection extends BaseInfoSection {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Atualizar Progresso'),
+        title: const Text('Atualizar Progresso'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Tarefa: $taskName'),
             const SizedBox(height: 16),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Horas trabalhadas hoje',
                 border: OutlineInputBorder(),
                 suffixText: 'h',
@@ -679,8 +680,8 @@ class TaskBreakdownSection extends BaseInfoSection {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 12),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Observações (opcional)',
                 border: OutlineInputBorder(),
               ),
@@ -731,8 +732,8 @@ class TaskBreakdownSection extends BaseInfoSection {
               onChanged: (value) {},
             ),
             const SizedBox(height: 12),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Horas trabalhadas',
                 border: OutlineInputBorder(),
                 suffixText: 'h',
@@ -853,6 +854,7 @@ import '../base_info_section.dart';
 /// - Substituir TaskBreakdownSection placeholder para advogados associados
 /// - Foco em produtividade e execução de tarefas delegadas
 class TaskBreakdownSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const TaskBreakdownSection({
@@ -1505,14 +1507,14 @@ class TaskBreakdownSection extends BaseInfoSection {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Atualizar Progresso'),
+        title: const Text('Atualizar Progresso'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Tarefa: $taskName'),
             const SizedBox(height: 16),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Horas trabalhadas hoje',
                 border: OutlineInputBorder(),
                 suffixText: 'h',
@@ -1520,8 +1522,8 @@ class TaskBreakdownSection extends BaseInfoSection {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 12),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Observações (opcional)',
                 border: OutlineInputBorder(),
               ),
@@ -1572,8 +1574,8 @@ class TaskBreakdownSection extends BaseInfoSection {
               onChanged: (value) {},
             ),
             const SizedBox(height: 12),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Horas trabalhadas',
                 border: OutlineInputBorder(),
                 suffixText: 'h',

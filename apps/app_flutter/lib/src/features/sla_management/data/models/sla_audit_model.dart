@@ -126,6 +126,7 @@ class SlaAuditModel extends SlaAuditEntity {
     );
   }
 
+  @override
   SlaAuditModel copyWith({
     String? id,
     String? firmId,
@@ -320,6 +321,7 @@ class SlaAuditModel extends SlaAuditEntity {
     );
   }
 
+  @override
   SlaAuditModel copyWith({
     String? id,
     String? firmId,

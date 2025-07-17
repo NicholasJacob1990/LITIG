@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../base_info_section.dart';
-import '../../../domain/entities/case_detail.dart';
 
 /// Seção de Atribuição de Caso para Advogados Associados
 /// 
@@ -700,8 +699,6 @@ class CaseAssignmentSection extends BaseInfoSection {
     );
   }
 } 
-import '../base_info_section.dart';
-import '../../../domain/entities/case_detail.dart';
 
 /// Seção de Atribuição de Caso para Advogados Associados
 /// 

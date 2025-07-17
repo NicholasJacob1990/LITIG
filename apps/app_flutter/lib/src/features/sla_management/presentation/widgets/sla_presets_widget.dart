@@ -12,11 +12,11 @@ class SlaPresetsWidget extends StatefulWidget {
   final Function(SlaPresetEntity)? onPresetCreated;
 
   const SlaPresetsWidget({
-    Key? key,
+    super.key,
     this.presets,
     this.onPresetSelected,
     this.onPresetCreated,
-  }) : super(key: key);
+  });
 
   @override
   State<SlaPresetsWidget> createState() => _SlaPresetsWidgetState();
@@ -686,11 +686,11 @@ class SlaPresetsWidget extends StatefulWidget {
   final Function(SlaPresetEntity)? onPresetCreated;
 
   const SlaPresetsWidget({
-    Key? key,
+    super.key,
     this.presets,
     this.onPresetSelected,
     this.onPresetCreated,
-  }) : super(key: key);
+  });
 
   @override
   State<SlaPresetsWidget> createState() => _SlaPresetsWidgetState();

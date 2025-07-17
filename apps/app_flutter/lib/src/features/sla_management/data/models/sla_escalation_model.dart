@@ -72,6 +72,7 @@ class SlaEscalationModel extends SlaEscalationEntity {
     };
   }
 
+  @override
   SlaEscalationModel copyWith({
     String? id,
     String? name,

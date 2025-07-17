@@ -4,7 +4,6 @@ import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/sla_metrics_entity.dart';
 import '../../domain/repositories/sla_metrics_repository.dart';
 import '../datasources/sla_metrics_remote_data_source.dart';
-import '../models/sla_metrics_model.dart';
 
 class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
   final SlaMetricsRemoteDataSource remoteDataSource;

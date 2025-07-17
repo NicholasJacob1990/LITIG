@@ -5,7 +5,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaNotificationsWidget extends StatefulWidget {
-  const SlaNotificationsWidget({Key? key}) : super(key: key);
+  const SlaNotificationsWidget({super.key});
 
   @override
   State<SlaNotificationsWidget> createState() => _SlaNotificationsWidgetState();
@@ -802,7 +802,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaNotificationsWidget extends StatefulWidget {
-  const SlaNotificationsWidget({Key? key}) : super(key: key);
+  const SlaNotificationsWidget({super.key});
 
   @override
   State<SlaNotificationsWidget> createState() => _SlaNotificationsWidgetState();

@@ -230,21 +230,21 @@ class CaseDetailScreen extends StatelessWidget {
           isCompleted: true,
           isCurrent: false,
           completedAt: DateTime(2024, 5, 20),
-          documents: [
-            const PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
+          documents: const [
+            PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
           ],
         ),
-        ProcessPhase(
+        const ProcessPhase(
           name: 'Coleta de Provas',
           description: 'Reunindo todas as evidências e documentos necessários.',
           isCompleted: false,
           isCurrent: true,
           documents: [
-            const PhaseDocument(name: 'Contrato_Servico.pdf', url: ''),
-            const PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
+            PhaseDocument(name: 'Contrato_Servico.pdf', url: ''),
+            PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
           ],
         ),
-        ProcessPhase(
+        const ProcessPhase(
           name: 'Audiência de Conciliação',
           description: 'Tentativa de acordo amigável entre as partes.',
           isCompleted: false,
@@ -256,16 +256,16 @@ class CaseDetailScreen extends StatelessWidget {
 }
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
+                              child: Row(
+                                mainAxisSize = MainAxisSize.min,
+                                children = [
+                                  const SizedBox(
                                     width: 16,
                                     height: 16,
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
+                                  const SizedBox(width: 8),
+                                  const Text(
                                     'Carregando dados contextuais...',
                                     style: TextStyle(fontSize: 12),
                                   ),
@@ -275,9 +275,9 @@ class CaseDetailScreen extends StatelessWidget {
                           
                           // Render sections using factory
                           ...ContextualCaseDetailSectionFactory.buildSectionsForUser(
-                            currentUser: currentUser,
-                            caseDetail: caseDetail,
-                            contextualData: contextualData,
+                            currentUser = currentUser,
+                            caseDetail = caseDetail,
+                            contextualData = contextualData,
                           ),
                         ],
                       ),
@@ -333,21 +333,21 @@ class CaseDetailScreen extends StatelessWidget {
           isCompleted: true,
           isCurrent: false,
           completedAt: DateTime(2024, 5, 20),
-          documents: [
-            const PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
+          documents: const [
+            PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
           ],
         ),
-        ProcessPhase(
+        const ProcessPhase(
           name: 'Coleta de Provas',
           description: 'Reunindo todas as evidências e documentos necessários.',
           isCompleted: false,
           isCurrent: true,
           documents: [
-            const PhaseDocument(name: 'Contrato_Servico.pdf', url: ''),
-            const PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
+            PhaseDocument(name: 'Contrato_Servico.pdf', url: ''),
+            PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
           ],
         ),
-        ProcessPhase(
+        const ProcessPhase(
           name: 'Audiência de Conciliação',
           description: 'Tentativa de acordo amigável entre as partes.',
           isCompleted: false,

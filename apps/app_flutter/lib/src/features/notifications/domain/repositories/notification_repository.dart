@@ -25,8 +25,6 @@ abstract class NotificationRepository {
   /// Atualiza token FCM do usuário no backend
   Future<Either<Failure, void>> updateFCMToken(String token);
 } 
-import '../../../../core/error/failure.dart';
-import '../entities/notification_entity.dart';
 
 abstract class NotificationRepository {
   /// Busca lista de notificações do usuário

@@ -156,11 +156,6 @@ class ApiResponse {
     required this.data,
   });
 } 
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:meu_app/src/core/utils/logger.dart';
 
 /// Serviço simplificado de API para compatibilidade com data sources
 class SimpleApiService {

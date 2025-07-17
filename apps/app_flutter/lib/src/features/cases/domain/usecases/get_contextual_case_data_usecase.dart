@@ -179,10 +179,6 @@ class ContextualCaseDataResult {
     return 'ContextualCaseDataResult(caseId: ${caseDetail.id}, allocationType: ${contextualData.allocationType})';
   }
 } 
-import '../entities/contextual_case_data.dart';
-import '../entities/allocation_type.dart';
-import '../repositories/contextual_case_repository.dart';
-import '../../../../core/utils/logger.dart';
 
 /// Use case para buscar dados contextuais completos de um caso
 /// 

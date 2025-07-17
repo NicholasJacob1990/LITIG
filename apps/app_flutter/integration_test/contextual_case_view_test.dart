@@ -296,14 +296,11 @@ Future<void> _logoutAndLoginAsAssociatedLawyer(WidgetTester tester) async {
 
 class MockUser extends User {
   MockUser({
-    required String role,
-    required String id,
-    required String fullName,
+    required String super.role,
+    required super.id,
+    required String super.fullName,
   }) : super(
-    id: id,
     email: 'test@example.com',
-    fullName: fullName,
-    role: role,
     createdAt: DateTime.now(),
     permissions: _getPermissionsForRole(role),
   );
@@ -326,17 +323,12 @@ class MockUser extends User {
 }
 
 class MockContextualCaseData extends ContextualCaseData {
-  MockContextualCaseData({
-    required AllocationType allocationType,
-    String? delegatedByName,
-    int? hoursBudgeted,
-    double? hourlyRate,
-  }) : super(
-    allocationType: allocationType,
-    delegatedByName: delegatedByName,
-    hoursBudgeted: hoursBudgeted,
-    hourlyRate: hourlyRate,
-  );
+  const MockContextualCaseData({
+    required super.allocationType,
+    super.delegatedByName,
+    super.hoursBudgeted,
+    super.hourlyRate,
+  });
 } 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -635,14 +627,11 @@ Future<void> _logoutAndLoginAsAssociatedLawyer(WidgetTester tester) async {
 
 class MockUser extends User {
   MockUser({
-    required String role,
-    required String id,
-    required String fullName,
+    required String super.role,
+    required super.id,
+    required String super.fullName,
   }) : super(
-    id: id,
     email: 'test@example.com',
-    fullName: fullName,
-    role: role,
     createdAt: DateTime.now(),
     permissions: _getPermissionsForRole(role),
   );
@@ -665,15 +654,10 @@ class MockUser extends User {
 }
 
 class MockContextualCaseData extends ContextualCaseData {
-  MockContextualCaseData({
-    required AllocationType allocationType,
-    String? delegatedByName,
-    int? hoursBudgeted,
-    double? hourlyRate,
-  }) : super(
-    allocationType: allocationType,
-    delegatedByName: delegatedByName,
-    hoursBudgeted: hoursBudgeted,
-    hourlyRate: hourlyRate,
-  );
+  const MockContextualCaseData({
+    required super.allocationType,
+    super.delegatedByName,
+    super.hoursBudgeted,
+    super.hourlyRate,
+  });
 } 

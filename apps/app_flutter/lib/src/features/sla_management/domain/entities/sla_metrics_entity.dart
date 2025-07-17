@@ -164,7 +164,7 @@ class SlaMetricsEntity extends Equatable {
   double _calculatePerformanceScore() {
     // Score baseado no tempo médio de resposta vs. SLA
     final avgResponseHours = performanceMetrics.averageResponseTime.inHours;
-    final maxSlaHours = 48; // Assumindo SLA padrão de 48h
+    const maxSlaHours = 48; // Assumindo SLA padrão de 48h
     
     if (avgResponseHours <= maxSlaHours * 0.5) return 100;
     if (avgResponseHours <= maxSlaHours * 0.7) return 85;
@@ -819,7 +819,7 @@ class SlaMetricsEntity extends Equatable {
   double _calculatePerformanceScore() {
     // Score baseado no tempo médio de resposta vs. SLA
     final avgResponseHours = performanceMetrics.averageResponseTime.inHours;
-    final maxSlaHours = 48; // Assumindo SLA padrão de 48h
+    const maxSlaHours = 48; // Assumindo SLA padrão de 48h
     
     if (avgResponseHours <= maxSlaHours * 0.5) return 100;
     if (avgResponseHours <= maxSlaHours * 0.7) return 85;

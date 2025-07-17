@@ -36,8 +36,6 @@ class GetContextualActionsUseCase {
     }
   }
 } 
-import '../repositories/contextual_case_repository.dart';
-import '../../../../core/utils/logger.dart';
 
 /// Use case para buscar ações contextuais disponíveis para um caso
 /// 

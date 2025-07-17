@@ -286,7 +286,7 @@ class SlaPresetEntity extends Equatable {
       return (end - start).inMinutes / 60.0;
     } else {
       // Expediente cruza a meia-noite
-      return (Duration(hours: 24) - (start - end)).inMinutes / 60.0;
+      return (const Duration(hours: 24) - (start - end)).inMinutes / 60.0;
     }
   }
 
@@ -677,7 +677,7 @@ class SlaPresetEntity extends Equatable {
       return (end - start).inMinutes / 60.0;
     } else {
       // Expediente cruza a meia-noite
-      return (Duration(hours: 24) - (start - end)).inMinutes / 60.0;
+      return (const Duration(hours: 24) - (start - end)).inMinutes / 60.0;
     }
   }
 

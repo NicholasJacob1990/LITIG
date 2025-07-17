@@ -17,7 +17,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
   SlaSettingsBloc({
     required this.validateSlaSettings,
     required this.calculateSlaDeadline,
-  }) : super(SlaSettingsInitial()) {
+  }) : super(const SlaSettingsInitial()) {
     on<LoadSlaSettingsEvent>(_onLoadSlaSettings);
     on<UpdateSlaSettingsEvent>(_onUpdateSlaSettings);
     on<SaveSlaSettingsEvent>(_onSaveSlaSettings);
@@ -40,7 +40,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     LoadSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
-    emit(SlaSettingsLoading());
+    emit(const SlaSettingsLoading());
     
     try {
       // TODO: Implement when repository is available
@@ -107,7 +107,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
 
-    emit(SlaSettingsUpdating());
+    emit(const SlaSettingsUpdating());
 
     try {
       // Validate before saving
@@ -419,7 +419,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
 
     try {
       if (event.preset.isSystem) {
-        emit(SlaSettingsError(
+        emit(const SlaSettingsError(
           message: 'Não é possível deletar presets do sistema',
           errorCode: 'DELETE_SYSTEM_PRESET_ERROR',
         ));
@@ -500,7 +500,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     if (currentState is SlaSettingsValidationError) {
       emit(SlaSettingsLoaded(
         settings: currentState.settings,
-        availablePresets: [], // TODO: Load from repository
+        availablePresets: const [], // TODO: Load from repository
         validationResult: null,
         isModified: true,
         lastSaved: null,
@@ -609,7 +609,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
   SlaSettingsBloc({
     required this.validateSlaSettings,
     required this.calculateSlaDeadline,
-  }) : super(SlaSettingsInitial()) {
+  }) : super(const SlaSettingsInitial()) {
     on<LoadSlaSettingsEvent>(_onLoadSlaSettings);
     on<UpdateSlaSettingsEvent>(_onUpdateSlaSettings);
     on<SaveSlaSettingsEvent>(_onSaveSlaSettings);
@@ -632,7 +632,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     LoadSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
-    emit(SlaSettingsLoading());
+    emit(const SlaSettingsLoading());
     
     try {
       // TODO: Implement when repository is available
@@ -699,7 +699,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
 
-    emit(SlaSettingsUpdating());
+    emit(const SlaSettingsUpdating());
 
     try {
       // Validate before saving
@@ -1011,7 +1011,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
 
     try {
       if (event.preset.isSystem) {
-        emit(SlaSettingsError(
+        emit(const SlaSettingsError(
           message: 'Não é possível deletar presets do sistema',
           errorCode: 'DELETE_SYSTEM_PRESET_ERROR',
         ));
@@ -1092,7 +1092,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     if (currentState is SlaSettingsValidationError) {
       emit(SlaSettingsLoaded(
         settings: currentState.settings,
-        availablePresets: [], // TODO: Load from repository
+        availablePresets: const [], // TODO: Load from repository
         validationResult: null,
         isModified: true,
         lastSaved: null,

@@ -11,10 +11,10 @@ class SlaBasicSettingsWidget extends StatefulWidget {
   final Function(SlaSettingsEntity)? onSettingsChanged;
 
   const SlaBasicSettingsWidget({
-    Key? key,
+    super.key,
     this.settings,
     this.onSettingsChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<SlaBasicSettingsWidget> createState() => _SlaBasicSettingsWidgetState();
@@ -41,26 +41,26 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
   void _initializeControllers() {
     final settings = widget.settings;
     _normalHoursController = TextEditingController(
-      text: settings?.normalTimeframe?.hours.toString() ?? '48'
+      text: settings?.normalTimeframe.hours.toString() ?? '48'
     );
     _urgentHoursController = TextEditingController(
-      text: settings?.urgentTimeframe?.hours.toString() ?? '24'
+      text: settings?.urgentTimeframe.hours.toString() ?? '24'
     );
     _emergencyHoursController = TextEditingController(
-      text: settings?.emergencyTimeframe?.hours.toString() ?? '6'
+      text: settings?.emergencyTimeframe.hours.toString() ?? '6'
     );
     _complexHoursController = TextEditingController(
-      text: settings?.complexTimeframe?.hours.toString() ?? '72'
+      text: settings?.complexTimeframe.hours.toString() ?? '72'
     );
     _overrideLimitController = TextEditingController(
       text: settings?.overrideSettings['maxPerMonth']?.toString() ?? '5'
     );
     
     if (settings != null) {
-      _enableBusinessHours = settings!.enableBusinessHoursOnly;
-      _enableWeekends = settings!.includeWeekends;
-      _enableOverrides = settings!.allowOverrides;
-      _enableAutoEscalation = settings!.enableAutoEscalation;
+      _enableBusinessHours = settings.enableBusinessHoursOnly;
+      _enableWeekends = settings.includeWeekends;
+      _enableOverrides = settings.allowOverrides;
+      _enableAutoEscalation = settings.enableAutoEscalation;
     }
   }
   
@@ -224,10 +224,10 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Horas',
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             suffixText: 'h',
           ),
           onChanged: (value) => _validateAndUpdate(),
@@ -513,14 +513,14 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Teste de Configuração'),
+      builder: (context) => const AlertDialog(
+        title: Text('Teste de Configuração'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            const Text('Testando configurações SLA...'),
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Testando configurações SLA...'),
           ],
         ),
       ),
@@ -576,10 +576,10 @@ class SlaBasicSettingsWidget extends StatefulWidget {
   final Function(SlaSettingsEntity)? onSettingsChanged;
 
   const SlaBasicSettingsWidget({
-    Key? key,
+    super.key,
     this.settings,
     this.onSettingsChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<SlaBasicSettingsWidget> createState() => _SlaBasicSettingsWidgetState();
@@ -606,26 +606,26 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
   void _initializeControllers() {
     final settings = widget.settings;
     _normalHoursController = TextEditingController(
-      text: settings?.normalTimeframe?.hours.toString() ?? '48'
+      text: settings?.normalTimeframe.hours.toString() ?? '48'
     );
     _urgentHoursController = TextEditingController(
-      text: settings?.urgentTimeframe?.hours.toString() ?? '24'
+      text: settings?.urgentTimeframe.hours.toString() ?? '24'
     );
     _emergencyHoursController = TextEditingController(
-      text: settings?.emergencyTimeframe?.hours.toString() ?? '6'
+      text: settings?.emergencyTimeframe.hours.toString() ?? '6'
     );
     _complexHoursController = TextEditingController(
-      text: settings?.complexTimeframe?.hours.toString() ?? '72'
+      text: settings?.complexTimeframe.hours.toString() ?? '72'
     );
     _overrideLimitController = TextEditingController(
       text: settings?.overrideSettings['maxPerMonth']?.toString() ?? '5'
     );
     
     if (settings != null) {
-      _enableBusinessHours = settings!.enableBusinessHoursOnly;
-      _enableWeekends = settings!.includeWeekends;
-      _enableOverrides = settings!.allowOverrides;
-      _enableAutoEscalation = settings!.enableAutoEscalation;
+      _enableBusinessHours = settings.enableBusinessHoursOnly;
+      _enableWeekends = settings.includeWeekends;
+      _enableOverrides = settings.allowOverrides;
+      _enableAutoEscalation = settings.enableAutoEscalation;
     }
   }
   
@@ -789,10 +789,10 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Horas',
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             suffixText: 'h',
           ),
           onChanged: (value) => _validateAndUpdate(),
@@ -1078,14 +1078,14 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Teste de Configuração'),
+      builder: (context) => const AlertDialog(
+        title: Text('Teste de Configuração'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            const Text('Testando configurações SLA...'),
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Testando configurações SLA...'),
           ],
         ),
       ),

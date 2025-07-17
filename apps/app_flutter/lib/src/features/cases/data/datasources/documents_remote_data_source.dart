@@ -143,35 +143,35 @@ class DocumentsRemoteDataSourceImpl implements DocumentsRemoteDataSource {
   // Dados mock para fallback quando a API não está disponível
   List<CaseDocument> _getMockDocuments(String caseId) {
     return [
-      CaseDocumentModel(
+      const CaseDocumentModel(
         name: 'Relatório da Consulta',
         size: '2.3 MB',
         date: '16/01/2024',
         type: 'pdf',
         category: 'Consulta',
       ),
-      CaseDocumentModel(
+      const CaseDocumentModel(
         name: 'Modelo de Petição',
         size: '1.1 MB',
         date: '17/01/2024',
         type: 'docx',
         category: 'Petições',
       ),
-      CaseDocumentModel(
+      const CaseDocumentModel(
         name: 'Checklist de Documentos',
         size: '0.8 MB',
         date: '16/01/2024',
         type: 'pdf',
         category: 'Administrativo',
       ),
-      CaseDocumentModel(
+      const CaseDocumentModel(
         name: 'Contrato de Trabalho',
         size: '1.5 MB',
         date: '15/01/2024',
         type: 'pdf',
         category: 'Documentos Pessoais',
       ),
-      CaseDocumentModel(
+      const CaseDocumentModel(
         name: 'Comprovante de Pagamento',
         size: '0.6 MB',
         date: '14/01/2024',

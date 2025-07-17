@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir NextStepsSection para super associados
 /// - Foco em delivery framework e metodologias estruturadas
 class DeliveryFrameworkSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const DeliveryFrameworkSection({
@@ -72,7 +73,7 @@ class DeliveryFrameworkSection extends BaseInfoSection {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.verified,
                     color: Colors.white,
                     size: 14,
@@ -1250,6 +1251,7 @@ import '../base_info_section.dart';
 /// - Substituir NextStepsSection para super associados
 /// - Foco em delivery framework e metodologias estruturadas
 class DeliveryFrameworkSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const DeliveryFrameworkSection({
@@ -1310,7 +1312,7 @@ class DeliveryFrameworkSection extends BaseInfoSection {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.verified,
                     color: Colors.white,
                     size: 14,

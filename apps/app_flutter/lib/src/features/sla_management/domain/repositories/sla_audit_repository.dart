@@ -252,7 +252,6 @@ abstract class SlaAuditRepository {
   Future<Either<Failure, Map<String, dynamic>>> getAuditSystemHealth();
 } 
 import '../../../core/error/failure.dart';
-import '../entities/sla_audit_entity.dart';
 
 /// Contrato do repositório para auditoria SLA
 /// 

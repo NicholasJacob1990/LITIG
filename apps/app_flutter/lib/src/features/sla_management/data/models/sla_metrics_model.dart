@@ -492,7 +492,6 @@ class CaseTypeMetricsModel extends CaseTypeMetrics {
     );
   }
 } 
-import '../../domain/entities/sla_metrics_entity.dart';
 
 part 'sla_metrics_model.g.dart';
 

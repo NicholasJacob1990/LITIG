@@ -117,8 +117,9 @@ class SlaViolationEntity extends Equatable {
     int severityScore = 0;
 
     // Duração do atraso
-    if (delayDuration.inHours >= 24) severityScore += 3;
-    else if (delayDuration.inHours >= 6) severityScore += 2;
+    if (delayDuration.inHours >= 24) {
+      severityScore += 3;
+    } else if (delayDuration.inHours >= 6) severityScore += 2;
     else severityScore += 1;
 
     // Prioridade do caso
@@ -149,8 +150,9 @@ class SlaViolationEntity extends Equatable {
     }
 
     // Escalação
-    if (escalationLevel != null && escalationLevel! >= 3) severityScore += 2;
-    else if (escalationLevel != null && escalationLevel! >= 2) severityScore += 1;
+    if (escalationLevel != null && escalationLevel! >= 3) {
+      severityScore += 2;
+    } else if (escalationLevel != null && escalationLevel! >= 2) severityScore += 1;
 
     // Determina severidade final
     if (severityScore >= 8) return SlaViolationSeverity.critical;
@@ -505,8 +507,9 @@ class SlaViolationEntity extends Equatable {
     int severityScore = 0;
 
     // Duração do atraso
-    if (delayDuration.inHours >= 24) severityScore += 3;
-    else if (delayDuration.inHours >= 6) severityScore += 2;
+    if (delayDuration.inHours >= 24) {
+      severityScore += 3;
+    } else if (delayDuration.inHours >= 6) severityScore += 2;
     else severityScore += 1;
 
     // Prioridade do caso
@@ -537,8 +540,9 @@ class SlaViolationEntity extends Equatable {
     }
 
     // Escalação
-    if (escalationLevel != null && escalationLevel! >= 3) severityScore += 2;
-    else if (escalationLevel != null && escalationLevel! >= 2) severityScore += 1;
+    if (escalationLevel != null && escalationLevel! >= 3) {
+      severityScore += 2;
+    } else if (escalationLevel != null && escalationLevel! >= 2) severityScore += 1;
 
     // Determina severidade final
     if (severityScore >= 8) return SlaViolationSeverity.critical;

@@ -27,7 +27,7 @@ class NetworkFailure extends Failure {
 } 
   final String message;
   
-  const Failure(this.message);
+  Failure(this.message);
 
   @override
   bool operator ==(Object other) =>

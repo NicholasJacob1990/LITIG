@@ -6,7 +6,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaEscalationsWidget extends StatefulWidget {
-  const SlaEscalationsWidget({Key? key}) : super(key: key);
+  const SlaEscalationsWidget({super.key});
 
   @override
   State<SlaEscalationsWidget> createState() => _SlaEscalationsWidgetState();
@@ -831,7 +831,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaEscalationsWidget extends StatefulWidget {
-  const SlaEscalationsWidget({Key? key}) : super(key: key);
+  const SlaEscalationsWidget({super.key});
 
   @override
   State<SlaEscalationsWidget> createState() => _SlaEscalationsWidgetState();

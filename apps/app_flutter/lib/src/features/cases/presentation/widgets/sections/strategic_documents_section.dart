@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir DocumentsSection para advogados contratantes
 /// - Foco em oportunidade de negócio e documentos estratégicos
 class StrategicDocumentsSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const StrategicDocumentsSection({
@@ -872,12 +873,12 @@ class StrategicDocumentsSection extends BaseInfoSection {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Revisar ${doc['name']}'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Adicionar nota de revisão',
                 border: OutlineInputBorder(),
                 hintText: 'Ex: Documento válido, proceder com análise...',
@@ -1032,6 +1033,7 @@ import '../base_info_section.dart';
 /// - Substituir DocumentsSection para advogados contratantes
 /// - Foco em oportunidade de negócio e documentos estratégicos
 class StrategicDocumentsSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const StrategicDocumentsSection({
@@ -1892,12 +1894,12 @@ class StrategicDocumentsSection extends BaseInfoSection {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Revisar ${doc['name']}'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Adicionar nota de revisão',
                 border: OutlineInputBorder(),
                 hintText: 'Ex: Documento válido, proceder com análise...',

@@ -157,6 +157,7 @@ class SlaPresetModel extends SlaPresetEntity {
   }
 
   /// Cria uma cópia com modificações
+  @override
   SlaPresetModel copyWith({
     String? id,
     String? name,
@@ -365,6 +366,7 @@ class SlaPresetModel extends SlaPresetEntity {
   }
 
   /// Cria uma cópia com modificações
+  @override
   SlaPresetModel copyWith({
     String? id,
     String? name,

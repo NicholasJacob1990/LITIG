@@ -251,7 +251,6 @@ class SlaViolationActionModel extends SlaViolationAction {
     );
   }
 } 
-import '../../domain/entities/sla_violation_entity.dart';
 
 part 'sla_violation_model.g.dart';
 

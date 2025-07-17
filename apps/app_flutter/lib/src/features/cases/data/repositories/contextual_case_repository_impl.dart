@@ -1,4 +1,3 @@
-import '../../domain/entities/case_detail.dart';
 import '../../domain/entities/contextual_case_data.dart';
 import '../../domain/entities/allocation_type.dart';
 import '../../domain/repositories/contextual_case_repository.dart';
@@ -460,11 +459,6 @@ class ContextualCaseRepositoryImpl implements ContextualCaseRepository {
     }
   }
 } 
-import '../../domain/entities/contextual_case_data.dart';
-import '../../domain/entities/allocation_type.dart';
-import '../../domain/repositories/contextual_case_repository.dart';
-import '../datasources/contextual_case_remote_data_source.dart';
-import '../../../../core/utils/logger.dart';
 
 /// Implementação concreta do ContextualCaseRepository
 /// 

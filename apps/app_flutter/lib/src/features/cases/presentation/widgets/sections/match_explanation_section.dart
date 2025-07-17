@@ -11,6 +11,7 @@ import '../base_info_section.dart';
 /// Conforme solicitação: todos os advogados/escritórios devem ver a explicação
 /// do match, exceto os associados (que recebem por delegação interna)
 class MatchExplanationSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const MatchExplanationSection({
@@ -648,13 +649,13 @@ class MatchExplanationSection extends BaseInfoSection {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sugerir Melhoria'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Como podemos melhorar o algoritmo de match para você?'),
-            const SizedBox(height: 16),
+            Text('Como podemos melhorar o algoritmo de match para você?'),
+            SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Digite sua sugestão...',
                 border: OutlineInputBorder(),
               ),
@@ -731,6 +732,7 @@ import '../base_info_section.dart';
 /// Conforme solicitação: todos os advogados/escritórios devem ver a explicação
 /// do match, exceto os associados (que recebem por delegação interna)
 class MatchExplanationSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const MatchExplanationSection({
@@ -1368,13 +1370,13 @@ class MatchExplanationSection extends BaseInfoSection {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sugerir Melhoria'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Como podemos melhorar o algoritmo de match para você?'),
-            const SizedBox(height: 16),
+            Text('Como podemos melhorar o algoritmo de match para você?'),
+            SizedBox(height: 16),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Digite sua sugestão...',
                 border: OutlineInputBorder(),
               ),

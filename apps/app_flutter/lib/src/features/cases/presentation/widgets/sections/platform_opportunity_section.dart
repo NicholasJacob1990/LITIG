@@ -152,7 +152,7 @@ class PlatformOpportunitySection extends BaseInfoSection {
                     child: _buildPerformanceMetric(
                       context,
                       'Tempo Resposta',
-                      '${_getAverageResponseTime()}',
+                      _getAverageResponseTime(),
                       Icons.schedule,
                       Colors.green,
                     ),
@@ -632,25 +632,25 @@ class PlatformOpportunitySection extends BaseInfoSection {
                       title: const Text('Tipo'),
                       subtitle: Text(_getClientType()),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.location_on),
-                      title: const Text('Localização'),
-                      subtitle: const Text('São Paulo, SP'),
+                    const ListTile(
+                      leading: Icon(Icons.location_on),
+                      title: Text('Localização'),
+                      subtitle: Text('São Paulo, SP'),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.history),
-                      title: const Text('Histórico na Plataforma'),
-                      subtitle: const Text('3 casos anteriores'),
+                    const ListTile(
+                      leading: Icon(Icons.history),
+                      title: Text('Histórico na Plataforma'),
+                      subtitle: Text('3 casos anteriores'),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.star),
-                      title: const Text('Avaliação como Cliente'),
-                      subtitle: const Text('4.6/5 (baseado em 3 avaliações)'),
+                    const ListTile(
+                      leading: Icon(Icons.star),
+                      title: Text('Avaliação como Cliente'),
+                      subtitle: Text('4.6/5 (baseado em 3 avaliações)'),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.schedule),
-                      title: const Text('Tempo Médio de Resposta'),
-                      subtitle: const Text('3.2 horas'),
+                    const ListTile(
+                      leading: Icon(Icons.schedule),
+                      title: Text('Tempo Médio de Resposta'),
+                      subtitle: Text('3.2 horas'),
                     ),
                   ],
                 ),
@@ -870,7 +870,7 @@ class PlatformOpportunitySection extends BaseInfoSection {
                     child: _buildPerformanceMetric(
                       context,
                       'Tempo Resposta',
-                      '${_getAverageResponseTime()}',
+                      _getAverageResponseTime(),
                       Icons.schedule,
                       Colors.green,
                     ),
@@ -1350,25 +1350,25 @@ class PlatformOpportunitySection extends BaseInfoSection {
                       title: const Text('Tipo'),
                       subtitle: Text(_getClientType()),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.location_on),
-                      title: const Text('Localização'),
-                      subtitle: const Text('São Paulo, SP'),
+                    const ListTile(
+                      leading: Icon(Icons.location_on),
+                      title: Text('Localização'),
+                      subtitle: Text('São Paulo, SP'),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.history),
-                      title: const Text('Histórico na Plataforma'),
-                      subtitle: const Text('3 casos anteriores'),
+                    const ListTile(
+                      leading: Icon(Icons.history),
+                      title: Text('Histórico na Plataforma'),
+                      subtitle: Text('3 casos anteriores'),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.star),
-                      title: const Text('Avaliação como Cliente'),
-                      subtitle: const Text('4.6/5 (baseado em 3 avaliações)'),
+                    const ListTile(
+                      leading: Icon(Icons.star),
+                      title: Text('Avaliação como Cliente'),
+                      subtitle: Text('4.6/5 (baseado em 3 avaliações)'),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.schedule),
-                      title: const Text('Tempo Médio de Resposta'),
-                      subtitle: const Text('3.2 horas'),
+                    const ListTile(
+                      leading: Icon(Icons.schedule),
+                      title: Text('Tempo Médio de Resposta'),
+                      subtitle: Text('3.2 horas'),
                     ),
                   ],
                 ),

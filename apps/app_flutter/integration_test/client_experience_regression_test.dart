@@ -287,25 +287,6 @@ testWidgets('SNAPSHOT: UI do cliente deve ser pixel-perfect idêntica', (WidgetT
   // await expectGoldenMatches(find.byType(CaseDetailScreen), 'client_case_detail.png');
 });
 
-/// Documentação de critérios de aceitação
-/// 
-/// Este teste DEVE FALHAR se:
-/// 1. Cliente vir qualquer ContextualCaseCard
-/// 2. Cliente vir qualquer seção de advogado  
-/// 3. Cliente vir qualquer badge contextual
-/// 4. Navegação do cliente for alterada
-/// 5. Performance do cliente for degradada
-/// 6. Funcionalidades existentes pararem de funcionar
-/// 7. Estados de erro mudarem
-/// 8. Elementos visuais forem alterados
-/// 9. Dados exibidos mudarem de formato
-/// 
-/// ZERO REGRESSÃO = Experiência EXATAMENTE igual a antes 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-import 'package:meu_app/main.dart' as app;
-import 'package:meu_app/src/features/cases/presentation/widgets/case_card.dart';
-import 'package:meu_app/src/features/cases/presentation/widgets/contextual_case_card.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

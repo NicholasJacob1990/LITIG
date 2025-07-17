@@ -37,8 +37,8 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
         _performDirectorySearch(params),
       ]);
       
-      final semanticResults = results[0] as List<SearchResultWrapper>;
-      final directoryResults = results[1] as List<SearchResultWrapper>;
+      final semanticResults = results[0];
+      final directoryResults = results[1];
 
       // 2. COMBINA RESULTADOS com deduplicação e scoring
       List<SearchResultWrapper> hybridResults = _combineAndRankResults(
@@ -135,7 +135,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
   Future<List<dynamic>> _searchByNameAndSpecialty(String query) async {
     // Mock de dados para demonstração da busca híbrida
     List<LawyerModel> mockLawyers = [
-      LawyerModel(
+      const LawyerModel(
         id: 'dir_lawyer_1',
         name: 'Maria Silva - Direito Trabalhista',
         avatarUrl: 'https://ui-avatars.com/api/?name=Maria+Silva',
@@ -151,7 +151,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
         specializationScore: 0.88,
         activityLevel: 'high',
       ),
-      LawyerModel(
+      const LawyerModel(
         id: 'dir_lawyer_2', 
         name: 'João Santos - Direito Civil',
         avatarUrl: 'https://ui-avatars.com/api/?name=João+Santos',

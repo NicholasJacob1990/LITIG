@@ -398,7 +398,7 @@ class SlaValidationWarning {
 enum SlaValidationSeverity { error, warning }
 
 class ValidationFailure extends Failure {
-  ValidationFailure(String message) : super(message);
+  const ValidationFailure(String message) : super(message);
 } 
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -799,5 +799,5 @@ class SlaValidationWarning {
 enum SlaValidationSeverity { error, warning }
 
 class ValidationFailure extends Failure {
-  ValidationFailure(String message) : super(message);
+  const ValidationFailure(String message) : super(message);
 } 

@@ -2,17 +2,23 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
+import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_hiring_modal.dart';
 
 class LawyerMatchCard extends StatefulWidget {
   final MatchedLawyer lawyer;
   final VoidCallback? onSelect;
   final VoidCallback? onExplain;
+  final String? caseId;
+  final String? clientId;
 
   const LawyerMatchCard({
     super.key,
     required this.lawyer,
     this.onSelect,
     this.onExplain,
+    this.caseId,
+    this.clientId,
   });
 
   @override
@@ -347,9 +353,11 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
 
   Widget _buildMetric({required IconData icon, required String value, required String label}) {
     final theme = Theme.of(context);
+    // Otimização: usar cor constante ao invés de theme.colorScheme.onSurface.withOpacity(0.8)
+    const iconColor = Colors.grey; // Cor constante para evitar recálculo desnecessário
     return Column(
       children: [
-        Icon(icon, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.8)),
+        Icon(icon, size: 20, color: iconColor),
         const SizedBox(height: 4),
         Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
@@ -402,7 +410,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: () { /* TODO: Implementar contratação */ },
+            onPressed: _handleHireLawyer,
             icon: const Icon(LucideIcons.fileSignature),
             label: const Text('Contratar'),
             style: ElevatedButton.styleFrom(
@@ -425,4 +433,48 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       ],
     );
   }
+
+  void _handleHireLawyer() {
+    // Verifica se caseId e clientId foram fornecidos
+    if (widget.caseId == null || widget.clientId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro: Dados do caso não disponíveis. Por favor, selecione um caso primeiro.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Converte MatchedLawyer para Lawyer
+    final lawyer = _convertToLawyer(widget.lawyer);
+
+    // Abre o LawyerHiringModal
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => LawyerHiringModal(
+        lawyer: lawyer,
+        caseId: widget.caseId!,
+        clientId: widget.clientId!,
+      ),
+    );
+  }
+
+  /// Converte MatchedLawyer para Lawyer para compatibilidade com LawyerHiringModal
+  Lawyer _convertToLawyer(MatchedLawyer matchedLawyer) {
+    return Lawyer(
+      id: matchedLawyer.id,
+      name: matchedLawyer.nome,
+      avatarUrl: matchedLawyer.avatarUrl,
+      oab: 'OAB-${matchedLawyer.id.substring(0, 6)}', // Placeholder
+      expertiseAreas: matchedLawyer.specializations.isNotEmpty 
+          ? matchedLawyer.specializations 
+          : [matchedLawyer.primaryArea],
+      rating: matchedLawyer.rating ?? 0.0,
+      isAvailable: matchedLawyer.isAvailable,
+      distanceKm: matchedLawyer.distanceKm,
+    );
+  }
+
 } 

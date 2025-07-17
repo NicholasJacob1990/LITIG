@@ -76,6 +76,94 @@ class SlaEscalationEntity extends Equatable {
   /// Metadados adicionais
   final Map<String, dynamic>? metadata;
 
+  /// Getter para tipo de trigger (compatibilidade com widgets)
+  String get triggerType {
+    if (triggers.isEmpty) return 'none';
+    return triggers.first.type.toString();
+  }
+
+  /// Getter para níveis de escalação (compatibilidade com widgets)
+  List<EscalationLevel> get escalationLevels => levels;
+
+  /// Método para escalação baseada em tempo
+  static SlaEscalationEntity timeBasedEscalation({
+    required String id,
+    required String firmId,
+    required String name,
+    required String description,
+    required int delayMinutes,
+    required List<EscalationLevel> levels,
+  }) {
+    return SlaEscalationEntity(
+      id: id,
+      firmId: firmId,
+      name: name,
+      description: description,
+      isActive: true,
+      triggers: [
+        EscalationTrigger(
+          type: EscalationTriggerType.time,
+          threshold: delayMinutes,
+          conditions: {},
+        ),
+      ],
+      levels: levels,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Método para escalação baseada em prioridade
+  static SlaEscalationEntity priorityBasedEscalation({
+    required String id,
+    required String firmId,
+    required String name,
+    required String description,
+    required String priority,
+    required List<EscalationLevel> levels,
+  }) {
+    return SlaEscalationEntity(
+      id: id,
+      firmId: firmId,
+      name: name,
+      description: description,
+      isActive: true,
+      triggers: [
+        EscalationTrigger(
+          type: EscalationTriggerType.priority,
+          threshold: 0,
+          conditions: {'priority': priority},
+        ),
+      ],
+      levels: levels,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Método toJson para serialização
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'firmId': firmId,
+      'name': name,
+      'description': description,
+      'isActive': isActive,
+      'triggers': triggers.map((t) => t.toJson()).toList(),
+      'levels': levels.map((l) => l.toJson()).toList(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'caseId': caseId,
+      'priority': priority,
+      'executedAt': executedAt?.toIso8601String(),
+      'executedBy': executedBy,
+      'currentLevel': currentLevel,
+      'status': status?.toString(),
+      'logs': logs?.map((l) => l.toJson()).toList(),
+      'metadata': metadata,
+    };
+  }
+
   /// Verifica se a escalação deve ser executada
   bool shouldEscalate(Duration delayDuration, String priority) {
     if (!isActive) return false;
@@ -1106,4 +1194,3 @@ enum EscalationStatus {
   
   /// Com erro
   error,
-} 

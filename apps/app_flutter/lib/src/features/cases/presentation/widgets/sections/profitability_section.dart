@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir ProcessStatusSection para advogados contratantes
 /// - Foco em oportunidade de negócio e análise financeira
 class ProfitabilitySection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const ProfitabilitySection({
@@ -522,7 +523,7 @@ class ProfitabilitySection extends BaseInfoSection {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.trending_up, color: Colors.white, size: 32),
+                    const Icon(Icons.trending_up, color: Colors.white, size: 32),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -1249,9 +1250,9 @@ class ProfitabilitySection extends BaseInfoSection {
   void _generateFinancialReport(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Gerar Relatório Financeiro'),
-        content: const Column(
+      builder: (context) => const AlertDialog(
+        title: Text('Gerar Relatório Financeiro'),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
@@ -1334,6 +1335,7 @@ import '../base_info_section.dart';
 /// - Substituir ProcessStatusSection para advogados contratantes
 /// - Foco em oportunidade de negócio e análise financeira
 class ProfitabilitySection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const ProfitabilitySection({
@@ -1844,7 +1846,7 @@ class ProfitabilitySection extends BaseInfoSection {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.trending_up, color: Colors.white, size: 32),
+                    const Icon(Icons.trending_up, color: Colors.white, size: 32),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -2571,9 +2573,9 @@ class ProfitabilitySection extends BaseInfoSection {
   void _generateFinancialReport(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Gerar Relatório Financeiro'),
-        content: const Column(
+      builder: (context) => const AlertDialog(
+        title: Text('Gerar Relatório Financeiro'),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),

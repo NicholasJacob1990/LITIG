@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 class QualityControlSection extends BaseInfoSection {
@@ -379,8 +378,6 @@ class QualityControlSection extends BaseInfoSection {
     );
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 class QualityControlSection extends BaseInfoSection {
   const QualityControlSection({

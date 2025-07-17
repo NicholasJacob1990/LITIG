@@ -48,6 +48,28 @@ import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_blo
 
 // Firms
 import 'package:meu_app/src/features/firms/data/datasources/firm_remote_data_source.dart';
+
+// SLA Management
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_settings_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_escalation_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_metrics_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_audit_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_settings_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_escalation_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_metrics_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_audit_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_settings_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_escalation_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_metrics_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_audit_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_settings_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/update_sla_settings_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_metrics_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_escalations_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_audit_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_presets_usecase.dart';
+import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
+import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
 import 'package:meu_app/src/features/firms/data/repositories/firm_repository_impl.dart';
 import 'package:meu_app/src/features/firms/domain/repositories/firm_repository.dart';
 import 'package:meu_app/src/features/firms/domain/usecases/get_firms.dart';
@@ -98,11 +120,25 @@ import 'package:meu_app/src/features/notifications/data/repositories/notificatio
 import 'package:meu_app/src/features/notifications/domain/repositories/notification_repository.dart';
 import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
 
-// SLA Settings
-import 'package:meu_app/src/features/sla_settings/data/datasources/sla_settings_remote_data_source.dart';
-import 'package:meu_app/src/features/sla_settings/data/repositories/sla_settings_repository_impl.dart';
-import 'package:meu_app/src/features/sla_settings/domain/repositories/sla_settings_repository.dart';
-import 'package:meu_app/src/features/sla_settings/presentation/bloc/sla_settings_bloc.dart';
+// Chat
+import 'package:meu_app/src/features/chat/data/datasources/chat_remote_data_source.dart';
+import 'package:meu_app/src/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:meu_app/src/features/chat/domain/repositories/chat_repository.dart';
+import 'package:meu_app/src/features/chat/domain/usecases/get_chat_rooms.dart';
+import 'package:meu_app/src/features/chat/domain/usecases/get_chat_messages.dart';
+import 'package:meu_app/src/features/chat/domain/usecases/send_message.dart';
+import 'package:meu_app/src/features/chat/presentation/bloc/chat_bloc.dart';
+
+// Lawyer Hiring
+import 'package:meu_app/src/features/lawyers/data/datasources/lawyer_hiring_remote_data_source.dart';
+import 'package:meu_app/src/features/lawyers/data/repositories/lawyer_hiring_repository_impl.dart';
+import 'package:meu_app/src/features/lawyers/domain/repositories/lawyer_hiring_repository.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/hire_lawyer.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/get_hiring_proposals.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/respond_to_proposal.dart';
+import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_hiring_bloc.dart';
+
+// Removed duplicate SLA Settings imports - using sla_management structure
 
 final getIt = GetIt.instance;
 
@@ -323,17 +359,95 @@ void configureDependencies() {
   // Bloc
   getIt.registerFactory(() => NotificationBloc(repository: getIt()));
 
-  // SLA Settings
-  // Datasources
+  // SLA Management System - Complete Setup
+  
+  // SLA Data Sources
   getIt.registerLazySingleton<SlaSettingsRemoteDataSource>(
       () => SlaSettingsRemoteDataSourceImpl(apiService: getIt<SimpleApiService>()));
+  getIt.registerLazySingleton<SlaEscalationRemoteDataSource>(
+      () => SlaEscalationRemoteDataSourceImpl(apiService: getIt<SimpleApiService>()));
+  getIt.registerLazySingleton<SlaMetricsRemoteDataSource>(
+      () => SlaMetricsRemoteDataSourceImpl(apiService: getIt<SimpleApiService>()));
+  getIt.registerLazySingleton<SlaAuditRemoteDataSource>(
+      () => SlaAuditRemoteDataSourceImpl(apiService: getIt<SimpleApiService>()));
 
-  // Repositories
+  // SLA Repositories
   getIt.registerLazySingleton<SlaSettingsRepository>(
       () => SlaSettingsRepositoryImpl(remoteDataSource: getIt()));
+  getIt.registerLazySingleton<SlaEscalationRepository>(
+      () => SlaEscalationRepositoryImpl(remoteDataSource: getIt()));
+  getIt.registerLazySingleton<SlaMetricsRepository>(
+      () => SlaMetricsRepositoryImpl(remoteDataSource: getIt()));
+  getIt.registerLazySingleton<SlaAuditRepository>(
+      () => SlaAuditRepositoryImpl(remoteDataSource: getIt()));
 
+  // SLA Use Cases
+  getIt.registerLazySingleton(() => GetSlaSettingsUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateSlaSettingsUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetSlaMetricsUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetSlaEscalationsUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetSlaAuditUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetSlaPresetsUseCase(getIt()));
+
+  // SLA BLoCs
+  getIt.registerFactory(() => SlaSettingsBloc(
+        getSlaSettingsUseCase: getIt(),
+        updateSlaSettingsUseCase: getIt(),
+        getSlaPresetsUseCase: getIt(),
+      ));
+  getIt.registerFactory(() => SlaAnalyticsBloc(
+        getSlaMetricsUseCase: getIt(),
+        getSlaEscalationsUseCase: getIt(),
+        getSlaAuditUseCase: getIt(),
+      ));
+
+  // Chat
+  // Datasources
+  getIt.registerLazySingleton<ChatRemoteDataSource>(
+      () => ChatRemoteDataSourceImpl(apiService: getIt()));
+  
+  // Repositories
+  getIt.registerLazySingleton<ChatRepository>(
+      () => ChatRepositoryImpl(
+        remoteDataSource: getIt(),
+        networkInfo: getIt(),
+      ));
+  
+  // Use Cases
+  getIt.registerLazySingleton(() => GetChatRooms(getIt()));
+  getIt.registerLazySingleton(() => GetChatMessages(getIt()));
+  getIt.registerLazySingleton(() => SendMessage(getIt()));
+  
+  // BLoCs
+  getIt.registerFactory(() => ChatBloc(
+        getChatRooms: getIt(),
+        getChatMessages: getIt(),
+        sendMessage: getIt(),
+        chatRepository: getIt(),
+      ));
+
+  // Lawyer Hiring
+  // Datasources
+  getIt.registerLazySingleton<LawyerHiringRemoteDataSource>(
+      () => LawyerHiringRemoteDataSourceImpl(apiService: getIt()));
+  
+  // Repositories
+  getIt.registerLazySingleton<LawyerHiringRepository>(
+      () => LawyerHiringRepositoryImpl(
+          remoteDataSource: getIt(),
+          networkInfo: getIt(),
+      ));
+  
+  // Use Cases
+  getIt.registerLazySingleton(() => HireLawyer(getIt()));
+  getIt.registerLazySingleton(() => GetHiringProposals(getIt()));
+  getIt.registerLazySingleton(() => RespondToProposal(getIt()));
+  
   // Blocs
-  getIt.registerFactory(() => SlaSettingsBloc(repository: getIt()));
+  getIt.registerFactory(() => LawyerHiringBloc(
+      hireLawyer: getIt(),
+      getHiringProposals: getIt(),
+      respondToProposal: getIt(),
+  ));
 
   getIt.registerFactory(() => LawyerFirmBloc(firmsRepository: getIt()));
-} 

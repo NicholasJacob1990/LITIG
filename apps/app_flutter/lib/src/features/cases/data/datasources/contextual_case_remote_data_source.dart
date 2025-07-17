@@ -233,7 +233,7 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
 
   AllocationType _getMockAllocationType(String caseId) {
     final hash = caseId.hashCode;
-    final types = AllocationType.values;
+    const types = AllocationType.values;
     return types[hash.abs() % types.length];
   }
 
@@ -686,7 +686,7 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
 
   AllocationType _getMockAllocationType(String caseId) {
     final hash = caseId.hashCode;
-    final types = AllocationType.values;
+    const types = AllocationType.values;
     return types[hash.abs() % types.length];
   }
 

@@ -55,7 +55,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
         return Right(notifications);
       } else {
-        return Left(ServerFailure('Falha ao buscar notificações'));
+        return const Left(ServerFailure('Falha ao buscar notificações'));
       }
     } catch (e) {
       // Tentar retornar cache em caso de erro
@@ -80,7 +80,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         await _updateNotificationInCache(notificationId, isRead: true);
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao marcar notificação como lida'));
+        return const Left(ServerFailure('Falha ao marcar notificação como lida'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao marcar como lida: $e'));
@@ -97,7 +97,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         await _clearNotificationsCache();
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao marcar todas como lidas'));
+        return const Left(ServerFailure('Falha ao marcar todas como lidas'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao marcar todas como lidas: $e'));
@@ -114,7 +114,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         await _removeNotificationFromCache(notificationId);
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao deletar notificação'));
+        return const Left(ServerFailure('Falha ao deletar notificação'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao deletar notificação: $e'));
@@ -130,7 +130,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         final count = response.data['count'] as int;
         return Right(count);
       } else {
-        return Left(ServerFailure('Falha ao buscar contador de não lidas'));
+        return const Left(ServerFailure('Falha ao buscar contador de não lidas'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao buscar contador: $e'));
@@ -148,7 +148,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       if (response.statusCode == 200) {
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao atualizar token FCM'));
+        return const Left(ServerFailure('Falha ao atualizar token FCM'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao atualizar token: $e'));
@@ -289,7 +289,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
         return Right(notifications);
       } else {
-        return Left(ServerFailure('Falha ao buscar notificações'));
+        return const Left(ServerFailure('Falha ao buscar notificações'));
       }
     } catch (e) {
       // Tentar retornar cache em caso de erro
@@ -314,7 +314,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         await _updateNotificationInCache(notificationId, isRead: true);
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao marcar notificação como lida'));
+        return const Left(ServerFailure('Falha ao marcar notificação como lida'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao marcar como lida: $e'));
@@ -331,7 +331,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         await _clearNotificationsCache();
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao marcar todas como lidas'));
+        return const Left(ServerFailure('Falha ao marcar todas como lidas'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao marcar todas como lidas: $e'));
@@ -348,7 +348,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         await _removeNotificationFromCache(notificationId);
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao deletar notificação'));
+        return const Left(ServerFailure('Falha ao deletar notificação'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao deletar notificação: $e'));
@@ -364,7 +364,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         final count = response.data['count'] as int;
         return Right(count);
       } else {
-        return Left(ServerFailure('Falha ao buscar contador de não lidas'));
+        return const Left(ServerFailure('Falha ao buscar contador de não lidas'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao buscar contador: $e'));
@@ -382,7 +382,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       if (response.statusCode == 200) {
         return const Right(null);
       } else {
-        return Left(ServerFailure('Falha ao atualizar token FCM'));
+        return const Left(ServerFailure('Falha ao atualizar token FCM'));
       }
     } catch (e) {
       return Left(ServerFailure('Erro ao atualizar token: $e'));

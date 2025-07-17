@@ -164,9 +164,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     final result = await _repository.getUnreadCount();
     
     result.fold(
-      (failure) => {
+      (failure) {
         // Falha silenciosa para contador
-        print('Erro ao buscar contador: ${failure.message}')
+        print('Erro ao buscar contador: ${failure.message}');
       },
       (count) => emit(state.copyWith(unreadCount: count)),
     );
@@ -387,9 +387,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     final result = await _repository.getUnreadCount();
     
     result.fold(
-      (failure) => {
+      (failure) {
         // Falha silenciosa para contador
-        print('Erro ao buscar contador: ${failure.message}')
+        print('Erro ao buscar contador: ${failure.message}');
       },
       (count) => emit(state.copyWith(unreadCount: count)),
     );

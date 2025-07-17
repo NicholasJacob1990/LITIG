@@ -7,7 +7,7 @@ import '../bloc/sla_analytics_event.dart';
 import '../bloc/sla_analytics_state.dart';
 
 class SlaAnalyticsWidget extends StatefulWidget {
-  const SlaAnalyticsWidget({Key? key}) : super(key: key);
+  const SlaAnalyticsWidget({super.key});
 
   @override
   State<SlaAnalyticsWidget> createState() => _SlaAnalyticsWidgetState();
@@ -360,7 +360,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
   Widget _buildComplianceChart(SlaMetricsEntity metrics) {
     return LineChart(
       LineChartData(
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -403,7 +403,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
   Widget _buildViolationsChart(SlaMetricsEntity metrics) {
     return BarChart(
       BarChartData(
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -590,7 +590,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
         children: [
           Icon(Icons.error, size: 48, color: Colors.red[300]),
           const SizedBox(height: 16),
-          Text('Erro ao carregar analytics'),
+          const Text('Erro ao carregar analytics'),
           const SizedBox(height: 8),
           Text(message),
           const SizedBox(height: 16),
@@ -609,7 +609,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
         children: [
           Icon(Icons.analytics, size: 48, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text('Carregue os analytics para visualizar as métricas'),
+          const Text('Carregue os analytics para visualizar as métricas'),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadAnalytics,
@@ -765,7 +765,7 @@ import '../bloc/sla_analytics_event.dart';
 import '../bloc/sla_analytics_state.dart';
 
 class SlaAnalyticsWidget extends StatefulWidget {
-  const SlaAnalyticsWidget({Key? key}) : super(key: key);
+  const SlaAnalyticsWidget({super.key});
 
   @override
   State<SlaAnalyticsWidget> createState() => _SlaAnalyticsWidgetState();
@@ -1118,7 +1118,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
   Widget _buildComplianceChart(SlaMetricsEntity metrics) {
     return LineChart(
       LineChartData(
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -1161,7 +1161,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
   Widget _buildViolationsChart(SlaMetricsEntity metrics) {
     return BarChart(
       BarChartData(
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -1348,7 +1348,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
         children: [
           Icon(Icons.error, size: 48, color: Colors.red[300]),
           const SizedBox(height: 16),
-          Text('Erro ao carregar analytics'),
+          const Text('Erro ao carregar analytics'),
           const SizedBox(height: 8),
           Text(message),
           const SizedBox(height: 16),
@@ -1367,7 +1367,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
         children: [
           Icon(Icons.analytics, size: 48, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text('Carregue os analytics para visualizar as métricas'),
+          const Text('Carregue os analytics para visualizar as métricas'),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _loadAnalytics,

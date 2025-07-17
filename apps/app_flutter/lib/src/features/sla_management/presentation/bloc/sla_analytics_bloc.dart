@@ -15,7 +15,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     required this.getSlaMetrics,
     required this.getSlaComplianceReport,
     required this.getSlaPerformanceTrends,
-  }) : super(SlaAnalyticsInitial()) {
+  }) : super(const SlaAnalyticsInitial()) {
     on<LoadSlaAnalyticsEvent>(_onLoadSlaAnalytics);
     on<RefreshSlaAnalyticsEvent>(_onRefreshSlaAnalytics);
     on<FilterSlaAnalyticsEvent>(_onFilterSlaAnalytics);
@@ -36,7 +36,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadSlaAnalyticsEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       final params = GetSlaMetricsParams(
@@ -131,7 +131,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     FilterSlaAnalyticsEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       final params = GetSlaMetricsParams(
@@ -327,7 +327,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadKPIDashboardEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement KPI dashboard loading
@@ -357,7 +357,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadViolationAnalysisEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement violation analysis
@@ -388,7 +388,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadEscalationAnalysisEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement escalation analysis
@@ -415,7 +415,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     GenerateCustomReportEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsReportLoading(
+    emit(const SlaAnalyticsReportLoading(
       reportType: 'custom',
       baseMetrics: null,
     ));
@@ -467,7 +467,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadBenchmarkDataEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement benchmark data loading
@@ -495,7 +495,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadPredictiveAnalyticsEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement predictive analytics
@@ -546,7 +546,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     required this.getSlaMetrics,
     required this.getSlaComplianceReport,
     required this.getSlaPerformanceTrends,
-  }) : super(SlaAnalyticsInitial()) {
+  }) : super(const SlaAnalyticsInitial()) {
     on<LoadSlaAnalyticsEvent>(_onLoadSlaAnalytics);
     on<RefreshSlaAnalyticsEvent>(_onRefreshSlaAnalytics);
     on<FilterSlaAnalyticsEvent>(_onFilterSlaAnalytics);
@@ -567,7 +567,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadSlaAnalyticsEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       final params = GetSlaMetricsParams(
@@ -662,7 +662,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     FilterSlaAnalyticsEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       final params = GetSlaMetricsParams(
@@ -858,7 +858,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadKPIDashboardEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement KPI dashboard loading
@@ -888,7 +888,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadViolationAnalysisEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement violation analysis
@@ -919,7 +919,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadEscalationAnalysisEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement escalation analysis
@@ -946,7 +946,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     GenerateCustomReportEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsReportLoading(
+    emit(const SlaAnalyticsReportLoading(
       reportType: 'custom',
       baseMetrics: null,
     ));
@@ -998,7 +998,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadBenchmarkDataEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement benchmark data loading
@@ -1026,7 +1026,7 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     LoadPredictiveAnalyticsEvent event,
     Emitter<SlaAnalyticsState> emit,
   ) async {
-    emit(SlaAnalyticsLoading());
+    emit(const SlaAnalyticsLoading());
 
     try {
       // TODO: Implement predictive analytics

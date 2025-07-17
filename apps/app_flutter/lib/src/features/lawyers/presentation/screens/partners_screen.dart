@@ -306,7 +306,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                             _highlightedCaseId = null;
                             _hasPerformedSearch = false;
                           });
-                          context.read<SearchBloc>().add(SearchCleared());
+                          context.read<SearchBloc>().add(const SearchCleared());
                         },
                         icon: Icon(
                           LucideIcons.x,
@@ -631,7 +631,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
             children: [
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.location_on,
                     color: Colors.blue,
                     size: 20,
@@ -642,7 +642,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               ),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.location_on,
                     color: Colors.green,
                     size: 20,
@@ -911,7 +911,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                     TextButton.icon(
                       onPressed: _clearLocation,
                       icon: const Icon(LucideIcons.x, size: 16),
-                      label: Text('Limpar Local', style: TextStyle(fontSize: 12)),
+                      label: const Text('Limpar Local', style: TextStyle(fontSize: 12)),
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,
                       ),
@@ -1192,7 +1192,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.location_on,
                     color: Colors.blue,
                     size: 20,
@@ -1203,7 +1203,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
               ),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.location_on,
                     color: Colors.green,
                     size: 20,

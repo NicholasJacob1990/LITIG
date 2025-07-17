@@ -53,7 +53,7 @@ void main() {
 
     testWidgets('should not overflow on a small phone screen', (tester) async {
       // iPhone SE (1st gen)
-      final size = Size(320, 568);
+      const size = Size(320, 568);
       await tester.binding.setSurfaceSize(size);
       tester.binding.window.physicalSizeTestValue = size;
       tester.binding.window.devicePixelRatioTestValue = 1.0;
@@ -65,7 +65,7 @@ void main() {
 
     testWidgets('should not overflow on a standard phone screen', (tester) async {
       // iPhone 13
-      final size = Size(390, 844);
+      const size = Size(390, 844);
       await tester.binding.setSurfaceSize(size);
       tester.binding.window.physicalSizeTestValue = size;
       tester.binding.window.devicePixelRatioTestValue = 3.0;
@@ -77,7 +77,7 @@ void main() {
 
     testWidgets('should not overflow on a large phone screen', (tester) async {
       // iPhone 13 Pro Max
-      final size = Size(428, 926);
+      const size = Size(428, 926);
       await tester.binding.setSurfaceSize(size);
       tester.binding.window.physicalSizeTestValue = size;
       tester.binding.window.devicePixelRatioTestValue = 3.0;
@@ -89,7 +89,7 @@ void main() {
 
     testWidgets('should not overflow on a small tablet screen', (tester) async {
       // iPad Mini
-      final size = Size(768, 1024);
+      const size = Size(768, 1024);
        await tester.binding.setSurfaceSize(size);
       tester.binding.window.physicalSizeTestValue = size;
       tester.binding.window.devicePixelRatioTestValue = 2.0;

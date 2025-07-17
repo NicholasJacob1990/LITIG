@@ -74,7 +74,7 @@ class EscalationSection extends BaseInfoSection {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.check_circle, color: Colors.green, size: 16),
+                      const Icon(Icons.check_circle, color: Colors.green, size: 16),
                       const SizedBox(width: 8),
                       Text(
                         'Nenhuma escalação necessária',
@@ -658,7 +658,7 @@ class EscalationSection extends BaseInfoSection {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.check_circle, color: Colors.green, size: 16),
+                      const Icon(Icons.check_circle, color: Colors.green, size: 16),
                       const SizedBox(width: 8),
                       Text(
                         'Nenhuma escalação necessária',

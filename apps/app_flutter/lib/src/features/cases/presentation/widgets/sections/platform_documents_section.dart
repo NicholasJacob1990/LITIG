@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir DocumentsSection para super associados
 /// - Foco em performance na plataforma e qualidade dos entregáveis
 class PlatformDocumentsSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const PlatformDocumentsSection({
@@ -927,9 +928,9 @@ class PlatformDocumentsSection extends BaseInfoSection {
   void _runQualityCheck(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Verificação de Qualidade'),
-        content: const Column(
+      builder: (context) => const AlertDialog(
+        title: Text('Verificação de Qualidade'),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),
@@ -1218,6 +1219,7 @@ import '../base_info_section.dart';
 /// - Substituir DocumentsSection para super associados
 /// - Foco em performance na plataforma e qualidade dos entregáveis
 class PlatformDocumentsSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const PlatformDocumentsSection({
@@ -2133,9 +2135,9 @@ class PlatformDocumentsSection extends BaseInfoSection {
   void _runQualityCheck(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Verificação de Qualidade'),
-        content: const Column(
+      builder: (context) => const AlertDialog(
+        title: Text('Verificação de Qualidade'),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(),

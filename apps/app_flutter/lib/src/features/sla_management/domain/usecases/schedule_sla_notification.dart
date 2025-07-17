@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/sla_escalation_entity.dart';
 
 class ScheduleSlaNotification implements UseCase<bool, ScheduleSlaNotificationParams> {
   final SlaNotificationRepository repository;
@@ -144,9 +143,6 @@ class SendImmediateSlaNotificationParams {
     required this.data,
   });
 } 
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../entities/sla_escalation_entity.dart';
 
 class ScheduleSlaNotification implements UseCase<bool, ScheduleSlaNotificationParams> {
   final SlaNotificationRepository repository;

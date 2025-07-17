@@ -6,7 +6,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaBusinessRulesWidget extends StatefulWidget {
-  const SlaBusinessRulesWidget({Key? key}) : super(key: key);
+  const SlaBusinessRulesWidget({super.key});
 
   @override
   State<SlaBusinessRulesWidget> createState() => _SlaBusinessRulesWidgetState();
@@ -15,7 +15,7 @@ class SlaBusinessRulesWidget extends StatefulWidget {
 class _SlaBusinessRulesWidgetState extends State<SlaBusinessRulesWidget> {
   // Business Hours
   BusinessHours _businessHours = BusinessHours.standard();
-  Map<int, bool> _workingDays = {
+  final Map<int, bool> _workingDays = {
     1: true,  // Monday
     2: true,  // Tuesday
     3: true,  // Wednesday
@@ -863,7 +863,7 @@ import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaBusinessRulesWidget extends StatefulWidget {
-  const SlaBusinessRulesWidget({Key? key}) : super(key: key);
+  const SlaBusinessRulesWidget({super.key});
 
   @override
   State<SlaBusinessRulesWidget> createState() => _SlaBusinessRulesWidgetState();
@@ -872,7 +872,7 @@ class SlaBusinessRulesWidget extends StatefulWidget {
 class _SlaBusinessRulesWidgetState extends State<SlaBusinessRulesWidget> {
   // Business Hours
   BusinessHours _businessHours = BusinessHours.standard();
-  Map<int, bool> _workingDays = {
+  final Map<int, bool> _workingDays = {
     1: true,  // Monday
     2: true,  // Tuesday
     3: true,  // Wednesday

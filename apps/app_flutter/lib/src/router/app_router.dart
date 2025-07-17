@@ -27,7 +27,13 @@ import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_scr
 import 'package:meu_app/src/features/services/presentation/screens/services_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_detail_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/case_documents_screen.dart';
-import 'package:meu_app/src/features/sla_settings/presentation/screens/sla_settings_screen.dart';
+import 'package:meu_app/src/features/sla_management/presentation/screens/sla_settings_screen.dart';
+import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
+import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
+import 'package:meu_app/src/features/lawyers/presentation/screens/hiring_proposals_screen.dart';
+import 'package:meu_app/src/features/clients/presentation/screens/client_proposals_screen.dart';
+import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen.dart';
+import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
 import 'package:meu_app/injection_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -96,8 +102,10 @@ GoRouter appRouter(AuthBloc authBloc) {
           StatefulShellBranch(routes: [GoRoute(path: '/schedule', builder: (context, state) => const Center(child: Text('Agenda')))]),
           // 3: Advogado Associado - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
+          // 3.5: Advogado Associado - Propostas de Contratação
+          StatefulShellBranch(routes: [GoRoute(path: '/hiring-proposals', builder: (context, state) => const HiringProposalsScreen())]),
           // 4: Advogado Associado - Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const MessagesScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 5: Advogado Associado - Perfil
           StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),
           
@@ -122,7 +130,7 @@ GoRouter appRouter(AuthBloc authBloc) {
             ],
           ),
           // 11: Advogado Contratante - Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const MessagesScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 12: Advogado Contratante - Perfil
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-profile', builder: (context, state) => const ProfileScreen())]),
 
@@ -130,10 +138,12 @@ GoRouter appRouter(AuthBloc authBloc) {
           StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),
           // 14: Cliente - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),
+          // 14.5: Cliente - Propostas
+          StatefulShellBranch(routes: [GoRoute(path: '/client-proposals', builder: (context, state) => const ClientProposalsScreen())]),
           // 15: Cliente - Advogados (Busca Híbrida)
           StatefulShellBranch(routes: [GoRoute(path: '/advogados', builder: (context, state) => const LawyersScreen())]),
           // 16: Cliente - Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const MessagesScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 17: Cliente - Serviços
           StatefulShellBranch(routes: [GoRoute(path: '/services', builder: (context, state) => const ServicesScreen())]),
           // 18: Cliente - Perfil
@@ -179,10 +189,31 @@ GoRouter appRouter(AuthBloc authBloc) {
       GoRoute(
         path: '/sla-settings',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => BlocProvider(
-          create: (context) => getIt<SlaSettingsBloc>(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider<SlaSettingsBloc>(
+              create: (context) => getIt<SlaSettingsBloc>(),
+            ),
+            BlocProvider<SlaAnalyticsBloc>(
+              create: (context) => getIt<SlaAnalyticsBloc>(),
+            ),
+          ],
           child: const SlaSettingsScreen(),
         ),
+      ),
+      
+      // Chat routes
+      GoRoute(
+        path: '/chat/:roomId',
+        builder: (context, state) {
+          final roomId = state.pathParameters['roomId']!;
+          final otherPartyName = state.uri.queryParameters['otherPartyName'];
+          
+          return ChatScreen(
+            roomId: roomId,
+            otherPartyName: otherPartyName,
+          );
+        },
       ),
     ],
   );
@@ -201,4 +232,3 @@ class GoRouterRefreshStream extends ChangeNotifier {
     _subscription.cancel();
     super.dispose();
   }
-} 

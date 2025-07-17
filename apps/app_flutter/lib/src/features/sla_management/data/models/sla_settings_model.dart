@@ -73,6 +73,7 @@ class SlaSettingsModel extends SlaSettingsEntity {
     };
   }
 
+  @override
   SlaSettingsModel copyWith({
     String? id,
     String? firmId,

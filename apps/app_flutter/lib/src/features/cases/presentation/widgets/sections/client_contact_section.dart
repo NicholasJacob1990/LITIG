@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir LawyerResponsibleSection para advogados contratantes
 /// - Foco em oportunidade de negócio e relacionamento com cliente
 class ClientContactSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const ClientContactSection({
@@ -424,6 +425,7 @@ import '../base_info_section.dart';
 /// - Substituir LawyerResponsibleSection para advogados contratantes
 /// - Foco em oportunidade de negócio e relacionamento com cliente
 class ClientContactSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const ClientContactSection({

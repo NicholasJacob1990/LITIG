@@ -294,7 +294,7 @@ class PartnerSearchResultList extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.gem,
             size: 10,
             color: Colors.orange,

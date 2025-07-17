@@ -184,7 +184,6 @@ abstract class SlaMetricsRepository {
   });
 } 
 import '../../../core/error/failure.dart';
-import '../entities/sla_metrics_entity.dart';
 
 /// Contrato do repositório para métricas SLA
 /// 

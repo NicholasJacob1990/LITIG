@@ -3,9 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/sla_settings_bloc.dart';
 import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
-import '../bloc/sla_analytics_bloc.dart';
-import '../bloc/sla_analytics_event.dart';
-import '../bloc/sla_analytics_state.dart';
 import '../widgets/sla_basic_settings_widget.dart';
 import '../widgets/sla_presets_widget.dart';
 import '../widgets/sla_business_rules_widget.dart';
@@ -113,11 +110,14 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Chip(
+                        // Melhoria: adicionar ícone para melhor feedback visual
+                        avatar: const Icon(Icons.save_outlined, size: 16, color: Colors.orange),
                         label: const Text('Não salvo'),
-                        backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                        labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        backgroundColor: Colors.orange.withOpacity(0.2),
+                        labelStyle: const TextStyle(
+                          color: Colors.orange,
                           fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -125,11 +125,14 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Chip(
+                        // Melhoria: adicionar ícone para melhor feedback visual
+                        avatar: const Icon(Icons.error_outline, size: 16, color: Colors.red),
                         label: Text('${state.validationResult!.violations.length} erros'),
-                        backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                        labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        backgroundColor: Colors.red.withOpacity(0.2),
+                        labelStyle: const TextStyle(
+                          color: Colors.red,
                           fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -279,15 +282,21 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                 },
                 onPresetCreated: (preset) {
                   context.read<SlaSettingsBloc>().add(
-                    CreateCustomPresetEvent(preset: preset),
+                    CreateCustomPresetEvent(
+                      name: preset.name,
+                      description: preset.description ?? '',
+                      normalHours: 24,
+                      urgentHours: 8,
+                      emergencyHours: 2,
+                    ),
                   );
                 },
               ),
-              SlaBusinessRulesWidget(),
-              SlaNotificationsWidget(),
-              SlaEscalationsWidget(),
-              SlaAnalyticsWidget(),
-              SlaAuditWidget(),
+              const SlaBusinessRulesWidget(),
+              const SlaNotificationsWidget(),
+              const SlaEscalationsWidget(),
+              const SlaAnalyticsWidget(),
+              const SlaAuditWidget(),
             ],
           ),
         ),
@@ -642,7 +651,7 @@ class _SlaTestDialog extends StatefulWidget {
 class _SlaTestDialogState extends State<_SlaTestDialog> {
   String _priority = 'normal';
   String _caseType = 'litigation';
-  DateTime _startTime = DateTime.now();
+  final DateTime _startTime = DateTime.now();
   int? _overrideHours;
 
   @override

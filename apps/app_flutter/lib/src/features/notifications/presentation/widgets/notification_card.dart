@@ -10,13 +10,13 @@ class NotificationCard extends StatelessWidget {
   final bool showActions;
 
   const NotificationCard({
-    Key? key,
+    super.key,
     required this.notification,
     this.onTap,
     this.onMarkAsRead,
     this.onDelete,
     this.showActions = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +194,7 @@ class NotificationCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.priority_high,
             size: 12,
             color: Colors.red,
@@ -293,13 +293,13 @@ class NotificationCard extends StatelessWidget {
   final bool showActions;
 
   const NotificationCard({
-    Key? key,
+    super.key,
     required this.notification,
     this.onTap,
     this.onMarkAsRead,
     this.onDelete,
     this.showActions = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -477,7 +477,7 @@ class NotificationCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.priority_high,
             size: 12,
             color: Colors.red,

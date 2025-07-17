@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir DocumentsSection para advogados associados
 /// - Foco em produtividade e gestão de documentos de trabalho
 class WorkDocumentsSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const WorkDocumentsSection({
@@ -795,6 +796,7 @@ import '../base_info_section.dart';
 /// - Substituir DocumentsSection para advogados associados
 /// - Foco em produtividade e gestão de documentos de trabalho
 class WorkDocumentsSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const WorkDocumentsSection({

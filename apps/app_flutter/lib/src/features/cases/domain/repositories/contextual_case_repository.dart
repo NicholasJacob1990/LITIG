@@ -1,4 +1,3 @@
-import '../entities/case_detail.dart';
 import '../entities/contextual_case_data.dart';
 import '../entities/allocation_type.dart';
 
@@ -79,8 +78,6 @@ abstract class ContextualCaseRepository {
     required AllocationType newAllocationType,
   });
 } 
-import '../entities/contextual_case_data.dart';
-import '../entities/allocation_type.dart';
 
 /// Repository abstrato para gerenciar dados contextuais de casos
 /// 

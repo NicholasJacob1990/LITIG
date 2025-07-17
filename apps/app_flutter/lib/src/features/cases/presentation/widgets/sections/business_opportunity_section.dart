@@ -355,7 +355,7 @@ class BusinessOpportunitySection extends BaseInfoSection {
 
   String _getClientBudgetRange() {
     final estimatedValue = getContextualValue<double>('estimated_value', 8500.0);
-    final rangeMultiplier = 1.3;
+    const rangeMultiplier = 1.3;
     final maxBudget = estimatedValue * rangeMultiplier;
     return '${formatCurrency(estimatedValue)} - ${formatCurrency(maxBudget)}';
   }
@@ -952,7 +952,7 @@ class BusinessOpportunitySection extends BaseInfoSection {
 
   String _getClientBudgetRange() {
     final estimatedValue = getContextualValue<double>('estimated_value', 8500.0);
-    final rangeMultiplier = 1.3;
+    const rangeMultiplier = 1.3;
     final maxBudget = estimatedValue * rangeMultiplier;
     return '${formatCurrency(estimatedValue)} - ${formatCurrency(maxBudget)}';
   }

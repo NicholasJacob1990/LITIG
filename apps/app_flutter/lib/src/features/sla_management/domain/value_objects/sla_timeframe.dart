@@ -234,7 +234,7 @@ class SlaTimeframe extends Equatable {
   /// Valida se um override é permitido
   ValidationResult validateOverride(int overrideHours) {
     if (!allowOverride) {
-      return ValidationResult(
+      return const ValidationResult(
         isValid: false,
         message: 'Override não permitido para esta prioridade',
       );
@@ -248,13 +248,13 @@ class SlaTimeframe extends Equatable {
     }
 
     if (overrideHours < 0) {
-      return ValidationResult(
+      return const ValidationResult(
         isValid: false,
         message: 'Override não pode ser negativo',
       );
     }
 
-    return ValidationResult(
+    return const ValidationResult(
       isValid: true,
       message: 'Override válido',
     );
@@ -665,7 +665,7 @@ class SlaTimeframe extends Equatable {
   /// Valida se um override é permitido
   ValidationResult validateOverride(int overrideHours) {
     if (!allowOverride) {
-      return ValidationResult(
+      return const ValidationResult(
         isValid: false,
         message: 'Override não permitido para esta prioridade',
       );
@@ -679,13 +679,13 @@ class SlaTimeframe extends Equatable {
     }
 
     if (overrideHours < 0) {
-      return ValidationResult(
+      return const ValidationResult(
         isValid: false,
         message: 'Override não pode ser negativo',
       );
     }
 
-    return ValidationResult(
+    return const ValidationResult(
       isValid: true,
       message: 'Override válido',
     );

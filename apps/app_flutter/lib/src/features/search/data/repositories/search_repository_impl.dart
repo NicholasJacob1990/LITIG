@@ -18,7 +18,7 @@ class SearchRepositoryImpl implements SearchRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } on Exception {
-      return Left(const ServerFailure(message: 'Erro inesperado na busca'));
+      return const Left(ServerFailure(message: 'Erro inesperado na busca'));
     }
   }
 } 

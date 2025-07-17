@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:go_router/go_router.dart';
 import '../../domain/entities/case_detail.dart';
 import '../../../../shared/utils/app_colors.dart';
 import '../../../../core/utils/logger.dart';

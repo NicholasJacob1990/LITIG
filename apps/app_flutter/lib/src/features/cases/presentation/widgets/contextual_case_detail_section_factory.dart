@@ -110,33 +110,33 @@ class ContextualCaseDetailSectionFactory {
     return const [
       // EXPERIÊNCIA ATUAL DO CLIENTE - NÃO ALTERAR
       LazySection(
-        child: LawyerResponsibleSection(),
         priority: SectionPriority.critical,
+        child: LawyerResponsibleSection(),
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: ConsultationInfoSection(),
-        priority: SectionPriority.high,
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: PreAnalysisSection(),
-        priority: SectionPriority.high,
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.medium,
         child: NextStepsSection(),
-        priority: SectionPriority.medium,
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.medium,
         child: DocumentsSection(),
-        priority: SectionPriority.medium,
       ),
       SizedBox(height: 16),
       LazySection(
-        child: ProcessStatusSection(),
         priority: SectionPriority.low,
+        child: ProcessStatusSection(),
       ),
       SizedBox(height: 24), // Espaço extra no final
     ];
@@ -177,11 +177,11 @@ class ContextualCaseDetailSectionFactory {
     return [
       // Seções críticas carregadas imediatamente
       LazySection(
+        priority: SectionPriority.critical,
         child: InternalTeamSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       LazySection(
@@ -195,36 +195,36 @@ class ContextualCaseDetailSectionFactory {
       
       // Seções importantes carregadas em seguida
       LazySection(
+        priority: SectionPriority.high,
         child: TaskBreakdownSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: WorkDocumentsSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       
       // Seções menos críticas carregadas por último
       LazySection(
+        priority: SectionPriority.medium,
         child: TimeTrackingSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.low,
         child: EscalationSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.low,
       ),
       const SizedBox(height: 24),
     ];
@@ -238,64 +238,64 @@ class ContextualCaseDetailSectionFactory {
     return [
       // Informações essenciais do cliente primeiro
       LazySection(
+        priority: SectionPriority.critical,
         child: ClientContactSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.critical,
         child: BusinessOpportunitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       
       // Análises técnicas
       LazySection(
+        priority: SectionPriority.high,
         child: CaseComplexitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: MatchExplanationSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       
       // Gestão e estratégia
       LazySection(
+        priority: SectionPriority.medium,
         child: StrategicDocumentsSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.medium,
         child: ProfitabilitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       
       // Análises avançadas (lazy loading pesado)
       LazySection(
+        priority: SectionPriority.low,
         child: CompetitorAnalysisSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.low,
       ),
       const SizedBox(height: 24),
     ];
@@ -309,55 +309,55 @@ class ContextualCaseDetailSectionFactory {
     return [
       // Informações da plataforma primeiro
       LazySection(
+        priority: SectionPriority.critical,
         child: PlatformOpportunitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.critical,
         child: MatchExplanationSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       
       // Framework e processos
       LazySection(
+        priority: SectionPriority.high,
         child: DeliveryFrameworkSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: PlatformDocumentsSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       
       // Qualidade e controle
       LazySection(
+        priority: SectionPriority.medium,
         child: QualityControlSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       
       // Oportunidades futuras (menor prioridade)
       LazySection(
+        priority: SectionPriority.low,
         child: NextOpportunitiesSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.low,
       ),
       const SizedBox(height: 24),
     ];
@@ -377,21 +377,21 @@ class ContextualCaseDetailSectionFactory {
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: MatchExplanationSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
-      _PlaceholderSection(
+      const _PlaceholderSection(
         title: 'Documentos Estratégicos',
         description: 'Documentos compartilhados com o parceiro',
         icon: Icons.folder_shared,
         color: Colors.purple,
       ),
       const SizedBox(height: 16),
-      _PlaceholderSection(
+      const _PlaceholderSection(
         title: 'Análise de Competidores',
         description: 'Estratégia competitiva da parceria',
         icon: Icons.trending_up,
@@ -416,7 +416,7 @@ class ContextualCaseDetailSectionFactory {
         color: AppColors.primaryBlue,
       ),
       const SizedBox(height: 16),
-      _PlaceholderSection(
+      const _PlaceholderSection(
         title: 'Ações Disponíveis',
         description: 'Ações baseadas no contexto do caso',
         icon: Icons.touch_app,
@@ -714,33 +714,33 @@ class ContextualCaseDetailSectionFactory {
     return const [
       // EXPERIÊNCIA ATUAL DO CLIENTE - NÃO ALTERAR
       LazySection(
-        child: LawyerResponsibleSection(),
         priority: SectionPriority.critical,
+        child: LawyerResponsibleSection(),
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: ConsultationInfoSection(),
-        priority: SectionPriority.high,
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: PreAnalysisSection(),
-        priority: SectionPriority.high,
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.medium,
         child: NextStepsSection(),
-        priority: SectionPriority.medium,
       ),
       SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.medium,
         child: DocumentsSection(),
-        priority: SectionPriority.medium,
       ),
       SizedBox(height: 16),
       LazySection(
-        child: ProcessStatusSection(),
         priority: SectionPriority.low,
+        child: ProcessStatusSection(),
       ),
       SizedBox(height: 24), // Espaço extra no final
     ];
@@ -781,11 +781,11 @@ class ContextualCaseDetailSectionFactory {
     return [
       // Seções críticas carregadas imediatamente
       LazySection(
+        priority: SectionPriority.critical,
         child: InternalTeamSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       LazySection(
@@ -799,36 +799,36 @@ class ContextualCaseDetailSectionFactory {
       
       // Seções importantes carregadas em seguida
       LazySection(
+        priority: SectionPriority.high,
         child: TaskBreakdownSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: WorkDocumentsSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       
       // Seções menos críticas carregadas por último
       LazySection(
+        priority: SectionPriority.medium,
         child: TimeTrackingSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.low,
         child: EscalationSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.low,
       ),
       const SizedBox(height: 24),
     ];
@@ -842,64 +842,64 @@ class ContextualCaseDetailSectionFactory {
     return [
       // Informações essenciais do cliente primeiro
       LazySection(
+        priority: SectionPriority.critical,
         child: ClientContactSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.critical,
         child: BusinessOpportunitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       
       // Análises técnicas
       LazySection(
+        priority: SectionPriority.high,
         child: CaseComplexitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: MatchExplanationSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       
       // Gestão e estratégia
       LazySection(
+        priority: SectionPriority.medium,
         child: StrategicDocumentsSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.medium,
         child: ProfitabilitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       
       // Análises avançadas (lazy loading pesado)
       LazySection(
+        priority: SectionPriority.low,
         child: CompetitorAnalysisSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.low,
       ),
       const SizedBox(height: 24),
     ];
@@ -913,55 +913,55 @@ class ContextualCaseDetailSectionFactory {
     return [
       // Informações da plataforma primeiro
       LazySection(
+        priority: SectionPriority.critical,
         child: PlatformOpportunitySection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.critical,
         child: MatchExplanationSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.critical,
       ),
       const SizedBox(height: 16),
       
       // Framework e processos
       LazySection(
+        priority: SectionPriority.high,
         child: DeliveryFrameworkSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: PlatformDocumentsSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
       
       // Qualidade e controle
       LazySection(
+        priority: SectionPriority.medium,
         child: QualityControlSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.medium,
       ),
       const SizedBox(height: 16),
       
       // Oportunidades futuras (menor prioridade)
       LazySection(
+        priority: SectionPriority.low,
         child: NextOpportunitiesSection(
           caseDetail: caseDetail,
         ),
-        priority: SectionPriority.low,
       ),
       const SizedBox(height: 24),
     ];
@@ -981,21 +981,21 @@ class ContextualCaseDetailSectionFactory {
       ),
       const SizedBox(height: 16),
       LazySection(
+        priority: SectionPriority.high,
         child: MatchExplanationSection(
           caseDetail: caseDetail,
           contextualData: contextualData,
         ),
-        priority: SectionPriority.high,
       ),
       const SizedBox(height: 16),
-      _PlaceholderSection(
+      const _PlaceholderSection(
         title: 'Documentos Estratégicos',
         description: 'Documentos compartilhados com o parceiro',
         icon: Icons.folder_shared,
         color: Colors.purple,
       ),
       const SizedBox(height: 16),
-      _PlaceholderSection(
+      const _PlaceholderSection(
         title: 'Análise de Competidores',
         description: 'Estratégia competitiva da parceria',
         icon: Icons.trending_up,
@@ -1020,7 +1020,7 @@ class ContextualCaseDetailSectionFactory {
         color: AppColors.primaryBlue,
       ),
       const SizedBox(height: 16),
-      _PlaceholderSection(
+      const _PlaceholderSection(
         title: 'Ações Disponíveis',
         description: 'Ações baseadas no contexto do caso',
         icon: Icons.touch_app,

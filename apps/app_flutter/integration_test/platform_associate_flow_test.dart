@@ -10,7 +10,7 @@ void main() {
 
   // Mock de um usuário Super Associado para os testes de UI
   // Em um teste real, isso viria de um AuthBloc mockado
-  final platformAssociateUser = User(
+  const platformAssociateUser = User(
     id: 'test-user-id',
     email: 'associate@platform.com',
     fullName: 'Super Associado Teste',

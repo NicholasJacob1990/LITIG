@@ -192,7 +192,7 @@ class _ExampleB2BUsageState extends State<ExampleB2BUsage> {
           child: const Icon(Icons.person, color: Colors.blue),
         ),
         title: Text('Advogado Mock ${index + 1}'),
-        subtitle: Text('Especialista em Direito Civil'),
+        subtitle: const Text('Especialista em Direito Civil'),
         trailing: OutlinedButton(
           onPressed: () => _showMockLawyerHire(index),
           child: const Text('Contratar'),

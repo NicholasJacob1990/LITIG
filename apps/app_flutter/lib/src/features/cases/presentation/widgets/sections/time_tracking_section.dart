@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir ProcessStatusSection para advogados associados
 /// - Foco em produtividade e registro de tempo trabalhado
 class TimeTrackingSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const TimeTrackingSection({
@@ -647,8 +648,8 @@ class TimeTrackingSection extends BaseInfoSection {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Observações da sessão (opcional)',
                 border: OutlineInputBorder(),
               ),
@@ -701,21 +702,21 @@ class TimeTrackingSection extends BaseInfoSection {
               onChanged: (value) {},
             ),
             const SizedBox(height: 12),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Horário início',
                       border: OutlineInputBorder(),
                       hintText: '14:00',
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Horário fim',
                       border: OutlineInputBorder(),
                       hintText: '15:30',
@@ -868,6 +869,7 @@ import '../base_info_section.dart';
 /// - Substituir ProcessStatusSection para advogados associados
 /// - Foco em produtividade e registro de tempo trabalhado
 class TimeTrackingSection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const TimeTrackingSection({
@@ -1503,8 +1505,8 @@ class TimeTrackingSection extends BaseInfoSection {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              decoration: const InputDecoration(
+            const TextField(
+              decoration: InputDecoration(
                 labelText: 'Observações da sessão (opcional)',
                 border: OutlineInputBorder(),
               ),
@@ -1557,21 +1559,21 @@ class TimeTrackingSection extends BaseInfoSection {
               onChanged: (value) {},
             ),
             const SizedBox(height: 12),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Horário início',
                       border: OutlineInputBorder(),
                       hintText: '14:00',
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Horário fim',
                       border: OutlineInputBorder(),
                       hintText: '15:30',

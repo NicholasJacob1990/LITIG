@@ -12,6 +12,7 @@ import '../base_info_section.dart';
 /// - Substituir PreAnalysisSection para advogados contratantes
 /// - Foco em oportunidade de negócio e análise de viabilidade
 class CaseComplexitySection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const CaseComplexitySection({
@@ -81,7 +82,7 @@ class CaseComplexitySection extends BaseInfoSection {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Complexidade: ${complexityScore}/10',
+                          'Complexidade: $complexityScore/10',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: _getComplexityColor(complexityScore),
@@ -645,6 +646,7 @@ import '../base_info_section.dart';
 /// - Substituir PreAnalysisSection para advogados contratantes
 /// - Foco em oportunidade de negócio e análise de viabilidade
 class CaseComplexitySection extends BaseInfoSection {
+  @override
   final Map<String, dynamic>? contextualData;
 
   const CaseComplexitySection({
@@ -714,7 +716,7 @@ class CaseComplexitySection extends BaseInfoSection {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Complexidade: ${complexityScore}/10',
+                          'Complexidade: $complexityScore/10',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: _getComplexityColor(complexityScore),
