@@ -7,6 +7,7 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as 
 import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:meu_app/src/features/notifications/presentation/widgets/notification_badge.dart';
 import 'package:meu_app/src/shared/config/navigation_config.dart';
+import 'package:meu_app/src/shared/widgets/context_header_overlay.dart';
 
 class MainTabsShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -57,8 +58,10 @@ class MainTabsShell extends StatelessWidget {
           print('DEBUG - NavTabs count AFTER: ${navTabs.length}');
           print('DEBUG - NavTabs: ${navTabs.map((t) => t.label).toList()}');
           
-          return Scaffold(
-            body: navigationShell,
+                    return Scaffold(
+            body: userRole == 'lawyer_platform_associate'
+                ? ContextHeaderOverlay(child: navigationShell)
+                : navigationShell,
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: _getCurrentIndexForTabs(navTabs, navigationShell.currentIndex),
               onTap: (index) => _onItemTappedForTabs(index, navTabs),

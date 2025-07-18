@@ -46,6 +46,14 @@ dependencies:
   # Firebase Remote Config para feature flags
   firebase_remote_config: ^4.4.6
   firebase_core: ^2.32.0
+  
+  # Daily.co para videochamada
+  daily_flutter: ^0.31.0
+  permission_handler: ^11.0.1
+  web_socket_channel: ^2.4.0
+  
+  # Para sistema de avaliações
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:

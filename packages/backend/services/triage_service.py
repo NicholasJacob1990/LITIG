@@ -197,29 +197,124 @@ class TriageService:
         text_lower = text.lower()
 
         # -------- Heurística de área --------------------------------------
-        area = "Cível"  # padrão
+        area = "Civil"  # padrão
         subarea = "Geral"
 
-        trabalhista = r"trabalho|trabalhista|demitido|verbas? rescisórias|rescisão|salário"
-        criminal = r"pol[ií]cia|crime|criminoso|preso|roubo|furto|homic[ií]dio"
-        consumidor = r"consumidor|produto|compra|loja|defeito|garantia"
+        # Padrões de regex para cada área jurídica
+        trabalhista = r"trabalho|trabalhista|demitido|verbas? rescisórias|rescisão|salário|clt|fgts|inss|férias|13o?|décimo terceiro|aviso prévio|justa causa|assédio moral|acidente de trabalho"
+        criminal = r"pol[ií]cia|crime|criminoso|preso|roubo|furto|homic[ií]dio|delito|penal|detenção|prisão|flagrante|denúncia|queixa"
+        consumidor = r"consumidor|produto|compra|loja|defeito|garantia|cdc|código de defesa|vício|dano moral|propaganda enganosa|cobrança indevida"
+        tributario = r"tribut|imposto|taxa|contribuição|fiscal|receita federal|icms|iss|iptu|ipva|ir|cofins|pis|dívida ativa"
+        previdenciario = r"previdência|aposentadoria|pensão|benefício|inss|auxílio|bpc|loas|perícia médica|tempo de contribuição"
+        familia = r"divórcio|separação|pensão alimentícia|guarda|visitação|partilha|união estável|adoção|paternidade|alimentos"
+        empresarial = r"empresa|societário|contrato social|ltda|sociedade|sócio|quotas|dissolução|alteração contratual"
+        
+        # Novas áreas
+        administrativo = r"administrativo|servidor público|concurso|licitação|contrato administrativo|improbidade|mandado de segurança|desapropriação"
+        imobiliario = r"imóvel|imobiliário|aluguel|locação|despejo|compra e venda|escritura|registro|usucapião|condomínio"
+        ambiental = r"ambiental|meio ambiente|poluição|desmatamento|licença ambiental|ibama|crime ambiental|sustentabilidade"
+        bancario = r"banco|bancário|conta corrente|empréstimo|financiamento|juros|cheque|cartão de crédito|negativação|spc|serasa"
+        saude = r"saúde|plano de saúde|hospital|médico|cirurgia|medicamento|sus|ans|erro médico|negativa de cobertura"
+        propriedade_intelectual = r"propriedade intelectual|marca|patente|direito autoral|pirataria|inpi|software|invenção"
+        digital = r"digital|internet|dados pessoais|lgpd|privacidade|cyber|hacke|vazamento|redes sociais|e-commerce"
 
+        # Verificação hierárquica de áreas
         if re.search(trabalhista, text_lower):
             area = "Trabalhista"
             if re.search(r"justa causa", text_lower):
                 subarea = "Justa Causa"
             elif re.search(r"verbas? rescisórias", text_lower):
                 subarea = "Verbas Rescisórias"
+            elif re.search(r"assédio moral", text_lower):
+                subarea = "Assédio Moral"
+            elif re.search(r"acidente de trabalho", text_lower):
+                subarea = "Acidente de Trabalho"
         elif re.search(criminal, text_lower):
             area = "Criminal"
             if re.search(r"homic[ií]dio", text_lower):
                 subarea = "Homicídio"
             elif re.search(r"roubo|furto", text_lower):
                 subarea = "Patrimonial"
+            elif re.search(r"tráfico", text_lower):
+                subarea = "Tráfico"
         elif re.search(consumidor, text_lower):
             area = "Consumidor"
             if re.search(r"garantia", text_lower):
                 subarea = "Garantia"
+            elif re.search(r"cobrança indevida", text_lower):
+                subarea = "Cobrança Indevida"
+        elif re.search(tributario, text_lower):
+            area = "Tributário"
+            if re.search(r"icms|iss", text_lower):
+                subarea = "Impostos Estaduais/Municipais"
+            elif re.search(r"ir|imposto de renda", text_lower):
+                subarea = "Imposto de Renda"
+        elif re.search(previdenciario, text_lower):
+            area = "Previdenciário"
+            if re.search(r"aposentadoria", text_lower):
+                subarea = "Aposentadoria"
+            elif re.search(r"auxílio", text_lower):
+                subarea = "Benefícios"
+        elif re.search(familia, text_lower):
+            area = "Família"
+            if re.search(r"divórcio|separação", text_lower):
+                subarea = "Divórcio"
+            elif re.search(r"pensão alimentícia|alimentos", text_lower):
+                subarea = "Alimentos"
+            elif re.search(r"guarda", text_lower):
+                subarea = "Guarda"
+        elif re.search(administrativo, text_lower):
+            area = "Administrativo"
+            if re.search(r"servidor público", text_lower):
+                subarea = "Servidor Público"
+            elif re.search(r"licitação", text_lower):
+                subarea = "Licitações"
+            elif re.search(r"concurso", text_lower):
+                subarea = "Concurso Público"
+        elif re.search(imobiliario, text_lower):
+            area = "Imobiliário"
+            if re.search(r"locação|aluguel|despejo", text_lower):
+                subarea = "Locação"
+            elif re.search(r"compra e venda", text_lower):
+                subarea = "Compra e Venda"
+            elif re.search(r"usucapião", text_lower):
+                subarea = "Usucapião"
+        elif re.search(ambiental, text_lower):
+            area = "Ambiental"
+            if re.search(r"licença", text_lower):
+                subarea = "Licenciamento"
+            elif re.search(r"crime ambiental", text_lower):
+                subarea = "Crimes Ambientais"
+        elif re.search(bancario, text_lower):
+            area = "Bancário"
+            if re.search(r"juros", text_lower):
+                subarea = "Juros Abusivos"
+            elif re.search(r"negativação|spc|serasa", text_lower):
+                subarea = "Negativação Indevida"
+        elif re.search(saude, text_lower):
+            area = "Saúde"
+            if re.search(r"plano de saúde", text_lower):
+                subarea = "Plano de Saúde"
+            elif re.search(r"erro médico", text_lower):
+                subarea = "Erro Médico"
+        elif re.search(propriedade_intelectual, text_lower):
+            area = "Propriedade Intelectual"
+            if re.search(r"marca", text_lower):
+                subarea = "Marcas"
+            elif re.search(r"patente", text_lower):
+                subarea = "Patentes"
+        elif re.search(digital, text_lower):
+            area = "Digital"
+            if re.search(r"lgpd|dados pessoais", text_lower):
+                subarea = "LGPD"
+            elif re.search(r"vazamento", text_lower):
+                subarea = "Vazamento de Dados"
+        elif re.search(empresarial, text_lower):
+            area = "Empresarial"
+            if re.search(r"contrato social", text_lower):
+                subarea = "Societário"
+            elif re.search(r"dissolução", text_lower):
+                subarea = "Dissolução"
 
         # -------- Heurística de urgência ----------------------------------
         # 24h para casos urgentes (liminar, prazo curto, réu preso)

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'litigation_party.dart';
 
 class CaseDetail extends Equatable {
   final String id;
@@ -13,6 +14,9 @@ class CaseDetail extends Equatable {
   final List<NextStep> nextSteps;
   final List<CaseDocument> documents;
   final ProcessStatus processStatus;
+  final List<LitigationParty> parties; // NOVO: Partes processuais
+  final String? caseType; // NOVO: Tipo do caso (litigation, consultancy, etc.)
+  final String? cnjNumber; // NOVO: Número CNJ para casos contenciosos
 
   const CaseDetail({
     required this.id,
@@ -27,7 +31,53 @@ class CaseDetail extends Equatable {
     required this.nextSteps,
     required this.documents,
     required this.processStatus,
+    this.parties = const [], // NOVO: Lista de partes processuais
+    this.caseType, // NOVO: Tipo do caso
+    this.cnjNumber, // NOVO: Número CNJ
   });
+
+  /// Verifica se o caso é contencioso (tem partes processuais)
+  bool get isLitigation => caseType == 'litigation' || parties.isNotEmpty;
+
+  /// Verifica se o caso é consultivo
+  bool get isConsultancy => caseType == 'consultancy';
+
+  /// Obtém o autor principal (primeira parte do tipo plaintiff)
+  LitigationParty? get mainPlaintiff => 
+      parties.where((party) => party.isPlaintiff).isNotEmpty 
+          ? parties.where((party) => party.isPlaintiff).first 
+          : null;
+
+  /// Obtém o réu principal (primeira parte do tipo defendant)
+  LitigationParty? get mainDefendant => 
+      parties.where((party) => party.isDefendant).isNotEmpty 
+          ? parties.where((party) => party.isDefendant).first 
+          : null;
+
+  /// Factory method para criar CaseDetail com partes processuais
+  factory CaseDetail.withLitigationParties({
+    required CaseDetail originalCase,
+    required List<LitigationParty> parties,
+    String? cnjNumber,
+  }) {
+    return CaseDetail(
+      id: originalCase.id,
+      title: originalCase.title,
+      description: originalCase.description,
+      status: originalCase.status,
+      createdAt: originalCase.createdAt,
+      updatedAt: originalCase.updatedAt,
+      assignedLawyer: originalCase.assignedLawyer,
+      consultation: originalCase.consultation,
+      preAnalysis: originalCase.preAnalysis,
+      nextSteps: originalCase.nextSteps,
+      documents: originalCase.documents,
+      processStatus: originalCase.processStatus,
+      parties: parties,
+      caseType: 'litigation',
+      cnjNumber: cnjNumber,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -43,6 +93,9 @@ class CaseDetail extends Equatable {
         nextSteps,
         documents,
         processStatus,
+        parties, // NOVO
+        caseType, // NOVO
+        cnjNumber, // NOVO
       ];
 }
 

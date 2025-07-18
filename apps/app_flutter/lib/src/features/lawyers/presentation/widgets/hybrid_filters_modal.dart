@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../bloc/hybrid_match_bloc.dart';
+import 'package:meu_app/src/shared/widgets/legal_areas_selector.dart';
 
 /// Modal para filtros híbridos (advogados + escritórios)
 /// 
@@ -20,6 +21,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
   EntityFilter _selectedFilter = EntityFilter.todos;
   String _selectedPreset = 'balanced';
   bool _mixedRendering = false;
+  List<String> _selectedAreas = [];
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +86,24 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
             ),
             const SizedBox(height: 12),
             _buildPresetSelector(),
+            const SizedBox(height: 24),
+
+            // Filtro de Áreas Jurídicas
+            Text(
+              'Áreas de Especialização',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            LegalAreasSelector(
+              initialValues: _selectedAreas,
+              onChanged: (areas) {
+                setState(() {
+                  _selectedAreas = areas;
+                });
+              },
+            ),
             const SizedBox(height: 24),
 
             // Opção de Renderização Mista
@@ -255,6 +275,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
       _selectedFilter = EntityFilter.todos;
       _selectedPreset = 'balanced';
       _mixedRendering = false;
+      _selectedAreas = [];
     });
   }
 

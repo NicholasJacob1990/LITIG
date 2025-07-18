@@ -39,6 +39,8 @@ from routes.reports import router as reports_router
 from routes.unipile import router as unipile_router
 from routes.providers import router as providers_router
 from routes.users import router as users_router
+from routes.auto_context import router as auto_context_router
+from middleware.auto_context_middleware import AutoContextMiddleware
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
 
@@ -101,6 +103,7 @@ app = FastAPI(
 # Adiciona os middlewares na aplicação
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(AutoContextMiddleware)
 
 # --- Configuração do CORS ---
 # Configuração dinâmica baseada no ambiente
@@ -148,6 +151,7 @@ app.include_router(reports_router, prefix="/api/v2.2", tags=["Reports"])
 app.include_router(unipile_router, prefix="/api/v2.2", tags=["Unipile"])
 app.include_router(providers_router, prefix="/api", tags=["Providers"])
 app.include_router(users_router, prefix="/api", tags=["Users"])
+app.include_router(auto_context_router, prefix="/api", tags=["Auto Context"])
 
 # CORREÇÃO: Rate limiter aplicado individualmente nas rotas em routes.py
 # Removido limiter.limit("60/minute")(api_router) que causava erro nos testes

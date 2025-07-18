@@ -34,6 +34,8 @@ import 'package:meu_app/src/features/lawyers/presentation/screens/hiring_proposa
 import 'package:meu_app/src/features/clients/presentation/screens/client_proposals_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
+import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
+import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
 import 'package:meu_app/injection_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -212,6 +214,40 @@ GoRouter appRouter(AuthBloc authBloc) {
           return ChatScreen(
             roomId: roomId,
             otherPartyName: otherPartyName,
+          );
+        },
+      ),
+      
+      // Video Call routes
+      GoRoute(
+        path: '/video-call/:roomName',
+        builder: (context, state) {
+          final roomName = state.pathParameters['roomName']!;
+          final extra = state.extra as Map<String, dynamic>?;
+          
+          return VideoCallScreen(
+            roomName: roomName,
+            roomUrl: extra?['roomUrl'] ?? 'https://litig.daily.co/$roomName',
+            userId: extra?['userId'] ?? 'anonymous',
+            otherPartyName: extra?['otherPartyName'],
+          );
+        },
+      ),
+
+      // Rating routes
+      GoRoute(
+        path: '/rate-case/:caseId',
+        builder: (context, state) {
+          final caseId = state.pathParameters['caseId']!;
+          final lawyerId = state.uri.queryParameters['lawyerId']!;
+          final clientId = state.uri.queryParameters['clientId']!;
+          final userType = state.uri.queryParameters['userType'] ?? 'client';
+          
+          return CaseRatingScreen(
+            caseId: caseId,
+            lawyerId: lawyerId,
+            clientId: clientId,
+            userType: userType,
           );
         },
       ),

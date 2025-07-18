@@ -44,7 +44,7 @@ from backend.algoritmo_match import (
 )
 from backend.routes import (
     cases, recommendations, payments, offers, reviews_route, timeline, contracts, financials,
-    availability, directory_search, hiring_proposals
+    availability, directory_search, hiring_proposals, video_calls, documents_enhanced, ratings
 )
 from backend.api.schemas import (
     CaseRequestSchema,
@@ -149,6 +149,9 @@ app.include_router(financials.router, prefix="/api")
 app.include_router(availability.router, prefix="/api")
 app.include_router(directory_search.router, prefix="/api")
 app.include_router(hiring_proposals.router, prefix="/api")
+app.include_router(video_calls.router, prefix="/api")
+app.include_router(documents_enhanced.router, prefix="/api")
+app.include_router(ratings.router, prefix="/api")
 
 # Conexão Redis global
 redis_client: Optional[aioredis.Redis] = None

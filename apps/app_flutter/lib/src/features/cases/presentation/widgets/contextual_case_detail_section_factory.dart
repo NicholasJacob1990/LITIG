@@ -13,6 +13,7 @@ import 'pre_analysis_section.dart';
 import 'next_steps_section.dart';
 import 'documents_section.dart';
 import 'process_status_section.dart';
+import 'litigation_parties_section.dart'; // NOVO: Seção de partes processuais
 
 // Seções contextuais especializadas
 import 'sections/internal_team_section.dart';
@@ -107,39 +108,54 @@ class ContextualCaseDetailSectionFactory {
   static List<Widget> _buildClientSections(CaseDetail? caseDetail) {
     AppLogger.info('Building client sections (reference experience)');
     
-    return const [
+    List<Widget> sections = [
       // EXPERIÊNCIA ATUAL DO CLIENTE - NÃO ALTERAR
-      LazySection(
+      const LazySection(
         priority: SectionPriority.critical,
         child: LawyerResponsibleSection(),
       ),
-      SizedBox(height: 16),
-      LazySection(
+      const SizedBox(height: 16),
+      const LazySection(
         priority: SectionPriority.high,
         child: ConsultationInfoSection(),
       ),
-      SizedBox(height: 16),
-      LazySection(
+      const SizedBox(height: 16),
+      const LazySection(
         priority: SectionPriority.high,
         child: PreAnalysisSection(),
       ),
-      SizedBox(height: 16),
-      LazySection(
+      const SizedBox(height: 16),
+      
+      // NOVO: Seção de partes processuais (apenas para casos contenciosos)
+      if (caseDetail?.isLitigation == true && caseDetail!.parties.isNotEmpty)
+        LazySection(
+          priority: SectionPriority.high,
+          child: LitigationPartiesSection(
+            parties: caseDetail.parties,
+            title: 'Partes do Processo',
+          ),
+        ),
+      if (caseDetail?.isLitigation == true && caseDetail!.parties.isNotEmpty)
+        const SizedBox(height: 16),
+      
+      const LazySection(
         priority: SectionPriority.medium,
         child: NextStepsSection(),
       ),
-      SizedBox(height: 16),
-      LazySection(
+      const SizedBox(height: 16),
+      const LazySection(
         priority: SectionPriority.medium,
         child: DocumentsSection(),
       ),
-      SizedBox(height: 16),
-      LazySection(
+      const SizedBox(height: 16),
+      const LazySection(
         priority: SectionPriority.low,
         child: ProcessStatusSection(),
       ),
-      SizedBox(height: 24), // Espaço extra no final
+      const SizedBox(height: 24), // Espaço extra no final
     ];
+    
+    return sections;
   }
   
   /// **EXPERIÊNCIA DOS ADVOGADOS - CONTEXTUAL**

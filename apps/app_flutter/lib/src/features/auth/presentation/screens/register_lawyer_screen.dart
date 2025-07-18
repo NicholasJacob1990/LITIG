@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/shared/widgets/legal_areas_selector.dart';
 
 class RegisterLawyerScreen extends StatefulWidget {
   final String role;
@@ -29,7 +30,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _oabController = TextEditingController();
-  final _areasController = TextEditingController();
+  List<String> _selectedAreas = [];
   final _maxCasesController = TextEditingController();
   final _cepController = TextEditingController();
   final _addressController = TextEditingController();
@@ -56,7 +57,6 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _oabController.dispose();
-    _areasController.dispose();
     _maxCasesController.dispose();
     _cepController.dispose();
     _addressController.dispose();
@@ -91,7 +91,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
       cnpj: widget.role == 'lawyer_office' ? _cnpjController.text : null,
       phone: _phoneController.text,
       oab: _oabController.text.trim(),
-      areas: _areasController.text.trim(),
+      areas: _selectedAreas.join(','),
       maxCases: int.tryParse(_maxCasesController.text.trim()) ?? 0,
       cep: _cepController.text,
       address: _addressController.text.trim(),
@@ -326,7 +326,18 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
 
   Widget _buildStep2() => Column(children: [
     _buildTextField(controller: _oabController, hintText: 'Nº da OAB (Ex: 123456/SP)', validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
-    _buildTextField(controller: _areasController, hintText: 'Áreas de Atuação (separadas por vírgula)', validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
+    const SizedBox(height: 16),
+    LegalAreasSelector(
+      label: 'Áreas de Atuação',
+      initialValues: _selectedAreas,
+      required: true,
+      onChanged: (areas) {
+        setState(() {
+          _selectedAreas = areas;
+        });
+      },
+    ),
+    const SizedBox(height: 16),
     _buildTextField(controller: _maxCasesController, hintText: 'Nº máximo de casos simultâneos', keyboardType: TextInputType.number, validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
     _buildTextField(controller: _cepController, hintText: 'CEP', keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly, CepInputFormatter()], validator: (v) => v!.length != 9 ? 'CEP inválido' : null),
     _buildTextField(controller: _addressController, hintText: 'Endereço Completo', validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),

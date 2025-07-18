@@ -16,7 +16,8 @@ import uuid
 
 
 class AreaJuridica(str, Enum):
-    """Áreas jurídicas suportadas"""
+    """Áreas jurídicas suportadas - Cobertura completa do mercado brasileiro"""
+    # Áreas Principais (já existentes)
     TRABALHISTA = "Trabalhista"
     CIVIL = "Civil"
     CRIMINAL = "Criminal"
@@ -25,6 +26,42 @@ class AreaJuridica(str, Enum):
     CONSUMIDOR = "Consumidor"
     FAMILIA = "Família"
     EMPRESARIAL = "Empresarial"
+    
+    # Direito Público (alta prioridade)
+    ADMINISTRATIVO = "Administrativo"
+    CONSTITUCIONAL = "Constitucional"
+    ELEITORAL = "Eleitoral"
+    
+    # Direito Especializado (alta demanda)
+    IMOBILIARIO = "Imobiliário"
+    AMBIENTAL = "Ambiental"
+    BANCARIO = "Bancário"
+    SEGUROS = "Seguros"
+    SAUDE = "Saúde"
+    EDUCACIONAL = "Educacional"
+    
+    # Direito Empresarial Especializado
+    PROPRIEDADE_INTELECTUAL = "Propriedade Intelectual"
+    CONCORRENCIAL = "Concorrencial"
+    SOCIETARIO = "Societário"
+    RECUPERACAO_JUDICIAL = "Recuperação Judicial"
+    
+    # Direito Internacional e Regulatório
+    INTERNACIONAL = "Internacional"
+    REGULATORIO = "Regulatório"
+    TELECOMUNICACOES = "Telecomunicações"
+    ENERGIA = "Energia"
+    
+    # Direitos Especiais
+    MILITAR = "Militar"
+    AGRARIO = "Agrário"
+    MARITIMO = "Marítimo"
+    AERONAUTICO = "Aeronáutico"
+    
+    # Direitos Emergentes
+    DIGITAL = "Digital"
+    DESPORTIVO = "Desportivo"
+    MEDICO = "Médico"
 
 
 class ComplexidadeCaso(str, Enum):

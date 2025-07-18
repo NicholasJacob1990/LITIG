@@ -110,7 +110,6 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Chip(
-                        // Melhoria: adicionar ícone para melhor feedback visual
                         avatar: const Icon(Icons.save_outlined, size: 16, color: Colors.orange),
                         label: const Text('Não salvo'),
                         backgroundColor: Colors.orange.withOpacity(0.2),
@@ -125,7 +124,6 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                     Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Chip(
-                        // Melhoria: adicionar ícone para melhor feedback visual
                         avatar: const Icon(Icons.error_outline, size: 16, color: Colors.red),
                         label: Text('${state.validationResult!.violations.length} erros'),
                         backgroundColor: Colors.red.withOpacity(0.2),

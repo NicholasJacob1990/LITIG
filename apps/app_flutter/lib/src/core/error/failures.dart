@@ -79,4 +79,9 @@ class LimitExceededFailure extends Failure {
 /// Falha de recurso indisponível
 class UnavailableFailure extends Failure {
   const UnavailableFailure({required super.message, super.code});
+}
+
+/// Falha de videochamada
+class VideoCallFailure extends Failure {
+  const VideoCallFailure({required super.message, super.code});
 } 

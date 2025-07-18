@@ -129,6 +129,15 @@ import 'package:meu_app/src/features/chat/domain/usecases/get_chat_messages.dart
 import 'package:meu_app/src/features/chat/domain/usecases/send_message.dart';
 import 'package:meu_app/src/features/chat/presentation/bloc/chat_bloc.dart';
 
+// Video Call imports
+import 'package:meu_app/src/features/video_call/domain/repositories/video_call_repository.dart';
+import 'package:meu_app/src/features/video_call/domain/usecases/create_video_call_room.dart';
+import 'package:meu_app/src/features/video_call/domain/usecases/join_video_call_room.dart';
+import 'package:meu_app/src/features/video_call/data/repositories/video_call_repository_impl.dart';
+import 'package:meu_app/src/features/video_call/data/datasources/video_call_remote_data_source.dart';
+import 'package:meu_app/src/features/video_call/presentation/bloc/video_call_bloc.dart';
+import 'package:meu_app/src/core/services/video_call_service.dart';
+
 // Lawyer Hiring
 import 'package:meu_app/src/features/lawyers/data/datasources/lawyer_hiring_remote_data_source.dart';
 import 'package:meu_app/src/features/lawyers/data/repositories/lawyer_hiring_repository_impl.dart';
@@ -137,6 +146,16 @@ import 'package:meu_app/src/features/lawyers/domain/usecases/hire_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/usecases/get_hiring_proposals.dart';
 import 'package:meu_app/src/features/lawyers/domain/usecases/respond_to_proposal.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_hiring_bloc.dart';
+
+// Ratings
+import 'package:meu_app/src/features/ratings/data/datasources/rating_remote_datasource.dart';
+import 'package:meu_app/src/features/ratings/data/datasources/rating_remote_datasource_impl.dart';
+import 'package:meu_app/src/features/ratings/data/repositories/rating_repository_impl.dart';
+import 'package:meu_app/src/features/ratings/domain/repositories/rating_repository.dart';
+import 'package:meu_app/src/features/ratings/domain/usecases/submit_rating_usecase.dart';
+import 'package:meu_app/src/features/ratings/domain/usecases/get_lawyer_ratings_usecase.dart';
+import 'package:meu_app/src/features/ratings/domain/usecases/check_can_rate_usecase.dart';
+import 'package:meu_app/src/features/ratings/presentation/bloc/rating_bloc.dart';
 
 // Removed duplicate SLA Settings imports - using sla_management structure
 
@@ -426,6 +445,31 @@ void configureDependencies() {
         chatRepository: getIt(),
       ));
 
+  // Video Call
+  // Service
+  getIt.registerLazySingleton(() => VideoCallService());
+  
+  // Datasources
+  getIt.registerLazySingleton<VideoCallRemoteDataSource>(
+      () => VideoCallRemoteDataSourceImpl(dio: getIt()));
+  
+  // Repository
+  getIt.registerLazySingleton<VideoCallRepository>(() => VideoCallRepositoryImpl(
+        remoteDataSource: getIt(),
+        networkInfo: getIt(),
+      ));
+  
+  // Use Cases
+  getIt.registerLazySingleton(() => CreateVideoCallRoom(getIt()));
+  getIt.registerLazySingleton(() => JoinVideoCallRoom(getIt()));
+  
+  // BLoC
+  getIt.registerFactory(() => VideoCallBloc(
+        createVideoCallRoom: getIt(),
+        joinVideoCallRoom: getIt(),
+        videoCallService: getIt(),
+      ));
+
   // Lawyer Hiring
   // Datasources
   getIt.registerLazySingleton<LawyerHiringRemoteDataSource>(
@@ -451,3 +495,33 @@ void configureDependencies() {
   ));
 
   getIt.registerFactory(() => LawyerFirmBloc(firmsRepository: getIt()));
+
+  // Ratings System
+  // Data Sources
+  getIt.registerLazySingleton<RatingRemoteDataSource>(
+    () => RatingRemoteDataSourceImpl(dio: getIt()),
+  );
+
+  // Repositories
+  getIt.registerLazySingleton<RatingRepository>(
+    () => RatingRepositoryImpl(
+      remoteDataSource: getIt(),
+      networkInfo: getIt(),
+    ),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => SubmitRatingUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetLawyerRatingsUseCase(getIt()));
+  getIt.registerLazySingleton(() => CheckCanRateUseCase(getIt()));
+
+  // BLoC
+  getIt.registerFactory(
+    () => RatingBloc(
+      submitRatingUseCase: getIt(),
+      getLawyerRatingsUseCase: getIt(),
+      checkCanRateUseCase: getIt(),
+      repository: getIt(),
+    ),
+  );
+}

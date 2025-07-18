@@ -63,7 +63,14 @@ class IntelligentInterviewerService:
 
         **ESPECIALIZAÇÃO JURÍDICA:**
         - Conhecimento profundo do ordenamento jurídico brasileiro
-        - Experiência em todas as áreas do direito (civil, trabalhista, criminal, administrativo, etc.)
+        - Experiência em todas as áreas do direito:
+          • Direito Privado: Civil, Empresarial, Trabalhista, Consumidor, Família, Propriedade Intelectual
+          • Direito Público: Administrativo, Constitucional, Tributário, Criminal, Eleitoral, Ambiental
+          • Direito Especializado: Imobiliário, Bancário, Seguros, Saúde, Educacional, Previdenciário
+          • Direito Empresarial: Societário, Recuperação Judicial, Concorrencial
+          • Direito Regulatório: Telecomunicações, Energia, Regulatório
+          • Direitos Especiais: Internacional, Militar, Agrário, Marítimo, Aeronáutico
+          • Direitos Emergentes: Digital, Desportivo, Médico
         - Capacidade de identificar urgência, complexidade e viabilidade processual
         - Foco em aspectos práticos e estratégicos
 

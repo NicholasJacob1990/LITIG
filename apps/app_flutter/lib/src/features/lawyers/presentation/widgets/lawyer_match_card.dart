@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_hiring_modal.dart';
@@ -426,7 +427,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
           tooltip: 'Chat',
         ),
         IconButton(
-          onPressed: () { /* TODO: Implementar vídeo */ },
+          onPressed: () => _handleVideoCall(context),
           icon: const Icon(LucideIcons.video),
           tooltip: 'Vídeo Chamada',
         ),
@@ -475,6 +476,29 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       isAvailable: matchedLawyer.isAvailable,
       distanceKm: matchedLawyer.distanceKm,
     );
+  }
+
+  void _handleVideoCall(BuildContext context) {
+    // Verificar se caseId e clientId foram fornecidos
+    if (widget.caseId == null || widget.clientId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro: Dados do caso não disponíveis para videochamada.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Gerar nome único para a sala
+    final roomName = 'call_${widget.caseId}_${widget.lawyer.id}_${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Navegar para a tela de videochamada
+    context.push('/video-call/$roomName', extra: {
+      'roomUrl': 'https://litig.daily.co/$roomName',
+      'userId': widget.clientId,
+      'otherPartyName': widget.lawyer.nome,
+    });
   }
 
 } 

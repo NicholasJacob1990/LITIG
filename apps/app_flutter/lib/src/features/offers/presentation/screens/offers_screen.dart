@@ -20,7 +20,7 @@ class OffersScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => getIt<OffersBloc>()..add(LoadOffersData()),
+      create: (_) => getIt<OffersBloc>()..add(LoadOffersData()),
         ),
         BlocProvider(
           create: (_) => getIt<LawyerHiringBloc>(),
@@ -125,26 +125,26 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
 
   Widget _buildPlatformOffersView() {
     return BlocConsumer<OffersBloc, OffersState>(
-      listener: (context, state) {
-        if (state is OfferActionSuccess) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.green));
-        }
-        if (state is OfferActionFailure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(state.error), backgroundColor: Colors.red));
-        }
-      },
-      builder: (context, state) {
-        if (state is OffersLoading || state is OffersInitial) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (state is OffersError) {
-          return Center(child: Text('Erro: ${state.message}'));
-        }
-        if (state is OffersLoaded) {
+        listener: (context, state) {
+          if (state is OfferActionSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.green));
+          }
+          if (state is OfferActionFailure) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.error), backgroundColor: Colors.red));
+          }
+        },
+        builder: (context, state) {
+          if (state is OffersLoading || state is OffersInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is OffersError) {
+            return Center(child: Text('Erro: ${state.message}'));
+          }
+          if (state is OffersLoaded) {
            return Column(
              children: [
                TabBar(
@@ -158,18 +158,18 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
                Expanded(
                  child: TabBarView(
                    controller: _offersTabController,
-                   children: [
-                     _PendingOffersTab(offers: state.pendingOffers),
-                     const Center(child: Text('Histórico')),
-                     _StatsTab(stats: state.stats),
+              children: [
+                _PendingOffersTab(offers: state.pendingOffers),
+                const Center(child: Text('Histórico')),
+                _StatsTab(stats: state.stats),
                    ],
                  ),
                ),
-             ],
-           );
-        }
-        return const Center(child: Text('Estado não tratado.'));
-      },
+              ],
+            );
+          }
+          return const Center(child: Text('Estado não tratado.'));
+        },
     );
   }
 

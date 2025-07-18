@@ -34,6 +34,14 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     on<UpdateBusinessHoursEvent>(_onUpdateBusinessHours);
     on<UpdateEscalationRulesEvent>(_onUpdateEscalationRules);
     on<ToggleOverrideSettingsEvent>(_onToggleOverrideSettings);
+    // Missing handlers for widget compatibility
+    on<ValidateSlaSettingsEvent>(_onValidateSlaSettings);
+    on<ResetSlaSettingsEvent>(_onResetSlaSettings);
+    on<TestSlaSettingsEvent>(_onTestSlaSettings);
+    on<UpdateSlaNotificationSettingsEvent>(_onUpdateSlaNotificationSettings);
+    on<UpdateSlaBusinessRulesEvent>(_onUpdateSlaBusinessRules);
+    on<UpdateSlaEscalationSettingsEvent>(_onUpdateSlaEscalationSettings);
+    on<TestSlaEscalationEvent>(_onTestSlaEscalation);
   }
 
   Future<void> _onLoadSlaSettings(
@@ -591,15 +599,6 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     }
   }
 } 
-import 'package:equatable/equatable.dart';
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/sla_settings_entity.dart';
-import '../../domain/entities/sla_preset_entity.dart';
-import '../../domain/usecases/validate_sla_settings.dart';
-import '../../domain/usecases/calculate_sla_deadline.dart';
-import 'sla_settings_event.dart';
-import 'sla_settings_state.dart';
 
 class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
   final ValidateSlaSettings validateSlaSettings;

@@ -370,4 +370,75 @@ class RevertToVersionEvent extends SlaSettingsEvent {
 
   @override
   List<Object?> get props => [versionId, confirmRevert];
+}
+
+// Missing events for widget compatibility
+class ValidateSlaSettingsEvent extends SlaSettingsEvent {
+  final dynamic settings;
+
+  const ValidateSlaSettingsEvent({
+    required this.settings,
+  });
+
+  @override
+  List<Object?> get props => [settings];
+}
+
+class ResetSlaSettingsEvent extends SlaSettingsEvent {
+  const ResetSlaSettingsEvent();
+}
+
+class TestSlaSettingsEvent extends SlaSettingsEvent {
+  final dynamic settings;
+
+  const TestSlaSettingsEvent({
+    required this.settings,
+  });
+
+  @override
+  List<Object?> get props => [settings];
+}
+
+class UpdateSlaNotificationSettingsEvent extends SlaSettingsEvent {
+  final Map<String, dynamic> settings;
+
+  const UpdateSlaNotificationSettingsEvent({
+    required this.settings,
+  });
+
+  @override
+  List<Object?> get props => [settings];
+}
+
+class UpdateSlaBusinessRulesEvent extends SlaSettingsEvent {
+  final Map<String, dynamic> businessRules;
+
+  const UpdateSlaBusinessRulesEvent({
+    required this.businessRules,
+  });
+
+  @override
+  List<Object?> get props => [businessRules];
+}
+
+class UpdateSlaEscalationSettingsEvent extends SlaSettingsEvent {
+  final Map<String, dynamic> settings;
+
+  const UpdateSlaEscalationSettingsEvent({
+    required this.settings,
+  });
+
+  @override
+  List<Object?> get props => [settings];
+}
+
+class TestSlaEscalationEvent extends SlaSettingsEvent {
+  final String escalationId;
+
+  const TestSlaEscalationEvent({
+    required this.escalationId,
+  });
+
+  @override
+  List<Object?> get props => [escalationId];
 } 

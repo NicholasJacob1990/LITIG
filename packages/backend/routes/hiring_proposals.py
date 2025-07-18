@@ -21,7 +21,7 @@ class CreateHiringProposalRequest(BaseModel):
     contract_type: str
     budget: float = Field(..., gt=0)
     notes: Optional[str] = None
-    
+
     @validator('contract_type')
     def validate_contract_type(cls, v):
         if v not in ['hourly', 'fixed', 'success']:
@@ -232,8 +232,8 @@ async def accept_proposal(
         # Atualizar status da proposta
         update_result = supabase.table("hiring_proposals") \
             .update({
-                "status": "accepted",
-                "responded_at": datetime.utcnow().isoformat()
+            "status": "accepted",
+            "responded_at": datetime.utcnow().isoformat()
             }) \
             .eq("id", proposal_id) \
             .execute()
@@ -246,7 +246,7 @@ async def accept_proposal(
         
         # Criar contrato
         contract_data = {
-            "proposal_id": proposal_id,
+                "proposal_id": proposal_id,
             "client_id": proposal["client_id"],
             "lawyer_id": proposal["lawyer_id"],
             "case_id": proposal["case_id"],
@@ -308,8 +308,8 @@ async def reject_proposal(
         # Atualizar status da proposta
         update_result = supabase.table("hiring_proposals") \
             .update({
-                "status": "rejected",
-                "responded_at": datetime.utcnow().isoformat(),
+            "status": "rejected",
+            "responded_at": datetime.utcnow().isoformat(),
                 "response_message": request.response_message
             }) \
             .eq("id", proposal_id) \
@@ -365,7 +365,7 @@ async def cancel_proposal(
             }) \
             .eq("id", proposal_id) \
             .execute()
-        
+    
         if not update_result.data:
             raise HTTPException(
                 status_code=500,

@@ -24,6 +24,10 @@ Este plano de ação foi elaborado com base na análise precisa do código fonte
 
 ```dart
 // /lib/src/features/lawyers/presentation/widgets/lawyer_hiring_modal.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
+
 class LawyerHiringModal extends StatefulWidget {
   const LawyerHiringModal({
     super.key,
@@ -50,6 +54,9 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
     return BlocProvider(
       create: (context) => getIt<LawyerHiringBloc>(),
       child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Container(
           width: 500,
           padding: const EdgeInsets.all(24),
@@ -75,29 +82,42 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
   }
 
   Widget _buildHeader() {
+    final theme = Theme.of(context);
     return Row(
       children: [
-        const Icon(Icons.gavel, size: 32, color: Colors.blue),
+        Icon(
+          Icons.gavel, 
+          size: 32, 
+          color: AppColors.primaryBlue,
+        ),
         const SizedBox(width: 12),
-        const Text(
+        Text(
           'Contratar Advogado',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         const Spacer(),
         IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.close),
+          tooltip: 'Fechar',
         ),
       ],
     );
   }
 
   Widget _buildLawyerInfo() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+        ),
       ),
       child: Row(
         children: [
@@ -106,8 +126,13 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
             backgroundImage: widget.lawyer.avatarUrl != null
                 ? NetworkImage(widget.lawyer.avatarUrl!)
                 : null,
+            backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
             child: widget.lawyer.avatarUrl == null
-                ? const Icon(Icons.person)
+                ? Icon(
+                    Icons.person,
+                    color: AppColors.primaryBlue,
+                    size: 30,
+                  )
                 : null,
           ),
           const SizedBox(width: 16),
@@ -117,20 +142,50 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
               children: [
                 Text(
                   widget.lawyer.name,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                Text('OAB: ${widget.lawyer.oabNumber}'),
-                Text('${widget.lawyer.expertise.join(', ')}'),
+                const SizedBox(height: 4),
+                Text(
+                  'OAB: ${widget.lawyer.oabNumber}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                Text(
+                  '${widget.lawyer.expertise.join(', ')}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                    Text(' ${widget.lawyer.rating.toStringAsFixed(1)}'),
+                    Icon(
+                      Icons.star, 
+                      color: AppColors.secondaryYellow, 
+                      size: 16,
+                    ),
+                    Text(
+                      ' ${widget.lawyer.rating.toStringAsFixed(1)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.8),
+                      ),
+                    ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.location_on, size: 16),
-                    Text(' ${widget.lawyer.distance.toStringAsFixed(1)} km'),
+                    Icon(
+                      Icons.location_on, 
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      size: 16,
+                    ),
+                    Text(
+                      ' ${widget.lawyer.distance.toStringAsFixed(1)} km',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.8),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -142,12 +197,16 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
   }
 
   Widget _buildContractOptions() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Tipo de Contrato',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 8),
         RadioListTile<String>(
@@ -156,6 +215,7 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
           value: 'hourly',
           groupValue: _selectedContractType,
           onChanged: (value) => setState(() => _selectedContractType = value!),
+          activeColor: AppColors.primaryBlue,
         ),
         RadioListTile<String>(
           title: const Text('Valor Fixo'),
@@ -163,6 +223,7 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
           value: 'fixed',
           groupValue: _selectedContractType,
           onChanged: (value) => setState(() => _selectedContractType = value!),
+          activeColor: AppColors.primaryBlue,
         ),
         RadioListTile<String>(
           title: const Text('Êxito'),
@@ -170,6 +231,7 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
           value: 'success',
           groupValue: _selectedContractType,
           onChanged: (value) => setState(() => _selectedContractType = value!),
+          activeColor: AppColors.primaryBlue,
         ),
       ],
     );
@@ -183,8 +245,22 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
         labelText: _selectedContractType == 'hourly' 
             ? 'Valor por Hora (R$)'
             : 'Orçamento Total (R$)',
-        prefixText: 'R$ ',
-        border: const OutlineInputBorder(),
+        prefixText: 'R\$ ',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppColors.primaryBlue,
+          ),
+        ),
       ),
     );
   }
@@ -193,10 +269,24 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
     return TextField(
       controller: _notesController,
       maxLines: 3,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: 'Observações (opcional)',
         hintText: 'Informações adicionais sobre o caso...',
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppColors.primaryBlue,
+          ),
+        ),
       ),
     );
   }
@@ -207,16 +297,18 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
         if (state is LawyerHiringSuccess) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Proposta enviada com sucesso!'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Proposta enviada com sucesso!'),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         } else if (state is LawyerHiringError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Erro: ${state.message}'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -234,11 +326,21 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
             const SizedBox(width: 12),
             ElevatedButton(
               onPressed: isLoading ? null : _sendHiringProposal,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: isLoading
                   ? const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
                     )
                   : const Text('Enviar Proposta'),
             ),
@@ -251,9 +353,10 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
   void _sendHiringProposal() {
     if (_budgetController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, informe o valor'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          content: const Text('Por favor, informe o valor'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -262,9 +365,10 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
     final budget = double.tryParse(_budgetController.text.replaceAll(',', '.'));
     if (budget == null || budget <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Valor inválido'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          content: const Text('Valor inválido'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -383,42 +487,58 @@ class LawyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Informações do advogado (existente)
-            _buildLawyerInfo(),
-            
-            const SizedBox(height: 16),
-            
-            // Ações
-            Row(
+            return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showLawyerProfile(context),
-                    child: const Text('Ver Perfil'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: caseId != null && clientId != null
-                        ? () => _showHiringModal(context)
-                        : null,
-                    child: const Text('Contratar'),
-                  ),
+                // Informações do advogado (existente)
+                _buildLawyerInfo(),
+                
+                const SizedBox(height: 16),
+                
+                // Ações
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _showLawyerProfile(context),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.primaryBlue),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Ver Perfil'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: caseId != null && clientId != null
+                            ? () => _showHiringModal(context)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryBlue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Contratar'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
   }
 
   void _showHiringModal(BuildContext context) {
@@ -1390,8 +1510,12 @@ class _UnifiedLawyerDashboardState extends State<UnifiedLawyerDashboard> {
   }
 
   Widget _buildKPICard(String title, String value, IconData icon, Color color, double trend) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1403,14 +1527,14 @@ class _UnifiedLawyerDashboardState extends State<UnifiedLawyerDashboard> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 20),
                 ),
                 const Spacer(),
                 Icon(
                   trend > 0 ? Icons.trending_up : Icons.trending_down,
-                  color: trend > 0 ? Colors.green : Colors.red,
+                  color: trend > 0 ? AppColors.success : AppColors.error,
                   size: 16,
                 ),
               ],
@@ -1418,16 +1542,15 @@ class _UnifiedLawyerDashboardState extends State<UnifiedLawyerDashboard> {
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
@@ -1498,11 +1621,15 @@ class _UnifiedLawyerDashboardState extends State<UnifiedLawyerDashboard> {
   }
 
   Widget _buildQuickActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -1519,9 +1646,9 @@ class _UnifiedLawyerDashboardState extends State<UnifiedLawyerDashboard> {
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 12,
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1594,7 +1721,7 @@ class _AdvancedSearchFiltersState extends State<AdvancedSearchFilters> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -2571,10 +2698,10 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
   }
 
   Color _getRatingColor(double rating) {
-    if (rating >= 4) return Colors.green;
-    if (rating >= 3) return Colors.orange;
-    if (rating >= 2) return Colors.red;
-    return Colors.grey;
+              if (rating >= 4) return AppColors.success;
+          if (rating >= 3) return AppColors.warning;
+          if (rating >= 2) return AppColors.error;
+          return Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
   }
 
   bool _canSubmitRating() {
@@ -2604,29 +2731,39 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
   }
 
   void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Avaliação Enviada!'),
-          ],
-        ),
-        content: const Text('Obrigado pelo seu feedback. Sua avaliação foi registrada com sucesso.'),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
+            showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: AppColors.success),
+                const SizedBox(width: 8),
+                const Text('Avaliação Enviada!'),
+              ],
+            ),
+            content: const Text('Obrigado pelo seu feedback. Sua avaliação foi registrada com sucesso.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
   }
 
   void _showErrorDialog(String message) {
