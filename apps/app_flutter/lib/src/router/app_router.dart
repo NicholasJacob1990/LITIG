@@ -36,6 +36,7 @@ import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
 import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
+import 'package:meu_app/src/features/firms/presentation/screens/firm_team_screen.dart';
 import 'package:meu_app/injection_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -172,6 +173,16 @@ GoRouter appRouter(AuthBloc authBloc) {
         path: '/firm-modal/:firmId',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => FirmDetailScreen(firmId: state.pathParameters['firmId']!),
+      ),
+      
+      // ✅ NOVO: Rota crítica "Ver Equipe Completa"
+      GoRoute(
+        path: '/firm/:firmId/lawyers',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final firmId = state.pathParameters['firmId']!;
+          return FirmTeamScreen(firmId: firmId);
+        },
       ),
       GoRoute(
         path: '/triage',
