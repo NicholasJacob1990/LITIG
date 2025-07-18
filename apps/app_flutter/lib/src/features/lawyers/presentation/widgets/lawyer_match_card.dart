@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_hiring_modal.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 
 class LawyerMatchCard extends StatefulWidget {
   final MatchedLawyer lawyer;
@@ -72,6 +73,11 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
 
             // --- MÉTRICAS ---
             _buildMetricsRow(),
+
+            const SizedBox(height: 12),
+
+            // --- DADOS SOCIAIS ---
+            _buildSocialSection(),
 
             const SizedBox(height: 16),
 
@@ -447,18 +453,24 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       return;
     }
 
-    // Converte MatchedLawyer para Lawyer
-    final lawyer = _convertToLawyer(widget.lawyer);
-
     // Abre o LawyerHiringModal
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => LawyerHiringModal(
-        lawyer: lawyer,
+        lawyer: _convertToLawyer(widget.lawyer),
         caseId: widget.caseId!,
         clientId: widget.clientId!,
       ),
+    );
+  }
+
+  Widget _buildSocialSection() {
+    // TODO: Implementar campos de redes sociais no modelo MatchedLawyer
+    return LawyerSocialLinks(
+      linkedinUrl: 'https://linkedin.com/in/advogado',
+      instagramUrl: 'https://instagram.com/advogado',
+      facebookUrl: 'https://facebook.com/advogado',
     );
   }
 

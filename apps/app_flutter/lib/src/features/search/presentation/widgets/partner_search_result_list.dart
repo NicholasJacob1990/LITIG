@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 
 class PartnerSearchResultList extends StatelessWidget {
@@ -104,11 +105,22 @@ class PartnerSearchResultList extends StatelessWidget {
                           if (showSourceBadges) _buildSourceBadge(context, 'semantic'),
                         ],
                       ),
-                      Text(
-                        'OAB: ${lawyer.oab}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'OAB: ${lawyer.oab}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const Spacer(),
+                          // Ícones das redes sociais
+                          LawyerSocialLinks(
+                            linkedinUrl: 'https://linkedin.com/in/${lawyer.name.toLowerCase().replaceAll(' ', '-')}',
+                            instagramUrl: 'https://instagram.com/${lawyer.name.toLowerCase().replaceAll(' ', '')}',
+                            facebookUrl: 'https://facebook.com/${lawyer.name.toLowerCase().replaceAll(' ', '.')}',
+                          ),
+                        ],
                       ),
                     ],
                   ),

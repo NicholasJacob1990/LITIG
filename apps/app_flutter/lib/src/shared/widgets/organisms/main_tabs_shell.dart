@@ -109,6 +109,9 @@ class MainTabsShell extends StatelessWidget {
     Widget iconWidget = Icon(tab.icon);
     
     if (shouldShowBadge) {
+      // TODO: Implementar NotificationBadge quando NotificationBloc estiver pronto
+      iconWidget = Icon(tab.icon);
+      /*
       iconWidget = BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, notificationState) {
           return NotificationBadge(
@@ -117,6 +120,7 @@ class MainTabsShell extends StatelessWidget {
           );
         },
       );
+      */
     }
     
     return BottomNavigationBarItem(
@@ -249,9 +253,9 @@ class MainTabsShell extends StatelessWidget {
           const NavigationTab(
             label: 'Início',
             icon: LucideIcons.home,
-            branchIndex: 7,
+            branchIndex: 6,
             requiredPermission: 'nav.view.home',
-            route: '/home',
+            route: '/contractor-home',
           ),
           const NavigationTab(
             label: 'Meus Casos',

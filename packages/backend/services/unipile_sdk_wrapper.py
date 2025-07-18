@@ -148,132 +148,138 @@ class UnipileSDKWrapper:
             self.logger.error(f"Erro ao listar contas: {e}")
             return []
     
-    async def connect_linkedin(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        """
-        Conecta uma conta do LinkedIn usando o SDK.
-        """
+    async def connect_instagram(self, credentials: Dict) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta do Instagram usando o SDK."""
         try:
-            result = await self._execute_node_command("connect-linkedin", username, password)
+            cmd = ["connect-instagram", credentials.get('username', ''), credentials.get('password', '')]
+            result = await self._execute_node_command(*cmd)
             
             if result.get("success", False):
-                self.logger.info(f"Conta LinkedIn conectada com sucesso: {username}")
-                return result.get("data")
+                self.logger.info(f"Instagram conectado com sucesso: {result.get('data', {}).get('id', 'unknown')}")
+                return result
             else:
-                self.logger.error(f"Erro ao conectar LinkedIn: {result.get('error', 'Erro desconhecido')}")
+                self.logger.error(f"Erro ao conectar Instagram: {result.get('error', 'Erro desconhecido')}")
                 return None
                 
         except Exception as e:
-            self.logger.error(f"Erro ao conectar LinkedIn: {e}")
+            self.logger.error(f"Erro ao conectar Instagram: {e}")
             return None
-    
-    async def get_company_profile(self, account_id: str, identifier: str) -> Optional[Dict[str, Any]]:
-        """
-        Recupera o perfil de uma empresa no LinkedIn.
-        """
+
+    async def connect_facebook(self, credentials: Dict) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta do Facebook usando o SDK."""
         try:
-            result = await self._execute_node_command("get-company-profile", account_id, identifier)
+            cmd = ["connect-facebook", credentials.get('username', ''), credentials.get('password', '')]
+            result = await self._execute_node_command(*cmd)
             
             if result.get("success", False):
-                return result.get("data")
+                self.logger.info(f"Facebook conectado com sucesso: {result.get('data', {}).get('id', 'unknown')}")
+                return result
             else:
-                self.logger.error(f"Erro ao buscar perfil da empresa: {result.get('error', 'Erro desconhecido')}")
+                self.logger.error(f"Erro ao conectar Facebook: {result.get('error', 'Erro desconhecido')}")
                 return None
                 
         except Exception as e:
-            self.logger.error(f"Erro ao buscar perfil da empresa: {e}")
+            self.logger.error(f"Erro ao conectar Facebook: {e}")
             return None
     
-    async def connect_email(self, provider: str, email: str, credentials: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Conecta uma conta de email (Gmail/Outlook).
-        """
+    async def get_instagram_profile(self, account_id: str) -> Optional[Dict[str, Any]]:
+        """Recupera perfil completo do Instagram com métricas."""
         try:
-            credentials_json = json.dumps(credentials)
-            result = await self._execute_node_command("connect-email", provider, email, credentials_json)
+            cmd = ["get-instagram-profile", account_id]
+            result = await self._execute_node_command(*cmd)
             
             if result.get("success", False):
-                self.logger.info(f"Conta {provider} conectada com sucesso: {email}")
-                return result.get("data")
+                self.logger.info(f"Perfil Instagram obtido: {account_id}")
+                return result
             else:
-                self.logger.error(f"Erro ao conectar {provider}: {result.get('error', 'Erro desconhecido')}")
+                self.logger.error(f"Erro ao obter perfil Instagram: {result.get('error', 'Erro desconhecido')}")
                 return None
                 
         except Exception as e:
-            self.logger.error(f"Erro ao conectar email: {e}")
+            self.logger.error(f"Erro ao obter perfil Instagram: {e}")
             return None
     
-    async def list_emails(self, account_id: str, options: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """
-        Lista emails de uma conta específica.
-        """
+    async def get_facebook_profile(self, account_id: str) -> Optional[Dict[str, Any]]:
+        """Recupera perfil completo do Facebook com métricas."""
         try:
-            options_json = json.dumps(options or {})
-            result = await self._execute_node_command("list-emails", account_id, options_json)
+            cmd = ["get-facebook-profile", account_id]
+            result = await self._execute_node_command(*cmd)
             
             if result.get("success", False):
-                return result.get("data", [])
+                self.logger.info(f"Perfil Facebook obtido: {account_id}")
+                return result
             else:
-                self.logger.error(f"Erro ao listar emails: {result.get('error', 'Erro desconhecido')}")
-                return []
-                
-        except Exception as e:
-            self.logger.error(f"Erro ao listar emails: {e}")
-            return []
-    
-    async def send_email(self, account_id: str, email_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Envia um email.
-        """
-        try:
-            email_json = json.dumps(email_data)
-            result = await self._execute_node_command("send-email", account_id, email_json)
-            
-            if result.get("success", False):
-                self.logger.info(f"Email enviado com sucesso via conta {account_id}")
-                return result.get("data")
-            else:
-                self.logger.error(f"Erro ao enviar email: {result.get('error', 'Erro desconhecido')}")
+                self.logger.error(f"Erro ao obter perfil Facebook: {result.get('error', 'Erro desconhecido')}")
                 return None
                 
         except Exception as e:
-            self.logger.error(f"Erro ao enviar email: {e}")
+            self.logger.error(f"Erro ao obter perfil Facebook: {e}")
             return None
     
-    async def health_check(self) -> Dict[str, Any]:
-        """
-        Verifica saúde da conexão com Unipile via SDK.
-        """
+    async def get_instagram_posts(self, account_id: str, options: Dict = {}) -> Optional[Dict[str, Any]]:
+        """Lista posts do Instagram com análise completa."""
         try:
-            result = await self._execute_node_command("health-check")
+            options_json = json.dumps(options) if options else '{}'
+            cmd = ["get-instagram-posts", account_id, options_json]
+            result = await self._execute_node_command(*cmd)
             
             if result.get("success", False):
-                return {
-                    "status": "healthy",
-                    "connected_accounts": result.get("connected_accounts", 0),
-                    "api_endpoint": result.get("api_endpoint", ""),
-                    "has_token": result.get("has_token", False),
-                    "using_sdk": True,
-                    "timestamp": result.get("timestamp", datetime.now().isoformat())
-                }
+                self.logger.info(f"Posts Instagram obtidos: {account_id}")
+                return result
             else:
-                return {
-                    "status": "unhealthy",
-                    "error": result.get("error", "Erro desconhecido"),
-                    "using_sdk": True,
-                    "timestamp": result.get("timestamp", datetime.now().isoformat())
-                }
+                self.logger.error(f"Erro ao obter posts Instagram: {result.get('error', 'Erro desconhecido')}")
+                return None
                 
         except Exception as e:
-            return {
-                "status": "error",
-                "error": str(e),
-                "using_sdk": True,
-                "timestamp": datetime.now().isoformat()
-            }
+            self.logger.error(f"Erro ao obter posts Instagram: {e}")
+            return None
     
-    async def get_communication_data(self, oab_number: str, email: Optional[str] = None) -> Tuple[Optional[Dict], DataTransparency]:
+    async def get_facebook_posts(self, account_id: str, options: Dict = {}) -> Optional[Dict[str, Any]]:
+        """Lista posts do Facebook com análise completa."""
+        try:
+            options_json = json.dumps(options) if options else '{}'
+            cmd = ["get-facebook-posts", account_id, options_json]
+            result = await self._execute_node_command(*cmd)
+            
+            if result.get("success", False):
+                self.logger.info(f"Posts Facebook obtidos: {account_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter posts Facebook: {result.get('error', 'Erro desconhecido')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao obter posts Facebook: {e}")
+            return None
+    
+    async def get_social_profiles(self, account_ids: Dict) -> Optional[Dict[str, Any]]:
+        """Obtém dados consolidados de todas as redes sociais."""
+        try:
+            accounts_json = json.dumps(account_ids)
+            cmd = ["get-social-profiles", accounts_json]
+            result = await self._execute_node_command(*cmd)
+            
+            if result.get("success", False):
+                self.logger.info(f"Perfis sociais consolidados obtidos")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter perfis sociais: {result.get('error', 'Erro desconhecido')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao obter perfis sociais: {e}")
+            return None
+    
+    async def get_communication_data(self, oab_number: str, email: str = None) -> Tuple[Optional[Dict], DataTransparency]:
         """
-        Busca dados de comunicação para um advogado usando o SDK.
+        Busca dados de comunicação para um advogado incluindo redes sociais.
+        
+        Args:
+            oab_number: Número OAB do advogado
+            email: Email do advogado (opcional)
+            
+        Returns:
+            Tuple com dados e transparência
         """
         transparency = DataTransparency(
             source=DataSource.UNIPILE,
@@ -281,32 +287,68 @@ class UnipileSDKWrapper:
             confidence_score=0.0,
             data_freshness_hours=0,
             validation_status="pending",
-            source_url=f"https://{self.dsn}/api/v1/accounts",
-            api_version="v1-sdk"
+            source_url=f"{self.dsn}/api/v1/accounts",
+            api_version="v2-sdk-social"
         )
         
         try:
-            # 1. Listar contas
+            # 1. Listar contas para encontrar dados relevantes
             accounts = await self.list_accounts()
             
-            # 2. Buscar dados de comunicação baseados nas contas
-            communication_data = await self._analyze_communication_data(accounts, email)
+                         # 2. Buscar perfil por email se fornecido
+             profile = None
+             if email:
+                 self.logger.info(f"Buscando perfil por email: {email}")
+             
+             # 3. Buscar dados de comunicação tradicional
+             communication_data = await self._analyze_communication_data(accounts)
             
-            if communication_data:
-                transparency.confidence_score = 0.85  # SDK oferece maior confiabilidade
+            # 4. 🆕 Buscar dados sociais se há contas Instagram/Facebook
+            social_accounts = {}
+            for account in accounts:
+                if account.provider == 'instagram':
+                    social_accounts['instagram'] = account.id
+                elif account.provider == 'facebook':
+                    social_accounts['facebook'] = account.id
+                elif account.provider == 'linkedin':
+                    social_accounts['linkedin'] = account.id
+            
+            # 5. 🆕 Obter dados sociais consolidados
+            social_data = None
+            if social_accounts:
+                social_result = await self.get_social_profiles(social_accounts)
+                if social_result and social_result.get("success"):
+                    social_data = social_result.get("data", {})
+            
+            # 6. Consolidar dados tradicionais + sociais
+            if communication_data or social_data:
+                consolidated_data = {
+                    **communication_data if communication_data else {},
+                    "social_presence": social_data.get("social_score", {}) if social_data else {},
+                    "platform_details": social_data.get("profiles", {}) if social_data else {},
+                    "data_sources": ["unipile_communication", "unipile_social"] if social_data else ["unipile_communication"]
+                }
+                
+                # Validar dados consolidados
+                if self._validate_communication_data(consolidated_data):
+                    transparency.confidence_score = 0.85  # Maior score com dados sociais
                 transparency.validation_status = "validated"
-                transparency.data_freshness_hours = 1  # Dados mais frescos via SDK
+                    transparency.data_freshness_hours = self._calculate_freshness(
+                        consolidated_data.get("last_updated")
+                    )
                 
                 # Enriquecer dados com informações específicas para advogados
-                enriched_data = self._enrich_lawyer_data(communication_data, oab_number)
+                    enriched_data = self._enrich_lawyer_data(consolidated_data, oab_number)
                 
                 return enriched_data, transparency
+                else:
+                    transparency.validation_status = "failed"
+                    self.logger.warning(f"Dados inválidos do Unipile para OAB {oab_number}")
             else:
-                transparency.validation_status = "no_data"
                 self.logger.info(f"Nenhum dado de comunicação encontrado para OAB {oab_number}")
                 
         except Exception as e:
-            self.logger.error(f"Erro ao buscar dados de comunicação: {e}")
+            self.logger.error(f"Erro ao buscar dados Unipile: {e}")
             transparency.validation_status = "failed"
         
         return None, transparency
@@ -446,3 +488,86 @@ class UnipileSDKWrapper:
             return datetime.fromisoformat(date_str.replace('Z', '+00:00')).replace(tzinfo=None)
         except:
             return None 
+
+    # 🆕 NOVOS MÉTODOS PARA REDES SOCIAIS
+    async def connect_instagram_simple(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta do Instagram usando o SDK."""
+        try:
+            result = await self._execute_node_command("connect-instagram", username, password)
+            
+            if result.get("success", False):
+                self.logger.info(f"Instagram conectado: {username}")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar Instagram: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar Instagram: {e}")
+            return None
+
+    async def connect_facebook_simple(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta do Facebook usando o SDK."""
+        try:
+            result = await self._execute_node_command("connect-facebook", username, password)
+            
+            if result.get("success", False):
+                self.logger.info(f"Facebook conectado: {username}")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar Facebook: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar Facebook: {e}")
+            return None
+
+    async def get_instagram_data(self, account_id: str) -> Optional[Dict[str, Any]]:
+        """Obtém dados completos do Instagram."""
+        try:
+            profile_result = await self._execute_node_command("get-instagram-profile", account_id)
+            posts_result = await self._execute_node_command("get-instagram-posts", account_id, '{"limit":20}')
+            
+            if profile_result.get("success") and posts_result.get("success"):
+                return {
+                    "profile": profile_result.get("data"),
+                    "posts": posts_result.get("data"),
+                    "provider": "instagram"
+                }
+            return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao obter dados Instagram: {e}")
+            return None
+
+    async def get_facebook_data(self, account_id: str) -> Optional[Dict[str, Any]]:
+        """Obtém dados completos do Facebook."""
+        try:
+            profile_result = await self._execute_node_command("get-facebook-profile", account_id)
+            posts_result = await self._execute_node_command("get-facebook-posts", account_id, '{"limit":20}')
+            
+            if profile_result.get("success") and posts_result.get("success"):
+                return {
+                    "profile": profile_result.get("data"),
+                    "posts": posts_result.get("data"),
+                    "provider": "facebook"
+                }
+            return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao obter dados Facebook: {e}")
+            return None
+
+    async def get_social_score(self, platforms: Dict[str, str]) -> Optional[Dict[str, Any]]:
+        """Calcula score social consolidado."""
+        try:
+            accounts_json = json.dumps(platforms)
+            result = await self._execute_node_command("get-social-profiles", accounts_json)
+            
+            if result.get("success", False):
+                return result.get("data")
+            return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao calcular score social: {e}")
+            return None

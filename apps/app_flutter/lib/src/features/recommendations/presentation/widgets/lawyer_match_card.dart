@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart' as lucide;
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 
 class LawyerMatchCard extends StatelessWidget {
   final MatchedLawyer lawyer;

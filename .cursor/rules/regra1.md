@@ -1,5 +1,5 @@
 -sempre leia todo diretório antes de realizar alterações 
--anote todas as criações e alterações de novos componentes ou arquivos no @status.md e consulte-as sempre que continuar ou criar novas ações. Não delete conteúdo do arquivo, apenas acrescente para documentar todo o histórico de alterações
+-anote todas as criações e alterações de novos componentes ou arquivos em um arquivo dentro da pasta @status e consulte-as sempre que continuar ou criar novas ações. Não delete conteúdo do arquivo, apenas acrescente para documentar todo o histórico de alterações
 -tenha uma análise holística para o diretório flutter 
 -ODEIO SIMPLIFICAÇÕES
 -NÃO SIMPLIFIQUE

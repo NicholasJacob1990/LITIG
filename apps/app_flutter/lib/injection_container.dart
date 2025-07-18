@@ -159,6 +159,9 @@ import 'package:meu_app/src/features/ratings/presentation/bloc/rating_bloc.dart'
 
 // Removed duplicate SLA Settings imports - using sla_management structure
 
+// OCR Service
+import 'package:meu_app/src/core/services/ocr_service.dart';
+
 final getIt = GetIt.instance;
 
 void configureDependencies() {
@@ -524,4 +527,7 @@ void configureDependencies() {
       repository: getIt(),
     ),
   );
+
+  // OCR Service
+  getIt.registerLazySingleton<OCRService>(() => OCRService());
 }

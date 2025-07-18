@@ -97,13 +97,23 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS
+# Configurar CORS para aplicação web administrativa
+admin_origins = [
+    "http://localhost:3000",  # React/Next.js dev
+    "http://localhost:8080",  # Vue.js dev  
+    "http://localhost:4200",  # Angular dev
+    "http://localhost:5173",  # Vite dev
+    "https://admin.litig1.com",  # Produção
+    "https://controladoria.litig1.com"  # Produção alternativa
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=admin_origins + ["http://localhost:8081"],  # Flutter web também
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"]  # Para downloads
 )
 
 # ⚡ CHAVE 4: Background task para polling automático de pesos
@@ -1050,3 +1060,29 @@ if __name__ == "__main__":
         )
     except ImportError:
         print("Para executar a API, instale uvicorn: pip install uvicorn")
+
+# Registrar rotas administrativas
+try:
+    from .routes.admin import router as admin_router
+    app.include_router(admin_router, prefix="/api", tags=["Controladoria"])
+    print("✅ Rotas administrativas registradas com sucesso")
+except ImportError as e:
+    print(f"⚠️ Erro ao importar rotas administrativas: {e}")
+except Exception as e:
+    print(f"❌ Erro ao registrar rotas administrativas: {e}")
+
+# Endpoint de health check específico para aplicação web
+@app.get("/api/admin/health-web")
+async def admin_health_web():
+    """Health check otimizado para aplicação web administrativa."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0",
+        "environment": "development",
+        "cors_enabled": True,
+        "admin_features": [
+            "dashboard", "lawyers_management", "data_audit", 
+            "sync_control", "reports", "monitoring"
+        ]
+    }

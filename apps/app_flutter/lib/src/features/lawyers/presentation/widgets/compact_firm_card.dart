@@ -3,7 +3,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
-import 'compact_search_card.dart'; // Import for Badge classes
+import 'compact_search_card.dart' as search_card; // Import for Badge classes
+import '../../../lawyers/presentation/widgets/lawyer_social_links.dart';
 
 /// Cartão compacto para escritórios na aba "Buscar" (140-160px)
 /// 
@@ -89,6 +90,13 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Ícones das redes sociais
+                          LawyerSocialLinks(
+                            linkedinUrl: 'https://linkedin.com/company/${widget.firm.name.toLowerCase()}',
+                            instagramUrl: 'https://instagram.com/${widget.firm.name.toLowerCase()}',
+                            facebookUrl: 'https://facebook.com/${widget.firm.name.toLowerCase()}',
                           ),
                         ],
                       ),
@@ -225,17 +233,17 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
         const SizedBox(width: 8),
         Expanded(
           flex: 3,
-          child: TextButton(
-            onPressed: widget.onViewFirm,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primaryBlue,
-              padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: TextButton(
+              onPressed: () => _navigateToTeamView(context),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primaryBlue,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+              ),
+              child: const Text(
+                'Ver Equipe',
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+              ),
             ),
-            child: const Text(
-              'Ver Escritório',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
-            ),
-          ),
         ),
       ],
     );
@@ -254,41 +262,45 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
     return 'Direito Empresarial • Tributário';
   }
 
-  List<Badge> _getInstitutionalBadges() {
-    final badges = <Badge>[];
+  List<search_card.Badge> _getInstitutionalBadges() {
+    final badges = <search_card.Badge>[];
     
     // Badges baseados em KPIs e certificações institucionais
     if (widget.firm.kpis?.nps != null && widget.firm.kpis!.nps! > 8.0) {
-      badges.add(const Badge(title: 'Alto NPS', source: BadgeSource.platform));
+      badges.add(const search_card.Badge(title: 'Alto NPS', source: search_card.BadgeSource.platform));
     }
     
     if (widget.firm.kpis?.successRate != null && widget.firm.kpis!.successRate! > 0.85) {
-      badges.add(const Badge(title: '85%+ Êxito', source: BadgeSource.api));
+      badges.add(const search_card.Badge(title: '85%+ Êxito', source: search_card.BadgeSource.api));
     }
     
     // Certificações/Selos institucionais (placeholder)
-    badges.add(const Badge(title: 'Selo OAB-SP', source: BadgeSource.certified));
+    badges.add(const search_card.Badge(title: 'Selo OAB-SP', source: search_card.BadgeSource.certified));
     
     if (widget.firm.foundedYear != null) {
       final yearsOperation = DateTime.now().year - widget.firm.foundedYear!;
       if (yearsOperation > 10) {
-        badges.add(Badge(title: '$yearsOperation anos', source: BadgeSource.platform));
+        badges.add(search_card.Badge(title: '$yearsOperation anos', source: search_card.BadgeSource.platform));
       }
     }
     
     return badges;
   }
 
-  Color _getBadgeColor(BadgeSource source) {
+  Color _getBadgeColor(search_card.BadgeSource source) {
     switch (source) {
-      case BadgeSource.api:
+      case search_card.BadgeSource.api:
         return AppColors.warning; // APIs externas - dourado
-      case BadgeSource.platform:
+      case search_card.BadgeSource.platform:
         return AppColors.primaryBlue; // Sistema interno - azul
-      case BadgeSource.certified:
+      case search_card.BadgeSource.certified:
         return AppColors.success; // Certificado - verde
-      case BadgeSource.declared:
+      case search_card.BadgeSource.declared:
         return AppColors.lightTextSecondary; // Auto-declarado - cinza
     }
+  }
+
+  void _navigateToTeamView(BuildContext context) {
+    context.push('/firm/${widget.firm.id}/lawyers');
   }
 } 

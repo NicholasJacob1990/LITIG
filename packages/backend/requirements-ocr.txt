@@ -1,0 +1,31 @@
+# Dependências principais para OCR
+pytesseract==0.3.10
+Pillow==10.1.0
+
+# Validação de documentos brasileiros
+validate-docbr==1.10.0
+
+# OpenAI para enhancement
+openai>=1.0.0
+
+# Engines OCR avançados (opcionais - instalar conforme necessário)
+# Descomente as bibliotecas que deseja usar:
+
+# EasyOCR - Bom para documentos gerais
+# easyocr==1.7.0
+
+# docTR - Excelente para reconhecimento de documentos
+# python-doctr[tf]==0.7.0  # Para TensorFlow
+# python-doctr[torch]==0.7.0  # Para PyTorch
+
+# TrOCR - Estado da arte para texto manuscrito  
+# transformers==4.35.0
+# torch==2.1.0
+
+# Surya - Engine moderno de alta performance
+# surya-ocr==0.4.0
+
+# Dependências do sistema:
+# Ubuntu/Debian: sudo apt-get install tesseract-ocr tesseract-ocr-por
+# macOS: brew install tesseract tesseract-lang
+# Windows: Baixar de https://github.com/UB-Mannheim/tesseract/wiki 

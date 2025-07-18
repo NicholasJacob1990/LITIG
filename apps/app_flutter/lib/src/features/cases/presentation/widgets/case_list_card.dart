@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 
 class CaseListCard extends StatelessWidget {
   final String caseId;
@@ -88,7 +89,18 @@ class CaseListCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
               Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-              Text(lawyer.specialty, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Row(
+                children: [
+                  Text(lawyer.specialty, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                  const Spacer(),
+                  // Ícones das redes sociais
+                  LawyerSocialLinks(
+                    linkedinUrl: 'https://linkedin.com/in/${lawyer.name.toLowerCase().replaceAll(' ', '-')}',
+                    instagramUrl: 'https://instagram.com/${lawyer.name.toLowerCase().replaceAll(' ', '')}',
+                    facebookUrl: 'https://facebook.com/${lawyer.name.toLowerCase().replaceAll(' ', '.')}',
+                  ),
+                ],
+              ),
             ],
           ),
                     ),

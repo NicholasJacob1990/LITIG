@@ -14,7 +14,7 @@ import 'package:meu_app/src/features/cases/presentation/screens/case_detail_scre
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/partners_screen.dart';
-import 'package:meu_app/src/features/messages/presentation/screens/messages_screen.dart';
+
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/settings_screen.dart';
@@ -62,10 +62,11 @@ GoRouter appRouter(AuthBloc authBloc) {
         switch (userRole) {
           case 'lawyer_associated':
             return '/dashboard';
-          case 'lawyer_individual':
           case 'lawyer_office':
+            return '/firm-dashboard';  // Dashboard específico para sócios
+          case 'lawyer_individual':
           case 'lawyer_platform_associate':
-            return '/home';
+            return '/contractor-home';  // Dashboard específico para contratantes
           default:
             return '/client-home';
         }
@@ -112,7 +113,11 @@ GoRouter appRouter(AuthBloc authBloc) {
           // 5: Advogado Associado - Perfil
           StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),
           
-          // 6: Advogado Contratante - Início
+          // 6: Advogado Contratante - Dashboard Específico
+          StatefulShellBranch(routes: [GoRoute(path: '/contractor-home', builder: (context, state) => const DashboardScreen())]),
+          // 6.1: Sócio de Escritório - Dashboard da Firma
+          StatefulShellBranch(routes: [GoRoute(path: '/firm-dashboard', builder: (context, state) => const DashboardScreen())]),
+          // 6.2: Advogado Contratante - Início (legado)
           StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),
           // 7: Advogado Contratante - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-cases', builder: (context, state) => const CasesScreen())]),
@@ -211,7 +216,7 @@ GoRouter appRouter(AuthBloc authBloc) {
               create: (context) => getIt<SlaAnalyticsBloc>(),
             ),
           ],
-          child: const SlaSettingsScreen(),
+          child: const SlaSettingsScreen(firmId: 'temp-firm-id'),
         ),
       ),
       
@@ -279,3 +284,4 @@ class GoRouterRefreshStream extends ChangeNotifier {
     _subscription.cancel();
     super.dispose();
   }
+}

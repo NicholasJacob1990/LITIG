@@ -112,7 +112,7 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                       child: Chip(
                         avatar: const Icon(Icons.save_outlined, size: 16, color: Colors.orange),
                         label: const Text('Não salvo'),
-                        backgroundColor: Colors.orange.withOpacity(0.2),
+                        backgroundColor: Colors.orange.withValues(alpha: 0.2),
                         labelStyle: const TextStyle(
                           color: Colors.orange,
                           fontSize: 12,
@@ -125,8 +125,8 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Chip(
                         avatar: const Icon(Icons.error_outline, size: 16, color: Colors.red),
-                        label: Text('${state.validationResult!.violations.length} erros'),
-                        backgroundColor: Colors.red.withOpacity(0.2),
+                        label: Text('${state.validationResult?.violations.length ?? 0} erros'),
+                        backgroundColor: Colors.red.withValues(alpha: 0.2),
                         labelStyle: const TextStyle(
                           color: Colors.red,
                           fontSize: 12,
@@ -206,7 +206,7 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
       controller: _tabController,
       isScrollable: true,
       labelColor: Theme.of(context).colorScheme.onPrimary,
-      unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+      unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
       indicatorColor: Theme.of(context).colorScheme.onPrimary,
       tabs: const [
         Tab(

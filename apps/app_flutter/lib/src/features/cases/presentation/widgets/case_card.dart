@@ -6,6 +6,7 @@ import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 
 class CaseCard extends StatelessWidget {
   final String caseId;
@@ -481,12 +482,23 @@ class CaseCard extends StatelessWidget {
                   )
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Criado em ${lawyer!.createdDate}', 
-                  style: TextStyle(
-                    fontSize: 12, 
-                    color: theme.colorScheme.onSurface.withOpacity(0.7)
-                  )
+                Row(
+                  children: [
+                    Text(
+                      'Criado em ${lawyer!.createdDate}', 
+                      style: TextStyle(
+                        fontSize: 12, 
+                        color: theme.colorScheme.onSurface.withOpacity(0.7)
+                      )
+                    ),
+                    const Spacer(),
+                    // Ícones das redes sociais
+                    LawyerSocialLinks(
+                      linkedinUrl: 'https://linkedin.com/in/${lawyer!.name.toLowerCase().replaceAll(' ', '-')}',
+                      instagramUrl: 'https://instagram.com/${lawyer!.name.toLowerCase().replaceAll(' ', '')}',
+                      facebookUrl: 'https://facebook.com/${lawyer!.name.toLowerCase().replaceAll(' ', '.')}',
+                    ),
+                  ],
                 ),
               ],
             ),

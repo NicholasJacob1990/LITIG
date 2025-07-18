@@ -122,7 +122,7 @@ class HybridRecommendationsTabView extends StatefulWidget {
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
   bool _hasPerformedSearch = false;
   bool _showMapView = false; // ❌ REMOVIDO: Toggle mapa das recomendações conforme especificação
-
+  
   @override
   void initState() {
     super.initState();
@@ -149,38 +149,38 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               // ❌ REMOVIDO: Toggle Lista/Mapa (exclusivo da aba "Buscar")
               
               // ✅ NOVO: Banner para caso destacado
-              Container(
+                Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+                  decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
                       LucideIcons.lightbulb,
                       color: Theme.of(context).colorScheme.primary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
                       child: Text(
                         'Recomendações personalizadas baseadas no seu perfil e histórico',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w500,
+                              ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
         
         // Lista de resultados - MANTIDA: Cartões completos LawyerMatchCard
         Expanded(
@@ -204,12 +204,12 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                 final firms = state.results.whereType<LawFirm>().toList();
 
                 // ✅ SEMPRE LISTA: Sem toggle mapa nas recomendações
-                return PartnerSearchResultList(
-                  lawyers: lawyers,
-                  firms: firms,
-                  emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
-                  onRefresh: _fetchRecommendations,
-                );
+                  return PartnerSearchResultList(
+                    lawyers: lawyers,
+                    firms: firms,
+                    emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
+                    onRefresh: _fetchRecommendations,
+                  );
               }
               
               return _buildEmptyState(context);
@@ -225,27 +225,27 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LucideIcons.users,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            LucideIcons.users,
+            size: 64,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
               'Carregando suas recomendações...',
-              style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
+          ),
+          const SizedBox(height: 8),
+          Text(
               'Estamos encontrando os melhores advogados e escritórios para você.',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
             const CircularProgressIndicator(),
           ],
         ),
@@ -257,33 +257,33 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LucideIcons.alertCircle,
-              size: 64,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            LucideIcons.alertCircle,
+            size: 64,
               color: Colors.red.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Erro ao carregar recomendações',
-              style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Erro ao carregar recomendações',
+            style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
               onPressed: _fetchRecommendations,
-              icon: const Icon(LucideIcons.refreshCw),
-              label: const Text('Tentar Novamente'),
-            ),
-          ],
+            icon: const Icon(LucideIcons.refreshCw),
+            label: const Text('Tentar Novamente'),
+          ),
+        ],
         ),
       ),
     );
@@ -293,18 +293,18 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
               LucideIcons.searchX,
-              size: 64,
+            size: 64,
               color: Colors.grey.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
+          ),
+          const SizedBox(height: 16),
+          Text(
               'Nenhuma recomendação encontrada',
-              style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -318,8 +318,8 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               onPressed: _fetchRecommendations,
               icon: const Icon(LucideIcons.refreshCw),
               label: const Text('Atualizar'),
-            ),
-          ],
+          ),
+        ],
         ),
       ),
     );
@@ -338,7 +338,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   final TextEditingController _searchController = TextEditingController();
   bool _showMapView = false; // ✅ MANTIDO: Toggle Lista/Mapa apenas na busca
   bool _filtersExpanded = false; // ✅ NOVO: Controle do accordion de filtros
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -400,26 +400,26 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                   prefixIcon: const Icon(LucideIcons.search),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(LucideIcons.x),
-                          onPressed: () {
-                            _searchController.clear();
-                            _performSearch();
-                          },
+                    icon: const Icon(LucideIcons.x),
+                    onPressed: () {
+                      _searchController.clear();
+                      _performSearch();
+                    },
                         )
                       : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onChanged: (value) {
+                      onChanged: (value) {
                   setState(() {}); // Para atualizar o suffixIcon
-                  _performSearch();
-                },
+                        _performSearch();
+                      },
+                  ),
+                ],
               ),
-            ],
-          ),
         ),
-
+              
         // ✅ NOVO: Filtros inline (accordion)
         InlineSearchFilters(
           isExpanded: _filtersExpanded,
@@ -491,7 +491,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
               item: item,
               onSelect: () => _selectLawyer(item),
               onViewProfile: () => _viewLawyerProfile(item),
-            );
+      );
           }
           
           return const SizedBox.shrink();
@@ -613,11 +613,11 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
     }
 
     return GoogleMap(
-      initialCameraPosition: const CameraPosition(
-        target: LatLng(-23.5505, -46.6333), // São Paulo
-        zoom: 10,
-      ),
-      markers: markers,
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(-23.5505, -46.6333), // São Paulo
+              zoom: 10,
+            ),
+            markers: markers,
       onMapCreated: (GoogleMapController controller) {
         // Configurações adicionais do mapa se necessário
       },
@@ -627,17 +627,17 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   Widget _buildSearchError(BuildContext context, String message) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
+      padding: const EdgeInsets.all(24),
+      child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+                children: [
+                  Icon(
               LucideIcons.alertCircle,
               size: 64,
               color: Colors.red.withOpacity(0.5),
-            ),
+                  ),
             const SizedBox(height: 16),
-            Text(
+                  Text(
               'Erro na busca',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
@@ -646,15 +646,15 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
               message,
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
-            ),
+                    ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _performSearch,
               icon: const Icon(LucideIcons.refreshCw),
               label: const Text('Tentar Novamente'),
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
       ),
     );
   }
@@ -670,25 +670,25 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
               LucideIcons.search,
               size: 64,
               color: Colors.grey.withOpacity(0.5),
-            ),
+          ),
             const SizedBox(height: 16),
-            Text(
+          Text(
               _searchController.text.isEmpty 
                   ? 'Digite algo para buscar' 
                   : 'Nenhum resultado encontrado',
               style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
+          ),
+          const SizedBox(height: 8),
+          Text(
               _searchController.text.isEmpty
                   ? 'Use a busca para encontrar advogados e escritórios'
                   : 'Tente usar termos diferentes ou ajuste os filtros',
-              style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -697,7 +697,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
     final params = query.isEmpty
         ? const SearchParams(preset: 'balanced', includeFirms: true)
         : SearchParams(query: query, includeFirms: true);
-
-    context.read<SearchBloc>().add(SearchRequested(params));
+                    
+                    context.read<SearchBloc>().add(SearchRequested(params));
   }
 }

@@ -1,11 +1,286 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-backend/api/schemas.py
+api/schemas.py
 
-Esquemas Pydantic para validação de dados da API de matching jurídico.
-Baseado nas melhores práticas de FastAPI para Machine Learning.
+Schemas Pydantic para validação e serialização da API.
+Expandido com schemas administrativos para aplicação web.
 """
+
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
+
+from pydantic import BaseModel, Field, validator
+
+
+# ============================================================================
+# SCHEMAS ADMINISTRATIVOS PARA APLICAÇÃO WEB
+# ============================================================================
+
+class AdminUserSchema(BaseModel):
+    """Schema para usuário administrador."""
+    id: str
+    email: str
+    full_name: str
+    role: str
+    created_at: datetime
+    last_login: Optional[datetime] = None
+    permissions: List[str] = []
+
+class SystemMetricsSchema(BaseModel):
+    """Schema para métricas gerais do sistema."""
+    total_advogados: int
+    total_clientes: int
+    total_casos: int
+    usuarios_novos_30d: int
+    casos_novos_30d: int
+    contratos_ativos: int
+    receita_30d: Optional[float] = None
+
+class DataQualitySchema(BaseModel):
+    """Schema para qualidade de dados."""
+    total_lawyers: int
+    synced_lawyers: int
+    high_quality_data: int
+    sync_coverage: float
+    last_sync: Optional[datetime] = None
+    avg_processes_per_lawyer: Optional[float] = None
+
+class AdminDashboardSchema(BaseModel):
+    """Schema para dashboard administrativo."""
+    sistema: SystemMetricsSchema
+    qualidade_dados: DataQualitySchema
+    feature_flags_ativas: int
+    alertas_ativos: int
+    ultima_atualizacao: datetime
+
+class LawyerAuditSchema(BaseModel):
+    """Schema para dados de auditoria de advogado."""
+    ultima_sincronizacao: Optional[Dict[str, Any]] = None
+    casos_recentes: int
+    qualidade_dados: Optional[str] = None
+    fonte_dados: List[str] = []
+    total_sincronizacoes: int = 0
+    score_confiabilidade: Optional[float] = None
+
+class LawyerDetailSchema(BaseModel):
+    """Schema detalhado de advogado para administradores."""
+    id: str
+    full_name: str
+    email: Optional[str] = None
+    oab_number: Optional[str] = None
+    uf: Optional[str] = None
+    created_at: datetime
+    is_active: bool
+    role: str
+    auditoria: LawyerAuditSchema
+    
+    # Dados profissionais
+    specializations: List[str] = []
+    success_rate: Optional[float] = None
+    total_cases: int = 0
+    rating: Optional[float] = None
+    review_count: int = 0
+    
+    # Dados financeiros
+    consultation_fee: Optional[float] = None
+    hourly_rate: Optional[float] = None
+    
+    # Dados de qualidade
+    jusbrasil_data_quality: Optional[str] = None
+    last_jusbrasil_sync: Optional[datetime] = None
+
+class LawyerListSchema(BaseModel):
+    """Schema para lista paginada de advogados."""
+    advogados: List[LawyerDetailSchema]
+    paginacao: Dict[str, int]
+    filtros_aplicados: Dict[str, Any] = {}
+
+class SyncHistorySchema(BaseModel):
+    """Schema para histórico de sincronização."""
+    id: str
+    lawyer_id: str
+    lawyer_name: Optional[str] = None
+    sync_timestamp: datetime
+    data_source: str
+    sync_status: str
+    total_processes: Optional[int] = None
+    data_quality: Optional[str] = None
+    error_message: Optional[str] = None
+
+class DataAuditSchema(BaseModel):
+    """Schema para auditoria de dados."""
+    periodo: Dict[str, str]
+    sincronizacoes: Dict[str, Any]
+    feature_flags: Dict[str, Any]
+    alertas_sistema: Dict[str, Any]
+    qualidade_por_fonte: Dict[str, Dict[str, Union[int, float]]]
+
+class FeatureFlagSchema(BaseModel):
+    """Schema para feature flags."""
+    id: str
+    name: str
+    description: str
+    status: str
+    rollout_percentage: float
+    target_roles: List[str] = []
+    created_at: datetime
+    updated_at: datetime
+
+class AlertSchema(BaseModel):
+    """Schema para alertas do sistema."""
+    alert_id: str
+    model_name: str
+    alert_type: str
+    level: str
+    message: str
+    metrics: Dict[str, float]
+    timestamp: datetime
+    resolved: bool = False
+
+class ExecutiveReportSchema(BaseModel):
+    """Schema para relatório executivo."""
+    periodo_dias: int
+    performance_advogados: Dict[str, Any]
+    metricas_plataforma: Dict[str, Any]
+    alertas_ativos: int
+    qualidade_sistema: Dict[str, Any]
+    gerado_em: datetime
+    gerado_por: str
+
+class AdminActionLogSchema(BaseModel):
+    """Schema para log de ações administrativas."""
+    id: str
+    admin_id: str
+    admin_name: str
+    action_type: str
+    target_type: str
+    target_id: Optional[str] = None
+    description: str
+    timestamp: datetime
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+
+class SyncTaskSchema(BaseModel):
+    """Schema para tarefa de sincronização."""
+    task_id: str
+    status: str
+    progress: float = 0.0
+    started_at: datetime
+    completed_at: Optional[datetime] = None
+    total_lawyers: int = 0
+    processed_lawyers: int = 0
+    failed_lawyers: int = 0
+    success_lawyers: int = 0
+    error_message: Optional[str] = None
+
+class AdminPermissionSchema(BaseModel):
+    """Schema para permissões administrativas."""
+    key: str
+    description: str
+    category: str
+    granted: bool = False
+
+class AdminSettingsSchema(BaseModel):
+    """Schema para configurações administrativas."""
+    key: str
+    value: Any
+    description: str
+    category: str
+    updated_by: Optional[str] = None
+    updated_at: Optional[datetime] = None
+
+# ============================================================================
+# SCHEMAS DE REQUEST PARA APIs ADMINISTRATIVAS
+# ============================================================================
+
+class LawyerSearchRequest(BaseModel):
+    """Request para busca de advogados."""
+    page: int = Field(1, ge=1)
+    limit: int = Field(50, ge=1, le=100)
+    search: Optional[str] = None
+    filter_by_status: Optional[str] = None
+    filter_by_quality: Optional[str] = None
+    filter_by_uf: Optional[str] = None
+    sort_by: Optional[str] = None
+    sort_order: str = Field("desc", regex="^(asc|desc)$")
+
+class DataAuditRequest(BaseModel):
+    """Request para auditoria de dados."""
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    source: Optional[str] = None
+    include_details: bool = True
+
+class SyncRequest(BaseModel):
+    """Request para sincronização."""
+    priority_only: bool = False
+    force_refresh: bool = False
+    specific_sources: List[str] = []
+    batch_size: int = Field(10, ge=1, le=100)
+
+class BulkActionRequest(BaseModel):
+    """Request para ações em lote."""
+    lawyer_ids: List[str]
+    action_type: str
+    parameters: Dict[str, Any] = {}
+
+class SettingsUpdateRequest(BaseModel):
+    """Request para atualizar configurações."""
+    settings: Dict[str, Any]
+    reason: Optional[str] = None
+
+# ============================================================================
+# SCHEMAS DE RESPONSE PADRONIZADOS
+# ============================================================================
+
+class AdminApiResponse(BaseModel):
+    """Response padrão da API administrativa."""
+    success: bool
+    message: Optional[str] = None
+    data: Optional[Any] = None
+    errors: List[str] = []
+    timestamp: datetime = Field(default_factory=datetime.now)
+    request_id: Optional[str] = None
+
+class PaginatedResponse(BaseModel):
+    """Response paginado padrão."""
+    items: List[Any]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
+
+class TaskResponse(BaseModel):
+    """Response para tarefas assíncronas."""
+    task_id: str
+    status: str
+    message: str
+    estimated_completion: Optional[datetime] = None
+    progress_url: Optional[str] = None
+
+# ============================================================================
+# VALIDADORES PERSONALIZADOS
+# ============================================================================
+
+@validator('email')
+def validate_email(cls, v):
+    if v and '@' not in v:
+        raise ValueError('Email inválido')
+    return v
+
+@validator('oab_number')
+def validate_oab(cls, v):
+    if v and not v.isdigit():
+        raise ValueError('Número OAB deve conter apenas dígitos')
+    return v
+
+# ============================================================================
+# SCHEMAS EXISTENTES (mantidos para compatibilidade)
+# ============================================================================
 
 from datetime import datetime
 from enum import Enum

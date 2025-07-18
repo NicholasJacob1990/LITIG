@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/features/dashboard/presentation/widgets/client_dashboard.dart';
+import 'package:meu_app/src/features/dashboard/presentation/widgets/enhanced_client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_dashboard.dart';
+import 'package:meu_app/src/features/dashboard/presentation/widgets/firm_dashboard.dart';
+import 'package:meu_app/src/features/dashboard/presentation/widgets/contractor_dashboard.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -28,10 +31,30 @@ class DashboardScreen extends StatelessWidget {
           // Debug: imprimir o role para verificar o valor
           AppLogger.debug('Dashboard: User role = ${user.role}');
           
-          if (_isLawyer(user.role)) {
-            return LawyerDashboard(userName: user.fullName ?? 'Advogado');
-          } else {
-            return ClientDashboard(userName: user.fullName ?? 'Cliente');
+          // Determinar o dashboard baseado no tipo específico de usuário
+          switch (user.role) {
+            case 'lawyer_office':
+              // Sócios de escritório recebem dashboard específico da firma
+              return FirmDashboard(userName: user.fullName ?? 'Sócio');
+            case 'lawyer_individual':
+            case 'lawyer_platform_associate':
+              // Advogados contratantes recebem dashboard de captação
+              return ContractorDashboard(
+                userName: user.fullName ?? 'Advogado',
+                userRole: user.role ?? 'lawyer_individual',
+              );
+            case 'lawyer_associated':
+            case 'lawyer':
+            case 'LAWYER':
+            case 'advogado':
+            case 'Lawyer':
+              // Advogados associados recebem dashboard pessoal
+              return LawyerDashboard(userName: user.fullName ?? 'Advogado');
+            case 'client':
+            case 'PF':
+            default:
+              // Clientes recebem dashboard expandido
+              return EnhancedClientDashboard(userName: user.fullName ?? 'Cliente');
           }
         }
         // Exibe um loader enquanto o estado de autenticação é resolvido

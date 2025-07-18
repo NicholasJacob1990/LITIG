@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/entities/case_detail.dart';
 import '../../../../shared/widgets/atoms/initials_avatar.dart';
+import '../../../lawyers/presentation/widgets/lawyer_social_links.dart';
 
 class LawyerResponsibleSection extends StatelessWidget {
   final LawyerInfo? lawyer;
@@ -80,6 +81,13 @@ class LawyerResponsibleSection extends StatelessWidget {
                       const Icon(Icons.star, color: Colors.amber, size: 16),
                       const SizedBox(width: 4),
                       Text('${lawyer!.rating}  •  ${lawyer!.experienceYears} anos'),
+                      const Spacer(),
+                      // Ícones das redes sociais
+                      LawyerSocialLinks(
+                        linkedinUrl: 'https://linkedin.com/in/${lawyer!.name.toLowerCase().replaceAll(' ', '-')}',
+                        instagramUrl: 'https://instagram.com/${lawyer!.name.toLowerCase().replaceAll(' ', '')}',
+                        facebookUrl: 'https://facebook.com/${lawyer!.name.toLowerCase().replaceAll(' ', '.')}',
+                      ),
                     ],
                   ),
                   if (!lawyer!.isAvailable) ...[

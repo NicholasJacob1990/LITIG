@@ -489,4 +489,108 @@ class ApiService {
       throw ServerException.fromDioError(e);
     }
   }
+
+  // ========== OCR E DOCUMENTOS ==========
+  
+  /// Processa documento via OCR no backend
+  static Future<Response> processDocumentOCR({
+    required String imageBase64,
+    String? caseId,
+    String? documentTypeHint,
+    required String userId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      return await _dio.post('/documents/process-ocr', data: {
+        'image_base64': imageBase64,
+        'case_id': caseId,
+        'document_type_hint': documentTypeHint,
+        'user_id': userId,
+        'metadata': metadata ?? {},
+      });
+    } catch (e) {
+      AppLogger.error('Erro no processamento OCR', error: e);
+      rethrow;
+    }
+  }
+
+  /// Salva documento processado
+  static Future<Response> saveProcessedDocument({
+    required String caseId,
+    required String documentName,
+    required String documentType,
+    required Map<String, dynamic> extractedData,
+    required Map<String, dynamic> ocrResult,
+    required double confidenceScore,
+    String? imageBase64,
+  }) async {
+    try {
+      return await _dio.post('/documents/save-processed', data: {
+        'case_id': caseId,
+        'document_name': documentName,
+        'document_type': documentType,
+        'extracted_data': extractedData,
+        'ocr_result': ocrResult,
+        'confidence_score': confidenceScore,
+        'image_base64': imageBase64,
+      });
+    } catch (e) {
+      AppLogger.error('Erro ao salvar documento processado', error: e);
+      rethrow;
+    }
+  }
+
+  /// Valida dados extraídos
+  static Future<Response> validateDocumentData({
+    required Map<String, dynamic> extractedData,
+  }) async {
+    try {
+      return await _dio.post('/documents/validate-data', data: {
+        'extracted_data': extractedData,
+      });
+    } catch (e) {
+      AppLogger.error('Erro na validação de dados', error: e);
+      rethrow;
+    }
+  }
+
+  /// Lista documentos OCR de um caso
+  static Future<Response> getCaseOCRDocuments(String caseId) async {
+    try {
+      return await _dio.get('/documents/case/$caseId/ocr-documents');
+    } catch (e) {
+      AppLogger.error('Erro ao buscar documentos OCR', error: e);
+      rethrow;
+    }
+  }
+
+  /// Obtém detalhes de um documento
+  static Future<Response> getDocumentDetails(String documentId) async {
+    try {
+      return await _dio.get('/documents/document/$documentId/details');
+    } catch (e) {
+      AppLogger.error('Erro ao buscar detalhes do documento', error: e);
+      rethrow;
+    }
+  }
+
+  /// Reprocessa documento existente
+  static Future<Response> reprocessDocument(String documentId) async {
+    try {
+      return await _dio.post('/documents/reprocess/$documentId');
+    } catch (e) {
+      AppLogger.error('Erro no reprocessamento do documento', error: e);
+      rethrow;
+    }
+  }
+
+  /// Verifica saúde do serviço OCR
+  static Future<Response> checkOCRHealth() async {
+    try {
+      return await _dio.get('/documents/ocr/health');
+    } catch (e) {
+      AppLogger.error('Erro ao verificar saúde do OCR', error: e);
+      rethrow;
+    }
+  }
 } 
