@@ -95,7 +95,11 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                   _buildFormFields(),
                   const SizedBox(height: 24),
                   _buildRegisterButton(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+                  _buildDivider(context),
+                  const SizedBox(height: 24),
+                  _buildSocialRegistration(context),
+                  const SizedBox(height: 32),
                   _buildLoginPrompt(context),
                 ],
               ),
@@ -214,6 +218,110 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                   child: CircularProgressIndicator(strokeWidth: 3),
                 )
               : const Text('Criar Conta'),
+        );
+      },
+    );
+  }
+
+  Widget _buildDivider(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: Colors.grey[300])),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'ou cadastre-se com',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: Colors.grey[300])),
+      ],
+    );
+  }
+
+  Widget _buildSocialRegistration(BuildContext context) {
+    return BlocBuilder<AuthBloc, auth_states.AuthState>(
+      builder: (context, state) {
+        final isLoading = state is auth_states.AuthLoading;
+        return Column(
+          children: [
+            // Google OAuth (funcional)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      // Para registro, usamos um evento específico que pode capturar dados sociais
+                      context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+                    },
+              icon: const Icon(Icons.login), // Google icon placeholder
+              label: const Text('Cadastrar com Google'),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Redes Sociais (preparadas para implementação futura)
+            Text(
+              'Outras opções sociais (em breve):',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF0077B5), // LinkedIn Blue
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
+                    },
+                    icon: const Icon(Icons.business, size: 16),
+                    label: const Text('LinkedIn'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFFE4405F), // Instagram Pink
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthInstagramSignInRequested());
+                    },
+                    icon: const Icon(Icons.camera_alt, size: 16),
+                    label: const Text('Instagram'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF1877F2), // Facebook Blue
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthFacebookSignInRequested());
+                    },
+                    icon: const Icon(Icons.facebook, size: 16),
+                    label: const Text('Facebook'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         );
       },
     );

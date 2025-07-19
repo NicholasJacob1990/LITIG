@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 
 class DetailedCaseCard extends StatelessWidget {
   final String caseId;
@@ -76,7 +77,18 @@ class DetailedCaseCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(lawyer.name, style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
-              Text(lawyer.specialty, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7), fontSize: 12)),
+              Row(
+                children: [
+                  Text(lawyer.specialty, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7), fontSize: 12)),
+                  const Spacer(),
+                  // Ícones das redes sociais
+                  LawyerSocialLinks(
+                    linkedinUrl: 'https://linkedin.com/in/${lawyer.name.toLowerCase().replaceAll(' ', '-')}',
+                    instagramUrl: 'https://instagram.com/${lawyer.name.toLowerCase().replaceAll(' ', '')}',
+                    facebookUrl: 'https://facebook.com/${lawyer.name.toLowerCase().replaceAll(' ', '.')}',
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -144,6 +156,30 @@ class DetailedCaseCard extends StatelessWidget {
   }
 
   Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Em Andamento':
+        return AppColors.warning;
+      case 'Concluído':
+        return AppColors.success;
+      case 'Aguardando':
+        return AppColors.info;
+      default:
+        return AppColors.info; // Fallback
+    }
+  }
+} 
+    switch (status) {
+      case 'Em Andamento':
+        return AppColors.warning;
+      case 'Concluído':
+        return AppColors.success;
+      case 'Aguardando':
+        return AppColors.info;
+      default:
+        return AppColors.info; // Fallback
+    }
+  }
+} 
     switch (status) {
       case 'Em Andamento':
         return AppColors.warning;

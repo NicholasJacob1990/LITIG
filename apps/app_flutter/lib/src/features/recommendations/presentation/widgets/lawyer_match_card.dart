@@ -47,9 +47,20 @@ class LawyerMatchCard extends StatelessWidget {
                         style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        lawyer.primaryArea,
-                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary),
+                      Row(
+                        children: [
+                          Text(
+                            lawyer.primaryArea,
+                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary),
+                          ),
+                          const Spacer(),
+                          // Ícones das redes sociais
+                          LawyerSocialLinks(
+                            linkedinUrl: 'https://linkedin.com/in/${lawyer.nome.toLowerCase().replaceAll(' ', '-')}',
+                            instagramUrl: 'https://instagram.com/${lawyer.nome.toLowerCase().replaceAll(' ', '')}',
+                            facebookUrl: 'https://facebook.com/${lawyer.nome.toLowerCase().replaceAll(' ', '.')}',
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -252,6 +263,28 @@ class LawyerMatchCard extends StatelessWidget {
     );
   }
 
+  Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: iconColor ?? theme.textTheme.bodySmall?.color),
+        const SizedBox(width: 4),
+        Text(label, style: theme.textTheme.bodySmall),
+      ],
+    );
+  }
+} 
+  Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: iconColor ?? theme.textTheme.bodySmall?.color),
+        const SizedBox(width: 4),
+        Text(label, style: theme.textTheme.bodySmall),
+      ],
+    );
+  }
+} 
   Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
     final theme = Theme.of(context);
     return Row(

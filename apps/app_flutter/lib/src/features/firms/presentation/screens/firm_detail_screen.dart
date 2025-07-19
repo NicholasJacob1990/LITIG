@@ -7,6 +7,7 @@ import '../widgets/firm_card_helpers.dart';
 import '../../domain/entities/law_firm.dart';
 import '../../domain/entities/firm_kpi.dart';
 import '../../domain/usecases/get_firm_lawyers.dart';
+import '../../../lawyers/presentation/widgets/lawyer_social_links.dart';
 
 /// Tela para exibir detalhes completos de um escritório de advocacia
 /// 
@@ -544,13 +545,48 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
           children: [
             if (lawyer.email != null) Text(lawyer.email!),
             if (lawyer.specialization != null)
-              Text(
-                lawyer.specialization!,
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 12,
-                ),
+              Row(
+                children: [
+                  Text(
+                    lawyer.specialization!,
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  // Ícones das redes sociais
+                  LawyerSocialLinks(
+                    linkedinUrl: 'https://linkedin.com/in/${lawyer.name.toLowerCase().replaceAll(' ', '-')}',
+                    instagramUrl: 'https://instagram.com/${lawyer.name.toLowerCase().replaceAll(' ', '')}',
+                    facebookUrl: 'https://facebook.com/${lawyer.name.toLowerCase().replaceAll(' ', '.')}',
+                  ),
+                ],
               ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios),
+          onPressed: () {
+            // Implementar navegação para perfil do advogado
+          },
+        ),
+      ),
+    );
+  }
+} 
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.arrow_forward_ios),
+          onPressed: () {
+            // Implementar navegação para perfil do advogado
+          },
+        ),
+      ),
+    );
+  }
+} 
           ],
         ),
         trailing: IconButton(

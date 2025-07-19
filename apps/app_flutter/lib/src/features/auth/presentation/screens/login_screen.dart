@@ -204,17 +204,212 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocBuilder<AuthBloc, auth_states.AuthState>(
       builder: (context, state) {
         final isLoading = state is auth_states.AuthLoading;
-        return OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-          onPressed: isLoading
-              ? null
-              : () {
-                  context.read<AuthBloc>().add(AuthGoogleSignInRequested());
-                },
-          icon: const Icon(LucideIcons.user), // Placeholder for Google icon
-          label: const Text('Entrar com Google'),
+        return Column(
+          children: [
+            // Google OAuth (funcional)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+                    },
+              icon: const Icon(LucideIcons.user), // Placeholder for Google icon
+              label: const Text('Entrar com Google'),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Redes Sociais (em desenvolvimento)
+            Text(
+              'Outras opções sociais:',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF0077B5), // LinkedIn Blue
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
+                    },
+                    icon: const Icon(LucideIcons.briefcase, size: 16),
+                    label: const Text('LinkedIn'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFFE4405F), // Instagram Pink
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthInstagramSignInRequested());
+                    },
+                    icon: const Icon(LucideIcons.camera, size: 16),
+                    label: const Text('Instagram'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF1877F2), // Facebook Blue
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthFacebookSignInRequested());
+                    },
+                    icon: const Icon(LucideIcons.facebook, size: 16),
+                    label: const Text('Facebook'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRegisterPrompt(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Cadastro de Cliente
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Não tem uma conta?'),
+            TextButton(
+              onPressed: () => context.go('/register-client'),
+              child: Text(
+                'Cadastre-se como Cliente',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+        
+        const Divider(),
+        
+        const SizedBox(height: 24),
+
+        // Cadastro de Advogado
+        Text('É advogado(a)? Cadastre-se como:', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12.0,
+          runSpacing: 12.0,
+          alignment: WrapAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.user),
+              label: const Text('Autônomo'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_individual'}),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.users),
+              label: const Text('Associado'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_associated'}),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.building),
+              label: const Text('Escritório'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_office'}),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRegisterPrompt(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Cadastro de Cliente
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Não tem uma conta?'),
+            TextButton(
+              onPressed: () => context.go('/register-client'),
+              child: Text(
+                'Cadastre-se como Cliente',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+        
+        const Divider(),
+        
+        const SizedBox(height: 24),
+
+        // Cadastro de Advogado
+        Text('É advogado(a)? Cadastre-se como:', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 12.0,
+          runSpacing: 12.0,
+          alignment: WrapAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.user),
+              label: const Text('Autônomo'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_individual'}),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.users),
+              label: const Text('Associado'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_associated'}),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(LucideIcons.building),
+              label: const Text('Escritório'),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_office'}),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+            ),
+          ],
         );
       },
     );

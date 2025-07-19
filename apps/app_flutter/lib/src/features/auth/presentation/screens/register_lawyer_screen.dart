@@ -162,9 +162,43 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
             }
           }
         },
-        child: Form(
-          key: _formKey,
-          child: Stepper(
+        child: Column(
+          children: [
+            // Seção de cadastro social (opcional)
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Conecte suas redes sociais',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Opcional: Enriqueça seu perfil profissional com dados sociais',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildSocialRegistration(context),
+                ],
+              ),
+            ),
+            // Formulário principal obrigatório
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: Stepper(
             type: StepperType.vertical,
             currentStep: _currentStep,
             onStepContinue: () {
@@ -207,8 +241,99 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
               );
             },
           ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSocialRegistration(BuildContext context) {
+    return BlocBuilder<AuthBloc, auth_states.AuthState>(
+      builder: (context, state) {
+        final isLoading = state is auth_states.AuthLoading;
+        return Column(
+          children: [
+            // Google OAuth (funcional)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      // Para registro de advogado, ainda precisará preencher dados profissionais obrigatórios
+                      context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+                    },
+              icon: const Icon(Icons.login, size: 18),
+              label: const Text('Conectar com Google'),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Redes Sociais (preparadas para implementação futura)
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF0077B5), // LinkedIn Blue
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
+                    },
+                    icon: const Icon(Icons.business, size: 14),
+                    label: const Text('LinkedIn', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFFE4405F), // Instagram Pink
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthInstagramSignInRequested());
+                    },
+                    icon: const Icon(Icons.camera_alt, size: 14),
+                    label: const Text('Instagram', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF1877F2), // Facebook Blue
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
+                    ),
+                    onPressed: isLoading ? null : () {
+                      context.read<AuthBloc>().add(AuthFacebookSignInRequested());
+                    },
+                    icon: const Icon(Icons.facebook, size: 14),
+                    label: const Text('Facebook', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Após conectar, você ainda precisará preencher todos os dados profissionais obrigatórios.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        );
+      },
     );
   }
 

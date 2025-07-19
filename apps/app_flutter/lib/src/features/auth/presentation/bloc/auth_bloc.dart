@@ -34,6 +34,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckStatusRequested>(_onCheckStatusRequested);
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
+    on<AuthLinkedInSignInRequested>(_onLinkedInSignInRequested);
+    on<AuthInstagramSignInRequested>(_onInstagramSignInRequested);
+    on<AuthFacebookSignInRequested>(_onFacebookSignInRequested);
     on<AuthRegisterClientRequested>(_onRegisterClientRequested);
     on<AuthRegisterLawyerRequested>(_onRegisterLawyerRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
@@ -91,6 +94,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  Future<void> _onLinkedInSignInRequested(
+    AuthLinkedInSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      // TODO: Implementar autenticação LinkedIn via Unipile
+      emit(const AuthError('Autenticação LinkedIn em desenvolvimento. Use o sistema de conexões sociais no perfil.'));
+    } catch (e) {
+      emit(const AuthError('Erro na autenticação LinkedIn.'));
+    }
+  }
+
+  Future<void> _onInstagramSignInRequested(
+    AuthInstagramSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      // TODO: Implementar autenticação Instagram via Unipile
+      emit(const AuthError('Autenticação Instagram em desenvolvimento. Use o sistema de conexões sociais no perfil.'));
+    } catch (e) {
+      emit(const AuthError('Erro na autenticação Instagram.'));
+    }
+  }
+
+  Future<void> _onFacebookSignInRequested(
+    AuthFacebookSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      // TODO: Implementar autenticação Facebook via Unipile
+      emit(const AuthError('Autenticação Facebook em desenvolvimento. Use o sistema de conexões sociais no perfil.'));
+    } catch (e) {
+      emit(const AuthError('Erro na autenticação Facebook.'));
+    }
+  }
+
   Future<void> _onRegisterClientRequested(AuthRegisterClientRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -120,6 +162,90 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         cpf: event.cpf,
         phone: event.phone,
         oab: event.oab,
+        areas: event.areas,
+        maxCases: event.maxCases,
+        cep: event.cep,
+        address: event.address,
+        city: event.city,
+        state: event.state,
+        cvFile: event.cvFile,
+        oabFile: event.oabFile,
+        residenceProofFile: event.residenceProofFile,
+        gender: event.gender,
+        ethnicity: event.ethnicity,
+        isPcd: event.isPcd,
+        agreedToTerms: event.agreedToTerms,
+        userType: event.userType,
+        isPlatformAssociate: event.isPlatformAssociate, // NOVO: Campo Super Associado
+      ));
+      emit(const AuthSuccess('Registro de advogado realizado com sucesso! Sua conta está em análise.'));
+    } on AuthException catch (e) {
+      emit(AuthError(e.message));
+    } catch (e) {
+      emit(const AuthError('Ocorreu um erro desconhecido.'));
+    }
+  }
+
+  Future<void> _onLogoutRequested(AuthLogoutRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _logoutUseCase();
+       // O stream authStateChanges cuidará de emitir o estado Unauthenticated
+    } on AuthException catch (e) {
+      emit(AuthError(e.message));
+    } catch (e) {
+      emit(const AuthError('Ocorreu um erro desconhecido.'));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _userSubscription.cancel();
+    return super.close();
+  }
+} 
+        areas: event.areas,
+        maxCases: event.maxCases,
+        cep: event.cep,
+        address: event.address,
+        city: event.city,
+        state: event.state,
+        cvFile: event.cvFile,
+        oabFile: event.oabFile,
+        residenceProofFile: event.residenceProofFile,
+        gender: event.gender,
+        ethnicity: event.ethnicity,
+        isPcd: event.isPcd,
+        agreedToTerms: event.agreedToTerms,
+        userType: event.userType,
+        isPlatformAssociate: event.isPlatformAssociate, // NOVO: Campo Super Associado
+      ));
+      emit(const AuthSuccess('Registro de advogado realizado com sucesso! Sua conta está em análise.'));
+    } on AuthException catch (e) {
+      emit(AuthError(e.message));
+    } catch (e) {
+      emit(const AuthError('Ocorreu um erro desconhecido.'));
+    }
+  }
+
+  Future<void> _onLogoutRequested(AuthLogoutRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _logoutUseCase();
+       // O stream authStateChanges cuidará de emitir o estado Unauthenticated
+    } on AuthException catch (e) {
+      emit(AuthError(e.message));
+    } catch (e) {
+      emit(const AuthError('Ocorreu um erro desconhecido.'));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _userSubscription.cancel();
+    return super.close();
+  }
+} 
         areas: event.areas,
         maxCases: event.maxCases,
         cep: event.cep,

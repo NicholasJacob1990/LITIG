@@ -31,6 +31,11 @@ class AuthLoginRequested extends AuthEvent {
 
 class AuthGoogleSignInRequested extends AuthEvent {}
 
+/// Eventos para autenticação social via Unipile
+class AuthLinkedInSignInRequested extends AuthEvent {}
+class AuthInstagramSignInRequested extends AuthEvent {}
+class AuthFacebookSignInRequested extends AuthEvent {}
+
 /// Evento para registrar um cliente
 class AuthRegisterClientRequested extends AuthEvent {
   final String email;
@@ -119,6 +124,16 @@ class AuthRegisterLawyerRequested extends AuthEvent {
   ];
 }
 
+/// Evento para realizar logout
+class AuthLogoutRequested extends AuthEvent {}
+
+/// Evento para verificar o status de autenticação na inicialização
+class AuthCheckStatusRequested extends AuthEvent {} 
+/// Evento para realizar logout
+class AuthLogoutRequested extends AuthEvent {}
+
+/// Evento para verificar o status de autenticação na inicialização
+class AuthCheckStatusRequested extends AuthEvent {} 
 /// Evento para realizar logout
 class AuthLogoutRequested extends AuthEvent {}
 
