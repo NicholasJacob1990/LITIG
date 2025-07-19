@@ -105,7 +105,7 @@ class OCRService {
   Future<List<File>?> scanDocumentWithNativeInterface() async {
     try {
       final result = await _documentScanner.scanDocument();
-      if (result != null && result.images.isNotEmpty) {
+      if (result.images.isNotEmpty) {
         return result.images;
       }
       return null;

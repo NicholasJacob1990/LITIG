@@ -28,7 +28,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -51,7 +51,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -65,7 +65,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -79,7 +79,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -94,7 +94,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -109,7 +109,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -123,7 +123,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -137,7 +137,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -151,7 +151,7 @@ class RatingRepositoryImpl implements RatingRepository {
         return Left(_handleException(e));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -171,20 +171,20 @@ class RatingRepositoryImpl implements RatingRepository {
     if (errorMessage.contains('401') || 
         errorMessage.contains('unauthorized') ||
         errorMessage.contains('não autenticado')) {
-      return AuthenticationFailure(message: 'Usuário não autenticado');
+      return const AuthenticationFailure(message: 'Usuário não autenticado');
     }
 
     // Erros de autorização
     if (errorMessage.contains('403') || 
         errorMessage.contains('forbidden') ||
         errorMessage.contains('permissão')) {
-      return AuthorizationFailure(message: 'Sem permissão para esta operação');
+      return const AuthorizationFailure(message: 'Sem permissão para esta operação');
     }
 
     // Erros de timeout
     if (errorMessage.contains('timeout') || 
         errorMessage.contains('connection timeout')) {
-      return TimeoutFailure(message: 'Timeout na conexão');
+      return const TimeoutFailure(message: 'Timeout na conexão');
     }
 
     // Erros de servidor
@@ -193,14 +193,14 @@ class RatingRepositoryImpl implements RatingRepository {
         errorMessage.contains('503') ||
         errorMessage.contains('504') ||
         errorMessage.contains('server error')) {
-      return ServerFailure(message: 'Erro no servidor');
+      return const ServerFailure(message: 'Erro no servidor');
     }
 
     // Erros de rede
     if (errorMessage.contains('network') || 
         errorMessage.contains('connection') ||
         errorMessage.contains('socket')) {
-      return ConnectionFailure(message: 'Erro de conexão');
+      return const ConnectionFailure(message: 'Erro de conexão');
     }
 
     // Erro genérico

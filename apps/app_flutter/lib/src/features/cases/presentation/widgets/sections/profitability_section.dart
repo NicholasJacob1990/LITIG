@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Rentabilidade para advogados contratantes
@@ -1322,8 +1321,6 @@ class ProfitabilitySection extends BaseInfoSection {
     );
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Rentabilidade para advogados contratantes
 /// 

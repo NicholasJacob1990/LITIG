@@ -385,7 +385,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
                   child: Icon(icon, color: color, size: 20),
                 ),
                 const Spacer(),
-                Icon(
+                const Icon(
                   Icons.trending_up,
                   color: Colors.green,
                   size: 16,

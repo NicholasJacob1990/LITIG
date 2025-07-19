@@ -35,10 +35,10 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         );
         return Right(result);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure());
+      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -55,10 +55,10 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         );
         return Right(result['token'] as String);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure());
+      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -69,10 +69,10 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         await remoteDataSource.endRoom(roomName);
         return const Right(null);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure());
+      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -83,10 +83,10 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         final result = await remoteDataSource.getRoomStatus(roomName);
         return Right(result);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure());
+      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -97,10 +97,10 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         final result = await remoteDataSource.getUserRooms(userId);
         return Right(result);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure());
+      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 }

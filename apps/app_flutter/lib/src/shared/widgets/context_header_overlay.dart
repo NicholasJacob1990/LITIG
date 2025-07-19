@@ -16,9 +16,9 @@ class ContextHeaderOverlay extends StatefulWidget {
   final Widget child;
 
   const ContextHeaderOverlay({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<ContextHeaderOverlay> createState() => _ContextHeaderOverlayState();
@@ -28,7 +28,7 @@ class _ContextHeaderOverlayState extends State<ContextHeaderOverlay>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  String _currentContext = 'platform_work';
+  final String _currentContext = 'platform_work';
 
   @override
   void initState() {
@@ -90,11 +90,11 @@ class _ContextHeaderOverlayState extends State<ContextHeaderOverlay>
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: _getContextColor().withOpacity(0.7),
+            color: _getContextColor().withValues(alpha: 0.7),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: _getContextColor().withOpacity(0.2),
+                color: _getContextColor().withValues(alpha: 0.2),
                 blurRadius: 2,
                 offset: const Offset(0, 1),
               ),
@@ -113,7 +113,7 @@ class _ContextHeaderOverlayState extends State<ContextHeaderOverlay>
               child: Icon(
                 Icons.person_outline,
                 size: 14,
-                color: Colors.grey.withOpacity(0.5),
+                color: Colors.grey.withValues(alpha: 0.5),
               ),
             ),
           ),
@@ -141,7 +141,7 @@ class _ContextHeaderOverlayState extends State<ContextHeaderOverlay>
 
 /// Versão ainda mais discreta - apenas para status bar
 class MinimalContextIndicator extends StatelessWidget {
-  const MinimalContextIndicator({Key? key}) : super(key: key);
+  const MinimalContextIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +156,7 @@ class MinimalContextIndicator extends StatelessWidget {
           width: 4,
           height: 4,
           decoration: BoxDecoration(
-            color: _getContextColor(context).withOpacity(0.6),
+            color: _getContextColor(context).withValues(alpha: 0.6),
             shape: BoxShape.circle,
           ),
         );
@@ -180,7 +180,7 @@ class MinimalContextIndicator extends StatelessWidget {
 
 /// Widget para integração no AppBar existente
 class DiscreteContextAppBarAction extends StatelessWidget {
-  const DiscreteContextAppBarAction({Key? key}) : super(key: key);
+  const DiscreteContextAppBarAction({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +201,7 @@ class DiscreteContextAppBarAction extends StatelessWidget {
                 width: 5,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: _getContextColor(context).withOpacity(0.8),
+                  color: _getContextColor(context).withValues(alpha: 0.8),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -217,7 +217,7 @@ class DiscreteContextAppBarAction extends StatelessWidget {
                     child: Icon(
                       Icons.person_outline,
                       size: 16,
-                      color: Colors.grey.shade600.withOpacity(0.7),
+                      color: Colors.grey.shade600.withValues(alpha: 0.7),
                     ),
                   ),
                 ),

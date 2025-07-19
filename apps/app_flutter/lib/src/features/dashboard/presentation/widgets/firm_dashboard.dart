@@ -136,7 +136,7 @@ class FirmDashboard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -256,7 +256,7 @@ class FirmDashboard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...teamMembers.map((member) => _buildTeamMemberCard(context, member)).toList(),
+        ...teamMembers.map((member) => _buildTeamMemberCard(context, member)),
       ],
     );
   }

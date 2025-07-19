@@ -282,8 +282,6 @@ class NotificationCard extends StatelessWidget {
     }
   }
 } 
-import 'package:intl/intl.dart';
-import '../../domain/entities/notification_entity.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationEntity notification;

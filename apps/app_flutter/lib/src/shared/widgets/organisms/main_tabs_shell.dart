@@ -4,8 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
-import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
-import 'package:meu_app/src/features/notifications/presentation/widgets/notification_badge.dart';
 import 'package:meu_app/src/shared/config/navigation_config.dart';
 import 'package:meu_app/src/shared/widgets/context_header_overlay.dart';
 

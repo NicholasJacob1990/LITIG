@@ -55,20 +55,20 @@ class RatingValidators {
     final trimmedComment = comment.trim();
     
     if (trimmedComment.length > maxCommentLength) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Comentário deve ter no máximo $maxCommentLength caracteres',
       ));
     }
 
     if (trimmedComment.length < 10) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Comentário deve ter pelo menos 10 caracteres se fornecido',
       ));
     }
 
     // Verificar se não contém apenas espaços ou caracteres especiais
     if (!RegExp(r'[a-zA-ZÀ-ÿ0-9]').hasMatch(trimmedComment)) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Comentário deve conter texto válido',
       ));
     }
@@ -79,7 +79,7 @@ class RatingValidators {
   /// Valida as tags selecionadas
   static Either<Failure, List<String>> validateTags(List<String> tags) {
     if (tags.length > maxTagsCount) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Você pode selecionar no máximo $maxTagsCount tags',
       ));
     }
@@ -88,7 +88,7 @@ class RatingValidators {
     final validTags = tags.where((tag) => tag.trim().isNotEmpty).toList();
     
     if (validTags.length != tags.length) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Todas as tags devem ser válidas',
       ));
     }
@@ -106,20 +106,20 @@ class RatingValidators {
   }) {
     // Verificar se o usuário é parte do caso
     if (raterType == 'client' && userId != clientId) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Apenas o cliente do caso pode fazer esta avaliação',
       ));
     }
 
     if (raterType == 'lawyer' && userId != lawyerId) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Apenas o advogado do caso pode fazer esta avaliação',
       ));
     }
 
     // Verificar se o tipo de avaliador é válido
     if (!['client', 'lawyer'].contains(raterType)) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'Tipo de avaliador inválido',
       ));
     }
@@ -143,20 +143,20 @@ class RatingValidators {
   }) {
     // Validar IDs não vazios
     if (caseId.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do caso é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do caso é obrigatório'));
     }
     
     if (lawyerId.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do advogado é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do advogado é obrigatório'));
     }
     
     if (clientId.trim().isEmpty) {
-      return Left(ValidationFailure(message: 'ID do cliente é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do cliente é obrigatório'));
     }
 
     // Validar tipo do avaliador
     if (!['client', 'lawyer'].contains(raterType)) {
-      return Left(ValidationFailure(message: 'Tipo de avaliador inválido'));
+      return const Left(ValidationFailure(message: 'Tipo de avaliador inválido'));
     }
 
     // Validar ratings obrigatórios
@@ -204,7 +204,7 @@ class RatingValidators {
 
     // Permitir uma diferença de até 1.5 pontos
     if (difference > 1.5) {
-      return Left(ValidationFailure(
+      return const Left(ValidationFailure(
         message: 'A avaliação geral parece inconsistente com as avaliações detalhadas. '
         'Por favor, revise suas avaliações.',
       ));

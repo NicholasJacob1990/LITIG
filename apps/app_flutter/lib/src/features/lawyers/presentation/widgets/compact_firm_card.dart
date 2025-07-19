@@ -74,7 +74,7 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             LucideIcons.building,
                             size: 12,
                             color: AppColors.primaryBlue,
@@ -140,7 +140,7 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
           width: 1.5,
         ),
       ),
-      child: Icon(
+      child: const Icon(
         LucideIcons.building2,
         size: 20,
         color: AppColors.primaryBlue,
@@ -266,11 +266,11 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
     final badges = <search_card.Badge>[];
     
     // Badges baseados em KPIs e certificações institucionais
-    if (widget.firm.kpis?.nps != null && widget.firm.kpis!.nps! > 8.0) {
+    if (widget.firm.kpis?.nps != null && widget.firm.kpis!.nps > 8.0) {
       badges.add(const search_card.Badge(title: 'Alto NPS', source: search_card.BadgeSource.platform));
     }
     
-    if (widget.firm.kpis?.successRate != null && widget.firm.kpis!.successRate! > 0.85) {
+    if (widget.firm.kpis?.successRate != null && widget.firm.kpis!.successRate > 0.85) {
       badges.add(const search_card.Badge(title: '85%+ Êxito', source: search_card.BadgeSource.api));
     }
     

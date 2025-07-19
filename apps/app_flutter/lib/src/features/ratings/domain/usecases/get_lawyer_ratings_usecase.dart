@@ -17,15 +17,15 @@ class GetLawyerRatingsUseCase {
   }) async {
     // Validações
     if (lawyerId.isEmpty) {
-      return Left(ValidationFailure(message: 'ID do advogado é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do advogado é obrigatório'));
     }
 
     if (page < 1) {
-      return Left(ValidationFailure(message: 'Página deve ser maior que 0'));
+      return const Left(ValidationFailure(message: 'Página deve ser maior que 0'));
     }
 
     if (limit < 1 || limit > 50) {
-      return Left(ValidationFailure(message: 'Limite deve estar entre 1 e 50'));
+      return const Left(ValidationFailure(message: 'Limite deve estar entre 1 e 50'));
     }
 
     // Buscar avaliações

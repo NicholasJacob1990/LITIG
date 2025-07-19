@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
-import 'package:meu_app/src/features/dashboard/presentation/widgets/client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/enhanced_client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/firm_dashboard.dart';

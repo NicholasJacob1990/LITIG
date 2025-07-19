@@ -162,6 +162,15 @@ import 'package:meu_app/src/features/ratings/presentation/bloc/rating_bloc.dart'
 // OCR Service
 import 'package:meu_app/src/core/services/ocr_service.dart';
 
+// Admin
+import 'package:meu_app/src/features/admin/domain/repositories/admin_repository.dart';
+import 'package:meu_app/src/features/admin/domain/usecases/get_admin_dashboard.dart';
+import 'package:meu_app/src/features/admin/domain/usecases/get_admin_metrics.dart';
+import 'package:meu_app/src/features/admin/domain/usecases/get_admin_audit_logs.dart';
+import 'package:meu_app/src/features/admin/domain/usecases/generate_executive_report.dart';
+import 'package:meu_app/src/features/admin/domain/usecases/force_global_sync.dart';
+import 'package:meu_app/src/features/admin/presentation/bloc/admin_bloc.dart';
+
 final getIt = GetIt.instance;
 
 void configureDependencies() {
@@ -530,4 +539,25 @@ void configureDependencies() {
 
   // OCR Service
   getIt.registerLazySingleton<OCRService>(() => OCRService());
+
+  // Admin System
+  // TODO: Implement AdminRepository when data layer is created
+  // getIt.registerLazySingleton<AdminRepository>(() => AdminRepositoryImpl());
+  
+  // Use Cases
+  // getIt.registerLazySingleton(() => GetAdminDashboard(getIt()));
+  // getIt.registerLazySingleton(() => GetAdminMetrics(getIt()));
+  // getIt.registerLazySingleton(() => GetAdminAuditLogs(getIt()));
+  // getIt.registerLazySingleton(() => GenerateExecutiveReport(getIt()));
+  // getIt.registerLazySingleton(() => ForceGlobalSync(getIt()));
+  
+  // BLoC - Temporário para funcionamento das rotas
+  getIt.registerFactory(() => AdminBloc(
+    // Mock implementations for now
+    getAdminDashboard: null,
+    getAdminMetrics: null,
+    getAdminAuditLogs: null,
+    generateExecutiveReport: null,
+    forceGlobalSync: null,
+  ));
 }

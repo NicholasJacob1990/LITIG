@@ -10,7 +10,7 @@ import '../utils/app_colors.dart';
 /// Para uso no AppBar - SEM referências à marca LITIG-1
 /// Apenas cores e ícones sutis para indicar contexto
 class DiscreteContextIndicator extends StatelessWidget {
-  const DiscreteContextIndicator({Key? key}) : super(key: key);
+  const DiscreteContextIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class DiscreteContextIndicator extends StatelessWidget {
               width: 5,
               height: 5,
               decoration: BoxDecoration(
-                color: _getContextColor(context).withOpacity(0.7),
+                color: _getContextColor(context).withValues(alpha: 0.7),
                 shape: BoxShape.circle,
               ),
             ),
@@ -45,7 +45,7 @@ class DiscreteContextIndicator extends StatelessWidget {
                   child: Icon(
                     Icons.person_outline,
                     size: 16,
-                    color: Colors.grey.shade600.withOpacity(0.6),
+                    color: Colors.grey.shade600.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -75,7 +75,7 @@ class DiscreteContextIndicator extends StatelessWidget {
 
 /// Versão ainda mais minimalista - apenas um ponto
 class MinimalContextDot extends StatelessWidget {
-  const MinimalContextDot({Key? key}) : super(key: key);
+  const MinimalContextDot({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,7 @@ class MinimalContextDot extends StatelessWidget {
           width: 4,
           height: 4,
           decoration: BoxDecoration(
-            color: _getContextColor(context).withOpacity(0.5),
+            color: _getContextColor(context).withValues(alpha: 0.5),
             shape: BoxShape.circle,
           ),
         );

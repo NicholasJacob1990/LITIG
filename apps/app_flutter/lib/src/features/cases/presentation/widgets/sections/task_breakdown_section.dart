@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Breakdown de Tarefas para advogados associados
@@ -841,8 +840,6 @@ class TaskBreakdownSection extends BaseInfoSection {
     }
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Breakdown de Tarefas para advogados associados
 /// 

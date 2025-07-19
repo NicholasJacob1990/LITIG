@@ -91,7 +91,7 @@ class _LegalAreasSelectorState extends State<LegalAreasSelector> {
                                 '${area.icon} ${area.value}',
                                 style: const TextStyle(fontSize: 12),
                               ),
-                              backgroundColor: Color(area.color).withOpacity(0.1),
+                              backgroundColor: Color(area.color).withValues(alpha: 0.1),
                               deleteIcon: const Icon(Icons.close, size: 16),
                               onDeleted: () {
                                 setState(() {
@@ -216,7 +216,7 @@ class _LegalAreasDialogState extends State<_LegalAreasDialog> {
                       });
                     },
                   );
-                }).toList(),
+                }),
                 const Divider(),
               ],
             );

@@ -131,7 +131,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                            border: Border.all(color: Colors.grey.withValues(alpha: 0.5)),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -392,7 +392,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
             barWidth: 3,
             belowBarData: BarAreaData(
               show: true,
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -506,9 +506,9 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
+        color: Colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.withOpacity(0.2)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -757,12 +757,6 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
     );
   }
 } 
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fl_chart/fl_chart.dart';
-import '../../domain/entities/sla_metrics_entity.dart';
-import '../bloc/sla_analytics_bloc.dart';
-import '../bloc/sla_analytics_event.dart';
-import '../bloc/sla_analytics_state.dart';
 
 class SlaAnalyticsWidget extends StatefulWidget {
   const SlaAnalyticsWidget({super.key});
@@ -889,7 +883,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                            border: Border.all(color: Colors.grey.withValues(alpha: 0.5)),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -1150,7 +1144,7 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
             barWidth: 3,
             belowBarData: BarAreaData(
               show: true,
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -1264,9 +1258,9 @@ class _SlaAnalyticsWidgetState extends State<SlaAnalyticsWidget> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
+        color: Colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.withOpacity(0.2)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [

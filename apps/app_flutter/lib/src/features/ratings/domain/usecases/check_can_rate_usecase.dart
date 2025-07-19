@@ -12,7 +12,7 @@ class CheckCanRateUseCase {
   Future<Either<Failure, Map<String, dynamic>>> call(String caseId) async {
     // Validações
     if (caseId.isEmpty) {
-      return Left(ValidationFailure(message: 'ID do caso é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do caso é obrigatório'));
     }
 
     // Verificar permissão

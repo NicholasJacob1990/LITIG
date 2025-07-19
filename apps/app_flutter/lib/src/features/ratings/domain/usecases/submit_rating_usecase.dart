@@ -13,43 +13,43 @@ class SubmitRatingUseCase {
   Future<Either<Failure, String>> call(CaseRating rating) async {
     // Validações básicas
     if (rating.overallRating < 1 || rating.overallRating > 5) {
-      return Left(ValidationFailure(message: 'Avaliação geral deve estar entre 1 e 5'));
+      return const Left(ValidationFailure(message: 'Avaliação geral deve estar entre 1 e 5'));
     }
 
     if (rating.communicationRating < 1 || rating.communicationRating > 5) {
-      return Left(ValidationFailure(message: 'Avaliação de comunicação deve estar entre 1 e 5'));
+      return const Left(ValidationFailure(message: 'Avaliação de comunicação deve estar entre 1 e 5'));
     }
 
     if (rating.expertiseRating < 1 || rating.expertiseRating > 5) {
-      return Left(ValidationFailure(message: 'Avaliação de expertise deve estar entre 1 e 5'));
+      return const Left(ValidationFailure(message: 'Avaliação de expertise deve estar entre 1 e 5'));
     }
 
     if (rating.responsivenessRating < 1 || rating.responsivenessRating > 5) {
-      return Left(ValidationFailure(message: 'Avaliação de responsividade deve estar entre 1 e 5'));
+      return const Left(ValidationFailure(message: 'Avaliação de responsividade deve estar entre 1 e 5'));
     }
 
     if (rating.valueRating < 1 || rating.valueRating > 5) {
-      return Left(ValidationFailure(message: 'Avaliação de custo-benefício deve estar entre 1 e 5'));
+      return const Left(ValidationFailure(message: 'Avaliação de custo-benefício deve estar entre 1 e 5'));
     }
 
     if (rating.comment != null && rating.comment!.length > 500) {
-      return Left(ValidationFailure(message: 'Comentário não pode exceder 500 caracteres'));
+      return const Left(ValidationFailure(message: 'Comentário não pode exceder 500 caracteres'));
     }
 
     if (rating.caseId.isEmpty) {
-      return Left(ValidationFailure(message: 'ID do caso é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do caso é obrigatório'));
     }
 
     if (rating.lawyerId.isEmpty) {
-      return Left(ValidationFailure(message: 'ID do advogado é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do advogado é obrigatório'));
     }
 
     if (rating.clientId.isEmpty) {
-      return Left(ValidationFailure(message: 'ID do cliente é obrigatório'));
+      return const Left(ValidationFailure(message: 'ID do cliente é obrigatório'));
     }
 
     if (!['client', 'lawyer'].contains(rating.raterType)) {
-      return Left(ValidationFailure(message: 'Tipo do avaliador deve ser "client" ou "lawyer"'));
+      return const Left(ValidationFailure(message: 'Tipo do avaliador deve ser "client" ou "lawyer"'));
     }
 
     // Submeter avaliação

@@ -113,6 +113,7 @@ class CaseRatingModel extends CaseRating {
   }
 
   /// Cria uma cópia do modelo com campos modificados
+  @override
   CaseRatingModel copyWith({
     String? id,
     String? caseId,

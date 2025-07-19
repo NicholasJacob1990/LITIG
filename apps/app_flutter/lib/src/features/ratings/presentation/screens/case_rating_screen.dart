@@ -659,11 +659,11 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.check_circle, color: AppColors.success),
-            const SizedBox(width: 8),
-            const Text('Avaliação Enviada!'),
+            SizedBox(width: 8),
+            Text('Avaliação Enviada!'),
           ],
         ),
         content: const Text(

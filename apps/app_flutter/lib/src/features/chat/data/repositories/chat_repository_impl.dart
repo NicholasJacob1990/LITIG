@@ -5,7 +5,6 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/entities/chat_room.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_remote_data_source.dart';
-import '../models/chat_message_model.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource remoteDataSource;

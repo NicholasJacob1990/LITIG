@@ -151,7 +151,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                 width: 2,
               ),
             ),
-            child: Icon(
+            child: const Icon(
               LucideIcons.building2,
               size: 30,
               color: AppColors.primaryBlue,
@@ -217,7 +217,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                 width: 1,
               ),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
@@ -225,7 +225,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                   size: 16,
                   color: AppColors.warning,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   '🏛️ Escritório Renomado',
                   style: TextStyle(
@@ -455,7 +455,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.building,
                     size: 14,
                     color: AppColors.primaryBlue,
@@ -463,7 +463,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                   const SizedBox(width: 6),
                   Text(
                     'Advogado do ${firm.name}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryBlue,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -490,12 +490,12 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _handleFirmHiring(context, lawyer, firm),
-                    icon: Icon(
+                    icon: const Icon(
                       LucideIcons.building2,
                       size: 16,
                       color: AppColors.primaryBlue,
                     ),
-                    label: Text(
+                    label: const Text(
                       'Contratar via Escritório',
                       style: TextStyle(
                         color: AppColors.primaryBlue,
@@ -503,7 +503,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppColors.primaryBlue),
+                      side: const BorderSide(color: AppColors.primaryBlue),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
@@ -549,17 +549,17 @@ class _FirmTeamViewState extends State<FirmTeamView> {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: () => _handleTeamMeeting(context, firm),
-              icon: Icon(
+              icon: const Icon(
                 LucideIcons.video,
                 size: 18,
                 color: AppColors.info,
               ),
-              label: Text(
+              label: const Text(
                 'Reunião com Equipe',
                 style: TextStyle(color: AppColors.info),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.info),
+                side: const BorderSide(color: AppColors.info),
               ),
             ),
           ),
@@ -656,18 +656,18 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         nome: 'Dr. Ana Silva',
         avatarUrl: 'https://example.com/ana.jpg',
         primaryArea: 'Direito Civil',
-        specializations: ['Direito Civil', 'Direito Imobiliário'],
+        specializations: const ['Direito Civil', 'Direito Imobiliário'],
         fair: 0.92,
         rating: 4.8,
         distanceKm: 0.0, // Mesmo escritório
         reviewCount: 156,
         isAvailable: true,
-        features: LawyerFeatures(
+        features: const LawyerFeatures(
           successRate: 0.89,
           responseTime: 2,
           softSkills: 0.94,
         ),
-        awards: ['Top Lawyer 2023', 'OAB Destaque'],
+        awards: const ['Top Lawyer 2023', 'OAB Destaque'],
         experienceYears: 12,
         professionalSummary: 'Especialista em Direito Civil com mais de 12 anos de experiência.',
       ),
@@ -676,18 +676,18 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         nome: 'Dr. Carlos Oliveira',
         avatarUrl: 'https://example.com/carlos.jpg',
         primaryArea: 'Direito Trabalhista',
-        specializations: ['Direito Trabalhista', 'Direito Sindical'],
+        specializations: const ['Direito Trabalhista', 'Direito Sindical'],
         fair: 0.87,
         rating: 4.6,
         distanceKm: 0.0,
         reviewCount: 203,
         isAvailable: true,
-        features: LawyerFeatures(
+        features: const LawyerFeatures(
           successRate: 0.91,
           responseTime: 1,
           softSkills: 0.88,
         ),
-        awards: ['Advogado do Ano 2022'],
+        awards: const ['Advogado do Ano 2022'],
         experienceYears: 15,
         professionalSummary: 'Especialista em questões trabalhistas e sindicais.',
       ),
@@ -696,18 +696,18 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         nome: 'Dra. Mariana Costa',
         avatarUrl: 'https://example.com/mariana.jpg',
         primaryArea: 'Direito Tributário',
-        specializations: ['Direito Tributário', 'Direito Empresarial'],
+        specializations: const ['Direito Tributário', 'Direito Empresarial'],
         fair: 0.85,
         rating: 4.7,
         distanceKm: 0.0,
         reviewCount: 98,
         isAvailable: false,
-        features: LawyerFeatures(
+        features: const LawyerFeatures(
           successRate: 0.93,
           responseTime: 3,
           softSkills: 0.91,
         ),
-        awards: ['Especialista Tributário 2023'],
+        awards: const ['Especialista Tributário 2023'],
         experienceYears: 8,
         professionalSummary: 'Especialista em planejamento tributário e compliance.',
       ),

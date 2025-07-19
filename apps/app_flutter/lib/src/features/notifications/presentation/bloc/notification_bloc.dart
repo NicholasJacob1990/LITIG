@@ -222,10 +222,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     return super.close();
   }
 } 
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
-import '../../domain/entities/notification_entity.dart';
-import '../../domain/repositories/notification_repository.dart';
 
 part 'notification_event.dart';
 part 'notification_state.dart';

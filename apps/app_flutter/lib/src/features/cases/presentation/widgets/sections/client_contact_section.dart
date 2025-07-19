@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Contato com Cliente para advogados contratantes
@@ -412,8 +411,6 @@ class ClientContactSection extends BaseInfoSection {
     return Colors.red;
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Contato com Cliente para advogados contratantes
 /// 

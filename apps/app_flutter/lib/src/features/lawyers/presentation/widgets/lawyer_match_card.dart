@@ -467,7 +467,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
 
   Widget _buildSocialSection() {
     // TODO: Implementar campos de redes sociais no modelo MatchedLawyer
-    return LawyerSocialLinks(
+    return const LawyerSocialLinks(
       linkedinUrl: 'https://linkedin.com/in/advogado',
       instagramUrl: 'https://instagram.com/advogado',
       facebookUrl: 'https://facebook.com/advogado',

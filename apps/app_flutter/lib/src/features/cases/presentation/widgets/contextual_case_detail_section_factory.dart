@@ -619,39 +619,10 @@ class _PlaceholderSection extends StatelessWidget {
     );
   }
 } 
-import '../../domain/entities/case_detail.dart';
-import '../../domain/entities/contextual_case_data.dart';
-import '../../domain/entities/allocation_type.dart';
-import '../../../auth/domain/entities/user.dart';
-import '../../../../shared/utils/app_colors.dart';
-import '../../../../core/utils/logger.dart';
 
 // Widgets da experiência atual do cliente (manter intactos)
-import 'lawyer_responsible_section.dart';
-import 'consultation_info_section.dart';
-import 'pre_analysis_section.dart';
-import 'next_steps_section.dart';
-import 'documents_section.dart';
-import 'process_status_section.dart';
 
 // Seções contextuais especializadas
-import 'sections/internal_team_section.dart';
-import 'sections/business_opportunity_section.dart';
-import 'sections/platform_opportunity_section.dart';
-import 'sections/client_contact_section.dart';
-import 'sections/case_complexity_section.dart';
-import 'sections/match_explanation_section.dart';
-import 'sections/task_breakdown_section.dart';
-import 'sections/time_tracking_section.dart';
-import 'sections/work_documents_section.dart';
-import 'sections/strategic_documents_section.dart';
-import 'sections/platform_documents_section.dart';
-import 'sections/delivery_framework_section.dart';
-import 'sections/profitability_section.dart';
-import 'sections/quality_control_section.dart';
-import 'sections/escalation_section.dart';
-import 'sections/competitor_analysis_section.dart';
-import 'sections/next_opportunities_section.dart';
 
 /// Factory principal para seções contextuais da tela de detalhes do caso
 /// 

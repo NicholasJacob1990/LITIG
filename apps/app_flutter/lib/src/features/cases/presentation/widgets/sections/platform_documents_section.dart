@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Documentos da Plataforma para super associados
@@ -1206,8 +1205,6 @@ class PlatformDocumentsSection extends BaseInfoSection {
     );
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Documentos da Plataforma para super associados
 /// 

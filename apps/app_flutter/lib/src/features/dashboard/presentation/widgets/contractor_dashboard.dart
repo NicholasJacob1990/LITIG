@@ -157,7 +157,7 @@ class ContractorDashboard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...opportunities.map((opp) => _buildOpportunityCard(context, opp)).toList(),
+        ...opportunities.map((opp) => _buildOpportunityCard(context, opp)),
       ],
     );
   }
@@ -218,7 +218,7 @@ class ContractorDashboard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Icon(LucideIcons.dollarSign, size: 16, color: Colors.green),
+                  const Icon(LucideIcons.dollarSign, size: 16, color: Colors.green),
                   const SizedBox(width: 4),
                   Text(
                     'R\$ ${_formatCurrency(opportunity['value'])}',
@@ -286,7 +286,7 @@ class ContractorDashboard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...partnerships.map((partner) => _buildPartnershipCard(context, partner)).toList(),
+        ...partnerships.map((partner) => _buildPartnershipCard(context, partner)),
       ],
     );
   }
@@ -326,7 +326,7 @@ class ContractorDashboard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Icon(LucideIcons.star, size: 14, color: Colors.amber),
+                        const Icon(LucideIcons.star, size: 14, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
                           '${partner['rating']}',
@@ -386,7 +386,7 @@ class ContractorDashboard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(

@@ -78,6 +78,7 @@ class LawyerRatingStatsModel extends LawyerRatingStats {
   }
 
   /// Cria uma cópia do modelo com campos modificados
+  @override
   LawyerRatingStatsModel copyWith({
     String? lawyerId,
     double? overallRating,

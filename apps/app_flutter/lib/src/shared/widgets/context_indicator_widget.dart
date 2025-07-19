@@ -15,7 +15,7 @@ import '../../features/auth/presentation/bloc/auth_state.dart';
 /// - Integração completa com AutoContextService do backend
 /// - Logs automáticos de mudança de contexto
 class ContextIndicatorWidget extends StatefulWidget {
-  const ContextIndicatorWidget({Key? key}) : super(key: key);
+  const ContextIndicatorWidget({super.key});
 
   @override
   State<ContextIndicatorWidget> createState() => _ContextIndicatorWidgetState();
@@ -191,7 +191,7 @@ class _ContextIndicatorWidgetState extends State<ContextIndicatorWidget>
                             vertical: isCompact ? 4 : 6,
                           ),
                           decoration: BoxDecoration(
-                            color: _getContextColor().withOpacity(0.1),
+                            color: _getContextColor().withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: _getContextColor(),
@@ -199,7 +199,7 @@ class _ContextIndicatorWidgetState extends State<ContextIndicatorWidget>
                             ),
                             boxShadow: _isTransitioning ? [
                               BoxShadow(
-                                color: _getContextColor().withOpacity(0.3),
+                                color: _getContextColor().withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -232,7 +232,7 @@ class _ContextIndicatorWidgetState extends State<ContextIndicatorWidget>
                                       _getContextSubtitle(),
                                       style: TextStyle(
                                         fontSize: 9,
-                                        color: _getContextColor().withOpacity(0.8),
+                                        color: _getContextColor().withValues(alpha: 0.8),
                                         height: 1.0,
                                       ),
                                     ),
@@ -359,10 +359,10 @@ class _PersonalAreaButton extends StatelessWidget {
             vertical: isCompact ? 4 : 6,
           ),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.1),
+            color: AppColors.success.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.success.withOpacity(0.3),
+              color: AppColors.success.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -376,7 +376,7 @@ class _PersonalAreaButton extends StatelessWidget {
               ),
               if (!isCompact) ...[
                 const SizedBox(width: 4),
-                Text(
+                const Text(
                   'Pessoal',
                   style: TextStyle(
                     fontSize: 10,

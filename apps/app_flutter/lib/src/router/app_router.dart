@@ -37,6 +37,13 @@ import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart'
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
 import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_team_screen.dart';
+import 'package:meu_app/src/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:meu_app/src/features/admin/presentation/screens/admin_metrics_screen.dart';
+import 'package:meu_app/src/features/admin/presentation/screens/admin_audit_screen.dart';
+import 'package:meu_app/src/features/admin/presentation/screens/admin_reports_screen.dart';
+import 'package:meu_app/src/features/admin/presentation/screens/admin_settings_screen.dart';
+import 'package:meu_app/src/features/admin/presentation/bloc/admin_bloc.dart';
+import 'package:meu_app/src/features/admin/domain/services/admin_auth_service.dart';
 import 'package:meu_app/injection_container.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -267,7 +274,148 @@ GoRouter appRouter(AuthBloc authBloc) {
           );
         },
       ),
+
+      // 🏛️ ADMIN ROUTES - Sistema de Controladoria
+      GoRoute(
+        path: '/admin',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          // Verificar permissões administrativas
+          final authState = authBloc.state;
+          if (authState is auth_states.Authenticated) {
+            final userRole = authState.user.role;
+            if (!AdminAuthService.canAccessRoute(userRole, '/admin')) {
+              return _buildAccessDeniedScreen(context);
+            }
+          }
+          
+          return BlocProvider(
+            create: (context) => getIt<AdminBloc>(),
+            child: const AdminDashboardScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin/metrics',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          // Verificar permissões administrativas
+          final authState = authBloc.state;
+          if (authState is auth_states.Authenticated) {
+            final userRole = authState.user.role;
+            if (!AdminAuthService.canAccessRoute(userRole, '/admin/metrics')) {
+              return _buildAccessDeniedScreen(context);
+            }
+          }
+          
+          return BlocProvider(
+            create: (context) => getIt<AdminBloc>(),
+            child: const AdminMetricsScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin/audit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          // Verificar permissões administrativas
+          final authState = authBloc.state;
+          if (authState is auth_states.Authenticated) {
+            final userRole = authState.user.role;
+            if (!AdminAuthService.canAccessRoute(userRole, '/admin/audit')) {
+              return _buildAccessDeniedScreen(context);
+            }
+          }
+          
+          return BlocProvider(
+            create: (context) => getIt<AdminBloc>(),
+            child: const AdminAuditScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin/reports',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          // Verificar permissões administrativas
+          final authState = authBloc.state;
+          if (authState is auth_states.Authenticated) {
+            final userRole = authState.user.role;
+            if (!AdminAuthService.canAccessRoute(userRole, '/admin/reports')) {
+              return _buildAccessDeniedScreen(context);
+            }
+          }
+          
+          return BlocProvider(
+            create: (context) => getIt<AdminBloc>(),
+            child: const AdminReportsScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin/settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          // Verificar permissões administrativas
+          final authState = authBloc.state;
+          if (authState is auth_states.Authenticated) {
+            final userRole = authState.user.role;
+            if (!AdminAuthService.canAccessRoute(userRole, '/admin/settings')) {
+              return _buildAccessDeniedScreen(context);
+            }
+          }
+          
+          return BlocProvider(
+            create: (context) => getIt<AdminBloc>(),
+            child: const AdminSettingsScreen(),
+          );
+        },
+      ),
     ],
+  );
+}
+
+/// Tela de Acesso Negado para rotas administrativas
+Widget _buildAccessDeniedScreen(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Acesso Negado'),
+      backgroundColor: Colors.red,
+      foregroundColor: Colors.white,
+    ),
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            LucideIcons.shieldX,
+            size: 64,
+            color: Colors.red.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Acesso Negado',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Você não tem permissão para acessar esta área administrativa.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/'),
+            icon: const Icon(LucideIcons.home),
+            label: const Text('Voltar ao Início'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }
 

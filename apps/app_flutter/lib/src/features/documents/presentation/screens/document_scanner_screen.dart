@@ -204,7 +204,7 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
                           color: Colors.blue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Column(
+                        child: const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
@@ -214,7 +214,7 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
                                   size: 16,
                                   color: AppColors.primaryBlue,
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 Text(
                                   'Documentos Suportados',
                                   style: TextStyle(
@@ -224,8 +224,8 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
+                            SizedBox(height: 8),
+                            Text(
                               '• CPF, CNPJ, RG, Carteira OAB\n'
                               '• Contratos de Trabalho\n'
                               '• Comprovantes e Holerites\n'
@@ -410,7 +410,7 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
                           color: AppColors.primaryBlue.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: CircularProgressIndicator(
+                        child: const CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
                             AppColors.primaryBlue,
                           ),
@@ -622,7 +622,7 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
           label: const Text('Validar com Backend'),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            side: BorderSide(color: AppColors.primaryBlue),
+            side: const BorderSide(color: AppColors.primaryBlue),
           ),
         ),
 
@@ -719,7 +719,7 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
           ),
         ],
       ),
-      child: SafeArea(
+      child: const SafeArea(
         child: Row(
           children: [
             Icon(
@@ -727,8 +727,8 @@ class _DocumentScannerScreenState extends State<DocumentScannerScreen> {
               color: AppColors.primaryBlue,
               size: 16,
             ),
-            const SizedBox(width: 8),
-            const Expanded(
+            SizedBox(width: 8),
+            Expanded(
               child: Text(
                 'Seus documentos são processados localmente e com segurança',
                 style: TextStyle(

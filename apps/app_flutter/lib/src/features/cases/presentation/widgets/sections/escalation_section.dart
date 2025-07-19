@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 class EscalationSection extends BaseInfoSection {
@@ -583,8 +582,6 @@ class EscalationSection extends BaseInfoSection {
     );
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 class EscalationSection extends BaseInfoSection {
   const EscalationSection({

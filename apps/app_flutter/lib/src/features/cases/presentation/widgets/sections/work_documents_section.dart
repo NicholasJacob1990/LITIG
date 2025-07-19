@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Documentos de Trabalho para advogados associados
@@ -783,8 +782,6 @@ class WorkDocumentsSection extends BaseInfoSection {
     // TODO: Implementar navegação de templates
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Documentos de Trabalho para advogados associados
 /// 

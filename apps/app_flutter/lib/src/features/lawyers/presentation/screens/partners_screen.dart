@@ -121,7 +121,7 @@ class HybridRecommendationsTabView extends StatefulWidget {
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
   bool _hasPerformedSearch = false;
-  bool _showMapView = false; // ❌ REMOVIDO: Toggle mapa das recomendações conforme especificação
+  final bool _showMapView = false; // ❌ REMOVIDO: Toggle mapa das recomendações conforme especificação
   
   @override
   void initState() {

@@ -49,7 +49,7 @@ class LitigationPartiesSection extends StatelessWidget {
                       color: AppColors.primaryBlue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       LucideIcons.users,
                       size: 20,
                       color: AppColors.primaryBlue,

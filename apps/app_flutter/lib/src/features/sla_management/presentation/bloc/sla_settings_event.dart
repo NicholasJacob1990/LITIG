@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import '../../domain/entities/sla_settings_entity.dart';
 import '../../domain/entities/sla_preset_entity.dart';
 
@@ -441,4 +442,78 @@ class TestSlaEscalationEvent extends SlaSettingsEvent {
 
   @override
   List<Object?> get props => [escalationId];
+}
+
+// Audit Events
+class ExportSlaAuditLogEvent extends SlaSettingsEvent {
+  final String format;
+  final DateTimeRange? dateRange;
+
+  const ExportSlaAuditLogEvent(
+    this.format, {
+    this.dateRange,
+  });
+
+  @override
+  List<Object?> get props => [format, dateRange];
+}
+
+class GenerateSlaComplianceReportEvent extends SlaSettingsEvent {
+  final DateTimeRange dateRange;
+
+  const GenerateSlaComplianceReportEvent(this.dateRange);
+
+  @override
+  List<Object?> get props => [dateRange];
+}
+
+class VerifySlaIntegrityEvent extends SlaSettingsEvent {
+  const VerifySlaIntegrityEvent();
+}
+
+// Notification Events
+class TestSlaNotificationEvent extends SlaSettingsEvent {
+  final String channel;
+
+  const TestSlaNotificationEvent(this.channel);
+
+  @override
+  List<Object?> get props => [channel];
+}
+
+// Preset Events
+class ApplySlaPresetEvent extends SlaSettingsEvent {
+  final SlaPresetEntity preset;
+
+  const ApplySlaPresetEvent(this.preset);
+
+  @override
+  List<Object?> get props => [preset];
+}
+
+class CreateCustomSlaPresetEvent extends SlaSettingsEvent {
+  final SlaPresetEntity preset;
+
+  const CreateCustomSlaPresetEvent(this.preset);
+
+  @override
+  List<Object?> get props => [preset];
+}
+
+class ExportSlaPresetEvent extends SlaSettingsEvent {
+  final SlaPresetEntity preset;
+
+  const ExportSlaPresetEvent(this.preset);
+
+  @override
+  List<Object?> get props => [preset];
+}
+
+class DeleteSlaPresetEvent extends SlaSettingsEvent {
+  final String presetId;
+
+  const DeleteSlaPresetEvent(this.presetId);
+
+  @override
+  List<Object?> get props => [presetId];
 } 

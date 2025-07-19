@@ -79,7 +79,7 @@ class DetailedCaseCard extends StatelessWidget {
               Text(lawyer.name, style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
               Row(
                 children: [
-                  Text(lawyer.specialty, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7), fontSize: 12)),
+                  Text(lawyer.specialty, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 12)),
                   const Spacer(),
                   // Ícones das redes sociais
                   LawyerSocialLinks(
@@ -94,7 +94,7 @@ class DetailedCaseCard extends StatelessWidget {
         ),
         Chip(
           label: Text(status),
-          backgroundColor: _getStatusColor(status).withOpacity(0.1),
+          backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
           labelStyle: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold, fontSize: 12),
           side: BorderSide.none,
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -112,7 +112,7 @@ class DetailedCaseCard extends StatelessWidget {
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: progress,
-          backgroundColor: theme.colorScheme.outline.withOpacity(0.3),
+          backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.3),
           valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(status)),
           minHeight: 6,
           borderRadius: BorderRadius.circular(3),
@@ -125,10 +125,10 @@ class DetailedCaseCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(LucideIcons.flag, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        Icon(LucideIcons.flag, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         const SizedBox(width: 8),
         Text('Próxima etapa: ', style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
-        Expanded(child: Text(nextStep, overflow: TextOverflow.ellipsis, style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)))),
+        Expanded(child: Text(nextStep, overflow: TextOverflow.ellipsis, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)))),
       ],
     );
   }
@@ -167,8 +167,7 @@ class DetailedCaseCard extends StatelessWidget {
         return AppColors.info; // Fallback
     }
   }
-} 
-    switch (status) {
+}     switch (status) {
       case 'Em Andamento':
         return AppColors.warning;
       case 'Concluído':

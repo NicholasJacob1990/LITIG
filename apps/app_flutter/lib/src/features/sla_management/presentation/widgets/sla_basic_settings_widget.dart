@@ -496,7 +496,7 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<SlaSettingsBloc>().add(ResetSlaSettingsEvent());
+              context.read<SlaSettingsBloc>().add(const ResetSlaSettingsEvent());
             },
             child: const Text('Restaurar'),
           ),
@@ -1061,7 +1061,7 @@ class _SlaBasicSettingsWidgetState extends State<SlaBasicSettingsWidget> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<SlaSettingsBloc>().add(ResetSlaSettingsEvent());
+              context.read<SlaSettingsBloc>().add(const ResetSlaSettingsEvent());
             },
             child: const Text('Restaurar'),
           ),

@@ -15,7 +15,7 @@ class ChatMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = 'current_user_id'; // TODO: Get from AuthBloc
+    const currentUserId = 'current_user_id'; // TODO: Get from AuthBloc
     final isFromCurrentUser = message.senderId == currentUserId;
     
     return Container(

@@ -179,3 +179,4 @@ curl -X GET "http://localhost:8080/api/v1/unipile/health"
 4. Adicione ao `.env`: `UNIPILE_API_TOKEN=seu_token`
 
 **Com este único token, o sistema ficará 100% funcional!** 🚀 
+ 

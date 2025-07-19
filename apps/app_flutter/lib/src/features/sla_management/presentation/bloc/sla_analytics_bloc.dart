@@ -1,7 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
-import '../../domain/entities/sla_metrics_entity.dart';
 import '../../domain/usecases/get_sla_metrics.dart';
 import 'sla_analytics_event.dart';
 import 'sla_analytics_state.dart';
@@ -530,12 +528,6 @@ class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
     }
   }
 } 
-import 'package:equatable/equatable.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/sla_metrics_entity.dart';
-import '../../domain/usecases/get_sla_metrics.dart';
-import 'sla_analytics_event.dart';
-import 'sla_analytics_state.dart';
 
 class SlaAnalyticsBloc extends Bloc<SlaAnalyticsEvent, SlaAnalyticsState> {
   final GetSlaMetrics getSlaMetrics;

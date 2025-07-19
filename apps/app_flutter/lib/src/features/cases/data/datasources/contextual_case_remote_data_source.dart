@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import '../../domain/entities/case_detail.dart';
 import '../../domain/entities/contextual_case_data.dart';
 import '../../domain/entities/allocation_type.dart';
 import '../../../../core/utils/logger.dart';
@@ -452,10 +451,6 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
     };
   }
 } 
-import '../../domain/entities/case_detail.dart';
-import '../../domain/entities/contextual_case_data.dart';
-import '../../domain/entities/allocation_type.dart';
-import '../../../../core/utils/logger.dart';
 
 /// Interface para o data source contextual de casos
 abstract class ContextualCaseRemoteDataSource {

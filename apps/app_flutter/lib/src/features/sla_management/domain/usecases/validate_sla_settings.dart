@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/sla_settings_entity.dart';
-import '../value_objects/sla_timeframe.dart';
 
 class ValidateSlaSettings implements UseCase<SlaValidationResult, ValidateSlaSettingsParams> {
   ValidateSlaSettings();
@@ -400,10 +399,6 @@ enum SlaValidationSeverity { error, warning }
 class ValidationFailure extends Failure {
   const ValidationFailure(String message) : super(message);
 } 
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../entities/sla_settings_entity.dart';
-import '../value_objects/sla_timeframe.dart';
 
 class ValidateSlaSettings implements UseCase<SlaValidationResult, ValidateSlaSettingsParams> {
   ValidateSlaSettings();

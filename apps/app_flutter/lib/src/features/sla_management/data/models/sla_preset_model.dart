@@ -208,7 +208,6 @@ class SlaPresetModel extends SlaPresetEntity {
     );
   }
 } 
-import '../../domain/entities/sla_preset_entity.dart';
 
 part 'sla_preset_model.g.dart';
 

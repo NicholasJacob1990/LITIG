@@ -374,7 +374,7 @@ class RatingCard extends StatelessWidget {
               color: AppColors.success.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
@@ -382,7 +382,7 @@ class RatingCard extends StatelessWidget {
                   size: 12,
                   color: AppColors.success,
                 ),
-                const SizedBox(width: 2),
+                SizedBox(width: 2),
                 Text(
                   'Verificado',
                   style: TextStyle(

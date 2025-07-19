@@ -74,7 +74,7 @@ class _CompactSearchCardState extends State<CompactSearchCard> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             LucideIcons.briefcase,
                             size: 12,
                             color: AppColors.primaryBlue,
@@ -298,15 +298,15 @@ class _CompactSearchCardState extends State<CompactSearchCard> {
       return [
         if (lawyer.awards.isNotEmpty) 
           Badge(title: lawyer.awards.first, source: BadgeSource.certified),
-        Badge(title: 'Plataforma', source: BadgeSource.platform),
+        const Badge(title: 'Plataforma', source: BadgeSource.platform),
         if (lawyer.rating != null && lawyer.rating! > 4.5)
-          Badge(title: 'Top Rated', source: BadgeSource.api),
+          const Badge(title: 'Top Rated', source: BadgeSource.api),
       ];
     }
     
     return [
-      Badge(title: 'Verificado', source: BadgeSource.platform),
-      Badge(title: 'Certificado', source: BadgeSource.certified),
+      const Badge(title: 'Verificado', source: BadgeSource.platform),
+      const Badge(title: 'Certificado', source: BadgeSource.certified),
     ];
   }
 

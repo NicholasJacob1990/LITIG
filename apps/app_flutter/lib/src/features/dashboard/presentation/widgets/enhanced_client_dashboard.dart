@@ -160,7 +160,7 @@ class EnhancedClientDashboard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...activeCases.map((caseData) => _buildCaseCard(context, caseData)).toList(),
+        ...activeCases.map((caseData) => _buildCaseCard(context, caseData)),
       ],
     );
   }
@@ -275,7 +275,7 @@ class EnhancedClientDashboard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        ...lawyers.map((lawyer) => _buildLawyerCard(context, lawyer)).toList(),
+        ...lawyers.map((lawyer) => _buildLawyerCard(context, lawyer)),
       ],
     );
   }
@@ -395,7 +395,7 @@ class EnhancedClientDashboard extends StatelessWidget {
             ),
           )
         else
-          ...hearings.map((hearing) => _buildHearingCard(context, hearing)).toList(),
+          ...hearings.map((hearing) => _buildHearingCard(context, hearing)),
       ],
     );
   }

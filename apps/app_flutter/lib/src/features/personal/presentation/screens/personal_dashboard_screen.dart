@@ -14,7 +14,7 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 /// - Interface verde para diferenciação visual
 /// - 4 abas específicas: Painel, Buscar, Casos, Mensagens
 class PersonalDashboardScreen extends StatefulWidget {
-  const PersonalDashboardScreen({Key? key}) : super(key: key);
+  const PersonalDashboardScreen({super.key});
 
   @override
   State<PersonalDashboardScreen> createState() => _PersonalDashboardScreenState();
@@ -142,11 +142,11 @@ class _PersonalDashboardScreenState extends State<PersonalDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
             Icon(LucideIcons.info, color: AppColors.success),
-            const SizedBox(width: 8),
-            const Text('Área Pessoal'),
+            SizedBox(width: 8),
+            Text('Área Pessoal'),
           ],
         ),
         content: const Column(
@@ -649,11 +649,11 @@ class _PersonalDashboardTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(LucideIcons.dollarSign, color: AppColors.success),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Resumo Financeiro',
                 style: TextStyle(
                   fontSize: 18,

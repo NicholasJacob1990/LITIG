@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../base_info_section.dart';
-import '../../../domain/entities/case_detail.dart';
 
 /// Seção de Equipe Interna para Advogados Associados
 /// 
@@ -410,8 +409,6 @@ class InternalTeamSection extends BaseInfoSection {
     );
   }
 } 
-import '../base_info_section.dart';
-import '../../../domain/entities/case_detail.dart';
 
 /// Seção de Equipe Interna para Advogados Associados
 /// 

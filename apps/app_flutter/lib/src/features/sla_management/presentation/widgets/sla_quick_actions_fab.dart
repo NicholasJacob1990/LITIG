@@ -43,13 +43,13 @@ class SlaQuickActionsFab extends StatelessWidget {
     switch (tabIndex) {
       case 0: // Configurações
         return [
-          QuickAction(
+          const QuickAction(
             action: 'save',
             icon: Icons.save,
             label: 'Salvar',
             tooltip: 'Salvar configurações',
           ),
-          QuickAction(
+          const QuickAction(
             action: 'validate',
             icon: Icons.check_circle,
             label: 'Validar',
@@ -58,7 +58,7 @@ class SlaQuickActionsFab extends StatelessWidget {
         ];
       case 1: // Presets
         return [
-          QuickAction(
+          const QuickAction(
             action: 'preset',
             icon: Icons.bookmark_add,
             label: 'Novo Preset',
@@ -67,7 +67,7 @@ class SlaQuickActionsFab extends StatelessWidget {
         ];
       case 2: // Regras de Negócio
         return [
-          QuickAction(
+          const QuickAction(
             action: 'test',
             icon: Icons.play_arrow,
             label: 'Testar',
@@ -76,7 +76,7 @@ class SlaQuickActionsFab extends StatelessWidget {
         ];
       case 3: // Notificações
         return [
-          QuickAction(
+          const QuickAction(
             action: 'test',
             icon: Icons.notifications_active,
             label: 'Testar',
@@ -85,7 +85,7 @@ class SlaQuickActionsFab extends StatelessWidget {
         ];
       case 4: // Escalações
         return [
-          QuickAction(
+          const QuickAction(
             action: 'test',
             icon: Icons.trending_up,
             label: 'Testar',
@@ -94,7 +94,7 @@ class SlaQuickActionsFab extends StatelessWidget {
         ];
       case 5: // Analytics
         return [
-          QuickAction(
+          const QuickAction(
             action: 'export',
             icon: Icons.download,
             label: 'Exportar',
@@ -103,7 +103,7 @@ class SlaQuickActionsFab extends StatelessWidget {
         ];
       case 6: // Auditoria
         return [
-          QuickAction(
+          const QuickAction(
             action: 'backup',
             icon: Icons.backup,
             label: 'Backup',
@@ -146,7 +146,7 @@ class SlaQuickActionsFab extends StatelessWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(

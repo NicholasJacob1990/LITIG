@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:dio/dio.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_room_model.dart';
 import '../../../../core/services/simple_api_service.dart';

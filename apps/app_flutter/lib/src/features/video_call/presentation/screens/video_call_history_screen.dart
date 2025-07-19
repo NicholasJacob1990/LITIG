@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../bloc/video_call_bloc.dart';
-import '../widgets/video_call_card.dart';
 import '../../../../injection_container.dart';
 
 class VideoCallHistoryScreen extends StatefulWidget {

@@ -38,7 +38,7 @@ class SlaValidationPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _getStatusColor(context).withOpacity(0.1),
+        color: _getStatusColor(context).withValues(alpha: 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(10),
           topRight: Radius.circular(10),
@@ -67,7 +67,7 @@ class SlaValidationPanel extends StatelessWidget {
                 Text(
                   _getStatusSubtitle(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: _getStatusColor(context).withOpacity(0.8),
+                    color: _getStatusColor(context).withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -94,7 +94,7 @@ class SlaValidationPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error,
                 color: Colors.red,
                 size: 20,
@@ -115,7 +115,7 @@ class SlaValidationPanel extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.circle,
                       color: Colors.red,
                       size: 8,
@@ -143,7 +143,7 @@ class SlaValidationPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.warning,
                 color: Colors.orange,
                 size: 20,
@@ -164,7 +164,7 @@ class SlaValidationPanel extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.circle,
                       color: Colors.orange,
                       size: 8,
@@ -199,7 +199,7 @@ class SlaValidationPanel extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.analytics,
                   color: Colors.blue,
                   size: 20,

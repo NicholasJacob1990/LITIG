@@ -29,10 +29,10 @@ class EnhancedDocumentUploadDialog extends StatefulWidget {
 class _EnhancedDocumentUploadDialogState extends State<EnhancedDocumentUploadDialog>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  List<DocumentUploadData> _selectedDocuments = [];
+  final List<DocumentUploadData> _selectedDocuments = [];
   DocumentCategory? _selectedCategory;
   List<DocumentTypeSuggestion> _suggestions = [];
-  bool _showSuggestions = true;
+  final bool _showSuggestions = true;
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _EnhancedDocumentUploadDialogState extends State<EnhancedDocumentUploadDia
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.8,
         child: Column(
@@ -312,7 +312,7 @@ class _EnhancedDocumentUploadDialogState extends State<EnhancedDocumentUploadDia
                 if (doc.autoDetected)
                   Row(
                     children: [
-                      Icon(Icons.auto_awesome, size: 14, color: Colors.orange),
+                      const Icon(Icons.auto_awesome, size: 14, color: Colors.orange),
                       const SizedBox(width: 4),
                       Text(
                         'Detectado automaticamente',

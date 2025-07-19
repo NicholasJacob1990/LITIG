@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Controle de Tempo para advogados associados
@@ -856,8 +855,6 @@ class TimeTrackingSection extends BaseInfoSection {
     }
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Controle de Tempo para advogados associados
 /// 

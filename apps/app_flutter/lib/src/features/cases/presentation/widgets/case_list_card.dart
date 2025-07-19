@@ -61,7 +61,7 @@ class CaseListCard extends StatelessWidget {
                   children: [
         Chip(
           label: Text(status),
-          backgroundColor: _getStatusColor(status).withOpacity(0.1),
+          backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
           labelStyle: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold),
           side: BorderSide.none,
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -91,7 +91,7 @@ class CaseListCard extends StatelessWidget {
               Text(lawyer.name, style: const TextStyle(fontWeight: FontWeight.w600)),
               Row(
                 children: [
-                  Text(lawyer.specialty, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text(lawyer.specialty, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                   const Spacer(),
                   // Ícones das redes sociais
                   LawyerSocialLinks(

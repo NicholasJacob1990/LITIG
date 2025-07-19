@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Framework de Entrega para super associados
@@ -1238,8 +1237,6 @@ class DeliveryFrameworkSection extends BaseInfoSection {
     // TODO: Implementar acesso aos templates
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Framework de Entrega para super associados
 /// 

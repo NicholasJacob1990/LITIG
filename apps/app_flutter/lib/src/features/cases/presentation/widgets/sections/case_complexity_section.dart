@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/case_detail.dart';
 import '../base_info_section.dart';
 
 /// Seção de Análise de Complexidade para advogados contratantes
@@ -633,8 +632,6 @@ class CaseComplexitySection extends BaseInfoSection {
     return Colors.red;
   }
 } 
-import '../../../domain/entities/case_detail.dart';
-import '../base_info_section.dart';
 
 /// Seção de Análise de Complexidade para advogados contratantes
 /// 

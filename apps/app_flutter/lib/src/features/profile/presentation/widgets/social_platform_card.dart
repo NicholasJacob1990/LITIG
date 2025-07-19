@@ -257,7 +257,7 @@ class SocialPlatformCard extends StatelessWidget {
     }
 
     return AppButton(
-      text: 'Conectar ${title}',
+      text: 'Conectar $title',
       onPressed: onConnect,
       variant: AppButtonVariant.primary,
       size: AppButtonSize.medium,

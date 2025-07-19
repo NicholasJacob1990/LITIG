@@ -168,7 +168,7 @@ class LawyerMatchCard extends StatelessWidget {
             if ((experienceYears ?? 0) > 0)
               Row(
                 children: [
-                  Icon(lucide.LucideIcons.briefcase, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  Icon(lucide.LucideIcons.briefcase, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   const SizedBox(width: 8),
                   Text('$experienceYears anos de experiência', style: theme.textTheme.bodyMedium),
                 ],
@@ -188,7 +188,7 @@ class LawyerMatchCard extends StatelessWidget {
             children: awards.take(3).map((award) => Chip(
               avatar: const Icon(lucide.LucideIcons.award, size: 14, color: Colors.amber),
               label: Text(award, style: theme.textTheme.labelSmall),
-              backgroundColor: Colors.amber.withOpacity(0.1),
+              backgroundColor: Colors.amber.withValues(alpha: 0.1),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             )).toList(),
           ),
@@ -273,8 +273,7 @@ class LawyerMatchCard extends StatelessWidget {
       ],
     );
   }
-} 
-  Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
+}   Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
     final theme = Theme.of(context);
     return Row(
       children: [

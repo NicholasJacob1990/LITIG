@@ -125,7 +125,7 @@ class SlaSettingsEntity extends Equatable {
       includeWeekends: false,
       allowOverrides: true,
       enableAutoEscalation: true,
-      overrideSettings: {
+      overrideSettings: const {
         'maxPerMonth': 5,
         'requireApproval': true,
         'auditTrail': true,
@@ -133,34 +133,34 @@ class SlaSettingsEntity extends Equatable {
       },
       lastModified: now,
       lastModifiedBy: createdBy,
-      businessHours: {
-        'monday': {'start': '09:00', 'end': '18:00'},
-        'tuesday': {'start': '09:00', 'end': '18:00'},
-        'wednesday': {'start': '09:00', 'end': '18:00'},
-        'thursday': {'start': '09:00', 'end': '18:00'},
-        'friday': {'start': '09:00', 'end': '18:00'},
-        'saturday': {'start': '09:00', 'end': '13:00'},
-        'sunday': {'start': null, 'end': null},
+      businessHours: const {
+        'monday': const {'start': '09:00', 'end': '18:00'},
+        'tuesday': const {'start': '09:00', 'end': '18:00'},
+        'wednesday': const {'start': '09:00', 'end': '18:00'},
+        'thursday': const {'start': '09:00', 'end': '18:00'},
+        'friday': const {'start': '09:00', 'end': '18:00'},
+        'saturday': const {'start': '09:00', 'end': '13:00'},
+        'sunday': const {'start': null, 'end': null},
       },
-      escalationRules: {
+      escalationRules: const {
         'enabled': true,
-        'levels': [
+        'levels': const [
           {'minutes': 30, 'target': 'supervisor'},
           {'minutes': 120, 'target': 'partner'},
           {'minutes': 240, 'target': 'admin'},
         ],
       },
-      notificationSettings: {
+      notificationSettings: const {
         'enabled': true,
-        'channels': ['email', 'push'],
-        'timing': {
-          'beforeDeadline': [60, 30, 15], // minutos antes
+        'channels': const ['email', 'push'],
+        'timing': const {
+          'beforeDeadline': const [60, 30, 15], // minutos antes
           'atDeadline': true,
-          'afterViolation': [15, 60, 240], // minutos depois
+          'afterViolation': const [15, 60, 240], // minutos depois
         },
       },
-      holidays: [],
-      customRules: {},
+      holidays: const [],
+      customRules: const {},
       metadata: {
         'version': '1.0',
         'createdAt': now.toIso8601String(),
@@ -294,7 +294,7 @@ class SlaSettingsEntity extends Equatable {
   /// Ajusta deadline removendo finais de semana
   DateTime _adjustForWeekends(DateTime deadline) {
     while (deadline.weekday == 6 || deadline.weekday == 7) {
-      deadline = deadline.add(Duration(days: 1));
+      deadline = deadline.add(const Duration(days: 1));
     }
     return deadline;
   }

@@ -199,52 +199,61 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
               child: Form(
                 key: _formKey,
                 child: Stepper(
-            type: StepperType.vertical,
-            currentStep: _currentStep,
-            onStepContinue: () {
-              final isLastStep = _currentStep == getSteps(isOffice: isOffice, isAssociated: isAssociated).length - 1;
-              if (isLastStep) {
-                _handleRegister();
-              } else {
-                if (_formKey.currentState!.validate()) {
-                   setState(() => _currentStep += 1);
-                }
-              }
-            },
-            onStepCancel: _currentStep == 0 ? null : () => setState(() => _currentStep -= 1),
-            onStepTapped: (step) => setState(() => _currentStep = step),
-            steps: getSteps(isOffice: isOffice, isAssociated: isAssociated),
-            controlsBuilder: (context, details) {
-              final isLastStep = _currentStep == getSteps(isOffice: isOffice, isAssociated: isAssociated).length - 1;
-              return Padding(
-                padding: const EdgeInsets.only(top: 32.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: details.onStepContinue,
-                        child: BlocBuilder<AuthBloc, auth_states.AuthState>(
-                            builder: (context, state) {
-                          if (isLastStep && state is auth_states.AuthLoading) {
-                            return const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white));
-                          }
-                          return Text(isLastStep ? 'Finalizar Cadastro' : 'Continuar');
-                        }),
+                  type: StepperType.vertical,
+                  currentStep: _currentStep,
+                  onStepContinue: () {
+                    final isLastStep = _currentStep == getSteps(isOffice: isOffice, isAssociated: isAssociated).length - 1;
+                    if (isLastStep) {
+                      _handleRegister();
+                    } else {
+                      if (_formKey.currentState!.validate()) {
+                        setState(() => _currentStep += 1);
+                      }
+                    }
+                  },
+                  onStepCancel: _currentStep == 0 ? null : () => setState(() => _currentStep -= 1),
+                  onStepTapped: (step) => setState(() => _currentStep = step),
+                  steps: getSteps(isOffice: isOffice, isAssociated: isAssociated),
+                  controlsBuilder: (context, details) {
+                    final isLastStep = _currentStep == getSteps(isOffice: isOffice, isAssociated: isAssociated).length - 1;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 32.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: details.onStepContinue,
+                              child: BlocBuilder<AuthBloc, auth_states.AuthState>(
+                                builder: (context, state) {
+                                  if (isLastStep && state is auth_states.AuthLoading) {
+                                    return const SizedBox(
+                                      height: 24, 
+                                      width: 24, 
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                                    );
+                                  }
+                                  return Text(isLastStep ? 'Finalizar Cadastro' : 'Continuar');
+                                }
+                              ),
+                            ),
+                          ),
+                          if (details.onStepCancel != null) ...[
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: details.onStepCancel, 
+                                child: const Text('Voltar')
+                              ),
+                            ),
+                          ]
+                        ],
                       ),
-                    ),
-                    if (details.onStepCancel != null) ...[
-                      const SizedBox(width: 12),
-                      Expanded(child: OutlinedButton(onPressed: details.onStepCancel, child: const Text('Voltar'))),
-                    ]
-                  ],
-                ),
-              );
-            },
-          ),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -265,7 +274,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                   ? null
                   : () {
                       // Para registro de advogado, ainda precisará preencher dados profissionais obrigatórios
-                      context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+                      context.read<AuthBloc>().add(AuthGoogleRegisterRequested());
                     },
               icon: const Icon(Icons.login, size: 18),
               label: const Text('Conectar com Google'),
@@ -284,7 +293,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                       side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
                     ),
                     onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
+                      context.read<AuthBloc>().add(AuthLinkedInRegisterRequested());
                     },
                     icon: const Icon(Icons.business, size: 14),
                     label: const Text('LinkedIn', style: TextStyle(fontSize: 12)),
@@ -299,7 +308,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                       side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
                     ),
                     onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthInstagramSignInRequested());
+                      context.read<AuthBloc>().add(AuthInstagramRegisterRequested());
                     },
                     icon: const Icon(Icons.camera_alt, size: 14),
                     label: const Text('Instagram', style: TextStyle(fontSize: 12)),
@@ -314,7 +323,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                       side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
                     ),
                     onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthFacebookSignInRequested());
+                      context.read<AuthBloc>().add(AuthFacebookRegisterRequested());
                     },
                     icon: const Icon(Icons.facebook, size: 14),
                     label: const Text('Facebook', style: TextStyle(fontSize: 12)),
@@ -425,9 +434,9 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(8),
-            color: Colors.blue.withOpacity(0.05),
+            color: Colors.blue.withValues(alpha: 0.05),
           ),
           child: CheckboxListTile(
             title: const Text('Sou associado do escritório titular LITGO'),
@@ -550,7 +559,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
           ),
           child: file == null
               ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(Icons.upload_file, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  Icon(Icons.upload_file, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   const SizedBox(height: 8),
                   Text(label, style: theme.textTheme.bodyMedium),
                 ])
@@ -632,12 +641,12 @@ class PhoneInputFormatter extends TextInputFormatter {
 }
 
 class CepInputFormatter extends TextInputFormatter {
-   @override
+  @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     final text = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     var formatted = '';
-     for (var i = 0; i < text.length; i++) {
+    for (var i = 0; i < text.length; i++) {
       if (i == 5) formatted += '-';
       formatted += text[i];
     }
@@ -646,4 +655,4 @@ class CepInputFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
-} 
+}

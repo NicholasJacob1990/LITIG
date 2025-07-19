@@ -34,7 +34,7 @@ class LawyerRatingStats extends Equatable {
       expertiseAvg: 0.0,
       responsivenessAvg: 0.0,
       valueAvg: 0.0,
-      starDistribution: {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0},
+      starDistribution: const {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0},
       lastUpdated: DateTime.now(),
     );
   }

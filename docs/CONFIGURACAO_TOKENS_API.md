@@ -578,3 +578,4 @@ echo "SUPABASE_URL: ${SUPABASE_URL:-NOT_SET}"
 3. **Fase 3** (Avançado): Sistema híbrido completo
 
 **PRIMEIRO PASSO**: Obter e configurar `UNIPILE_API_TOKEN` para ativar as funcionalidades sociais! 🚀 
+ 

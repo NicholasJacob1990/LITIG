@@ -96,7 +96,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.slidersHorizontal,
                     size: 20,
                     color: AppColors.primaryBlue,
@@ -114,7 +114,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
                   AnimatedRotation(
                     duration: const Duration(milliseconds: 300),
                     turns: widget.isExpanded ? 0.5 : 0,
-                    child: Icon(
+                    child: const Icon(
                       LucideIcons.chevronDown,
                       size: 20,
                       color: AppColors.primaryBlue,
@@ -185,17 +185,17 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: _resetFilters,
-                          icon: Icon(
+                          icon: const Icon(
                             LucideIcons.rotateCcw,
                             size: 16,
                             color: AppColors.error,
                           ),
-                          label: Text(
+                          label: const Text(
                             'Limpar',
                             style: TextStyle(color: AppColors.error),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: AppColors.error),
+                            side: const BorderSide(color: AppColors.error),
                           ),
                         ),
                       ),
@@ -473,10 +473,10 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
 
     // Feedback visual
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Filtros aplicados com sucesso!'),
+      const SnackBar(
+        content: Text('Filtros aplicados com sucesso!'),
         backgroundColor: AppColors.success,
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ),
     );
   }

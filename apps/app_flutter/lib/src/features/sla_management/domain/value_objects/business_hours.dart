@@ -1,8 +1,14 @@
+import 'package:flutter/material.dart';
+
 class BusinessHours {
   final int startHour;
   final int startMinute;
   final int endHour;
   final int endMinute;
+  final int? lunchStartHour;
+  final int? lunchStartMinute;
+  final int? lunchEndHour;
+  final int? lunchEndMinute;
   final List<int> workingDays; // 1-7 (Monday-Sunday)
   final List<DateTime> holidays;
   final String timezone;
@@ -12,23 +18,46 @@ class BusinessHours {
     required this.startMinute,
     required this.endHour,
     required this.endMinute,
+    this.lunchStartHour,
+    this.lunchStartMinute,
+    this.lunchEndHour,
+    this.lunchEndMinute,
     required this.workingDays,
     required this.holidays,
     required this.timezone,
   });
 
-  // Default business hours: 9:00 AM to 6:00 PM, Monday to Friday, Brazil timezone
-  static BusinessHours defaultBusiness() {
+  // Compatibility getters for widgets
+  TimeOfDay get startTime => TimeOfDay(hour: startHour, minute: startMinute);
+  TimeOfDay get endTime => TimeOfDay(hour: endHour, minute: endMinute);
+  TimeOfDay? get lunchStart => lunchStartHour != null ? TimeOfDay(hour: lunchStartHour!, minute: lunchStartMinute!) : null;
+  TimeOfDay? get lunchEnd => lunchEndHour != null ? TimeOfDay(hour: lunchEndHour!, minute: lunchEndMinute!) : null;
+  String get type {
+    if (startHour == 9 && endHour == 18) return 'standard';
+    if (startHour == 8 && endHour == 20) return 'extended';
+    if (startHour == 0 && endHour == 23) return 'fullTime';
+    return 'custom';
+  }
+
+  // Standard business hours: 9:00 AM to 6:00 PM, Monday to Friday, Brazil timezone
+  static BusinessHours standard() {
     return const BusinessHours(
       startHour: 9,
       startMinute: 0,
       endHour: 18,
       endMinute: 0,
+      lunchStartHour: 12,
+      lunchStartMinute: 0,
+      lunchEndHour: 13,
+      lunchEndMinute: 0,
       workingDays: [1, 2, 3, 4, 5], // Monday to Friday
       holidays: [],
       timezone: 'America/Sao_Paulo',
     );
   }
+
+  // Default business hours (alias for standard)
+  static BusinessHours defaultBusiness() => standard();
 
   // Extended business hours: 8:00 AM to 8:00 PM, Monday to Saturday
   static BusinessHours extended() {
@@ -37,6 +66,10 @@ class BusinessHours {
       startMinute: 0,
       endHour: 20,
       endMinute: 0,
+      lunchStartHour: 12,
+      lunchStartMinute: 0,
+      lunchEndHour: 13,
+      lunchEndMinute: 0,
       workingDays: [1, 2, 3, 4, 5, 6], // Monday to Saturday
       holidays: [],
       timezone: 'America/Sao_Paulo',
@@ -183,15 +216,27 @@ class BusinessHours {
     int? startMinute,
     int? endHour,
     int? endMinute,
+    int? lunchStartHour,
+    int? lunchStartMinute,
+    int? lunchEndHour,
+    int? lunchEndMinute,
     List<int>? workingDays,
     List<DateTime>? holidays,
     String? timezone,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+    TimeOfDay? lunchStart,
+    TimeOfDay? lunchEnd,
   }) {
     return BusinessHours(
-      startHour: startHour ?? this.startHour,
-      startMinute: startMinute ?? this.startMinute,
-      endHour: endHour ?? this.endHour,
-      endMinute: endMinute ?? this.endMinute,
+      startHour: startHour ?? startTime?.hour ?? this.startHour,
+      startMinute: startMinute ?? startTime?.minute ?? this.startMinute,
+      endHour: endHour ?? endTime?.hour ?? this.endHour,
+      endMinute: endMinute ?? endTime?.minute ?? this.endMinute,
+      lunchStartHour: lunchStartHour ?? lunchStart?.hour ?? this.lunchStartHour,
+      lunchStartMinute: lunchStartMinute ?? lunchStart?.minute ?? this.lunchStartMinute,
+      lunchEndHour: lunchEndHour ?? lunchEnd?.hour ?? this.lunchEndHour,
+      lunchEndMinute: lunchEndMinute ?? lunchEnd?.minute ?? this.lunchEndMinute,
       workingDays: workingDays ?? this.workingDays,
       holidays: holidays ?? this.holidays,
       timezone: timezone ?? this.timezone,
@@ -205,6 +250,10 @@ class BusinessHours {
       'startMinute': startMinute,
       'endHour': endHour,
       'endMinute': endMinute,
+      'lunchStartHour': lunchStartHour,
+      'lunchStartMinute': lunchStartMinute,
+      'lunchEndHour': lunchEndHour,
+      'lunchEndMinute': lunchEndMinute,
       'workingDays': workingDays,
       'holidays': holidays.map((h) => h.toIso8601String()).toList(),
       'timezone': timezone,
@@ -217,6 +266,10 @@ class BusinessHours {
       startMinute: json['startMinute'] as int,
       endHour: json['endHour'] as int,
       endMinute: json['endMinute'] as int,
+      lunchStartHour: json['lunchStartHour'] as int?,
+      lunchStartMinute: json['lunchStartMinute'] as int?,
+      lunchEndHour: json['lunchEndHour'] as int?,
+      lunchEndMinute: json['lunchEndMinute'] as int?,
       workingDays: List<int>.from(json['workingDays']),
       holidays: (json['holidays'] as List)
           .map((h) => DateTime.parse(h as String))
@@ -233,6 +286,10 @@ class BusinessHours {
         other.startMinute == startMinute &&
         other.endHour == endHour &&
         other.endMinute == endMinute &&
+        other.lunchStartHour == lunchStartHour &&
+        other.lunchStartMinute == lunchStartMinute &&
+        other.lunchEndHour == lunchEndHour &&
+        other.lunchEndMinute == lunchEndMinute &&
         _listEquals(other.workingDays, workingDays) &&
         _listEquals(other.holidays, holidays) &&
         other.timezone == timezone;
@@ -253,6 +310,10 @@ class BusinessHours {
       startMinute,
       endHour,
       endMinute,
+      lunchStartHour,
+      lunchStartMinute,
+      lunchEndHour,
+      lunchEndMinute,
       Object.hashAll(workingDays),
       Object.hashAll(holidays),
       timezone,

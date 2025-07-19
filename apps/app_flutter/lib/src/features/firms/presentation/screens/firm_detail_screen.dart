@@ -578,8 +578,8 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
           ],
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.arrow_forward_ios),
-          onPressed: () {
+          icon = const Icon(Icons.arrow_forward_ios),
+          onPressed = () {
             // Implementar navegação para perfil do advogado
           },
         ),
@@ -590,8 +590,8 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
           ],
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.arrow_forward_ios),
-          onPressed: () {
+          icon = const Icon(Icons.arrow_forward_ios),
+          onPressed = () {
             // Implementar navegação para perfil do advogado
           },
         ),

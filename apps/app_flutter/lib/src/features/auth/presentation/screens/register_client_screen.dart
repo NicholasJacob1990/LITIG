@@ -145,8 +145,8 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
         });
       },
       style: SegmentedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-        foregroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+        backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+        foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
         selectedBackgroundColor: Theme.of(context).colorScheme.primary,
       ),
@@ -256,7 +256,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                   ? null
                   : () {
                       // Para registro, usamos um evento específico que pode capturar dados sociais
-                      context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+                      context.read<AuthBloc>().add(AuthGoogleRegisterRequested());
                     },
               icon: const Icon(Icons.login), // Google icon placeholder
               label: const Text('Cadastrar com Google'),
@@ -283,7 +283,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                       side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
                     ),
                     onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
+                      context.read<AuthBloc>().add(AuthLinkedInRegisterRequested());
                     },
                     icon: const Icon(Icons.business, size: 16),
                     label: const Text('LinkedIn'),
@@ -298,7 +298,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                       side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
                     ),
                     onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthInstagramSignInRequested());
+                      context.read<AuthBloc>().add(AuthInstagramRegisterRequested());
                     },
                     icon: const Icon(Icons.camera_alt, size: 16),
                     label: const Text('Instagram'),
@@ -313,7 +313,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                       side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
                     ),
                     onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthFacebookSignInRequested());
+                      context.read<AuthBloc>().add(AuthFacebookRegisterRequested());
                     },
                     icon: const Icon(Icons.facebook, size: 16),
                     label: const Text('Facebook'),
@@ -407,4 +407,3 @@ class PhoneInputFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
-} 

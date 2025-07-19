@@ -121,7 +121,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
               color: AppColors.success.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
@@ -129,7 +129,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
                   size: 14,
                   color: AppColors.success,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 Text(
                   'Recomendado',
                   style: TextStyle(
@@ -394,7 +394,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
+                const Icon(
                   Icons.star,
                   size: 16,
                   color: Colors.amber,
