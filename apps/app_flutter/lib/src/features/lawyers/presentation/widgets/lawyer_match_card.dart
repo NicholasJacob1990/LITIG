@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
-import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_hiring_modal.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 
@@ -46,7 +45,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.dividerColor.withOpacity(0.2)),
+        side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -157,7 +156,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
           height: 64,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: matchColor.withOpacity(0.1),
+            color: matchColor.withValues(alpha: 0.1),
             border: Border.all(color: matchColor, width: 2),
           ),
           child: Center(
@@ -177,7 +176,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.1),
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -241,9 +240,9 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
                       .map((award) => Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.1),
+                              color: Colors.amber.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                              border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               award,
@@ -360,7 +359,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
 
   Widget _buildMetric({required IconData icon, required String value, required String label}) {
     final theme = Theme.of(context);
-    // Otimização: usar cor constante ao invés de theme.colorScheme.onSurface.withOpacity(0.8)
+    // Otimização: usar cor constante ao invés de theme.colorScheme.onSurface.withValues(alpha: 0.8)
     const iconColor = Colors.grey; // Cor constante para evitar recálculo desnecessário
     return Column(
       children: [
@@ -458,7 +457,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       context: context,
       barrierDismissible: false,
       builder: (context) => LawyerHiringModal(
-        lawyer: _convertToLawyer(widget.lawyer),
+        lawyer: widget.lawyer,
         caseId: widget.caseId!,
         clientId: widget.clientId!,
       ),
@@ -474,21 +473,6 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
     );
   }
 
-  /// Converte MatchedLawyer para Lawyer para compatibilidade com LawyerHiringModal
-  Lawyer _convertToLawyer(MatchedLawyer matchedLawyer) {
-    return Lawyer(
-      id: matchedLawyer.id,
-      name: matchedLawyer.nome,
-      avatarUrl: matchedLawyer.avatarUrl,
-      oab: 'OAB-${matchedLawyer.id.substring(0, 6)}', // Placeholder
-      expertiseAreas: matchedLawyer.specializations.isNotEmpty 
-          ? matchedLawyer.specializations 
-          : [matchedLawyer.primaryArea],
-      rating: matchedLawyer.rating ?? 0.0,
-      isAvailable: matchedLawyer.isAvailable,
-      distanceKm: matchedLawyer.distanceKm,
-    );
-  }
 
   void _handleVideoCall(BuildContext context) {
     // Verificar se caseId e clientId foram fornecidos

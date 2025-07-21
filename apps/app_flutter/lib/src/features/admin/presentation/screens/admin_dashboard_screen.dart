@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/atoms/custom_card.dart';
 import '../../../../shared/widgets/atoms/loading_indicator.dart';
 import '../bloc/admin_bloc.dart';
+import '../bloc/admin_event.dart';
+import '../bloc/admin_state.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -24,7 +26,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     _tabController = TabController(length: 4, vsync: this);
     
     // Carregar dados iniciais
-    context.read<AdminBloc>().add(LoadAdminDashboard());
+    context.read<AdminBloc>().add(const LoadAdminDashboard());
   }
 
   @override
@@ -90,7 +92,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () {
-                      context.read<AdminBloc>().add(LoadAdminDashboard());
+                      context.read<AdminBloc>().add(const LoadAdminDashboard());
                     },
                     icon: const Icon(LucideIcons.refreshCw),
                     label: const Text('Tentar Novamente'),
@@ -120,12 +122,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     }
 
     final data = state.dashboardData;
-    final sistema = data['sistema'] as Map<String, dynamic>? ?? {};
-    final qualidadeDados = data['qualidade_dados'] as Map<String, dynamic>? ?? {};
+    final sistema = data.sistema;
+    final qualidadeDados = data.qualidadeDados;
 
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<AdminBloc>().add(LoadAdminDashboard());
+        context.read<AdminBloc>().add(const LoadAdminDashboard());
       },
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -247,7 +249,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     
                     LinearProgressIndicator(
                       value: (qualidadeDados['sync_coverage'] ?? 0).toDouble(),
-                      backgroundColor: AppColors.lightTextSecondary.withOpacity(0.2),
+                      backgroundColor: AppColors.lightTextSecondary.withValues(alpha: 0.2),
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
                     ),
                     
@@ -296,7 +298,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     icon: LucideIcons.fileBarChart,
                     color: AppColors.success,
                     onTap: () {
-                      context.read<AdminBloc>().add(GenerateExecutiveReport());
+                      context.read<AdminBloc>().add(const GenerateExecutiveReport(
+                        reportType: 'monthly',
+                        dateRange: {'month': 11},
+                      ));
                     },
                   ),
                 ),
@@ -479,7 +484,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<AdminBloc>().add(ForceGlobalSync());
+              context.read<AdminBloc>().add(const ForceGlobalSync());
               _showSyncStartedSnackbar(context);
             },
             child: const Text('Sincronizar'),

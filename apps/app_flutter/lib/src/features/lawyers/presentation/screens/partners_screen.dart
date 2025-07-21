@@ -21,8 +21,8 @@ import 'package:meu_app/src/features/lawyers/presentation/widgets/compact_firm_c
 import 'package:meu_app/src/features/lawyers/presentation/widgets/inline_search_filters.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_filters_modal.dart';
 
-class LawyersScreen extends StatelessWidget {
-  const LawyersScreen({super.key});
+class PartnersScreen extends StatelessWidget {
+  const PartnersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +121,7 @@ class HybridRecommendationsTabView extends StatefulWidget {
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
   bool _hasPerformedSearch = false;
+  bool _hasSearched = false;
   final bool _showMapView = false; // ❌ REMOVIDO: Toggle mapa das recomendações conforme especificação
   
   @override
@@ -152,10 +153,10 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                 Container(
                 padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                   ),
                   ),
                   child: Row(
@@ -231,7 +232,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
           Icon(
             LucideIcons.users,
             size: 64,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -263,7 +264,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -299,7 +300,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
           Icon(
               LucideIcons.searchX,
             size: 64,
-              color: Colors.grey.withOpacity(0.5),
+              color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -364,7 +365,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
@@ -378,7 +379,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                         Container(
                           width: 1,
                           height: 32,
-                          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                         ),
                         _buildViewToggle(
                           icon: LucideIcons.map,
@@ -555,7 +556,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
           size: 20,
           color: isSelected 
             ? Theme.of(context).colorScheme.onPrimary
-            : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -634,7 +635,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
                   Icon(
               LucideIcons.alertCircle,
               size: 64,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
                   ),
             const SizedBox(height: 16),
                   Text(
@@ -669,7 +670,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
             Icon(
               LucideIcons.search,
               size: 64,
-              color: Colors.grey.withOpacity(0.5),
+              color: Colors.grey.withValues(alpha: 0.5),
           ),
             const SizedBox(height: 16),
           Text(

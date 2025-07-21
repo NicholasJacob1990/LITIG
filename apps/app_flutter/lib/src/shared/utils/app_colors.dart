@@ -31,6 +31,13 @@ class AppColors {
   static const Color lightText2 = Color(0xFF64748B);
   static const Color lightTextSecondary = Color(0xFF94A3B8);
   
+  // Aliases for backwards compatibility
+  static const Color textPrimary = lightText;
+  static const Color textSecondary = lightTextSecondary;
+  static const Color primary = primaryBlue;
+  static const Color border = lightBorder;
+  static const Color background = lightBackground;
+  
   // Cores de fundo - Dark Theme
   static const Color darkBackground = Color(0xFF0F172A);
   static const Color darkCard = Color(0xFF1E293B);

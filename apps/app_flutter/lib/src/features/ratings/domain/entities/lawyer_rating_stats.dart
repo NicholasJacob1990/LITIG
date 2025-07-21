@@ -99,6 +99,9 @@ class LawyerRatingStats extends Equatable {
   /// Retorna true se o advogado tem avaliações
   bool get hasRatings => totalRatings > 0;
 
+  /// Retorna true se o advogado é recomendado (nota >= 4.0)
+  bool get isRecommended => overallRating >= 4.0 && totalRatings >= 5;
+
   /// Retorna o percentual de cada estrela
   Map<String, double> get starPercentages {
     if (totalRatings == 0) return {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0};

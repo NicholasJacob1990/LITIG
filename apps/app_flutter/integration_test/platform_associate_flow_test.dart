@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:meu_app/main.dart' as app;
@@ -62,7 +63,7 @@ void main() {
             reason: 'Aba "$tabLabel" deveria estar visível para o Super Associado');
       }
 
-      print('✅ Teste de visibilidade de abas para Super Associado passou.');
+      debugPrint('✅ Teste de visibilidade de abas para Super Associado passou.');
 
       // 4. Tentar navegar para a tela de Ofertas
       await tester.tap(find.text('Ofertas'));
@@ -71,7 +72,7 @@ void main() {
       // Verificar se a tela de ofertas carregou algum elemento identificador
       expect(find.textContaining('Ofertas de Casos'), findsOneWidget,
           reason: 'Deveria navegar para a tela de Ofertas');
-      print('✅ Navegação para Ofertas bem-sucedida.');
+      debugPrint('✅ Navegação para Ofertas bem-sucedida.');
 
       // 5. Tentar navegar para a tela de Parcerias
       await tester.tap(find.text('Parcerias'));
@@ -80,7 +81,7 @@ void main() {
       // Verificar se a tela de parcerias carregou
       expect(find.textContaining('Minhas Parcerias'), findsOneWidget,
           reason: 'Deveria navegar para a tela de Parcerias');
-      print('✅ Navegação para Parcerias bem-sucedida.');
+      debugPrint('✅ Navegação para Parcerias bem-sucedida.');
     });
   });
 } 

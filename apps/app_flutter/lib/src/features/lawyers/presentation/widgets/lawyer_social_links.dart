@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Widget simples que exibe apenas ícones das redes sociais com links
@@ -19,15 +20,15 @@ class LawyerSocialLinks extends StatelessWidget {
     final links = <Widget>[];
     
     if (linkedinUrl != null && linkedinUrl!.isNotEmpty) {
-      links.add(_buildIcon(Icons.business, const Color(0xFF0A66C2), linkedinUrl!));
+      links.add(_buildIcon(LucideIcons.linkedin, const Color(0xFF0A66C2), linkedinUrl!));
     }
     
     if (instagramUrl != null && instagramUrl!.isNotEmpty) {
-      links.add(_buildIcon(Icons.photo_camera, const Color(0xFFE4405F), instagramUrl!));
+      links.add(_buildIcon(LucideIcons.instagram, const Color(0xFFE4405F), instagramUrl!));
     }
     
     if (facebookUrl != null && facebookUrl!.isNotEmpty) {
-      links.add(_buildIcon(Icons.facebook, const Color(0xFF1877F2), facebookUrl!));
+      links.add(_buildIcon(LucideIcons.facebook, const Color(0xFF1877F2), facebookUrl!));
     }
     
     if (links.isEmpty) return const SizedBox.shrink();

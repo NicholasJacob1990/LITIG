@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/chat_message_model.dart';
 import '../models/chat_room_model.dart';
@@ -85,10 +86,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     int offset = 0,
   }) async {
     try {
-      final response = await apiService.get('/chat/rooms/$roomId/messages', queryParameters: {
-        'limit': limit,
-        'offset': offset,
-      });
+      final response = await apiService.get('/chat/rooms/$roomId/messages?limit=$limit&offset=$offset');
       final List<dynamic> data = response.data;
       return data.map((json) => ChatMessageModel.fromJson(json)).toList();
     } catch (e) {
@@ -167,14 +165,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               _messageControllers[roomId]!.add(chatMessage);
             }
           } catch (e) {
-            print('Error parsing WebSocket message: $e');
+            debugPrint('Error parsing WebSocket message: $e');
           }
         },
         onError: (error) {
-          print('WebSocket error: $error');
+          debugPrint('WebSocket error: $error');
         },
         onDone: () {
-          print('WebSocket connection closed');
+          debugPrint('WebSocket connection closed');
         },
       );
     } catch (e) {

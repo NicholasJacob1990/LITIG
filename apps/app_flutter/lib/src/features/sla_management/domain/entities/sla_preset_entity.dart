@@ -181,7 +181,7 @@ class SlaPresetEntity extends Equatable {
 
   /// Método estático para preset conservador
   static SlaPresetEntity conservative() {
-    const preset = systemPresets[0];
+    final preset = systemPresets[0];
     return SlaPresetEntity(
       id: preset['id'] as String,
       name: preset['name'] as String,
@@ -207,7 +207,7 @@ class SlaPresetEntity extends Equatable {
 
   /// Método estático para preset equilibrado
   static SlaPresetEntity balanced() {
-    const preset = systemPresets[1];
+    final preset = systemPresets[1];
     return SlaPresetEntity(
       id: preset['id'] as String,
       name: preset['name'] as String,
@@ -233,7 +233,7 @@ class SlaPresetEntity extends Equatable {
 
   /// Método estático para preset agressivo
   static SlaPresetEntity aggressive() {
-    const preset = systemPresets[2];
+    final preset = systemPresets[2];
     return SlaPresetEntity(
       id: preset['id'] as String,
       name: preset['name'] as String,
@@ -259,7 +259,7 @@ class SlaPresetEntity extends Equatable {
 
   /// Método estático para preset de escritório grande
   static SlaPresetEntity largeFirm() {
-    const preset = systemPresets[3];
+    final preset = systemPresets[3];
     return SlaPresetEntity(
       id: preset['id'] as String,
       name: preset['name'] as String,
@@ -285,7 +285,7 @@ class SlaPresetEntity extends Equatable {
 
   /// Método estático para preset de escritório boutique
   static SlaPresetEntity boutiqueFirm() {
-    const preset = systemPresets[4];
+    final preset = systemPresets[4];
     return SlaPresetEntity(
       id: preset['id'] as String,
       name: preset['name'] as String,

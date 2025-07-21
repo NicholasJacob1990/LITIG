@@ -33,6 +33,15 @@ class RefreshFirmsEvent extends FirmEvent {
 
 class FetchMoreFirmsEvent extends FirmEvent {}
 
+class GetFirmDetailsEvent extends FirmEvent {
+  final String firmId;
+
+  const GetFirmDetailsEvent({required this.firmId});
+
+  @override
+  List<Object?> get props => [firmId];
+}
+
 // States
 abstract class FirmState extends Equatable {
   const FirmState();
@@ -48,22 +57,26 @@ class FirmLoading extends FirmState {}
 class FirmLoaded extends FirmState {
   final List<LawFirm> firms;
   final bool hasReachedMax;
+  final LawFirm? firm; // Para detalhes de uma firm específica
 
   const FirmLoaded({
     required this.firms,
     this.hasReachedMax = false,
+    this.firm,
   });
 
   @override
-  List<Object?> get props => [firms, hasReachedMax];
+  List<Object?> get props => [firms, hasReachedMax, firm];
 
   FirmLoaded copyWith({
     List<LawFirm>? firms,
     bool? hasReachedMax,
+    LawFirm? firm,
   }) {
     return FirmLoaded(
       firms: firms ?? this.firms,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      firm: firm ?? this.firm,
     );
   }
 }
@@ -88,6 +101,7 @@ class FirmBloc extends Bloc<FirmEvent, FirmState> {
     on<GetFirmsEvent>(_onGetFirms);
     on<RefreshFirmsEvent>(_onRefreshFirms);
     on<FetchMoreFirmsEvent>(_onFetchMoreFirms, transformer: droppable());
+    on<GetFirmDetailsEvent>(_onGetFirmDetails);
   }
 
   Future<void> _onGetFirms(
@@ -146,6 +160,31 @@ class FirmBloc extends Bloc<FirmEvent, FirmState> {
         hasReachedMax: firms.length < _lastParams.limit,
       )),
     );
+  }
+
+  Future<void> _onGetFirmDetails(
+    GetFirmDetailsEvent event,
+    Emitter<FirmState> emit,
+  ) async {
+    emit(FirmLoading());
+    
+    // TODO: Implementar GetFirmDetailsUseCase quando estiver disponível
+    // Por enquanto, simular um resultado para evitar erro de compilação
+    try {
+      // Buscar a firm específica da lista atual se disponível
+      if (state is FirmLoaded) {
+        final currentState = state as FirmLoaded;
+        final firm = currentState.firms.firstWhere(
+          (f) => f.id == event.firmId,
+          orElse: () => throw Exception('Firm not found'),
+        );
+        emit(FirmLoaded(firms: currentState.firms, firm: firm));
+      } else {
+        emit(const FirmError(message: 'Detalhes da firma não disponíveis'));
+      }
+    } catch (e) {
+      emit(FirmError(message: 'Erro ao buscar detalhes da firma: $e'));
+    }
   }
 
   String _mapFailureToMessage(Failure failure) {

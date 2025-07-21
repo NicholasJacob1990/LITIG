@@ -46,7 +46,7 @@ class LitigationPartiesSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withOpacity(0.1),
+                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -152,10 +152,10 @@ class LitigationPartiesSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.05),
+        color: accentColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: accentColor.withOpacity(0.2),
+          color: accentColor.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -177,7 +177,7 @@ class LitigationPartiesSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
+                    color: accentColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -198,12 +198,12 @@ class LitigationPartiesSection extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(LucideIcons.idCard, size: 12, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  Icon(Icons.credit_card, size: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   const SizedBox(width: 4),
                   Text(
                     party.documentNumber!,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -217,7 +217,7 @@ class LitigationPartiesSection extends StatelessWidget {
                 Icon(
                   party.isRepresentedBySelf ? LucideIcons.userCheck : LucideIcons.briefcase,
                   size: 12,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -226,7 +226,7 @@ class LitigationPartiesSection extends StatelessWidget {
                         ? 'Própria pessoa'
                         : party.lawyer ?? 'Sem representação',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontStyle: party.lawyer == null && !party.isRepresentedBySelf
                           ? FontStyle.italic
                           : FontStyle.normal,
@@ -242,13 +242,13 @@ class LitigationPartiesSection extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(LucideIcons.mapPin, size: 12, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  Icon(LucideIcons.mapPin, size: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       party.address!,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -262,19 +262,19 @@ class LitigationPartiesSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.5),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(LucideIcons.stickyNote, size: 12, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                    Icon(LucideIcons.stickyNote, size: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         party.notes!,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           fontStyle: FontStyle.italic,
                         ),
                       ),

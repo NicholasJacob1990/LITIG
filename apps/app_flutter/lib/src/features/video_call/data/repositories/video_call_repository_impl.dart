@@ -38,7 +38,7 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -58,7 +58,7 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -72,7 +72,7 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -86,7 +86,7 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 
@@ -100,7 +100,7 @@ class VideoCallRepositoryImpl implements VideoCallRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ConnectionFailure(message: 'Sem conexão com a internet'));
+      return const Left(ConnectionFailure(message: 'Sem conexão com a internet'));
     }
   }
 }

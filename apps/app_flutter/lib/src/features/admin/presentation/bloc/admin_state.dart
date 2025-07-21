@@ -85,6 +85,8 @@ class AdminReportGenerated extends AdminState {
     required this.report,
   });
 
+  String get reportUrl => report['url'] as String? ?? '';
+
   @override
   List<Object?> get props => [dashboardData, report];
 }

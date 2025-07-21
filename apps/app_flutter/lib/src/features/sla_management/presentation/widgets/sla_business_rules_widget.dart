@@ -183,7 +183,7 @@ class _SlaBusinessRulesWidgetState extends State<SlaBusinessRulesWidget> {
                   Expanded(
                     child: _buildTimeField(
                       'Início Almoço',
-                      _businessHours.lunchStart,
+                      _businessHours.lunchStart ?? const TimeOfDay(hour: 12, minute: 0),
                       (time) => setState(() => _businessHours = _businessHours.copyWith(lunchStart: time)),
                     ),
                   ),
@@ -191,7 +191,7 @@ class _SlaBusinessRulesWidgetState extends State<SlaBusinessRulesWidget> {
                   Expanded(
                     child: _buildTimeField(
                       'Fim Almoço',
-                      _businessHours.lunchEnd,
+                      _businessHours.lunchEnd ?? const TimeOfDay(hour: 13, minute: 0),
                       (time) => setState(() => _businessHours = _businessHours.copyWith(lunchEnd: time)),
                     ),
                   ),
@@ -729,8 +729,12 @@ class _SlaBusinessRulesWidgetState extends State<SlaBusinessRulesWidget> {
         'type': _businessHours.type,
         'startTime': '${_businessHours.startTime.hour}:${_businessHours.startTime.minute}',
         'endTime': '${_businessHours.endTime.hour}:${_businessHours.endTime.minute}',
-        'lunchStart': '${_businessHours.lunchStart.hour}:${_businessHours.lunchStart.minute}',
-        'lunchEnd': '${_businessHours.lunchEnd.hour}:${_businessHours.lunchEnd.minute}',
+        'lunchStart': _businessHours.lunchStart != null 
+            ? '${_businessHours.lunchStart!.hour}:${_businessHours.lunchStart!.minute}' 
+            : null,
+        'lunchEnd': _businessHours.lunchEnd != null 
+            ? '${_businessHours.lunchEnd!.hour}:${_businessHours.lunchEnd!.minute}' 
+            : null,
       },
       'workingDays': _workingDays,
       'timezone': _selectedTimezone,

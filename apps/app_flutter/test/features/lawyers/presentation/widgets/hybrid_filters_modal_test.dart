@@ -55,8 +55,8 @@ void main() {
       // iPhone SE (1st gen)
       const size = Size(320, 568);
       await tester.binding.setSurfaceSize(size);
-      tester.binding.window.physicalSizeTestValue = size;
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
 
       await pumpModal(tester, size);
 
@@ -67,8 +67,8 @@ void main() {
       // iPhone 13
       const size = Size(390, 844);
       await tester.binding.setSurfaceSize(size);
-      tester.binding.window.physicalSizeTestValue = size;
-      tester.binding.window.devicePixelRatioTestValue = 3.0;
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 3.0;
       
       await pumpModal(tester, size);
 
@@ -79,8 +79,8 @@ void main() {
       // iPhone 13 Pro Max
       const size = Size(428, 926);
       await tester.binding.setSurfaceSize(size);
-      tester.binding.window.physicalSizeTestValue = size;
-      tester.binding.window.devicePixelRatioTestValue = 3.0;
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 3.0;
 
       await pumpModal(tester, size);
 
@@ -90,9 +90,9 @@ void main() {
     testWidgets('should not overflow on a small tablet screen', (tester) async {
       // iPad Mini
       const size = Size(768, 1024);
-       await tester.binding.setSurfaceSize(size);
-      tester.binding.window.physicalSizeTestValue = size;
-      tester.binding.window.devicePixelRatioTestValue = 2.0;
+      await tester.binding.setSurfaceSize(size);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 2.0;
 
       await pumpModal(tester, size);
 

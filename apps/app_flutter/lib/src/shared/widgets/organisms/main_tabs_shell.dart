@@ -28,13 +28,13 @@ class MainTabsShell extends StatelessWidget {
           List<NavigationTab> navTabs = _getNavItemsForPermissions(userPermissions, userRole);
           
           // DEBUG: Log para diagnosticar o problema
-          print('DEBUG - UserRole: $userRole');
-          print('DEBUG - UserPermissions: $userPermissions');
-          print('DEBUG - NavTabs count BEFORE: ${navTabs.length}');
+          debugPrint('DEBUG - UserRole: $userRole');
+          debugPrint('DEBUG - UserPermissions: $userPermissions');
+          debugPrint('DEBUG - NavTabs count BEFORE: ${navTabs.length}');
           
           // FALLBACK ADICIONAL: Se ainda está vazio, força abas mínimas
           if (navTabs.isEmpty) {
-            print('DEBUG - FORÇANDO FALLBACK MÍNIMO');
+            debugPrint('DEBUG - FORÇANDO FALLBACK MÍNIMO');
             navTabs = [
               const NavigationTab(
                 label: 'Início',
@@ -53,8 +53,8 @@ class MainTabsShell extends StatelessWidget {
             ];
           }
           
-          print('DEBUG - NavTabs count AFTER: ${navTabs.length}');
-          print('DEBUG - NavTabs: ${navTabs.map((t) => t.label).toList()}');
+          debugPrint('DEBUG - NavTabs count AFTER: ${navTabs.length}');
+          debugPrint('DEBUG - NavTabs: ${navTabs.map((t) => t.label).toList()}');
           
                     return Scaffold(
             body: userRole == 'lawyer_platform_associate'
@@ -188,14 +188,14 @@ class MainTabsShell extends StatelessWidget {
   List<NavigationTab> _getNavItemsForPermissions(List<String> userPermissions, String userRole) {
     // TEMPORÁRIO: Ignorar sistema de permissões e usar fallback direto
     // para resolver erro de BottomNavigationBar
-    print('DEBUG - Usando fallback direto para userRole: $userRole');
+    debugPrint('DEBUG - Usando fallback direto para userRole: $userRole');
     return _getFallbackTabsForRole(userRole);
   }
   
     /// Fallback com abas padrão por perfil quando o sistema de permissões falha
   /// Baseado no código legado comentado (linhas 204-242)
   List<NavigationTab> _getFallbackTabsForRole(String userRole) {
-    print('DEBUG - Usando fallback para userRole: $userRole');
+    debugPrint('DEBUG - Usando fallback para userRole: $userRole');
     
     switch (userRole) {
       case 'lawyer_associated':

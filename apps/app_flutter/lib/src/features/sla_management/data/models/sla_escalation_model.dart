@@ -4,103 +4,250 @@ import '../../domain/entities/sla_escalation_entity.dart';
 class SlaEscalationModel extends SlaEscalationEntity {
   const SlaEscalationModel({
     required super.id,
+    required super.firmId,
     required super.name,
     required super.description,
-    required super.firmId,
-    required super.triggerType,
-    required super.escalationLevels,
     required super.isActive,
+    required super.triggers,
+    required super.levels,
     required super.createdAt,
     required super.updatedAt,
-    required super.createdBy,
-    required super.executionStats,
-    required super.metadata,
+    super.caseId,
+    super.priority,
+    super.executedAt,
+    super.executedBy,
+    super.currentLevel,
+    super.status,
+    super.logs,
+    super.metadata,
   });
 
   factory SlaEscalationModel.fromJson(Map<String, dynamic> json) {
     return SlaEscalationModel(
       id: json['id'] as String,
+      firmId: json['firm_id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      firmId: json['firm_id'] as String,
-      triggerType: json['trigger_type'] as String,
-      escalationLevels: (json['escalation_levels'] as List<dynamic>)
-          .map((level) => EscalationLevelModel.fromJson(level as Map<String, dynamic>))
-          .toList(),
       isActive: json['is_active'] as bool? ?? true,
+      triggers: (json['triggers'] as List<dynamic>?)
+              ?.map((t) => EscalationTrigger(
+                  id: t['id'] as String,
+                  type: _parseEscalationTriggerType(t['type'] as String),
+                  condition: t['condition'] as String,
+                  value: t['value'],
+                  priority: t['priority'] as String?,
+                  metadata: t['metadata'] as Map<String, dynamic>?))
+              .toList() ?? [],
+      levels: (json['levels'] as List<dynamic>?)
+              ?.map((l) => EscalationLevel(
+                  level: l['level'] as int,
+                  name: l['name'] as String,
+                  description: l['description'] as String,
+                  actions: (l['actions'] as List<dynamic>?)
+                      ?.map((a) => EscalationAction(
+                          type: _parseEscalationActionType(a['type'] as String),
+                          description: a['description'] as String,
+                          parameters: a['parameters'] as Map<String, dynamic>,
+                          isRequired: a['isRequired'] as bool?,
+                          metadata: a['metadata'] as Map<String, dynamic>?))
+                      .toList() ?? [],
+                  recipients: (l['recipients'] as List<dynamic>?)
+                      ?.map((r) => EscalationRecipient(
+                          type: _parseEscalationRecipientType(r['type'] as String),
+                          identifier: r['identifier'] as String,
+                          name: r['name'] as String?,
+                          role: r['role'] as String?,
+                          metadata: r['metadata'] as Map<String, dynamic>?))
+                      .toList() ?? [],
+                  delayMinutes: l['delayMinutes'] as int?,
+                  conditions: l['conditions'] as Map<String, dynamic>?,
+                  metadata: l['metadata'] as Map<String, dynamic>?))
+              .toList() ?? [],
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      createdBy: json['created_by'] as String,
-      executionStats: ExecutionStatsModel.fromJson(json['execution_stats'] as Map<String, dynamic>),
-      metadata: Map<String, dynamic>.from(json['metadata'] as Map),
+      caseId: json['case_id'] as String?,
+      priority: json['priority'] as String?,
+      executedAt: json['executed_at'] != null ? DateTime.parse(json['executed_at'] as String) : null,
+      executedBy: json['executed_by'] as String?,
+      currentLevel: json['current_level'] as int?,
+      status: json['status'] != null ? _parseEscalationStatus(json['status'] as String) : null,
+      logs: (json['logs'] as List<dynamic>?)
+              ?.map((log) => EscalationLog(
+                  id: log['id'] as String,
+                  level: log['level'] as int,
+                  action: log['action'] as String,
+                  executedAt: DateTime.parse(log['executedAt'] as String),
+                  status: log['status'] as String,
+                  executedBy: log['executedBy'] as String?,
+                  result: log['result'] as Map<String, dynamic>?,
+                  error: log['error'] as String?,
+                  metadata: log['metadata'] as Map<String, dynamic>?))
+              .toList(),
+      metadata: json['metadata'] != null ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
     );
   }
 
   factory SlaEscalationModel.fromEntity(SlaEscalationEntity entity) {
     return SlaEscalationModel(
       id: entity.id,
+      firmId: entity.firmId,
       name: entity.name,
       description: entity.description,
-      firmId: entity.firmId,
-      triggerType: entity.triggerType,
-      escalationLevels: entity.escalationLevels,
       isActive: entity.isActive,
+      triggers: entity.triggers,
+      levels: entity.levels,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      createdBy: entity.createdBy,
-      executionStats: entity.executionStats,
+      caseId: entity.caseId,
+      priority: entity.priority,
+      executedAt: entity.executedAt,
+      executedBy: entity.executedBy,
+      currentLevel: entity.currentLevel,
+      status: entity.status,
+      logs: entity.logs,
       metadata: entity.metadata,
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'firm_id': firmId,
       'name': name,
       'description': description,
-      'firm_id': firmId,
-      'trigger_type': triggerType,
-      'escalation_levels': escalationLevels
-          .map((level) => EscalationLevelModel.fromEntity(level).toJson())
-          .toList(),
       'is_active': isActive,
+      'triggers': triggers.map((t) => t.toJson()).toList(),
+      'levels': levels.map((l) => l.toJson()).toList(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
-      'created_by': createdBy,
-      'execution_stats': ExecutionStatsModel.fromEntity(executionStats).toJson(),
-      'metadata': metadata,
+      if (caseId != null) 'case_id': caseId,
+      if (priority != null) 'priority': priority,
+      if (executedAt != null) 'executed_at': executedAt!.toIso8601String(),
+      if (executedBy != null) 'executed_by': executedBy,
+      if (currentLevel != null) 'current_level': currentLevel,
+      if (status != null) 'status': status!.name,
+      if (logs != null) 'logs': logs!.map((l) => l.toJson()).toList(),
+      if (metadata != null) 'metadata': metadata,
     };
   }
 
   @override
   SlaEscalationModel copyWith({
     String? id,
+    String? firmId,
     String? name,
     String? description,
-    String? firmId,
-    String? triggerType,
-    List<dynamic>? escalationLevels,
     bool? isActive,
+    List<EscalationTrigger>? triggers,
+    List<EscalationLevel>? levels,
     DateTime? createdAt,
     DateTime? updatedAt,
-    String? createdBy,
-    dynamic executionStats,
+    String? caseId,
+    String? priority,
+    DateTime? executedAt,
+    String? executedBy,
+    int? currentLevel,
+    EscalationStatus? status,
+    List<EscalationLog>? logs,
     Map<String, dynamic>? metadata,
   }) {
     return SlaEscalationModel(
       id: id ?? this.id,
+      firmId: firmId ?? this.firmId,
       name: name ?? this.name,
       description: description ?? this.description,
-      firmId: firmId ?? this.firmId,
-      triggerType: triggerType ?? this.triggerType,
-      escalationLevels: escalationLevels ?? this.escalationLevels,
       isActive: isActive ?? this.isActive,
+      triggers: triggers ?? this.triggers,
+      levels: levels ?? this.levels,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      createdBy: createdBy ?? this.createdBy,
-      executionStats: executionStats ?? this.executionStats,
+      caseId: caseId ?? this.caseId,
+      priority: priority ?? this.priority,
+      executedAt: executedAt ?? this.executedAt,
+      executedBy: executedBy ?? this.executedBy,
+      currentLevel: currentLevel ?? this.currentLevel,
+      status: status ?? this.status,
+      logs: logs ?? this.logs,
       metadata: metadata ?? this.metadata,
     );
+  }
+
+  static EscalationTriggerType _parseEscalationTriggerType(String type) {
+    switch (type.toLowerCase()) {
+      case 'timedelay':
+      case 'time_delay':
+        return EscalationTriggerType.timeDelay;
+      case 'prioritybased':
+      case 'priority_based':
+        return EscalationTriggerType.priorityBased;
+      case 'combined':
+        return EscalationTriggerType.combined;
+      case 'manual':
+        return EscalationTriggerType.manual;
+      default:
+        return EscalationTriggerType.manual;
+    }
+  }
+
+  static EscalationActionType _parseEscalationActionType(String type) {
+    switch (type.toLowerCase()) {
+      case 'notify':
+        return EscalationActionType.notify;
+      case 'reassign':
+        return EscalationActionType.reassign;
+      case 'createtask':
+      case 'create_task':
+        return EscalationActionType.createTask;
+      case 'sendemail':
+      case 'send_email':
+        return EscalationActionType.sendEmail;
+      case 'sendsms':
+      case 'send_sms':
+        return EscalationActionType.sendSms;
+      case 'webhook':
+        return EscalationActionType.webhook;
+      case 'custom':
+        return EscalationActionType.custom;
+      default:
+        return EscalationActionType.custom;
+    }
+  }
+
+  static EscalationRecipientType _parseEscalationRecipientType(String type) {
+    switch (type.toLowerCase()) {
+      case 'user':
+        return EscalationRecipientType.user;
+      case 'role':
+        return EscalationRecipientType.role;
+      case 'email':
+        return EscalationRecipientType.email;
+      case 'group':
+        return EscalationRecipientType.group;
+      case 'webhook':
+        return EscalationRecipientType.webhook;
+      default:
+        return EscalationRecipientType.user;
+    }
+  }
+
+  static EscalationStatus _parseEscalationStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return EscalationStatus.pending;
+      case 'active':
+        return EscalationStatus.active;
+      case 'paused':
+        return EscalationStatus.paused;
+      case 'completed':
+        return EscalationStatus.completed;
+      case 'cancelled':
+        return EscalationStatus.cancelled;
+      case 'error':
+        return EscalationStatus.error;
+      default:
+        return EscalationStatus.pending;
+    }
   }
 }
 

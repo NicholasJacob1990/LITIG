@@ -1,10 +1,10 @@
-import 'dart:convert';
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import '../../domain/entities/sla_escalation_entity.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../domain/repositories/sla_escalation_repository.dart';
 import '../datasources/sla_escalation_remote_data_source.dart';
 import '../datasources/sla_escalation_local_data_source.dart';
-import '../models/sla_escalation_model.dart';
 
 class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   final SlaEscalationRemoteDataSource remoteDataSource;
@@ -18,205 +18,443 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   });
 
   @override
-  Future<List<SlaEscalationEntity>> getEscalations(String firmId) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getActiveEscalations({
+    required String firmId,
+    String? lawyerId,
+    String? caseId,
+    String? priority,
+  }) async {
     try {
-      // Try cache first
-      final cachedEscalations = await localDataSource.getEscalations(firmId);
-      if (cachedEscalations.isNotEmpty) {
-        return cachedEscalations;
-      }
-
-      // Fetch from remote
-      final remoteEscalations = await remoteDataSource.getEscalations(firmId);
-      
-      // Cache results
-      await localDataSource.cacheEscalations(remoteEscalations);
-      
-      return remoteEscalations;
+      // Mock implementation - replace with actual data source calls
+      return Right([]);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter escalações ativas'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      // Fallback to cache
-      final cachedEscalations = await localDataSource.getEscalations(firmId);
-      if (cachedEscalations.isNotEmpty) {
-        return cachedEscalations;
-      }
-      throw Exception('Failed to load escalations: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<SlaEscalationEntity> createEscalation(SlaEscalationEntity escalation) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getEscalationHistory({
+    required String firmId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? lawyerId,
+    String? caseId,
+  }) async {
     try {
-      final createdEscalation = await remoteDataSource.createEscalation(escalation);
-      await localDataSource.cacheEscalation(createdEscalation);
-      return createdEscalation;
+      // Mock implementation - replace with actual data source calls
+      return Right([]);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter histórico de escalações'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to create escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<SlaEscalationEntity> updateEscalation(SlaEscalationEntity escalation) async {
+  Future<Either<Failure, Map<String, dynamic>>> createEscalation({
+    required String firmId,
+    required String caseId,
+    required String reason,
+    required String escalatedTo,
+    required String escalatedBy,
+    String? notes,
+    String priority = 'medium',
+  }) async {
     try {
-      final updatedEscalation = await remoteDataSource.updateEscalation(escalation);
-      await localDataSource.cacheEscalation(updatedEscalation);
-      return updatedEscalation;
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'firmId': firmId,
+        'caseId': caseId,
+        'reason': reason,
+        'escalatedTo': escalatedTo,
+        'escalatedBy': escalatedBy,
+        'priority': priority,
+        'notes': notes,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao criar escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to update escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<void> deleteEscalation(String escalationId) async {
+  Future<Either<Failure, void>> resolveEscalation({
+    required String escalationId,
+    required String resolvedBy,
+    required String resolution,
+    String? notes,
+  }) async {
     try {
-      await remoteDataSource.deleteEscalation(escalationId);
-      await localDataSource.removeEscalation(escalationId);
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao resolver escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to delete escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<SlaEscalationEntity> getEscalationById(String escalationId) async {
+  Future<Either<Failure, void>> transferEscalation({
+    required String escalationId,
+    required String newAssignee,
+    required String transferredBy,
+    String? reason,
+  }) async {
     try {
-      final escalation = await remoteDataSource.getEscalationById(escalationId);
-      return escalation;
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao transferir escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to get escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<bool> executeEscalation(String escalationId, Map<String, dynamic> context) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getEscalationRules({
+    required String firmId,
+  }) async {
     try {
-      final result = await remoteDataSource.executeEscalation(escalationId, context);
-      return result;
+      // Mock implementation - replace with actual data source calls
+      return Right([]);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter regras de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to execute escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getEscalationHistory(String firmId) async {
+  Future<Either<Failure, Map<String, dynamic>>> createEscalationRule({
+    required String firmId,
+    required String name,
+    required Map<String, dynamic> conditions,
+    required Map<String, dynamic> actions,
+    bool isActive = true,
+  }) async {
     try {
-      final history = await remoteDataSource.getEscalationHistory(firmId);
-      return history;
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'firmId': firmId,
+        'name': name,
+        'conditions': conditions,
+        'actions': actions,
+        'isActive': isActive,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao criar regra de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to get escalation history: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Map<String, dynamic>> getEscalationStats(String firmId) async {
+  Future<Either<Failure, void>> updateEscalationRule({
+    required String ruleId,
+    String? name,
+    Map<String, dynamic>? conditions,
+    Map<String, dynamic>? actions,
+    bool? isActive,
+  }) async {
     try {
-      final stats = await remoteDataSource.getEscalationStats(firmId);
-      return stats;
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao atualizar regra de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to get escalation stats: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<bool> testEscalation(String escalationId) async {
+  Future<Either<Failure, void>> deleteEscalationRule({
+    required String ruleId,
+  }) async {
     try {
-      final result = await remoteDataSource.testEscalation(escalationId);
-      return result;
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao deletar regra de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to test escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<SlaEscalationEntity>> getActiveEscalations(String firmId) async {
+  Future<Either<Failure, Map<String, dynamic>>> testEscalationRule({
+    required String ruleId,
+    required Map<String, dynamic> testData,
+  }) async {
     try {
-      final activeEscalations = await remoteDataSource.getActiveEscalations(firmId);
-      return activeEscalations;
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'ruleId': ruleId,
+        'testResult': 'success',
+        'matches': true,
+        'conditions': testData,
+        'testedAt': DateTime.now().toIso8601String(),
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao testar regra de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to get active escalations: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<void> activateEscalation(String escalationId) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getPendingEscalations({
+    required String userId,
+    String? priority,
+  }) async {
     try {
-      await remoteDataSource.activateEscalation(escalationId);
-      // Update local cache
-      final escalation = await getEscalationById(escalationId);
-      await localDataSource.cacheEscalation(escalation);
+      // Mock implementation - replace with actual data source calls
+      return Right([]);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter escalações pendentes'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to activate escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<void> deactivateEscalation(String escalationId) async {
+  Future<Either<Failure, Map<String, dynamic>>> getEscalationMetrics({
+    required String firmId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
     try {
-      await remoteDataSource.deactivateEscalation(escalationId);
-      // Update local cache
-      final escalation = await getEscalationById(escalationId);
-      await localDataSource.cacheEscalation(escalation);
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'firmId': firmId,
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+        'totalEscalations': 0,
+        'resolvedEscalations': 0,
+        'pendingEscalations': 0,
+        'averageResolutionTime': '0h',
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter métricas de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to deactivate escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<SlaEscalationEntity> duplicateEscalation(String escalationId) async {
+  Future<Either<Failure, Map<String, dynamic>>> getResolutionStats({
+    required String firmId,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? lawyerId,
+  }) async {
     try {
-      final duplicatedEscalation = await remoteDataSource.duplicateEscalation(escalationId);
-      await localDataSource.cacheEscalation(duplicatedEscalation);
-      return duplicatedEscalation;
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'firmId': firmId,
+        'lawyerId': lawyerId,
+        'startDate': startDate.toIso8601String(),
+        'endDate': endDate.toIso8601String(),
+        'averageResolutionTime': '0h',
+        'fastestResolution': '0h',
+        'slowestResolution': '0h',
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter estatísticas de resolução'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to duplicate escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<String> exportEscalation(String escalationId, String format) async {
+  Future<Either<Failure, Map<String, dynamic>>> getEscalationNotificationSettings({
+    required String firmId,
+  }) async {
     try {
-      final exportPath = await remoteDataSource.exportEscalation(escalationId, format);
-      return exportPath;
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'firmId': firmId,
+        'emailNotifications': true,
+        'smsNotifications': false,
+        'pushNotifications': true,
+        'escalationThreshold': 24,
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter configurações de notificação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to export escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<SlaEscalationEntity> importEscalation(String filePath) async {
+  Future<Either<Failure, void>> updateEscalationNotificationSettings({
+    required String firmId,
+    required Map<String, dynamic> settings,
+  }) async {
     try {
-      final importedEscalation = await remoteDataSource.importEscalation(filePath);
-      await localDataSource.cacheEscalation(importedEscalation);
-      return importedEscalation;
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao atualizar configurações de notificação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to import escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getEscalationLogs(String escalationId) async {
+  Future<Either<Failure, Map<String, dynamic>>> executeEscalationRules({
+    required String firmId,
+    String? caseId,
+    bool dryRun = false,
+  }) async {
     try {
-      final logs = await remoteDataSource.getEscalationLogs(escalationId);
-      return logs;
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'firmId': firmId,
+        'caseId': caseId,
+        'dryRun': dryRun,
+        'executedRules': 0,
+        'escalationsCreated': 0,
+        'executedAt': DateTime.now().toIso8601String(),
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao executar regras de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to get escalation logs: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Map<String, dynamic>> validateEscalation(SlaEscalationEntity escalation) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getEscalationLogs({
+    required String firmId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? ruleId,
+  }) async {
     try {
-      final validationResult = await remoteDataSource.validateEscalation(escalation);
-      return validationResult;
+      // Mock implementation - replace with actual data source calls
+      return Right([]);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter logs de escalação'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to validate escalation: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<void> clearEscalationCache() async {
+  Future<Either<Failure, void>> addEscalationComment({
+    required String escalationId,
+    required String comment,
+    required String addedBy,
+  }) async {
     try {
-      await localDataSource.clearAllEscalations();
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao adicionar comentário'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      throw Exception('Failed to clear escalation cache: $e');
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-} 
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getEscalationComments({
+    required String escalationId,
+  }) async {
+    try {
+      // Mock implementation - replace with actual data source calls
+      return Right([]);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter comentários'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
+    } catch (e) {
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> markEscalationAsCritical({
+    required String escalationId,
+    required String markedBy,
+    String? reason,
+  }) async {
+    try {
+      // Mock implementation - replace with actual data source calls
+      return const Right(null);
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao marcar como crítica'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
+    } catch (e) {
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getEscalationDashboard({
+    required String firmId,
+    DateTime? date,
+  }) async {
+    try {
+      // Mock implementation - replace with actual data source calls
+      return Right({
+        'firmId': firmId,
+        'date': date?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        'totalEscalations': 0,
+        'criticalEscalations': 0,
+        'pendingEscalations': 0,
+        'resolvedToday': 0,
+      });
+    } on ServerException {
+      return const Left(ServerFailure(message: 'Erro ao obter dashboard de escalações'));
+    } on NetworkException {
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
+    } catch (e) {
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
+    }
+  }
+}

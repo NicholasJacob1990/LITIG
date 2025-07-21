@@ -15,6 +15,16 @@ class CaseDocument extends Equatable {
     required this.category,
   });
 
+  factory CaseDocument.fromJson(Map<String, dynamic> json) {
+    return CaseDocument(
+      name: json['name'] ?? '',
+      size: json['size'] ?? '',
+      date: json['date'] ?? '',
+      type: json['type'] ?? '',
+      category: json['category'] ?? '',
+    );
+  }
+
   @override
   List<Object?> get props => [name, size, date, type, category];
 } 

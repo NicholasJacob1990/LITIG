@@ -7,10 +7,12 @@
  * Este serviço utiliza o SDK oficial da Unipile para simplificar a integração
  * e garantir compatibilidade com as melhores práticas da API.
  * 
- * VERSÃO 2.0 - Adicionado suporte para Instagram e Facebook
+ * VERSÃO 3.0 - Adicionado suporte para Instagram, Facebook e Calendários
  * 
  * Baseado na documentação:
  * - https://developer.unipile.com/reference/accountscontroller_listaccounts
+ * - https://developer.unipile.com/reference/calendarscontroller_listcalendars
+ * - https://developer.unipile.com/reference/calendarscontroller_createcalendarevent
  * - https://www.unipile.com/instagram-profile-api-a-complete-developers-guide-to-smarter-integration-with-unipile/
  * - https://www.unipile.com/communication-api/messaging-api/linkedin-api/
  * - SDK: npm install unipile-node-sdk
@@ -610,6 +612,332 @@ class UnipileSDKService {
         };
     }
 
+    // ========================================
+    // 📅 MÉTODOS DE CALENDÁRIO (NOVO v3.0)
+    // ========================================
+
+    /**
+     * 📅 Lista todos os calendários de uma conta
+     */
+    async listCalendars(accountId) {
+        try {
+            const calendars = await this.client.calendars.list({
+                account_id: accountId
+            });
+            
+            return {
+                success: true,
+                data: calendars,
+                provider: 'calendar',
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Obtém um calendário específico
+     */
+    async getCalendar(calendarId, accountId) {
+        try {
+            const calendar = await this.client.calendars.get({
+                calendar_id: calendarId,
+                account_id: accountId
+            });
+            
+            return {
+                success: true,
+                data: calendar,
+                provider: 'calendar',
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Lista eventos de um calendário específico
+     */
+    async listCalendarEvents(calendarId, options = {}) {
+        try {
+            const events = await this.client.calendars.listEvents({
+                calendar_id: calendarId,
+                ...options
+            });
+            
+            return {
+                success: true,
+                data: events,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Cria um novo evento no calendário
+     */
+    async createCalendarEvent(calendarId, eventData) {
+        try {
+            const event = await this.client.calendars.createEvent({
+                calendar_id: calendarId,
+                ...eventData
+            });
+            
+            return {
+                success: true,
+                data: event,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Obtém um evento específico
+     */
+    async getCalendarEvent(calendarId, eventId) {
+        try {
+            const event = await this.client.calendars.getEvent({
+                calendar_id: calendarId,
+                event_id: eventId
+            });
+            
+            return {
+                success: true,
+                data: event,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                event_id: eventId,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                event_id: eventId,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Edita um evento existente
+     */
+    async editCalendarEvent(calendarId, eventId, eventData) {
+        try {
+            const event = await this.client.calendars.editEvent({
+                calendar_id: calendarId,
+                event_id: eventId,
+                ...eventData
+            });
+            
+            return {
+                success: true,
+                data: event,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                event_id: eventId,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                event_id: eventId,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Deleta um evento
+     */
+    async deleteCalendarEvent(calendarId, eventId) {
+        try {
+            const result = await this.client.calendars.deleteEvent({
+                calendar_id: calendarId,
+                event_id: eventId
+            });
+            
+            return {
+                success: true,
+                data: result,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                event_id: eventId,
+                operation: 'delete',
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                calendar_id: calendarId,
+                event_id: eventId,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Cria evento jurídico LITIG-1 com padrões específicos
+     */
+    async createLegalEvent(calendarId, legalEventData) {
+        try {
+            const eventData = {
+                title: legalEventData.title,
+                description: this._formatLegalEventDescription(legalEventData),
+                start_time: legalEventData.startTime,
+                end_time: legalEventData.endTime,
+                location: legalEventData.location,
+                attendees: legalEventData.attendees || [],
+                reminders: legalEventData.reminders || this._getDefaultLegalReminders(),
+                metadata: {
+                    ...legalEventData.metadata,
+                    source: 'LITIG-1',
+                    case_id: legalEventData.caseId,
+                    case_type: legalEventData.caseType,
+                    lawyer_id: legalEventData.lawyerId,
+                    client_id: legalEventData.clientId,
+                    event_category: legalEventData.eventCategory || 'legal_appointment'
+                }
+            };
+            
+            return await this.createCalendarEvent(calendarId, eventData);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                provider: 'calendar',
+                operation: 'create_legal_event',
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Sincroniza eventos LITIG-1 com calendário externo
+     */
+    async syncLegalEventsWithCalendar(accountId, litigEvents) {
+        try {
+            const calendars = await this.listCalendars(accountId);
+            if (!calendars.success) {
+                throw new Error('Failed to list calendars');
+            }
+            
+            // Encontra calendário primário ou primeiro disponível
+            const primaryCalendar = calendars.data.find(cal => cal.primary) || calendars.data[0];
+            if (!primaryCalendar) {
+                throw new Error('No calendar available');
+            }
+            
+            const results = [];
+            
+            for (const litigEvent of litigEvents) {
+                const result = await this.createLegalEvent(primaryCalendar.id, litigEvent);
+                results.push({
+                    case_id: litigEvent.caseId,
+                    title: litigEvent.title,
+                    success: result.success,
+                    calendar_event_id: result.success ? result.data.id : null,
+                    error: result.success ? null : result.error
+                });
+            }
+            
+            return {
+                success: true,
+                data: {
+                    calendar_id: primaryCalendar.id,
+                    calendar_name: primaryCalendar.name,
+                    synced_events: results,
+                    success_count: results.filter(r => r.success).length,
+                    error_count: results.filter(r => !r.success).length
+                },
+                operation: 'sync_legal_events',
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+                operation: 'sync_legal_events',
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    /**
+     * 📅 Formata descrição para eventos jurídicos
+     */
+    _formatLegalEventDescription(legalEventData) {
+        const parts = [
+            legalEventData.description || '',
+            '',
+            '🏛️ Evento LITIG-1',
+            `📋 Caso: ${legalEventData.caseNumber || legalEventData.caseId}`,
+            `⚖️ Tipo: ${legalEventData.caseType || 'Jurídico'}`,
+            `👤 Cliente: ${legalEventData.clientName || 'N/A'}`,
+            `👨‍💼 Advogado: ${legalEventData.lawyerName || 'N/A'}`
+        ];
+        
+        if (legalEventData.urgency) {
+            parts.push(`🚨 Urgência: ${legalEventData.urgency}`);
+        }
+        
+        if (legalEventData.notes) {
+            parts.push('', '📝 Observações:', legalEventData.notes);
+        }
+        
+        return parts.filter(Boolean).join('\n');
+    }
+
+    /**
+     * 📅 Define lembretes padrão para eventos jurídicos
+     */
+    _getDefaultLegalReminders() {
+        return [
+            { method: 'email', minutes: 24 * 60 }, // 1 dia antes
+            { method: 'popup', minutes: 2 * 60 },  // 2 horas antes
+            { method: 'popup', minutes: 30 }       // 30 minutos antes
+        ];
+    }
+
     /**
      * Verifica a saúde da conexão
      */
@@ -715,6 +1043,52 @@ if (require.main === module) {
                 result = await service.healthCheck();
                 break;
                 
+            // 📅 Comandos de Calendário (v3.0)
+            case 'list-calendars':
+                const [calAccountId] = args;
+                result = await service.listCalendars(calAccountId);
+                break;
+                
+            case 'get-calendar':
+                const [getCalendarId, getCalAccountId] = args;
+                result = await service.getCalendar(getCalendarId, getCalAccountId);
+                break;
+                
+            case 'list-calendar-events':
+                const [listEventsCalendarId, listEventsOptions] = args;
+                result = await service.listCalendarEvents(listEventsCalendarId, JSON.parse(listEventsOptions || '{}'));
+                break;
+                
+            case 'create-calendar-event':
+                const [createEventCalendarId, createEventData] = args;
+                result = await service.createCalendarEvent(createEventCalendarId, JSON.parse(createEventData));
+                break;
+                
+            case 'get-calendar-event':
+                const [getEventCalendarId, getEventId] = args;
+                result = await service.getCalendarEvent(getEventCalendarId, getEventId);
+                break;
+                
+            case 'edit-calendar-event':
+                const [editEventCalendarId, editEventId, editEventData] = args;
+                result = await service.editCalendarEvent(editEventCalendarId, editEventId, JSON.parse(editEventData));
+                break;
+                
+            case 'delete-calendar-event':
+                const [deleteEventCalendarId, deleteEventId] = args;
+                result = await service.deleteCalendarEvent(deleteEventCalendarId, deleteEventId);
+                break;
+                
+            case 'create-legal-event':
+                const [legalEventCalendarId, legalEventData] = args;
+                result = await service.createLegalEvent(legalEventCalendarId, JSON.parse(legalEventData));
+                break;
+                
+            case 'sync-legal-events':
+                const [syncAccountId, syncLitigEvents] = args;
+                result = await service.syncLegalEventsWithCalendar(syncAccountId, JSON.parse(syncLitigEvents));
+                break;
+                
             default:
                 result = {
                     success: false,
@@ -733,7 +1107,17 @@ if (require.main === module) {
                         'connect-email',
                         'list-emails',
                         'send-email',
-                        'health-check'
+                        'health-check',
+                        // 📅 Comandos de Calendário
+                        'list-calendars',
+                        'get-calendar',
+                        'list-calendar-events',
+                        'create-calendar-event',
+                        'get-calendar-event',
+                        'edit-calendar-event',
+                        'delete-calendar-event',
+                        'create-legal-event',
+                        'sync-legal-events'
                     ]
                 };
         }

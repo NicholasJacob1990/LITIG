@@ -6,6 +6,7 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final ButtonStyle? style;
   final IconData? icon;
+  final bool isSecondary;
 
   const CustomButton({
     super.key,
@@ -14,13 +15,20 @@ class CustomButton extends StatelessWidget {
     this.isLoading = false,
     this.style,
     this.icon,
+    this.isSecondary = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
-      style: style,
+      style: style ?? (isSecondary
+          ? ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Theme.of(context).primaryColor,
+              side: BorderSide(color: Theme.of(context).primaryColor),
+            )
+          : null),
       child: isLoading
           ? const SizedBox(
               height: 20,

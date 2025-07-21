@@ -30,131 +30,101 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas SLA'));
+      return Left(ServerFailure(message: 'Erro ao obter métricas SLA'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, List<SlaComplianceMetric>>> getComplianceMetrics({
+  Future<List<Map<String, dynamic>>> getComplianceMetrics({
     required String firmId,
     required DateTime startDate,
     required DateTime endDate,
-    String? groupBy,
   }) async {
     try {
       final result = await remoteDataSource.getComplianceMetrics(
         firmId: firmId,
         startDate: startDate,
         endDate: endDate,
-        groupBy: groupBy,
       );
-      return Right(result);
-    } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas de compliance'));
-    } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return result.map((e) => e.toJson()).toList();
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return [];
     }
   }
 
   @override
-  Future<Either<Failure, List<SlaPerformanceMetric>>> getPerformanceMetrics({
+  Future<List<Map<String, dynamic>>> getPerformanceMetrics({
     required String firmId,
     required DateTime startDate,
     required DateTime endDate,
-    String? lawyerId,
   }) async {
     try {
       final result = await remoteDataSource.getPerformanceMetrics(
         firmId: firmId,
         startDate: startDate,
         endDate: endDate,
-        lawyerId: lawyerId,
       );
-      return Right(result);
-    } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas de performance'));
-    } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return result;
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return [];
     }
   }
 
   @override
-  Future<Either<Failure, List<SlaViolationMetric>>> getViolationMetrics({
+  Future<List<Map<String, dynamic>>> getViolationMetrics({
     required String firmId,
     required DateTime startDate,
     required DateTime endDate,
-    String? reason,
   }) async {
     try {
       final result = await remoteDataSource.getViolationMetrics(
         firmId: firmId,
         startDate: startDate,
         endDate: endDate,
-        reason: reason,
       );
-      return Right(result);
-    } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas de violação'));
-    } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return result;
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return [];
     }
   }
 
   @override
-  Future<Either<Failure, List<SlaEscalationMetric>>> getEscalationMetrics({
+  Future<List<Map<String, dynamic>>> getEscalationMetrics({
     required String firmId,
     required DateTime startDate,
     required DateTime endDate,
-    String? level,
   }) async {
     try {
       final result = await remoteDataSource.getEscalationMetrics(
         firmId: firmId,
         startDate: startDate,
         endDate: endDate,
-        level: level,
       );
-      return Right(result);
-    } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas de escalação'));
-    } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return result;
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return [];
     }
   }
 
   @override
-  Future<Either<Failure, List<SlaTrendMetric>>> getTrendMetrics({
+  Future<List<Map<String, dynamic>>> getTrendMetrics({
     required String firmId,
-    required String metric,
-    required String period,
-    String? granularity,
+    required DateTime startDate,
+    required DateTime endDate,
   }) async {
     try {
       final result = await remoteDataSource.getTrendMetrics(
         firmId: firmId,
-        metric: metric,
-        period: period,
-        granularity: granularity,
+        startDate: startDate,
+        endDate: endDate,
       );
-      return Right(result);
-    } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas de tendência'));
-    } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return result;
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return [];
     }
   }
 
@@ -174,11 +144,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao gerar relatório de compliance'));
+      return Left(ServerFailure(message: 'Erro ao gerar relatório de compliance'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -200,11 +170,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao gerar relatório de performance'));
+      return Left(ServerFailure(message: 'Erro ao gerar relatório de performance'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -224,11 +194,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter tendências de performance'));
+      return Left(ServerFailure(message: 'Erro ao obter tendências de performance'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -248,11 +218,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter dados de benchmark'));
+      return Left(ServerFailure(message: 'Erro ao obter dados de benchmark'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -270,33 +240,25 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter análise preditiva'));
+      return Left(ServerFailure(message: 'Erro ao obter análise preditiva'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, List<SlaAlertMetric>>> getAlertMetrics({
+  Future<List<Map<String, dynamic>>> getAlertMetrics({
     required String firmId,
-    String? severity,
-    bool activeOnly = true,
   }) async {
     try {
       final result = await remoteDataSource.getAlertMetrics(
         firmId: firmId,
-        severity: severity,
-        activeOnly: activeOnly,
       );
-      return Right(result);
-    } on ServerException {
-      return Left(ServerFailure('Erro ao obter métricas de alertas'));
-    } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return result;
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return [];
     }
   }
 
@@ -312,11 +274,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao gerar relatório customizado'));
+      return Left(ServerFailure(message: 'Erro ao gerar relatório customizado'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -338,11 +300,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao exportar métricas'));
+      return Left(ServerFailure(message: 'Erro ao exportar métricas'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -360,11 +322,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter resumo de métricas'));
+      return Left(ServerFailure(message: 'Erro ao obter resumo de métricas'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -386,11 +348,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter top performers'));
+      return Left(ServerFailure(message: 'Erro ao obter top performers'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -408,11 +370,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter dashboard KPI'));
+      return Left(ServerFailure(message: 'Erro ao obter dashboard KPI'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -432,11 +394,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao agendar relatório'));
+      return Left(ServerFailure(message: 'Erro ao agendar relatório'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 
@@ -446,11 +408,11 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       final result = await remoteDataSource.getScheduledReports(firmId);
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure('Erro ao obter relatórios agendados'));
+      return Left(ServerFailure(message: 'Erro ao obter relatórios agendados'));
     } on NetworkException {
-      return Left(NetworkFailure('Erro de conexão'));
+      return Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
-      return Left(UnexpectedFailure('Erro inesperado: ${e.toString()}'));
+      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
 } 

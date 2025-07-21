@@ -16,16 +16,37 @@ class SlaSettingsModel extends SlaSettingsEntity {
     required super.overrideSettings,
     required super.lastModified,
     required super.lastModifiedBy,
+    super.businessHours,
+    super.escalationRules,
+    super.notificationSettings,
+    super.holidays,
+    super.customRules,
+    super.metadata,
+    super.businessHoursStart,
+    super.businessHoursEnd,
+    super.urgentSlaHours,
+    super.emergencySlaHours,
+    super.complexCaseSlaHours,
+    super.defaultSlaHours,
+    super.businessStartHour,
+    super.businessEndHour,
+    super.maxOverrideHours,
+    super.businessDays,
+    super.escalationPercentages,
+    super.enableEscalation,
+    super.allowOverride,
+    super.overrideRequiredRoles,
+    super.timezone,
   });
 
   factory SlaSettingsModel.fromJson(Map<String, dynamic> json) {
     return SlaSettingsModel(
       id: json['id'] as String,
       firmId: json['firm_id'] as String,
-      normalTimeframe: SlaTimeframeModel.fromJson(json['normal_timeframe'] as Map<String, dynamic>),
-      urgentTimeframe: SlaTimeframeModel.fromJson(json['urgent_timeframe'] as Map<String, dynamic>),
-      emergencyTimeframe: SlaTimeframeModel.fromJson(json['emergency_timeframe'] as Map<String, dynamic>),
-      complexTimeframe: SlaTimeframeModel.fromJson(json['complex_timeframe'] as Map<String, dynamic>),
+      normalTimeframe: SlaTimeframeModel.fromJson(json['normal_timeframe'] as Map<String, dynamic>).toEntity(),
+      urgentTimeframe: SlaTimeframeModel.fromJson(json['urgent_timeframe'] as Map<String, dynamic>).toEntity(),
+      emergencyTimeframe: SlaTimeframeModel.fromJson(json['emergency_timeframe'] as Map<String, dynamic>).toEntity(),
+      complexTimeframe: SlaTimeframeModel.fromJson(json['complex_timeframe'] as Map<String, dynamic>).toEntity(),
       enableBusinessHoursOnly: json['enable_business_hours_only'] as bool? ?? true,
       includeWeekends: json['include_weekends'] as bool? ?? false,
       allowOverrides: json['allow_overrides'] as bool? ?? true,
@@ -87,6 +108,27 @@ class SlaSettingsModel extends SlaSettingsEntity {
     Map<String, dynamic>? overrideSettings,
     DateTime? lastModified,
     String? lastModifiedBy,
+    Map<String, dynamic>? businessHours,
+    Map<String, dynamic>? escalationRules,
+    Map<String, dynamic>? notificationSettings,
+    List<Map<String, dynamic>>? holidays,
+    Map<String, dynamic>? customRules,
+    Map<String, dynamic>? metadata,
+    String? businessHoursStart,
+    String? businessHoursEnd,
+    int? urgentSlaHours,
+    int? emergencySlaHours,
+    int? complexCaseSlaHours,
+    int? defaultSlaHours,
+    String? businessStartHour,
+    String? businessEndHour,
+    int? maxOverrideHours,
+    List<String>? businessDays,
+    List<int>? escalationPercentages,
+    bool? enableEscalation,
+    bool? allowOverride,
+    List<String>? overrideRequiredRoles,
+    String? timezone,
   }) {
     return SlaSettingsModel(
       id: id ?? this.id,
@@ -102,6 +144,27 @@ class SlaSettingsModel extends SlaSettingsEntity {
       overrideSettings: overrideSettings ?? this.overrideSettings,
       lastModified: lastModified ?? this.lastModified,
       lastModifiedBy: lastModifiedBy ?? this.lastModifiedBy,
+      businessHours: businessHours ?? this.businessHours,
+      escalationRules: escalationRules ?? this.escalationRules,
+      notificationSettings: notificationSettings ?? this.notificationSettings,
+      holidays: holidays ?? this.holidays,
+      customRules: customRules ?? this.customRules,
+      metadata: metadata ?? this.metadata,
+      businessHoursStart: businessHoursStart ?? this.businessHoursStart,
+      businessHoursEnd: businessHoursEnd ?? this.businessHoursEnd,
+      urgentSlaHours: urgentSlaHours ?? this.urgentSlaHours,
+      emergencySlaHours: emergencySlaHours ?? this.emergencySlaHours,
+      complexCaseSlaHours: complexCaseSlaHours ?? this.complexCaseSlaHours,
+      defaultSlaHours: defaultSlaHours ?? this.defaultSlaHours,
+      businessStartHour: businessStartHour ?? this.businessStartHour,
+      businessEndHour: businessEndHour ?? this.businessEndHour,
+      maxOverrideHours: maxOverrideHours ?? this.maxOverrideHours,
+      businessDays: businessDays ?? this.businessDays,
+      escalationPercentages: escalationPercentages ?? this.escalationPercentages,
+      enableEscalation: enableEscalation ?? this.enableEscalation,
+      allowOverride: allowOverride ?? this.allowOverride,
+      overrideRequiredRoles: overrideRequiredRoles ?? this.overrideRequiredRoles,
+      timezone: timezone ?? this.timezone,
     );
   }
 }
@@ -131,9 +194,9 @@ class SlaTimeframeModel {
   factory SlaTimeframeModel.fromEntity(SlaTimeframe entity) {
     return SlaTimeframeModel(
       hours: entity.hours,
-      minutes: entity.minutes,
-      type: entity.type,
-      metadata: entity.metadata,
+      minutes: 0, // SlaTimeframe não tem minutes
+      type: entity.priority, // usar priority como type
+      metadata: entity.metadata ?? {},
     );
   }
 
@@ -149,8 +212,7 @@ class SlaTimeframeModel {
   SlaTimeframe toEntity() {
     return SlaTimeframe(
       hours: hours,
-      minutes: minutes,
-      type: type,
+      priority: type, // type como priority
       metadata: metadata,
     );
   }

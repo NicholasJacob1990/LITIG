@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:dio/dio.dart';
 
 import '../../../../core/services/social_auth_service.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_card.dart';
-import '../../../../shared/theme/app_colors.dart';
+import '../../../../shared/utils/app_colors.dart';
 import '../../../../shared/theme/app_text_styles.dart';
 import '../widgets/social_platform_card.dart';
 import '../widgets/connect_social_modal.dart';
@@ -21,7 +23,7 @@ class SocialConnectionsScreen extends StatefulWidget {
 }
 
 class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
-  final SocialAuthService _socialService = SocialAuthService();
+  final SocialAuthService _socialService = SocialAuthService(Dio());
   List<SocialAccount> _connectedAccounts = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -95,18 +97,18 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         title: Text(
           'Redes Sociais',
-          style: AppTextStyles.headingSmall,
+          style: AppTextStyles.h5,
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.lightBackground,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: AppColors.textPrimary,
+            color: AppColors.lightText,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -143,12 +145,12 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Icons.share,
-                  color: AppColors.primary,
+                  color: AppColors.primaryBlue,
                   size: 24,
                 ),
               ),
@@ -159,13 +161,13 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
                   children: [
                     Text(
                       'Conecte suas Redes Sociais',
-                      style: AppTextStyles.headingSmall,
+                      style: AppTextStyles.h5,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Aumente sua credibilidade e visibilidade profissional',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+                        color: AppColors.lightTextSecondary,
                       ),
                     ),
                   ],
@@ -178,9 +180,9 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.success.withOpacity(0.2)),
+                border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
@@ -246,7 +248,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
       children: [
         Text(
           'Plataformas Disponíveis',
-          style: AppTextStyles.headingSmall,
+          style: AppTextStyles.h5,
         ),
         const SizedBox(height: 16),
         
@@ -255,7 +257,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
           provider: 'linkedin',
           title: 'LinkedIn',
           description: 'Conecte sua rede profissional',
-          icon: Icons.business,
+          icon: LucideIcons.linkedin,
           color: const Color(0xFF0A66C2),
           isConnected: _isProviderConnected('linkedin'),
           account: _getConnectedAccount('linkedin'),
@@ -270,7 +272,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
           provider: 'instagram',
           title: 'Instagram',
           description: 'Mostre sua presença visual',
-          icon: Icons.photo_camera,
+          icon: LucideIcons.instagram,
           color: const Color(0xFFE4405F),
           isConnected: _isProviderConnected('instagram'),
           account: _getConnectedAccount('instagram'),
@@ -303,7 +305,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
         children: [
           Text(
             'Benefícios das Conexões Sociais',
-            style: AppTextStyles.headingSmall,
+            style: AppTextStyles.h5,
           ),
           const SizedBox(height: 16),
           _buildBenefitItem(
@@ -343,12 +345,12 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               icon,
-              color: AppColors.primary,
+              color: AppColors.primaryBlue,
               size: 20,
             ),
           ),
@@ -366,7 +368,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
                 Text(
                   description,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: AppColors.lightTextSecondary,
                   ),
                 ),
               ],
@@ -386,13 +388,13 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
             children: [
               Icon(
                 Icons.security,
-                color: AppColors.primary,
+                color: AppColors.primaryBlue,
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
                 'Privacidade e Segurança',
-                style: AppTextStyles.headingSmall,
+                style: AppTextStyles.h5,
               ),
             ],
           ),
@@ -403,7 +405,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
             '• As credenciais são armazenadas de forma segura\n'
             '• Você pode desconectar a qualquer momento',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.lightTextSecondary,
               height: 1.5,
             ),
           ),

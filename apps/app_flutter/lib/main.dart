@@ -3,10 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:meu_app/injection_container.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/src/core/theme/app_theme.dart';
@@ -14,10 +12,10 @@ import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:meu_app/src/core/utils/logger.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meu_app/src/core/services/notification_service.dart';
-import 'package:meu_app/src/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
 
 String get _supabaseUrl {
   if (kIsWeb) {
@@ -32,11 +30,11 @@ String get _supabaseUrl {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Firebase initialization
-  await Firebase.initializeApp();
+  // Firebase initialization - temporarily disabled
+  // await Firebase.initializeApp();
   
   // Configure Firebase Messaging for background messages
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   
   // Setup dependency injection
   await setupInjection();
@@ -48,16 +46,16 @@ Future<void> main() async {
 }
 
 /// Handler para mensagens Firebase em background
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  print('Handling a background message: ${message.messageId}');
-  
-  // Processar dados da notificação se necessário
-  if (message.data.isNotEmpty) {
-    print('Message data: ${message.data}');
-  }
-}
+// @pragma('vm:entry-point')
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp();
+//   debugPrint('Handling a background message: ${message.messageId}');
+//   
+//   // Processar dados da notificação se necessário
+//   if (message.data.isNotEmpty) {
+//     debugPrint('Message data: ${message.data}');
+//   }
+// }
 
 /// Inicializa o serviço de notificações
 Future<void> _initializeNotificationService() async {
@@ -67,17 +65,17 @@ Future<void> _initializeNotificationService() async {
     
     // Configurar callbacks
     notificationService.setOnNotificationReceived((data) {
-      print('Notificação recebida: $data');
+      AppLogger.info('Notificação recebida', tag: 'NotificationService');
       // Aqui você pode adicionar lógica para atualizar o BLoC
     });
     
     notificationService.setOnNotificationTapped((data) {
-      print('Notificação tocada: $data');
+      AppLogger.info('Notificação tocada', tag: 'NotificationService');
       // Aqui você pode adicionar lógica de navegação
     });
     
   } catch (e) {
-    print('Erro ao inicializar notificações: $e');
+    AppLogger.error('Erro ao inicializar notificações', tag: 'NotificationService', error: e);
   }
 }
 

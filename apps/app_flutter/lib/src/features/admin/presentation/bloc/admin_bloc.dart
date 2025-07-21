@@ -1,16 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../domain/entities/admin_dashboard_data.dart';
-import '../../domain/entities/admin_metrics.dart';
-import '../../domain/entities/admin_audit_log.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/usecases/get_admin_dashboard.dart';
 import '../../domain/usecases/get_admin_metrics.dart';
 import '../../domain/usecases/get_admin_audit_logs.dart';
-import '../../domain/usecases/generate_executive_report.dart';
-import '../../domain/usecases/force_global_sync.dart';
+import '../../domain/usecases/generate_executive_report.dart' as usecases;
+import '../../domain/usecases/force_global_sync.dart' as usecases;
 import 'admin_event.dart';
 import 'admin_state.dart';
 
@@ -18,15 +13,15 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   final GetAdminDashboard _getAdminDashboard;
   final GetAdminMetrics _getAdminMetrics;
   final GetAdminAuditLogs _getAdminAuditLogs;
-  final GenerateExecutiveReport _generateExecutiveReport;
-  final ForceGlobalSync _forceGlobalSync;
+  final usecases.GenerateExecutiveReport _generateExecutiveReport;
+  final usecases.ForceGlobalSync _forceGlobalSync;
 
   AdminBloc({
     required GetAdminDashboard getAdminDashboard,
     required GetAdminMetrics getAdminMetrics,
     required GetAdminAuditLogs getAdminAuditLogs,
-    required GenerateExecutiveReport generateExecutiveReport,
-    required ForceGlobalSync forceGlobalSync,
+    required usecases.GenerateExecutiveReport generateExecutiveReport,
+    required usecases.ForceGlobalSync forceGlobalSync,
   })  : _getAdminDashboard = getAdminDashboard,
         _getAdminMetrics = getAdminMetrics,
         _getAdminAuditLogs = getAdminAuditLogs,
@@ -50,7 +45,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
   ) async {
     emit(const AdminLoading());
     
-    final result = await _getAdminDashboard();
+    final result = await _getAdminDashboard(NoParams());
     
     result.fold(
       (failure) => emit(AdminError(_mapFailureToMessage(failure))),
@@ -65,7 +60,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     if (state is AdminDashboardLoaded) {
       final currentState = state as AdminDashboardLoaded;
       
-      final result = await _getAdminMetrics(event.metricsType);
+      final result = await _getAdminMetrics(GetAdminMetricsParams(metricsType: event.metricsType));
       
       result.fold(
         (failure) => emit(AdminError(_mapFailureToMessage(failure))),
@@ -84,11 +79,11 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     if (state is AdminDashboardLoaded) {
       final currentState = state as AdminDashboardLoaded;
       
-      final result = await _getAdminAuditLogs(
+      final result = await _getAdminAuditLogs(GetAdminAuditLogsParams(
         startDate: event.startDate,
         endDate: event.endDate,
         logType: event.logType,
-      );
+      ));
       
       result.fold(
         (failure) => emit(AdminError(_mapFailureToMessage(failure))),
@@ -109,10 +104,10 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       
       emit(AdminGeneratingReport(currentState.dashboardData));
       
-      final result = await _generateExecutiveReport(
+      final result = await _generateExecutiveReport(usecases.GenerateExecutiveReportParams(
         reportType: event.reportType,
         dateRange: event.dateRange,
-      );
+      ));
       
       result.fold(
         (failure) => emit(AdminError(_mapFailureToMessage(failure))),
@@ -133,7 +128,7 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
       
       emit(AdminSyncing(currentState.dashboardData));
       
-      final result = await _forceGlobalSync();
+      final result = await _forceGlobalSync(NoParams());
       
       result.fold(
         (failure) => emit(AdminError(_mapFailureToMessage(failure))),

@@ -41,17 +41,17 @@ class RemoteConfigService {
       _isInitialized = true;
       
       if (kDebugMode) {
-        print('✅ RemoteConfigService inicializado com sucesso');
-        print('📱 Feature flags carregadas:');
-        print('   - use_new_navigation_system: $useNewNavigationSystem');
-        print('   - enable_contextual_case_view: $enableContextualCaseView');
-        print('   - enable_b2b_matching: $enableB2BMatching');
-        print('   - enable_partnership_ai_suggestions: $enablePartnershipAISuggestions');
+        debugPrint('✅ RemoteConfigService inicializado com sucesso');
+        debugPrint('📱 Feature flags carregadas:');
+        debugPrint('   - use_new_navigation_system: $useNewNavigationSystem');
+        debugPrint('   - enable_contextual_case_view: $enableContextualCaseView');
+        debugPrint('   - enable_b2b_matching: $enableB2BMatching');
+        debugPrint('   - enable_partnership_ai_suggestions: $enablePartnershipAISuggestions');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Erro ao inicializar RemoteConfigService: $e');
-        print('📱 Usando valores padrão locais');
+        debugPrint('❌ Erro ao inicializar RemoteConfigService: $e');
+        debugPrint('📱 Usando valores padrão locais');
       }
       _isInitialized = false;
     }
@@ -64,11 +64,11 @@ class RemoteConfigService {
     try {
       await _remoteConfig!.fetchAndActivate();
       if (kDebugMode) {
-        print('🔄 Feature flags atualizadas');
+        debugPrint('🔄 Feature flags atualizadas');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Erro ao atualizar feature flags: $e');
+        debugPrint('❌ Erro ao atualizar feature flags: $e');
       }
     }
   }
@@ -83,7 +83,7 @@ class RemoteConfigService {
       return _remoteConfig!.getBool(key);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Erro ao buscar feature flag "$key": $e');
+        debugPrint('❌ Erro ao buscar feature flag "$key": $e');
       }
       return defaultValue;
     }
@@ -99,7 +99,7 @@ class RemoteConfigService {
       return _remoteConfig!.getString(key);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Erro ao buscar feature flag "$key": $e');
+        debugPrint('❌ Erro ao buscar feature flag "$key": $e');
       }
       return defaultValue;
     }
@@ -115,7 +115,7 @@ class RemoteConfigService {
       return _remoteConfig!.getInt(key);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Erro ao buscar feature flag "$key": $e');
+        debugPrint('❌ Erro ao buscar feature flag "$key": $e');
       }
       return defaultValue;
     }

@@ -39,7 +39,7 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: theme.dividerColor.withOpacity(0.2),
+          color: theme.dividerColor.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -133,10 +133,10 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         shape: BoxShape.circle,
         border: Border.all(
-          color: AppColors.primaryBlue.withOpacity(0.3),
+          color: AppColors.primaryBlue.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -159,10 +159,10 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
       children: badges.take(3).map((badge) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: _getBadgeColor(badge.source).withOpacity(0.15),
+          color: _getBadgeColor(badge.source).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _getBadgeColor(badge.source).withOpacity(0.3),
+            color: _getBadgeColor(badge.source).withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -186,14 +186,14 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
           Icon(
             LucideIcons.helpCircle,
             size: 14,
-            color: AppColors.primaryBlue.withOpacity(0.8),
+            color: AppColors.primaryBlue.withValues(alpha: 0.8),
           ),
           const SizedBox(width: 4),
           Expanded(
             child: Text(
               'Por que este escritório?',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.primaryBlue.withOpacity(0.8),
+                color: AppColors.primaryBlue.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
               ),
@@ -202,7 +202,7 @@ class _CompactFirmCardState extends State<CompactFirmCard> {
           Icon(
             _isExpanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
             size: 14,
-            color: AppColors.primaryBlue.withOpacity(0.8),
+            color: AppColors.primaryBlue.withValues(alpha: 0.8),
           ),
         ],
       ),

@@ -85,26 +85,3 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 } 
-              ListTile(
-                leading = const Icon(LucideIcons.helpCircle),
-                title = const Text('Ajuda e Suporte'),
-                subtitle = const Text('Encontre ajuda ou entre em contato conosco'),
-                onTap = () {
-                  // Abrir link de suporte
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading = Icon(LucideIcons.logOut, color: Colors.red.shade700),
-                title = Text('Sair', style: TextStyle(color: Colors.red.shade700)),
-                onTap = () {
-                  // Lógica de logout
-                },
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-} 

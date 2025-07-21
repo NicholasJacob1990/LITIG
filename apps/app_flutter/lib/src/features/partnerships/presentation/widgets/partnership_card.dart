@@ -184,7 +184,7 @@ class PartnershipCard extends StatelessWidget {
     return Chip(
       avatar: Icon(icon, size: 16, color: colorScheme.secondary),
       label: Text(text),
-      backgroundColor: colorScheme.secondaryContainer.withOpacity(0.3),
+      backgroundColor: colorScheme.secondaryContainer.withValues(alpha: 0.3),
       labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

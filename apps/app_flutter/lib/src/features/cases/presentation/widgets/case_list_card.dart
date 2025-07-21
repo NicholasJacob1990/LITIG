@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
+import 'package:meu_app/src/features/cases/domain/entities/case_extensions.dart';
+import 'package:meu_app/src/shared/constants/case_type_constants.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
 
 class CaseListCard extends StatelessWidget {
   final String caseId;
@@ -12,6 +17,7 @@ class CaseListCard extends StatelessWidget {
   final String preAnalysisDate;
   final LawyerInfo lawyer;
   final VoidCallback onPressPreAnalysis;
+  final Case? caseData; // Dados completos do caso para acessar o tipo
 
   const CaseListCard({
     super.key,
@@ -23,6 +29,7 @@ class CaseListCard extends StatelessWidget {
     required this.preAnalysisDate,
     required this.lawyer,
     required this.onPressPreAnalysis,
+    this.caseData,
   });
 
   @override
@@ -56,23 +63,29 @@ class CaseListCard extends StatelessWidget {
   }
 
   Widget _buildCardHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        // Indicador de tipo compacto
+        if (caseData?.caseType != null)
+          _buildListTypeIndicator(),
+        // Status adaptativo
         Chip(
-          label: Text(status),
+          label: Text(_getStatusDisplayText()),
           backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
           labelStyle: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold),
           side: BorderSide.none,
           padding: const EdgeInsets.symmetric(horizontal: 8),
         ),
+        // Tipo de cliente
         Chip(
-          avatar: Icon(clientType == 'PF' ? Icons.person : Icons.business, size: 16),
+          avatar: Icon(clientType == 'PF' ? LucideIcons.user : LucideIcons.building, size: 16),
           label: Text(clientType == 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica'),
           backgroundColor: Colors.grey[200],
           side: BorderSide.none,
-                    ),
-                  ],
+        ),
+      ],
     );
   }
 
@@ -147,5 +160,43 @@ class CaseListCard extends StatelessWidget {
       default:
         return Colors.grey.shade700;
     }
+  }
+
+  // Indicador de tipo compacto para lista
+  Widget _buildListTypeIndicator() {
+    if (caseData?.caseType == null) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: caseData!.typeColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: caseData!.typeColor.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(caseData!.typeIcon, size: 10, color: caseData!.typeColor),
+          const SizedBox(width: 4),
+          Text(
+            caseData!.typeDisplayName,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+              color: caseData!.typeColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Status adaptativo
+  String _getStatusDisplayText() {
+    final statusMapping = CaseTypeConstants.getStatusMapping(caseData?.caseType);
+    return statusMapping[status] ?? status;
   }
 } 

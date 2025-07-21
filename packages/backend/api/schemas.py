@@ -204,7 +204,7 @@ class LawyerSearchRequest(BaseModel):
     filter_by_quality: Optional[str] = None
     filter_by_uf: Optional[str] = None
     sort_by: Optional[str] = None
-    sort_order: str = Field("desc", regex="^(asc|desc)$")
+    sort_order: str = Field("desc", pattern="^(asc|desc)$")
 
 class DataAuditRequest(BaseModel):
     """Request para auditoria de dados."""
@@ -346,6 +346,19 @@ class ComplexidadeCaso(str, Enum):
     HIGH = "HIGH"
 
 
+class TipoCaso(str, Enum):
+    """Tipos de caso baseados na natureza jurídica"""
+    CONSULTANCY = "consultancy"          # Consultoria
+    LITIGATION = "litigation"           # Contencioso
+    CONTRACT = "contract"               # Contratos
+    COMPLIANCE = "compliance"           # Compliance
+    DUE_DILIGENCE = "due_diligence"    # Due Diligence
+    MA = "ma"                          # M&A
+    IP = "ip"                          # Propriedade Intelectual
+    CORPORATE = "corporate"            # Societário
+    CUSTOM = "custom"                  # Personalizado
+
+
 class PresetPesos(str, Enum):
     """Presets de pesos para o algoritmo"""
     FAST = "fast"
@@ -386,6 +399,8 @@ class CaseRequestSchema(BaseModel):
         ComplexidadeCaso.MEDIUM, description="Complexidade estimada")
     estimated_value: Optional[float] = Field(
         None, ge=0, description="Valor estimado da causa (R$)")
+    case_type: Optional[TipoCaso] = Field(
+        None, description="Tipo de caso (gerado automaticamente pela IA se não fornecido)")
 
     class Config:
         schema_extra = {
@@ -400,7 +415,8 @@ class CaseRequestSchema(BaseModel):
                     "longitude": -46.6333
                 },
                 "complexity": "MEDIUM",
-                "estimated_value": 25000.0
+                "estimated_value": 25000.0,
+                "case_type": "litigation"
             }
         }
 
@@ -517,6 +533,7 @@ class MatchResponseSchema(BaseModel):
     weights_used: Dict[str, float] = Field(...,
                                            description="Pesos utilizados no algoritmo")
     case_complexity: ComplexidadeCaso = Field(..., description="Complexidade detectada")
+    case_type: Optional[TipoCaso] = Field(None, description="Tipo de caso identificado pela IA")
 
     # (v2.6) Dados do A/B Test
     ab_test_group: Optional[str] = Field(
@@ -546,7 +563,9 @@ class MatchResponseSchema(BaseModel):
                 ],
                 "total_lawyers_evaluated": 147,
                 "algorithm_version": "v2.2",
-                "execution_time_ms": 245.6
+                "execution_time_ms": 245.6,
+                "case_complexity": "MEDIUM",
+                "case_type": "litigation"
             }
         }
 
@@ -634,11 +653,27 @@ class EquityDataUpdate(BaseModel):
 
 class CaseCreate(BaseModel):
     description: str
+    case_type: Optional[TipoCaso] = Field(
+        None, description="Tipo de caso (opcional, gerado automaticamente pela IA se não fornecido)")
+    area: Optional[AreaJuridica] = Field(
+        None, description="Área jurídica")
+    subarea: Optional[str] = Field(
+        None, description="Subárea específica")
 
 
 class CaseSchema(BaseModel):
     id: str
     client_id: str
+    case_type: Optional[TipoCaso] = Field(
+        None, description="Tipo de caso")
+    area: Optional[AreaJuridica] = Field(
+        None, description="Área jurídica")
+    subarea: Optional[str] = Field(
+        None, description="Subárea específica")
+    status: Optional[str] = Field(
+        None, description="Status do caso")
+    created_at: Optional[datetime] = Field(
+        None, description="Data de criação")
 
 
 class CaseOutcome(str, Enum):

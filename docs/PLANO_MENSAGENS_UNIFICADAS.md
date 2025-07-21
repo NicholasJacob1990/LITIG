@@ -1,4 +1,4 @@
-# 📋 PLANO COMPLETO: INTEGRAÇÃO DE MENSAGENS UNIFICADAS
+2# 📋 PLANO COMPLETO: INTEGRAÇÃO DE MENSAGENS UNIFICADAS
 
 ## **🎯 OBJETIVO ESTRATÉGICO**
 
@@ -1061,6 +1061,34 @@ void main() {
 }
 ```
 
+
+## **📋 FASE 7: CALENDÁRIOS E FINALIZAÇÃO**
+
+### **7.1 Conclusão da Implementação de Calendários**
+- ✅ Widget de calendário Flutter
+- ✅ Sincronização de eventos
+- ✅ Notificações de lembrete
+
+### **7.2 Otimizações e Performance**
+- ✅ Cache de mensagens
+- ✅ Paginação de chats
+- ✅ Compressão de imagens
+
+### **7.3 Documentação Final**
+- ✅ Documentação de API
+- ✅ Guia de usuário
+- ✅ Deployment
+
+**📝 NOTA IMPORTANTE:**
+As funcionalidades de **gestão de perfis e posts** mencionadas anteriormente foram realocadas para serem implementadas como parte da **aba de perfil dos usuários**, proporcionando uma melhor organização e experiência de usuário. Essas funcionalidades incluem:
+
+- Gestão de perfis sociais (LinkedIn, Instagram)
+- Visualização e interação com posts
+- Sistema de convites e conexões
+- Analytics de engajamento social
+
+Essas funcionalidades serão desenvolvidas separadamente no módulo de perfis de usuário para manter a separação clara entre mensagens unificadas e recursos de gestão social.
+
 ---
 
 ## **📋 CRONOGRAMA DE IMPLEMENTAÇÃO**
@@ -1083,44 +1111,51 @@ void main() {
 - ✅ Notificações push
 
 ### **🗓️ Fase 4: Calendários (Semana 6)**
-- ✅ Integração Google Calendar
-- ✅ Integração Outlook Calendar
-- ✅ Widget de calendário
 
-### **🗓️ Fase 5: Polimento (Semana 7)**
-- ✅ Testes completos
-- ✅ Documentação
+### **🗓️ Fase 5: Otimização (Semana 7)**
+- ✅ Cache e performance
+- ✅ Testes de carga
+- ✅ Polimento de UX
+
+### **🗓️ Fase 6: Documentação (Semana 8)**
+- ✅ Documentação técnica
+- ✅ Guias de usuário
 - ✅ Deploy em produção
 
 ---
+
+## **2️⃣ Aplicações para Cenários B2B (Expandido)**
+
+### **A. Para Clientes e Fornecedores (cliente ↔ fornecedor)**
+
+*   **Onboarding de oferta**: via **Invitations** e **Posts**, enviar convites de demonstração ou propostas diretamente no LinkedIn ou e‑mail.
+*   **Suporte em tempo real**: usar **Messaging** para chat 1:1 com fornecedores, centralizando LinkedIn, Messenger e Gmail num único painel.
+*   **Notificações e alertas**: criar **Webhooks** para receber updates de status de contas e mensagens críticas em tempo real.
+*   **Compartilhamento de documentos**: enviar anexos via **Messaging** e **Emails**, mantendo histórico e rastreabilidade.
+
+### **B. Entre Fornecedores (fornecedor ↔ fornecedor)**
+
+*   **Sincronização de projetos**: usar **Calendários** para agendar reuniões e sincronizar eventos entre times de diferentes empresas.
+*   **Base de contatos**: extrair **perfis completos** de LinkedIn (experiência, certificações) para validar credenciais dos parceiros.
+*   **Marketplace de serviços**: publicar e listar **job-postings** no LinkedIn, recebendo candidaturas diretamente no CRM via Unipile.
+*   **Customização avançada**: usar a rota **raw** para implementar integrações não convencionais ou acessar endpoints emergentes do LinkedIn.
 
 ## **🎯 RESULTADO ESPERADO**
 
 ### **✅ Funcionalidades Implementadas:**
 - ✅ **Chat Unificado**: Todas as mensagens em uma interface
 - ✅ **Múltiplos Provedores**: LinkedIn, Instagram, WhatsApp, Gmail, Outlook
-- ✅ **Calendários Integrados**: Google e Outlook
-- ✅ **Notificações Push**: Tempo real
-- ✅ **Sincronização**: Webhooks automáticos
-- ✅ **Interface Responsiva**: Flutter nativo
+- ✅ **Gestão de Perfis**: Visualização de perfis e conexões
+- ✅ **Gestão de Publicações**: Interação com posts e convites
 
 ### **📊 Métricas de Sucesso:**
 - ✅ **Redução de 80%** no tempo de resposta
-- ✅ **Centralização** de todas as comunicações
-- ✅ **Experiência unificada** para usuários
-- ✅ **Escalabilidade** para novos provedores
+- ✅ **Aumento de 30%** no engajamento B2B através de interações sociais
 
----
 
 ## **🔗 REFERÊNCIAS**
 
-- [Unipile Documentation](https://developer.unipile.com/docs)
-- [Firebase Flutter Social Auth](https://firebase.flutter.dev/docs/auth/social/)
-- [Instagram API Guide](https://www.unipile.com/instagram-profile-api-a-complete-developers-guide-to-smarter-integration-with-unipile/)
-- [LinkedIn Messaging API](https://developer.unipile.com/reference/linkedincontroller_getrawdata) 
-- https://developer.unipile.com/reference/linkedincontroller_search
-- https://developer.unipile.com/reference/linkedincontroller_getsearchparameterslist
-- https://developer.unipile.com/reference/linkedincontroller_endorseprofile
+- [LinkedIn Messaging API](https://developer.unipile.com/reference/linkedincontroller_getrawdata)
 - https://developer.unipile.com/reference/linkedincontroller_getcompanyprofile
 - https://developer.unipile.com/reference/linkedincontroller_performactiononmember
 - https://developer.unipile.com/reference/mailscontroller_listmails
@@ -1143,6 +1178,6 @@ void main() {
 - https://developer.unipile.com/reference/chatscontroller_startnewchat
 - https://developer.unipile.com/reference/chatscontroller_getchat
 - https://developer.unipile.com/reference/chatscontroller_patchchat
-- https://developer.unipile.com/reference/chatscontroller_listchatmessages
-- https://developer.unipile.com/reference/chatscontroller_sendmessageinchat
-- https://developer.unipile.com/reference/chatscontroller_listattendees
+- https://developer.unipile.com/reference/userscontroller_getprofilebyidentifier
+- https://developer.unipile.com/reference/userscontroller_getfollowers
+- https://developer.unipile.com/reference/linkedincontroller_getrawdata

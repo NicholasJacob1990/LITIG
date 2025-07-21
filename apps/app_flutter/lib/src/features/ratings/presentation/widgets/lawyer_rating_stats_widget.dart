@@ -53,7 +53,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -118,7 +118,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.success.withOpacity(0.1),
+              color: AppColors.success.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
@@ -185,10 +185,10 @@ class LawyerRatingStatsWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -285,7 +285,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -293,7 +293,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -347,7 +347,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
       width: 60,
       height: 8,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(4),
       ),
       child: FractionallySizedBox(
@@ -404,7 +404,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: FractionallySizedBox(
@@ -426,7 +426,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
                     '${(percentage * 100).toInt()}%',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.end,
                   ),
@@ -437,7 +437,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
                   child: Text(
                     '$count',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -455,7 +455,7 @@ class LawyerRatingStatsWidget extends StatelessWidget {
       width: 60,
       height: 60,
       decoration: BoxDecoration(
-        color: _getRatingColor(stats.overallRating).withOpacity(0.1),
+        color: _getRatingColor(stats.overallRating).withValues(alpha: 0.1),
         shape: BoxShape.circle,
         border: Border.all(
           color: _getRatingColor(stats.overallRating),

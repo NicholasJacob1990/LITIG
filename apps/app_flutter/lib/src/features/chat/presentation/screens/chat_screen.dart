@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../bloc/chat_bloc.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/chat_message_bubble.dart';
-import '../../../../injection_container.dart';
+import 'package:meu_app/injection_container.dart';
 
 class ChatScreen extends StatefulWidget {
   final String roomId;

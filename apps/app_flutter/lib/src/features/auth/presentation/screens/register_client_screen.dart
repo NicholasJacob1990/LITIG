@@ -406,4 +406,4 @@ class PhoneInputFormatter extends TextInputFormatter {
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
     );
-  }
+  }}

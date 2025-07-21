@@ -11,7 +11,8 @@ import '../error/exceptions.dart';
 
 class ApiService {
   static final Dio _dio = Dio();
-  static final SupabaseClient _supabase = Supabase.instance.client;
+  // TODO: Implement Supabase integration
+  // static final SupabaseClient _supabase = Supabase.instance.client;
 
   static String get _baseUrl {
     // Debug logs para verificar a detecção de plataforma

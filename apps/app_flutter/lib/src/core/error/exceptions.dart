@@ -49,6 +49,14 @@ class NotFoundException implements Exception {
   String toString() => 'NotFoundException: Recurso não encontrado - $resource';
 }
 
+/// Exceção de rede para problemas de conectividade
+class NetworkException implements Exception {
+  NetworkException();
+
+  @override
+  String toString() => 'NetworkException: Erro de conectividade de rede';
+}
+
 /// Representa uma exceção para falhas de autenticação (HTTP 401).
 class AuthenticationException implements Exception {
   final String message;
@@ -80,7 +88,6 @@ class ConnectionException implements Exception {
 } 
 
 /// Exceção para erros de comunicação com a API
-class NetworkException implements Exception {}
 
 /// Exceção para quando o cache falha
 class CacheException implements Exception {} 

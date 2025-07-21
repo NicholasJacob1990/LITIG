@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_hiring_bloc.dart';
-import 'package:meu_app/src/injection_container.dart';
-import 'package:meu_app/src/features/lawyers/domain/usecases/hire_lawyer_params.dart';
+import 'package:meu_app/injection_container.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/hire_lawyer.dart';
 
 class LawyerHiringModal extends StatefulWidget {
   final MatchedLawyer lawyer;
@@ -35,12 +35,12 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<LawyerHiringBloc>(
       create: (context) => getIt<LawyerHiringBloc>(),
       child: Dialog(
         // Melhoria de acessibilidade: adicionar semantics para screen readers
         child: Semantics(
-          label: 'Modal de contratação de advogado ${widget.lawyer.name}',
+          label: 'Modal de contratação de advogado ${widget.lawyer.nome}',
           child: Container(
             width: 500,
             padding: const EdgeInsets.all(24),
@@ -95,10 +95,10 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundImage: widget.lawyer.photo != null
-                ? NetworkImage(widget.lawyer.photo!)
+            backgroundImage: widget.lawyer.avatarUrl.isNotEmpty
+                ? NetworkImage(widget.lawyer.avatarUrl)
                 : null,
-            child: widget.lawyer.photo == null
+            child: widget.lawyer.avatarUrl.isEmpty
                 ? const Icon(Icons.person)
                 : null,
           ),
@@ -108,21 +108,21 @@ class _LawyerHiringModalState extends State<LawyerHiringModal> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.lawyer.name,
+                  widget.lawyer.nome,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text('OAB: ${widget.lawyer.oabNumber}'),
-                Text('${widget.lawyer.specialty}'),
+                Text('Área: ${widget.lawyer.primaryArea}'),
+                Text('Experiência: ${widget.lawyer.experienceYears ?? 'N/I'} anos'),
                 Row(
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 16),
-                    Text(' ${widget.lawyer.rating.toStringAsFixed(1)}'),
+                    Text(' ${widget.lawyer.rating?.toStringAsFixed(1) ?? 'N/A'}'),
                     const SizedBox(width: 16),
                     const Icon(Icons.location_on, size: 16),
-                    Text(' ${widget.lawyer.distance.toStringAsFixed(1)} km'),
+                    Text(' ${widget.lawyer.distanceKm.toStringAsFixed(1)} km'),
                   ],
                 ),
               ],

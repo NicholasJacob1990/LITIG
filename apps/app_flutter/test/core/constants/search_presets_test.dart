@@ -29,7 +29,7 @@ void main() {
         );
       }
       
-      print('✅ Validação de presets: ${result.summary}');
+      // Validação de presets: ${result.summary}
     });
 
     test('should validate individual presets', () {

@@ -7,6 +7,8 @@ import 'package:meu_app/src/features/offers/presentation/bloc/offers_state.dart'
 import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_hiring_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/hiring_proposals_screen.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_state.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_event.dart';
 import 'package:meu_app/src/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:meu_app/injection_container.dart';
 import '../widgets/case_offer_card.dart';
@@ -72,7 +74,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
         bottom: TabBar(
           controller: _mainTabController,
           labelColor: Theme.of(context).colorScheme.onPrimary,
-          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
           indicatorColor: Theme.of(context).colorScheme.onPrimary,
           tabs: [
             BlocBuilder<OffersBloc, OffersState>(
@@ -197,7 +199,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
                   IconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: () {
-                      context.read<PartnershipsBloc>().add(const LoadPartnerships());
+                      context.read<PartnershipsBloc>().add(LoadPartnerships());
                     },
                   ),
                 ],
@@ -245,7 +247,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            context.read<PartnershipsBloc>().add(const LoadPartnerships());
+                            context.read<PartnershipsBloc>().add(LoadPartnerships());
                           },
                           child: const Text('Tentar Novamente'),
                         ),
@@ -379,7 +381,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, color: color, size: 20),
@@ -517,7 +519,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -593,7 +595,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -690,7 +692,7 @@ class _PendingOffersTab extends StatelessWidget {
 }
 
 class _PendingPartnershipsTab extends StatelessWidget {
-  final List<Partnership> partnerships;
+  final List<dynamic> partnerships; // TODO: Define Partnership type
   const _PendingPartnershipsTab({required this.partnerships});
 
   @override
@@ -705,7 +707,7 @@ class _PendingPartnershipsTab extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<PartnershipsBloc>().add(LoadPartnershipsData());
+        context.read<PartnershipsBloc>().add(LoadPartnerships());
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -753,10 +755,10 @@ class _PendingPartnershipsTab extends StatelessWidget {
     );
   }
 
-  Future<void> _acceptPartnership(BuildContext context, Partnership partnership) async {
+  Future<void> _acceptPartnership(BuildContext context, dynamic partnership) async { // TODO: Define Partnership type
     final result = await showDialog<bool>(
       context: context,
-      builder: (_) => AcceptPartnershipDialog(partnership: partnership),
+      builder: (_) => _buildAcceptPartnershipDialog(partnership, context),
     );
 
     if (result == true && context.mounted) {
@@ -764,15 +766,67 @@ class _PendingPartnershipsTab extends StatelessWidget {
     }
   }
 
-  Future<void> _rejectPartnership(BuildContext context, Partnership partnership) async {
+  Future<void> _rejectPartnership(BuildContext context, dynamic partnership) async { // TODO: Define Partnership type
     final reason = await showDialog<String>(
       context: context,
-      builder: (_) => RejectPartnershipDialog(partnership: partnership),
+      builder: (_) => _buildRejectPartnershipDialog(partnership, context),
     );
 
     if (reason != null && context.mounted) {
       context.read<PartnershipsBloc>().add(RejectPartnership(partnershipId: partnership.id, reason: reason));
     }
+  }
+
+  Widget _buildAcceptPartnershipDialog(dynamic partnership, BuildContext context) {
+    return AlertDialog(
+      title: const Text('Aceitar Parceria'),
+      content: Text('Deseja aceitar a proposta de parceria de ${partnership.clientName}?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Aceitar'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRejectPartnershipDialog(dynamic partnership, BuildContext context) {
+    final reasonController = TextEditingController();
+    
+    return AlertDialog(
+      title: const Text('Rejeitar Parceria'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Deseja rejeitar a proposta de parceria de ${partnership.clientName}?'),
+          const SizedBox(height: 16),
+          TextField(
+            controller: reasonController,
+            decoration: const InputDecoration(
+              labelText: 'Motivo (opcional)',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(null),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(
+            reasonController.text.isEmpty ? 'Não especificado' : reasonController.text,
+          ),
+          child: const Text('Rejeitar'),
+        ),
+      ],
+    );
   }
 }
 

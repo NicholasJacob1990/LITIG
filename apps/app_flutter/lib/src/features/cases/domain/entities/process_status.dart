@@ -13,6 +13,15 @@ class ProcessStatus extends Equatable {
     required this.phases,
   });
 
+  factory ProcessStatus.fromJson(Map<String, dynamic> json) {
+    return ProcessStatus(
+      currentPhase: json['current_phase'] ?? '',
+      description: json['description'] ?? '',
+      progressPercentage: (json['progress_percentage'] as num?)?.toDouble() ?? 0.0,
+      phases: (json['phases'] as List?)?.map((p) => ProcessPhase.fromJson(p)).toList() ?? [],
+    );
+  }
+
   @override
   List<Object?> get props => [currentPhase, description, progressPercentage, phases];
 }
@@ -34,6 +43,17 @@ class ProcessPhase extends Equatable {
     this.documents = const [],
   });
 
+  factory ProcessPhase.fromJson(Map<String, dynamic> json) {
+    return ProcessPhase(
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      isCompleted: json['is_completed'] ?? false,
+      isCurrent: json['is_current'] ?? false,
+      completedAt: json['completed_at'] != null ? DateTime.parse(json['completed_at']) : null,
+      documents: (json['documents'] as List?)?.map((d) => PhaseDocument.fromJson(d)).toList() ?? [],
+    );
+  }
+
   @override
   List<Object?> get props => [name, description, isCompleted, isCurrent, completedAt, documents];
 }
@@ -46,6 +66,13 @@ class PhaseDocument extends Equatable {
     required this.name,
     required this.url,
   });
+
+  factory PhaseDocument.fromJson(Map<String, dynamic> json) {
+    return PhaseDocument(
+      name: json['name'] ?? '',
+      url: json['url'] ?? '',
+    );
+  }
 
   @override
   List<Object?> get props => [name, url];

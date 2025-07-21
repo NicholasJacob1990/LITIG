@@ -273,25 +273,4 @@ class LawyerMatchCard extends StatelessWidget {
       ],
     );
   }
-}   Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: iconColor ?? theme.textTheme.bodySmall?.color),
-        const SizedBox(width: 4),
-        Text(label, style: theme.textTheme.bodySmall),
-      ],
-    );
-  }
-} 
-  Widget _buildInfoChip(BuildContext context, {required IconData icon, required String label, Color? iconColor}) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: iconColor ?? theme.textTheme.bodySmall?.color),
-        const SizedBox(width: 4),
-        Text(label, style: theme.textTheme.bodySmall),
-      ],
-    );
-  }
-} 
+}

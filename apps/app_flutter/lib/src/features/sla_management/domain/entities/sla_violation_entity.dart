@@ -670,22 +670,6 @@ class SlaViolationEntity extends Equatable {
 }
 
 /// Tipos de violação de SLA
-enum SlaViolationType {
-  /// Violação simples - atraso no prazo
-  simple,
-  
-  /// Violação com escalação - atraso com escalação automática
-  escalated,
-  
-  /// Violação crítica - atraso em caso crítico
-  critical,
-  
-  /// Violação recorrente - múltiplas violações do mesmo advogado/caso
-  recurring,
-  
-  /// Violação sistêmica - problema no sistema/processo
-  systemic,
-}
 
 /// Níveis de impacto da violação
 enum SlaViolationImpact {

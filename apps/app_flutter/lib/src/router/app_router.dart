@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/features/auth/presentation/screens/login_screen.dart';
@@ -14,6 +15,7 @@ import 'package:meu_app/src/features/cases/presentation/screens/case_detail_scre
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/partners_screen.dart';
+import 'package:meu_app/src/features/lawyers/presentation/screens/lawyers_screen.dart';
 
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -131,7 +133,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           // 8: Advogado Contratante - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-offers', builder: (context, state) => const OffersScreen())]),
           // 9: Advogado Contratante - Parceiros
-          StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const LawyersScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const PartnersScreen())]),
           // 10: Advogado Contratante - Parcerias
           StatefulShellBranch(
             routes: [
@@ -249,10 +251,13 @@ GoRouter appRouter(AuthBloc authBloc) {
           final extra = state.extra as Map<String, dynamic>?;
           
           return VideoCallScreen(
-            roomName: roomName,
-            roomUrl: extra?['roomUrl'] ?? 'https://litig.daily.co/$roomName',
-            userId: extra?['userId'] ?? 'anonymous',
-            otherPartyName: extra?['otherPartyName'],
+            roomId: roomName,
+            userName: extra?['userName'],
+            callConfig: {
+              'roomUrl': extra?['roomUrl'] ?? 'https://litig.daily.co/$roomName',
+              'userId': extra?['userId'] ?? 'anonymous',
+              'otherPartyName': extra?['otherPartyName'],
+            },
           );
         },
       ),
@@ -284,7 +289,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           final authState = authBloc.state;
           if (authState is auth_states.Authenticated) {
             final userRole = authState.user.role;
-            if (!AdminAuthService.canAccessRoute(userRole, '/admin')) {
+            if (!AdminAuthService.canAccessRoute(userRole ?? '', '/admin')) {
               return _buildAccessDeniedScreen(context);
             }
           }
@@ -303,7 +308,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           final authState = authBloc.state;
           if (authState is auth_states.Authenticated) {
             final userRole = authState.user.role;
-            if (!AdminAuthService.canAccessRoute(userRole, '/admin/metrics')) {
+            if (!AdminAuthService.canAccessRoute(userRole ?? '', '/admin/metrics')) {
               return _buildAccessDeniedScreen(context);
             }
           }
@@ -322,7 +327,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           final authState = authBloc.state;
           if (authState is auth_states.Authenticated) {
             final userRole = authState.user.role;
-            if (!AdminAuthService.canAccessRoute(userRole, '/admin/audit')) {
+            if (!AdminAuthService.canAccessRoute(userRole ?? '', '/admin/audit')) {
               return _buildAccessDeniedScreen(context);
             }
           }
@@ -341,7 +346,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           final authState = authBloc.state;
           if (authState is auth_states.Authenticated) {
             final userRole = authState.user.role;
-            if (!AdminAuthService.canAccessRoute(userRole, '/admin/reports')) {
+            if (!AdminAuthService.canAccessRoute(userRole ?? '', '/admin/reports')) {
               return _buildAccessDeniedScreen(context);
             }
           }
@@ -360,7 +365,7 @@ GoRouter appRouter(AuthBloc authBloc) {
           final authState = authBloc.state;
           if (authState is auth_states.Authenticated) {
             final userRole = authState.user.role;
-            if (!AdminAuthService.canAccessRoute(userRole, '/admin/settings')) {
+            if (!AdminAuthService.canAccessRoute(userRole ?? '', '/admin/settings')) {
               return _buildAccessDeniedScreen(context);
             }
           }
@@ -388,7 +393,7 @@ Widget _buildAccessDeniedScreen(BuildContext context) {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            LucideIcons.shieldX,
+            LucideIcons.shieldOff,
             size: 64,
             color: Colors.red.withValues(alpha: 0.5),
           ),

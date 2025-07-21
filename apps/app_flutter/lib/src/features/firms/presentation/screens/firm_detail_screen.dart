@@ -149,7 +149,7 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -355,7 +355,7 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -471,7 +471,7 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
             Icon(
               Icons.people_outline,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -498,7 +498,7 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
             Icon(
               Icons.people_outline,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -528,7 +528,7 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
           backgroundImage: lawyer.avatarUrl != null
               ? NetworkImage(lawyer.avatarUrl!)
               : null,
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+          backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
           child: lawyer.avatarUrl == null
               ? Icon(
                   Icons.person,
@@ -568,30 +568,6 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
         trailing: IconButton(
           icon: const Icon(Icons.arrow_forward_ios),
           onPressed: () {
-            // Implementar navegação para perfil do advogado
-          },
-        ),
-      ),
-    );
-  }
-} 
-          ],
-        ),
-        trailing: IconButton(
-          icon = const Icon(Icons.arrow_forward_ios),
-          onPressed = () {
-            // Implementar navegação para perfil do advogado
-          },
-        ),
-      ),
-    );
-  }
-} 
-          ],
-        ),
-        trailing: IconButton(
-          icon = const Icon(Icons.arrow_forward_ios),
-          onPressed = () {
             // Implementar navegação para perfil do advogado
           },
         ),

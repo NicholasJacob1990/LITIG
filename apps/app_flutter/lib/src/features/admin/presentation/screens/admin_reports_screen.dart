@@ -98,13 +98,13 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.fileText,
             size: 32,
             color: AppColors.primaryBlue,
@@ -301,7 +301,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getReportTypeColor(type).withOpacity(0.1),
+          backgroundColor: _getReportTypeColor(type).withValues(alpha: 0.1),
           child: Icon(
             _getReportTypeIcon(type),
             color: _getReportTypeColor(type),
@@ -443,7 +443,10 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   }
 
   void _generateReport(BuildContext context, String reportType) {
-    context.read<AdminBloc>().add(GenerateExecutiveReport());
+    context.read<AdminBloc>().add(GenerateExecutiveReport(
+      reportType: reportType,
+      dateRange: {'month': DateTime.now().month},
+    ));
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -586,7 +589,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           Icon(
             LucideIcons.checkCircle,
             size: 64,
-            color: Colors.green.withOpacity(0.5),
+            color: Colors.green.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -631,7 +634,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -646,7 +649,10 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => context.read<AdminBloc>().add(GenerateExecutiveReport()),
+            onPressed: () => context.read<AdminBloc>().add(const GenerateExecutiveReport(
+              reportType: 'executive',
+              dateRange: {'month': 11},
+            )),
             icon: const Icon(LucideIcons.refreshCw),
             label: const Text('Tentar Novamente'),
           ),

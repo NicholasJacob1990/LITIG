@@ -64,7 +64,7 @@ class HiringProposalCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: _getStatusColor(proposal.status).withOpacity(0.1),
+            color: _getStatusColor(proposal.status).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -447,10 +447,10 @@ class HiringProposalCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _getStatusColor(proposal.status).withOpacity(0.1),
+        color: _getStatusColor(proposal.status).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _getStatusColor(proposal.status).withOpacity(0.3),
+          color: _getStatusColor(proposal.status).withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -493,7 +493,7 @@ class HiringProposalCard extends StatelessWidget {
   }
 
   Color _getBorderColor(String status) {
-    return _getStatusColor(status).withOpacity(0.3);
+    return _getStatusColor(status).withValues(alpha: 0.3);
   }
 
   IconData _getStatusIcon(String status) {

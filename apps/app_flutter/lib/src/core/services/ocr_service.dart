@@ -1,14 +1,11 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/material.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:cpf_cnpj_validator/cpf_validator.dart';
 import 'package:cpf_cnpj_validator/cnpj_validator.dart';
 import '../utils/logger.dart';
+import 'ocr_service_stub.dart';
 
 /// Resultado da extração de texto OCR
 class OCRResult {
@@ -83,18 +80,9 @@ class OCRService {
   Future<void> initialize() async {
     try {
       _textRecognizer = TextRecognizer();
+      _documentScanner = DocumentScanner();
       
-      // Configurar scanner de documentos
-      final options = DocumentScannerOptions(
-        documentFormat: DocumentFormat.all,
-        mode: ScannerMode.full,
-        isGalleryImport: true,
-        pageLimit: 10,
-        resultFormats: [ResultFormat.jpeg, ResultFormat.pdf],
-      );
-      _documentScanner = DocumentScanner(options: options);
-      
-      AppLogger.success('OCR Service inicializado com sucesso');
+      AppLogger.success('OCR Service inicializado com sucesso (modo stub)');
     } catch (e) {
       AppLogger.error('Erro ao inicializar OCR Service', error: e);
       rethrow;
@@ -106,7 +94,7 @@ class OCRService {
     try {
       final result = await _documentScanner.scanDocument();
       if (result.images.isNotEmpty) {
-        return result.images;
+        return result.images.map((imagePath) => File(imagePath)).toList();
       }
       return null;
     } catch (e) {

@@ -98,6 +98,9 @@ class HybridMatchLoaded extends HybridMatchState {
     this.mixedRendering = false,
   });
 
+  // Getter para compatibilidade
+  List<MatchedLawyer> get matches => lawyers;
+
   @override
   List<Object?> get props => [lawyers, firms, mixedRendering];
 }

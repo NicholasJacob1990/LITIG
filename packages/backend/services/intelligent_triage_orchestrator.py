@@ -17,6 +17,7 @@ from ..models import MatchRequest
 from ..models.triage_result import TriageResult, OrchestrationResult
 from ..models.strategy import Strategy
 from ..core.embedding_utils import generate_embedding
+from ..utils.case_type_mapper import map_area_to_case_type
 
 
 @dataclass
@@ -295,6 +296,22 @@ class IntelligentTriageOrchestrator:
             except Exception as e:
                 print(f"Erro ao aplicar melhorias LEX-9000: {e}")
 
+        # NOVO: Adicionar case_type baseado na área jurídica
+        area = triage_data.get("area")
+        subarea = triage_data.get("subarea")
+        keywords = triage_data.get("keywords", [])
+        summary = triage_data.get("summary")
+        nature = triage_data.get("nature")  # Pode vir do LEX-9000
+        
+        case_type = map_area_to_case_type(
+            area=area,
+            subarea=subarea,
+            keywords=keywords,
+            summary=summary,
+            nature=nature
+        )
+        triage_data["case_type"] = case_type
+        
         # Gerar embedding do resumo se disponível
         if "summary" in triage_data:
             embedding = await generate_embedding(triage_data["summary"])
@@ -362,6 +379,22 @@ class IntelligentTriageOrchestrator:
                 "conversation_optimized": True,
                 "source_strategy": "failover"
             }
+            
+            # NOVO: Adicionar case_type baseado na área jurídica
+            area = combined_data.get("area")
+            subarea = combined_data.get("subarea")
+            keywords = combined_data.get("keywords", [])
+            summary = combined_data.get("summary")
+            nature = combined_data.get("nature")
+            
+            case_type = map_area_to_case_type(
+                area=area,
+                subarea=subarea,
+                keywords=keywords,
+                summary=summary,
+                nature=nature
+            )
+            combined_data["case_type"] = case_type
 
             # Gerar embedding se necessário
             if "summary" in combined_data:
@@ -470,6 +503,27 @@ class IntelligentTriageOrchestrator:
                 }
                 print(
                     f"LEX-9000 analysis completed with confidence: {lex_analysis.confidence_score:.2f}")
+            
+            # NOVO: Adicionar case_type baseado na área jurídica
+            # Priorizar dados do LEX-9000 se disponível
+            area = combined_data.get("area")
+            subarea = combined_data.get("subarea")
+            keywords = combined_data.get("keywords", [])
+            summary = combined_data.get("summary")
+            nature = None
+            
+            # Se LEX-9000 analisou, usar a natureza dele
+            if lex_analysis and hasattr(lex_analysis, 'classificacao'):
+                nature = lex_analysis.classificacao.get('natureza')
+            
+            case_type = map_area_to_case_type(
+                area=area,
+                subarea=subarea,
+                keywords=keywords,
+                summary=summary,
+                nature=nature
+            )
+            combined_data["case_type"] = case_type
 
             # Gerar embedding
             if "summary" in combined_data:

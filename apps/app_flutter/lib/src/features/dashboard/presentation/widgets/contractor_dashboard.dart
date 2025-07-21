@@ -24,8 +24,17 @@ class ContractorDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bem-vindo, $userName'),
-        subtitle: Text(_getRoleDisplayName(userRole)),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Bem-vindo, $userName'),
+            Text(
+              _getRoleDisplayName(userRole),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.logOut),
@@ -191,9 +200,9 @@ class ContractorDashboard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: probabilityColor.withOpacity(0.1),
+                      color: probabilityColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: probabilityColor.withOpacity(0.3)),
+                      border: Border.all(color: probabilityColor.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '${opportunity['probability']}%',

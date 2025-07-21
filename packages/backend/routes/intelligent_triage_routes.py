@@ -82,6 +82,7 @@ class TriageResultResponse(BaseModel):
     conversation_summary: str
     processing_time_ms: int
     flow_type: str
+    case_type: Optional[str] = None
     analysis_details: Optional[Dict] = None
     timestamp: datetime = Field(default_factory=datetime.now)
 
@@ -246,6 +247,7 @@ async def get_triage_result(
             conversation_summary=result.conversation_summary,
             processing_time_ms=result.processing_time_ms,
             flow_type=result.flow_type,
+            case_type=result.triage_data.get("case_type"),
             analysis_details=result.analysis_details
         )
 
@@ -293,6 +295,7 @@ async def force_complete_conversation(
             conversation_summary=result.conversation_summary,
             processing_time_ms=result.processing_time_ms,
             flow_type=result.flow_type,
+            case_type=result.triage_data.get("case_type"),
             analysis_details=result.analysis_details
         )
 

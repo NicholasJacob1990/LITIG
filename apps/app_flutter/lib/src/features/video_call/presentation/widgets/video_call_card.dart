@@ -30,7 +30,7 @@ class VideoCallCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(room.status).withOpacity(0.1),
+                    color: _getStatusColor(room.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -62,7 +62,7 @@ class VideoCallCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(room.status).withOpacity(0.1),
+                    color: _getStatusColor(room.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -101,7 +101,7 @@ class VideoCallCard extends StatelessWidget {
             
             if (room.endedAt != null)
               _buildDetailRow(
-                icon: LucideIcons.stop,
+                icon: LucideIcons.stopCircle,
                 label: 'Encerrada em',
                 value: _formatDateTime(room.endedAt!),
               ),
@@ -215,7 +215,7 @@ class VideoCallCard extends StatelessWidget {
       case 'expired':
         return LucideIcons.alertTriangle;
       default:
-        return LucideIcons.help;
+        return LucideIcons.helpCircle;
     }
   }
 

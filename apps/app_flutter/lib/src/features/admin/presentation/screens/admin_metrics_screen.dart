@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/admin/presentation/bloc/admin_bloc.dart';
 import 'package:meu_app/src/features/admin/presentation/bloc/admin_event.dart';
 import 'package:meu_app/src/features/admin/presentation/bloc/admin_state.dart';
+import 'package:meu_app/src/features/admin/domain/entities/admin_metrics.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 
 /// Tela de Métricas Administrativas
@@ -20,7 +21,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AdminBloc>().add(const LoadAdminMetrics());
+    context.read<AdminBloc>().add(const LoadAdminMetrics(metricsType: 'system'));
   }
 
   @override
@@ -59,7 +60,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
     );
   }
 
-  Widget _buildMetricsContent(BuildContext context, List<AdminMetrics> metrics) {
+  Widget _buildMetricsContent(BuildContext context, AdminMetrics metrics) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -91,9 +92,9 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -197,9 +198,9 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,7 +239,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
     );
   }
 
-  Widget _buildMetricsCharts(BuildContext context, List<AdminMetrics> metrics) {
+  Widget _buildMetricsCharts(BuildContext context, AdminMetrics metrics) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -296,10 +297,10 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -339,7 +340,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
           Container(
             height: 200,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -349,13 +350,13 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
                   Icon(
                     LucideIcons.barChart3,
                     size: 48,
-                    color: color.withOpacity(0.5),
+                    color: color.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Gráfico $title',
                     style: TextStyle(
-                      color: color.withOpacity(0.7),
+                      color: color.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -383,7 +384,10 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => context.read<AdminBloc>().add(const GenerateExecutiveReport()),
+                onPressed: () => context.read<AdminBloc>().add(const GenerateExecutiveReport(
+                  reportType: 'metrics',
+                  dateRange: {'month': 11},
+                )),
                 icon: const Icon(LucideIcons.fileText),
                 label: const Text('Gerar Relatório'),
                 style: ElevatedButton.styleFrom(
@@ -420,7 +424,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -435,7 +439,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => context.read<AdminBloc>().add(const LoadAdminMetrics()),
+            onPressed: () => context.read<AdminBloc>().add(const LoadAdminMetrics(metricsType: 'system')),
             icon: const Icon(LucideIcons.refreshCw),
             label: const Text('Tentar Novamente'),
           ),
@@ -452,7 +456,7 @@ class _AdminMetricsScreenState extends State<AdminMetricsScreen> {
           Icon(
             LucideIcons.barChart3,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

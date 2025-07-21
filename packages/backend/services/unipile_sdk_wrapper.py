@@ -571,3 +571,370 @@ class UnipileSDKWrapper:
         except Exception as e:
             self.logger.error(f"Erro ao calcular score social: {e}")
             return None
+
+    # ========================================
+    # 📅 MÉTODOS DE CALENDÁRIO (NOVO v3.0)
+    # ========================================
+
+    async def list_calendars(self, account_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Lista todos os calendários de uma conta via SDK.
+        """
+        try:
+            result = await self._execute_node_command("list-calendars", account_id)
+            
+            if result.get("success", False):
+                self.logger.info(f"Calendários listados para conta {account_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao listar calendários: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao listar calendários: {e}")
+            return None
+
+    async def get_calendar(self, calendar_id: str, account_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Obtém um calendário específico via SDK.
+        """
+        try:
+            result = await self._execute_node_command("get-calendar", calendar_id, account_id)
+            
+            if result.get("success", False):
+                self.logger.info(f"Calendário {calendar_id} obtido")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter calendário: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao obter calendário {calendar_id}: {e}")
+            return None
+
+    async def list_calendar_events(self, calendar_id: str, options: Dict = {}) -> Optional[Dict[str, Any]]:
+        """
+        Lista eventos de um calendário específico via SDK.
+        """
+        try:
+            options_json = json.dumps(options) if options else '{}'
+            result = await self._execute_node_command("list-calendar-events", calendar_id, options_json)
+            
+            if result.get("success", False):
+                self.logger.info(f"Eventos listados do calendário {calendar_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao listar eventos: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao listar eventos do calendário {calendar_id}: {e}")
+            return None
+
+    async def create_calendar_event(self, calendar_id: str, event_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Cria um novo evento no calendário via SDK.
+        """
+        try:
+            event_json = json.dumps(event_data)
+            result = await self._execute_node_command("create-calendar-event", calendar_id, event_json)
+            
+            if result.get("success", False):
+                self.logger.info(f"Evento criado no calendário {calendar_id}: {event_data.get('title', 'Sem título')}")
+                return result
+            else:
+                self.logger.error(f"Erro ao criar evento: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao criar evento no calendário {calendar_id}: {e}")
+            return None
+
+    async def get_calendar_event(self, calendar_id: str, event_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Obtém um evento específico via SDK.
+        """
+        try:
+            result = await self._execute_node_command("get-calendar-event", calendar_id, event_id)
+            
+            if result.get("success", False):
+                self.logger.info(f"Evento {event_id} obtido")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter evento: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao obter evento {event_id}: {e}")
+            return None
+
+    async def edit_calendar_event(self, calendar_id: str, event_id: str, event_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Edita um evento existente via SDK.
+        """
+        try:
+            event_json = json.dumps(event_data)
+            result = await self._execute_node_command("edit-calendar-event", calendar_id, event_id, event_json)
+            
+            if result.get("success", False):
+                self.logger.info(f"Evento {event_id} editado")
+                return result
+            else:
+                self.logger.error(f"Erro ao editar evento: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao editar evento {event_id}: {e}")
+            return None
+
+    async def delete_calendar_event(self, calendar_id: str, event_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Deleta um evento via SDK.
+        """
+        try:
+            result = await self._execute_node_command("delete-calendar-event", calendar_id, event_id)
+            
+            if result.get("success", False):
+                self.logger.info(f"Evento {event_id} deletado")
+                return result
+            else:
+                self.logger.error(f"Erro ao deletar evento: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao deletar evento {event_id}: {e}")
+            return None
+
+    async def create_legal_event(self, calendar_id: str, legal_event_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Cria um evento jurídico LITIG-1 via SDK com formatação específica.
+        """
+        try:
+            event_json = json.dumps(legal_event_data)
+            result = await self._execute_node_command("create-legal-event", calendar_id, event_json)
+            
+            if result.get("success", False):
+                self.logger.info(f"Evento jurídico criado: {legal_event_data.get('title', 'Sem título')} (Caso: {legal_event_data.get('case_id', 'N/A')})")
+                return result
+            else:
+                self.logger.error(f"Erro ao criar evento jurídico: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao criar evento jurídico: {e}")
+            return None
+
+    async def sync_legal_events_with_calendar(self, account_id: str, litig_events: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """
+        Sincroniza eventos LITIG-1 com calendário externo via SDK.
+        """
+        try:
+            events_json = json.dumps(litig_events)
+            result = await self._execute_node_command("sync-legal-events", account_id, events_json)
+            
+            if result.get("success", False):
+                sync_data = result.get("data", {})
+                success_count = sync_data.get("success_count", 0)
+                error_count = sync_data.get("error_count", 0)
+                self.logger.info(f"Sincronização de eventos: {success_count} sucessos, {error_count} erros")
+                return result
+            else:
+                self.logger.error(f"Erro ao sincronizar eventos: {result.get('error')}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Erro ao sincronizar eventos legais: {e}")
+            return None
+
+    # ========================================
+    # 📅 MÉTODOS ESPECÍFICOS PARA LITIG-1
+    # ========================================
+
+    async def create_audiencia_event(self, calendar_id: str, audiencia_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Cria evento específico para audiência jurídica.
+        """
+        legal_event_data = {
+            "title": f"Audiência - {audiencia_data.get('case_title', 'Processo')}",
+            "description": audiencia_data.get("description", ""),
+            "start_time": audiencia_data.get("datetime"),
+            "end_time": self._calculate_end_time(audiencia_data.get("datetime"), hours=2),  # Audiência padrão 2h
+            "location": audiencia_data.get("location", "Fórum/Tribunal"),
+            "attendees": [
+                audiencia_data.get("client_email"),
+                audiencia_data.get("lawyer_email")
+            ],
+            "case_id": audiencia_data.get("case_id"),
+            "case_type": audiencia_data.get("case_type", "Audiência"),
+            "case_number": audiencia_data.get("case_number"),
+            "client_name": audiencia_data.get("client_name"),
+            "lawyer_name": audiencia_data.get("lawyer_name"),
+            "urgency": "alta",
+            "notes": audiencia_data.get("notes"),
+            "event_category": "audiencia",
+            "reminders": [
+                {"method": "email", "minutes": 48 * 60},  # 2 dias antes
+                {"method": "popup", "minutes": 4 * 60},   # 4 horas antes
+                {"method": "popup", "minutes": 60}        # 1 hora antes
+            ]
+        }
+        
+        return await self.create_legal_event(calendar_id, legal_event_data)
+
+    async def create_consulta_event(self, calendar_id: str, consulta_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Cria evento específico para consulta jurídica.
+        """
+        legal_event_data = {
+            "title": f"Consulta - {consulta_data.get('client_name', 'Cliente')}",
+            "description": consulta_data.get("description", ""),
+            "start_time": consulta_data.get("datetime"),
+            "end_time": self._calculate_end_time(consulta_data.get("datetime"), hours=1),  # Consulta padrão 1h
+            "location": consulta_data.get("location", "Escritório"),
+            "attendees": [
+                consulta_data.get("client_email"),
+                consulta_data.get("lawyer_email")
+            ],
+            "case_id": consulta_data.get("case_id"),
+            "case_type": consulta_data.get("case_type", "Consulta"),
+            "client_name": consulta_data.get("client_name"),
+            "lawyer_name": consulta_data.get("lawyer_name"),
+            "urgency": "média",
+            "notes": consulta_data.get("notes"),
+            "event_category": "consulta",
+            "reminders": [
+                {"method": "email", "minutes": 24 * 60},  # 1 dia antes
+                {"method": "popup", "minutes": 2 * 60},   # 2 horas antes
+                {"method": "popup", "minutes": 30}        # 30 minutos antes
+            ]
+        }
+        
+        return await self.create_legal_event(calendar_id, legal_event_data)
+
+    async def create_prazo_event(self, calendar_id: str, prazo_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Cria evento específico para prazo processual.
+        """
+        legal_event_data = {
+            "title": f"Prazo - {prazo_data.get('prazo_type', 'Processual')}",
+            "description": prazo_data.get("description", ""),
+            "start_time": prazo_data.get("deadline"),
+            "end_time": self._calculate_end_time(prazo_data.get("deadline"), hours=0.5),  # Prazo 30min
+            "location": "Trabalho interno",
+            "attendees": [prazo_data.get("lawyer_email")],
+            "case_id": prazo_data.get("case_id"),
+            "case_type": prazo_data.get("case_type", "Prazo"),
+            "case_number": prazo_data.get("case_number"),
+            "lawyer_name": prazo_data.get("lawyer_name"),
+            "urgency": "crítica",
+            "notes": prazo_data.get("notes"),
+            "event_category": "prazo",
+            "reminders": [
+                {"method": "email", "minutes": 72 * 60},  # 3 dias antes
+                {"method": "email", "minutes": 24 * 60},  # 1 dia antes
+                {"method": "popup", "minutes": 4 * 60},   # 4 horas antes
+                {"method": "popup", "minutes": 60}        # 1 hora antes
+            ]
+        }
+        
+        return await self.create_legal_event(calendar_id, legal_event_data)
+
+    def _calculate_end_time(self, start_time_iso: str, hours: float = 1.0) -> str:
+        """
+        Calcula horário de fim baseado no início e duração.
+        """
+        try:
+            from datetime import datetime, timedelta
+            start_time = datetime.fromisoformat(start_time_iso.replace('Z', '+00:00')).replace(tzinfo=None)
+            end_time = start_time + timedelta(hours=hours)
+            return end_time.isoformat()
+        except:
+            return start_time_iso
+
+    # ========================================
+    # 📅 MÉTODOS DE SINCRONIZAÇÃO AVANÇADA
+    # ========================================
+
+    async def sync_case_calendar(self, account_id: str, case_id: str, events: List[Dict]) -> Optional[Dict[str, Any]]:
+        """
+        Sincroniza calendário específico de um caso.
+        """
+        try:
+            # Enriquecer eventos com metadados do caso
+            enriched_events = []
+            for event in events:
+                enriched_event = {
+                    **event,
+                    "case_id": case_id,
+                    "source": "LITIG-1",
+                    "sync_timestamp": datetime.now().isoformat()
+                }
+                enriched_events.append(enriched_event)
+            
+            return await self.sync_legal_events_with_calendar(account_id, enriched_events)
+            
+        except Exception as e:
+            self.logger.error(f"Erro ao sincronizar calendário do caso {case_id}: {e}")
+            return None
+
+    async def get_legal_events_by_case(self, calendar_id: str, case_id: str) -> Optional[List[Dict]]:
+        """
+        Obtém todos os eventos de um caso específico.
+        """
+        try:
+            # Buscar eventos com filtro de metadados
+            options = {
+                "metadata_filter": {
+                    "case_id": case_id,
+                    "source": "LITIG-1"
+                }
+            }
+            
+            result = await self.list_calendar_events(calendar_id, options)
+            
+            if result and result.get("success"):
+                events = result.get("data", [])
+                filtered_events = []
+                
+                for event in events:
+                    if event.get("metadata", {}).get("case_id") == case_id:
+                        filtered_events.append(event)
+                
+                self.logger.info(f"Encontrados {len(filtered_events)} eventos para o caso {case_id}")
+                return filtered_events
+            
+            return []
+            
+        except Exception as e:
+            self.logger.error(f"Erro ao obter eventos do caso {case_id}: {e}")
+            return []
+
+    async def health_check_calendar(self) -> Dict[str, Any]:
+        """
+        Verifica saúde da integração de calendário.
+        """
+        try:
+            result = await self._execute_node_command("health-check")
+            
+            if result.get("success", False):
+                health_data = result.get("data", result)
+                return {
+                    "calendar_support": True,
+                    "sdk_version": "3.0",
+                    "node_service_status": "healthy",
+                    **health_data
+                }
+            else:
+                return {
+                    "calendar_support": False,
+                    "node_service_status": "unhealthy",
+                    "error": result.get("error", "Unknown error")
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Erro no health check do calendário: {e}")
+            return {
+                "calendar_support": False,
+                "node_service_status": "error",
+                "error": str(e)
+            }

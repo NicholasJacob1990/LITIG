@@ -29,7 +29,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AdminBloc>().add(LoadAdminAuditLogs());
+    context.read<AdminBloc>().add(const LoadAdminAuditLogs());
   }
 
   @override
@@ -94,14 +94,14 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         border: Border(
-          bottom: BorderSide(color: AppColors.primaryBlue.withOpacity(0.2)),
+          bottom: BorderSide(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
         ),
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.filter,
             size: 16,
             color: AppColors.primaryBlue,
@@ -110,7 +110,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Expanded(
             child: Text(
               'Filtros ativos: ${_getActiveFiltersText()}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.primaryBlue,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -119,11 +119,11 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           ),
           TextButton(
             onPressed: _clearFilters,
-            child: const Text('Limpar'),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryBlue,
               padding: const EdgeInsets.symmetric(horizontal: 8),
             ),
+            child: const Text('Limpar'),
           ),
         ],
       ),
@@ -152,7 +152,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
       _startDate = null;
       _endDate = null;
     });
-    context.read<AdminBloc>().add(LoadAdminAuditLogs());
+    context.read<AdminBloc>().add(const LoadAdminAuditLogs());
   }
 
   Widget _buildAuditLogsList(BuildContext context, List<AdminAuditLog> auditLogs) {
@@ -208,7 +208,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
             // Header com ação e severidade
             Row(
               children: [
-                _buildSeverityBadge(log.severity),
+                _buildSeverityBadge(log.severity ?? 'medium'),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -230,7 +230,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
             const SizedBox(height: 8),
             
             // Detalhes do usuário
-            if (log.userInfo != null) ...[
+            if (log.userInfo['name'] != null) ...[
               Row(
                 children: [
                   Icon(
@@ -240,7 +240,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${log.userInfo!.name} (${log.userInfo!.email})',
+                    '${log.userInfo['name']} (${log.userInfo['email']})',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -258,7 +258,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${log.ipAddress} - ${log.location ?? 'Localização desconhecida'}',
+                  '${log.ipAddress} - Localização desconhecida',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -276,7 +276,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  log.details!,
+                  log.details?.toString() ?? 'Nenhum detalhe disponível',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -287,15 +287,15 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
             Row(
               children: [
                 Icon(
-                  log.success ? LucideIcons.checkCircle : LucideIcons.xCircle,
+                  log.isSuccessful ? LucideIcons.checkCircle : LucideIcons.xCircle,
                   size: 16,
-                  color: log.success ? Colors.green : Colors.red,
+                  color: log.isSuccessful ? Colors.green : Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  log.success ? 'Sucesso' : 'Falha',
+                  log.isSuccessful ? 'Sucesso' : 'Falha',
                   style: TextStyle(
-                    color: log.success ? Colors.green : Colors.red,
+                    color: log.isSuccessful ? Colors.green : Colors.red,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -336,9 +336,9 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -469,7 +469,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<AdminBloc>().add(LoadAdminAuditLogs());
+              context.read<AdminBloc>().add(const LoadAdminAuditLogs());
             },
             child: const Text('Aplicar'),
           ),
@@ -496,7 +496,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Icon(
             LucideIcons.searchX,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -522,7 +522,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -537,7 +537,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => context.read<AdminBloc>().add(LoadAdminAuditLogs()),
+            onPressed: () => context.read<AdminBloc>().add(const LoadAdminAuditLogs()),
             icon: const Icon(LucideIcons.refreshCw),
             label: const Text('Tentar Novamente'),
           ),
@@ -554,7 +554,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Icon(
             LucideIcons.shield,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

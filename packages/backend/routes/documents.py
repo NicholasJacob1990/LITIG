@@ -271,7 +271,7 @@ async def validate_document_data(
                 "warnings": validation_result.get("warnings", [])
             }
         )
-        
+
     except Exception as e:
         logger.error(f"Erro na validação de dados: {e}")
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
@@ -358,7 +358,7 @@ async def get_document_details(
         
         # Verificar acesso ao caso relacionado
         case_result = supabase.table("cases").select("*").eq("id", document["case_id"]).execute()
-        
+
         if case_result.data:
             case = case_result.data[0]
             user_has_access = (
@@ -386,7 +386,7 @@ async def get_document_details(
             "extracted_fields": list(document.get("extracted_data", {}).keys()),
             "processing_info": document.get("processing_metadata", {})
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -431,7 +431,7 @@ async def reprocess_document(
         # Verificar se tem imagem para reprocessar
         if not document.get("image_url"):
             raise HTTPException(status_code=400, detail="Documento não possui imagem para reprocessamento")
-        
+
         # Baixar imagem do storage
         image_base64 = await _get_document_image(document["image_url"], supabase)
         
@@ -443,7 +443,7 @@ async def reprocess_document(
         
         if not ocr_result.get("success", False):
             raise HTTPException(status_code=400, detail="Erro no reprocessamento")
-        
+
         # Atualizar documento com novos dados
         updated_data = {
             "extracted_data": ocr_result.get("extracted_data", {}),
@@ -475,7 +475,7 @@ async def reprocess_document(
                 "reprocessed_at": updated_data["reprocessed_at"]
             }
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -524,7 +524,7 @@ async def _get_document_image(image_url: str, supabase: Client) -> str:
         image_base64 = base64.b64encode(result).decode('utf-8')
         
         return image_base64
-        
+
     except Exception as e:
         logger.error(f"Erro ao recuperar imagem: {e}")
         return ""
@@ -551,7 +551,7 @@ async def _update_case_stats(case_id: str, supabase: Client):
             })\
             .eq("id", case_id)\
             .execute()
-            
+
     except Exception as e:
         logger.warning(f"Erro ao atualizar estatísticas do caso: {e}")
 
@@ -576,13 +576,13 @@ async def get_ocr_engines(current_user: dict = Depends(get_current_user)):
     try:
         ocr_service = OCRValidationService()
         engine_info = ocr_service.get_engine_info()
-        
+
         return {
             "success": True,
             "data": engine_info,
             "message": f"Encontrados {engine_info['total_engines']} engines disponíveis"
         }
-        
+
     except Exception as e:
         logger.error(f"Erro ao obter informações dos engines OCR: {e}")
         return {
@@ -627,13 +627,13 @@ async def test_ocr_engine(
             image_base64, 
             document_type_hint=request.get("document_type")
         )
-        
+
         return {
             "success": True,
             "data": result,
             "message": "Teste de OCR concluído com sucesso"
         }
-        
+
     except Exception as e:
         logger.error(f"Erro no teste de OCR: {e}")
         return {

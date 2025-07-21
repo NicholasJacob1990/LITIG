@@ -51,6 +51,15 @@ class ConsultationInfo {
     required this.mode,
     required this.plan,
   });
+
+  factory ConsultationInfo.fromJson(Map<String, dynamic> json) {
+    return ConsultationInfo(
+      date: json['date'] ?? '',
+      duration: json['duration'] ?? '',
+      mode: json['mode'] ?? '',
+      plan: json['plan'] ?? '',
+    );
+  }
 }
 
 /// Modelo para a seção de pré-análise da IA.
@@ -75,6 +84,30 @@ class PreAnalysis {
     required this.costs,
     required this.risk,
   });
+
+  factory PreAnalysis.fromJson(Map<String, dynamic> json) {
+    return PreAnalysis(
+      priority: json['priority'] ?? 'medium',
+      tag: json['tag'] ?? '',
+      tagColor: _parseColor(json['tag_color']),
+      estimatedTime: json['estimated_time'] ?? '',
+      urgency: json['urgency'] ?? 5,
+      summary: json['summary'] ?? '',
+      requiredDocs: List<String>.from(json['required_docs'] ?? []),
+      costs: (json['costs'] as List?)?.map((c) => CostEstimate.fromJson(c)).toList() ?? [],
+      risk: json['risk'] ?? 'medium',
+    );
+  }
+
+  static Color _parseColor(dynamic color) {
+    if (color is int) return Color(color);
+    if (color is String) {
+      if (color.startsWith('#')) {
+        return Color(int.parse(color.substring(1), radix: 16) + 0xFF000000);
+      }
+    }
+    return Colors.blue;
+  }
 }
 
 /// Modelo para a estimativa de custos.
@@ -82,6 +115,13 @@ class CostEstimate {
   final String label;
   final String value;
   CostEstimate({required this.label, required this.value});
+
+  factory CostEstimate.fromJson(Map<String, dynamic> json) {
+    return CostEstimate(
+      label: json['label'] ?? '',
+      value: json['value'] ?? '',
+    );
+  }
 }
 
 /// Modelo para a seção de próximos passos.
@@ -98,6 +138,16 @@ class NextStep {
     required this.priority,
     required this.status,
   });
+
+  factory NextStep.fromJson(Map<String, dynamic> json) {
+    return NextStep(
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      dueDate: json['due_date'] ?? '',
+      priority: json['priority'] ?? 'MEDIUM',
+      status: json['status'] ?? 'PENDING',
+    );
+  }
 }
 
 /// Modelo para um item na lista de documentos.

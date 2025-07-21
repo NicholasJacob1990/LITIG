@@ -432,8 +432,8 @@ void main() {
       expect(find.text('Verificação de Conflitos Concluída'), findsOneWidget);
 
       // Verificar se há indicação de advogados filtrados por conflito
-      final conflictWarning = find.text('Alguns advogados foram filtrados por conflito de interesse');
-      // Pode ou não aparecer, dependendo se há conflitos reais
+      // O warning pode ou não aparecer, dependendo se há conflitos reais
+      find.text('Alguns advogados foram filtrados por conflito de interesse');
     });
 
     testWidgets('Complete contract flow - From match to signed contract', (WidgetTester tester) async {

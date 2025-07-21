@@ -32,7 +32,7 @@ class ChatRoomCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: room.hasUnreadMessages 
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
                     : Colors.grey[200]!,
                 width: room.hasUnreadMessages ? 1.5 : 1,
               ),
@@ -43,7 +43,7 @@ class ChatRoomCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: room.hasUnreadMessages 
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                       : Colors.grey[100],
                   child: Icon(
                     LucideIcons.user,

@@ -95,7 +95,7 @@ class LawyerResponsibleSection extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: Colors.orange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
@@ -169,7 +169,7 @@ class _ActionChip extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       onPressed: onTap,
-      disabledColor: bg.withOpacity(0.5),
+      disabledColor: bg.withValues(alpha: 0.5),
     );
   }
 } 

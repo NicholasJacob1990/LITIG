@@ -12,6 +12,9 @@ class MatchesLoaded extends MatchesState {
   final List<MatchedLawyer> lawyers;
 
   const MatchesLoaded(this.lawyers);
+
+  // Getter para compatibilidade
+  List<MatchedLawyer> get matches => lawyers;
 }
 
 class MatchesError extends MatchesState {

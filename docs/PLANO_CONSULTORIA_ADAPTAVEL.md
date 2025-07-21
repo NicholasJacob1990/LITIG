@@ -882,7 +882,40 @@ A proposta de **adaptação dos cards existentes** para diferenciar consultivo v
 
 ---
 
+### **📅 Funcionalidade de Agenda Implementada**
+
+**Status**: ✅ **CONCLUÍDO**
+
+Todos os cards de casos já incluem:
+- **Botão "Agenda"** com ícone `LucideIcons.calendar`
+- **Navegação direta** para `/case-detail/{caseId}/agenda`
+- **Cor específica**: `AppColors.success` (verde)
+- **Posicionamento**: Antes do botão "Ver Detalhes"
+- **Integração**: Via Unipile SDK com Google Calendar e Outlook (API já disponível)
+
+```dart
+// Implementação já presente em case_card.dart (lines 76-84)
+TextButton.icon(
+  onPressed: () => context.push('/case-detail/$caseId/agenda'),
+  icon: const Icon(LucideIcons.calendar, size: 16),
+  label: const Text('Agenda'),
+  style: TextButton.styleFrom(
+    foregroundColor: AppColors.success,
+  ),
+),
+```
+
+### **Aplicação nos Cards de Consultoria**
+
+O botão de agenda será especialmente útil para casos de consultoria, onde:
+- **Prazos de entrega** são críticos
+- **Reuniões de briefing** são frequentes  
+- **Apresentações** precisam ser agendadas
+- **Reviews intermediários** devem ser programados
+
+---
+
 **📝 Documento elaborado por: Sistema de Análise LITIG-1**  
 **📅 Data: Janeiro 2025**  
-**🔄 Versão: 2.0 (Focado em Cards)**  
+**🔄 Versão: 2.1 (Cards + Agenda)**  
 **🎯 Status: Pronto para Implementação Imediata** 

@@ -155,30 +155,7 @@ class DetailedCaseCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Em Andamento':
-        return AppColors.warning;
-      case 'Concluído':
-        return AppColors.success;
-      case 'Aguardando':
-        return AppColors.info;
-      default:
-        return AppColors.info; // Fallback
-    }
-  }
-}     switch (status) {
-      case 'Em Andamento':
-        return AppColors.warning;
-      case 'Concluído':
-        return AppColors.success;
-      case 'Aguardando':
-        return AppColors.info;
-      default:
-        return AppColors.info; // Fallback
-    }
-  }
-} 
+  Color _getStatusColor(String? status) {
     switch (status) {
       case 'Em Andamento':
         return AppColors.warning;

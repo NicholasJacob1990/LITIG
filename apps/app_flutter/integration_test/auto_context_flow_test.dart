@@ -31,7 +31,10 @@ void main() {
         
         // Verificar cor azul (plataforma)
         final indicatorWidget = tester.widget<Container>(contextIndicator);
-        // expect(indicatorWidget.decoration.color, equals(AppColors.primaryBlue));
+        final decoration = indicatorWidget.decoration as BoxDecoration?;
+        if (decoration != null) {
+          expect(decoration.color, isNotNull, reason: 'Context indicator should have a color');
+        }
       }
 
       // === FASE 3: NAVEGAÇÃO AUTOMÁTICA PARA ÁREA PESSOAL ===
@@ -115,7 +118,7 @@ void main() {
         expect(find.text('Atuando como plataforma'), findsWidgets);
       }
 
-      print('✅ Teste de detecção automática completo - PASSOU');
+      debugPrint('✅ Teste de detecção automática completo - PASSOU');
     });
 
     testWidgets('Detecção baseada em rotas específicas - Patterns automáticos', (WidgetTester tester) async {
@@ -152,7 +155,7 @@ void main() {
         expect(platformContext, findsOneWidget);
       }
 
-      print('✅ Teste de detecção por rotas - PASSOU');
+      debugPrint('✅ Teste de detecção por rotas - PASSOU');
     });
 
     testWidgets('Teste de performance - Detecção não deve afetar navegação', (WidgetTester tester) async {
@@ -181,7 +184,7 @@ void main() {
       }
       
       // Navegação deve ser fluida mesmo com detecção automática
-      print('✅ Teste de performance - PASSOU');
+      debugPrint('✅ Teste de performance - PASSOU');
     });
 
     testWidgets('Fallback para usuários não-super-associados', (WidgetTester tester) async {
@@ -204,7 +207,7 @@ void main() {
       final personalButton = find.byKey(const Key('personal_area_button'));
       expect(personalButton, findsNothing);
 
-      print('✅ Teste de fallback - PASSOU');
+      debugPrint('✅ Teste de fallback - PASSOU');
     });
 
     testWidgets('Sistema deve funcionar mesmo com backend indisponível', (WidgetTester tester) async {
@@ -235,7 +238,7 @@ void main() {
         expect(find.text('Ofertas'), findsWidgets);
       }
 
-      print('✅ Teste de resiliência - PASSOU');
+      debugPrint('✅ Teste de resiliência - PASSOU');
     });
   });
 }
@@ -253,54 +256,24 @@ Future<void> _loginAsSuperAssociate(WidgetTester tester) async {
   // await tester.tap(find.byKey(Key('login_button')));
   // await tester.pumpAndSettle();
   
-  print('Mock: Login como super associado realizado');
+  debugPrint('Mock: Login como super associado realizado');
 }
 
 Future<void> _loginAsClient(WidgetTester tester) async {
   // Simular login como cliente normal
-  print('Mock: Login como cliente realizado');
+  debugPrint('Mock: Login como cliente realizado');
 }
 
 Future<void> _simulateRouteNavigation(WidgetTester tester, String route) async {
   // Simular navegação para rota específica
   // Em implementação real, usaria GoRouter.of(context).go(route)
-  print('Mock: Navegação para $route simulada');
+  debugPrint('Mock: Navegação para $route simulada');
 }
 
 Future<void> _simulateBackendError(WidgetTester tester) async {
   // Simular erro de conexão com backend
-  print('Mock: Erro de backend simulado');
+  debugPrint('Mock: Erro de backend simulado');
 }
 
-/// Verifica se elementos específicos do contexto automático estão presentes
-void _verifyAutoContextElements(WidgetTester tester) {
-  // Elementos que devem estar presentes na Solução 3
-  final expectedElements = [
-    'context_indicator',
-    'personal_area_button',
-    'auto_context_service',
-  ];
-  
-  for (final element in expectedElements) {
-    final widget = find.byKey(Key(element));
-    if (widget.evaluate().isNotEmpty) {
-      expect(widget, findsOneWidget, reason: 'Elemento $element deve estar presente');
-    }
-  }
-}
 
-/// Verifica que não há elementos de toggle manual (Solução 1 e 2)
-void _verifyNoManualToggle(WidgetTester tester) {
-  // Elementos que NÃO devem estar presentes na Solução 3
-  final forbiddenElements = [
-    'context_toggle_button',
-    'context_switch_dropdown',
-    'manual_context_selector',
-    'context_mode_toggle',
-  ];
-  
-  for (final element in forbiddenElements) {
-    final widget = find.byKey(Key(element));
-    expect(widget, findsNothing, reason: 'Elemento $element NÃO deve estar presente na Solução 3');
-  }
-} 
+ 

@@ -22,7 +22,7 @@ class LawyerHiringRemoteDataSourceImpl implements LawyerHiringRemoteDataSource {
     try {
       final response = await apiService.post(
         '/lawyers/hire',
-        body: {
+        data: {
           'lawyer_id': params.lawyerId,
           'case_id': params.caseId,
           'client_id': params.clientId,
@@ -33,12 +33,11 @@ class LawyerHiringRemoteDataSourceImpl implements LawyerHiringRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final Map<String, dynamic> jsonResponse = json.decode(response.data);
         return HiringResultModel.fromJson(jsonResponse);
       } else {
         throw ServerException(
-          message: 'Failed to send hiring proposal',
-          statusCode: response.statusCode,
+          message: 'Failed to send hiring proposal: ${response.statusCode}',
         );
       }
     } catch (e) {
@@ -53,14 +52,17 @@ class LawyerHiringRemoteDataSourceImpl implements LawyerHiringRemoteDataSource {
         'lawyer_id': lawyerId,
         if (status != null) 'status': status,
       };
+      
+      final queryString = queryParams.entries
+          .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+          .join('&');
 
       final response = await apiService.get(
-        '/hiring-proposals',
-        queryParameters: queryParams,
+        '/hiring-proposals?$queryString',
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final Map<String, dynamic> jsonResponse = json.decode(response.data);
         final List<dynamic> proposalsJson = jsonResponse['proposals'];
         return proposalsJson
             .map((json) => HiringProposalModel.fromJson(json))
@@ -68,7 +70,6 @@ class LawyerHiringRemoteDataSourceImpl implements LawyerHiringRemoteDataSource {
       } else {
         throw ServerException(
           message: 'Failed to get hiring proposals',
-          statusCode: response.statusCode,
         );
       }
     } catch (e) {
@@ -84,12 +85,11 @@ class LawyerHiringRemoteDataSourceImpl implements LawyerHiringRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final Map<String, dynamic> jsonResponse = json.decode(response.data);
         return HiringProposalModel.fromJson(jsonResponse['proposal']);
       } else {
         throw ServerException(
           message: 'Failed to accept hiring proposal',
-          statusCode: response.statusCode,
         );
       }
     } catch (e) {
@@ -102,18 +102,17 @@ class LawyerHiringRemoteDataSourceImpl implements LawyerHiringRemoteDataSource {
     try {
       final response = await apiService.patch(
         '/hiring-proposals/$proposalId/reject',
-        body: {
+        data: {
           'reason': reason ?? '',
         },
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final Map<String, dynamic> jsonResponse = json.decode(response.data);
         return HiringProposalModel.fromJson(jsonResponse['proposal']);
       } else {
         throw ServerException(
           message: 'Failed to reject hiring proposal',
-          statusCode: response.statusCode,
         );
       }
     } catch (e) {

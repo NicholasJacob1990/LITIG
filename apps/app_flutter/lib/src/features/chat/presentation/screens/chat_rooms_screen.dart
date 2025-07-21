@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../bloc/chat_bloc.dart';
 import '../widgets/chat_room_card.dart';
-import '../../../../injection_container.dart';
+import 'package:meu_app/injection_container.dart';
 
 class ChatRoomsScreen extends StatelessWidget {
   const ChatRoomsScreen({super.key});

@@ -37,6 +37,13 @@ class AdminAuditLog extends Equatable {
     this.errorMessage,
   });
 
+  /// Getter para informações do usuário (compatibilidade)
+  Map<String, String?> get userInfo => {
+    'name': userName,
+    'email': userEmail,
+    'type': userType,
+  };
+
   @override
   List<Object?> get props => [
         id,

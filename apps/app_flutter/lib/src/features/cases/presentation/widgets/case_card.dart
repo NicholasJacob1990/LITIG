@@ -7,6 +7,8 @@ import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
+import 'package:meu_app/src/features/cases/domain/entities/case_extensions.dart';
+import 'package:meu_app/src/shared/constants/case_type_constants.dart';
 
 class CaseCard extends StatelessWidget {
   final String caseId;
@@ -52,11 +54,29 @@ class CaseCard extends StatelessWidget {
               Text(
                 subtitle, 
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                 )
               ),
               const SizedBox(height: 16),
-              _buildPreAnalysisSection(context),
+              // Mostra pré-análise apenas para tipos relevantes
+              if (caseData?.shouldShowPreAnalysis ?? true)
+                _buildPreAnalysisSection(context),
+              
+              // Seções específicas por tipo de caso
+              if (caseData?.isConsultivo == true)
+                _buildConsultancySpecificSection(context),
+              if (caseData?.isContrato == true)
+                _buildContractSpecificSection(context),
+              if (caseData?.isCompliance == true)
+                _buildComplianceSpecificSection(context),
+              if (caseData?.isDueDiligence == true)
+                _buildDueDiligenceSpecificSection(context),
+              if (caseData?.isMA == true)
+                _buildMASpecificSection(context),
+              if (caseData?.isIP == true)
+                _buildIPSpecificSection(context),
+              if (caseData?.isCorporativo == true && !caseData!.isMA && !caseData!.isDueDiligence)
+                _buildCorporateSpecificSection(context),
               
               // Seção de recomendação de escritório (para casos corporativos)
               if (caseData?.shouldShowFirmRecommendation == true) ...[
@@ -70,16 +90,29 @@ class CaseCard extends StatelessWidget {
               ] else ...[
                 const SizedBox(height: 16),
               ],
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () => context.push('/case-detail/$caseId'),
-                  icon: const Icon(LucideIcons.eye, size: 16),
-                  label: const Text('Ver Detalhes'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primaryBlue,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Botão da agenda do caso
+                  TextButton.icon(
+                    onPressed: () => context.push('/case-detail/$caseId/agenda'),
+                    icon: const Icon(LucideIcons.calendar, size: 16),
+                    label: const Text('Agenda'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.success,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  // Botão ver detalhes existente
+                  TextButton.icon(
+                    onPressed: () => context.push('/case-detail/$caseId'),
+                    icon: const Icon(LucideIcons.eye, size: 16),
+                    label: const Text('Ver Detalhes'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primaryBlue,
+                    ),
+                  ),
+                ],
               )
             ],
           ),
@@ -93,49 +126,59 @@ class CaseCard extends StatelessWidget {
 
     // NOVO: Adiciona o badge de alocação, se existir
     final allocationBadge = _buildAllocationBadge(context);
+    // Badge de tipo de caso
+    final typeBadge = _buildTypeBadge(context);
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Text(
-            title, 
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold, 
-              color: theme.colorScheme.onSurface
-            )
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title, 
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold, 
+                  color: theme.colorScheme.onSurface
+                )
+              ),
+            ),
+          ],
         ),
-        // NOVO: Renderiza o badge
-        if (allocationBadge != null) ...[
-          allocationBadge,
-          const SizedBox(width: 8),
-        ],
-        // Indicador de complexidade para casos corporativos
-        if (caseData?.isHighComplexity == true) ...[
-          Chip(
-            avatar: Icon(
-              LucideIcons.briefcase, 
-              size: 14, 
-              color: theme.colorScheme.tertiary
-            ),
-            label: Text(
-              'Corporativo', 
-              style: TextStyle(
-                fontSize: 12, 
-                fontWeight: FontWeight.w500, 
-                color: theme.colorScheme.onSurface
-              )
-            ),
-            backgroundColor: theme.colorScheme.tertiary.withOpacity(0.1),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), 
-              side: BorderSide.none
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-        Chip(
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            // Badge do tipo de caso
+            if (typeBadge != null) typeBadge,
+            // Badge de alocação
+            if (allocationBadge != null) allocationBadge,
+            // Indicador de complexidade para casos corporativos
+            if (caseData?.isHighComplexity == true) ...[
+              Chip(
+                avatar: Icon(
+                  LucideIcons.briefcase, 
+                  size: 14, 
+                  color: theme.colorScheme.tertiary
+                ),
+                label: Text(
+                  'Alta Complexidade', 
+                  style: TextStyle(
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w500, 
+                    color: theme.colorScheme.onSurface
+                  )
+                ),
+                backgroundColor: theme.colorScheme.tertiary.withValues(alpha: 0.1),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8), 
+                  side: BorderSide.none
+                ),
+              ),
+            ],
+            Chip(
           avatar: Icon(
             clientType == 'PF' ? LucideIcons.user : LucideIcons.building, 
             size: 14, 
@@ -149,29 +192,30 @@ class CaseCard extends StatelessWidget {
               color: theme.colorScheme.onSurface
             )
           ),
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), 
             side: BorderSide.none
           ),
-        ),
-        const SizedBox(width: 8),
-        Chip(
-          label: Text(
-            status, 
+          ),
+          Chip(
+            label: Text(
+              _getStatusDisplayText(), 
             style: TextStyle(
               fontSize: 12, 
               fontWeight: FontWeight.w500, 
               color: _getStatusColor(status)
             )
           ),
-          backgroundColor: _getStatusColor(status).withOpacity(0.1),
+          backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), 
             side: BorderSide.none
           ),
+          ),
+          ],
         ),
       ],
     );
@@ -212,7 +256,7 @@ class CaseCard extends StatelessWidget {
           color: theme.colorScheme.onSurface,
         ),
       ),
-      backgroundColor: (config['color'] as Color).withOpacity(0.1),
+      backgroundColor: (config['color'] as Color).withValues(alpha: 0.1),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -226,7 +270,7 @@ class CaseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: theme.colorScheme.secondary, width: 4)),
-        color: theme.colorScheme.secondary.withOpacity(0.05),
+        color: theme.colorScheme.secondary.withValues(alpha: 0.05),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -241,7 +285,7 @@ class CaseCard extends StatelessWidget {
             child: Text(
               'Pré-análise IA gerada em $preAnalysisDate',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7)
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
               ),
             ),
           ),
@@ -275,7 +319,7 @@ class CaseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: theme.colorScheme.tertiary, width: 4)),
-        color: theme.colorScheme.tertiary.withOpacity(0.05),
+        color: theme.colorScheme.tertiary.withValues(alpha: 0.05),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -301,7 +345,7 @@ class CaseCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiary.withOpacity(0.2),
+                    color: theme.colorScheme.tertiary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -323,7 +367,7 @@ class CaseCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiary.withOpacity(0.1),
+                  color: theme.colorScheme.tertiary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -347,7 +391,7 @@ class CaseCard extends StatelessWidget {
                     Text(
                       '${firm.teamSize} advogados',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                     if (firm.kpis != null) ...[
@@ -363,7 +407,7 @@ class CaseCard extends StatelessWidget {
                           Text(
                             '${(firm.kpis!.successRate * 100).toInt()}% sucesso',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -393,7 +437,7 @@ class CaseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: theme.colorScheme.outline, width: 4)),
-        color: theme.colorScheme.outline.withOpacity(0.05),
+        color: theme.colorScheme.outline.withValues(alpha: 0.05),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -411,7 +455,7 @@ class CaseCard extends StatelessWidget {
                 Text(
                   'Analisando escritórios especializados...',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -419,7 +463,7 @@ class CaseCard extends StatelessWidget {
                 Text(
                   'Recomendação será exibida após matching B2B',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 11,
                   ),
                 ),
@@ -478,7 +522,7 @@ class CaseCard extends StatelessWidget {
                 Text(
                   lawyer!.specialty, 
                   style: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7)
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                   )
                 ),
                 const SizedBox(height: 4),
@@ -488,7 +532,7 @@ class CaseCard extends StatelessWidget {
                       'Criado em ${lawyer!.createdDate}', 
                       style: TextStyle(
                         fontSize: 12, 
-                        color: theme.colorScheme.onSurface.withOpacity(0.7)
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                       )
                     ),
                     const Spacer(),
@@ -509,7 +553,7 @@ class CaseCard extends StatelessWidget {
               children: [
                 Icon(
                   LucideIcons.messageCircle, 
-                  color: theme.colorScheme.onSurface.withOpacity(0.5), 
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5), 
                   size: 28
                 ),
                 Positioned(
@@ -551,5 +595,168 @@ class CaseCard extends StatelessWidget {
       default:
         return Colors.grey;
     }
+  }
+
+  // Novo: Badge de tipo de caso
+  Widget? _buildTypeBadge(BuildContext context) {
+    if (caseData?.caseType == null) return null;
+    
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: caseData!.typeColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: caseData!.typeColor.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            caseData!.typeIcon,
+            size: 14,
+            color: caseData!.typeColor,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            caseData!.typeDisplayName,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: caseData!.typeColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Obter texto de status adaptativo
+  String _getStatusDisplayText() {
+    final statusMapping = CaseTypeConstants.getStatusMapping(caseData?.caseType);
+    return statusMapping[status] ?? status;
+  }
+
+  // Seções específicas por tipo de caso
+  Widget _buildConsultancySpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.target,
+      color: AppColors.info,
+      title: 'Entregáveis do Projeto',
+      description: 'Acompanhe o progresso das entregas previstas para este projeto de consultoria.',
+    );
+  }
+
+  Widget _buildContractSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.fileText,
+      color: AppColors.success,
+      title: 'Cláusulas e Negociação',
+      description: 'Acompanhe as cláusulas em análise e o status da negociação.',
+    );
+  }
+
+  Widget _buildComplianceSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.shield,
+      color: AppColors.warning,
+      title: 'Adequação Regulatória',
+      description: 'Monitore o progresso da adequação às normas e regulamentos.',
+    );
+  }
+
+  Widget _buildDueDiligenceSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.search,
+      color: AppColors.primaryBlue,
+      title: 'Investigação e Análise',
+      description: 'Acompanhe o progresso da investigação e análise de riscos.',
+    );
+  }
+
+  Widget _buildMASpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.building2,
+      color: AppColors.secondaryPurple,
+      title: 'Estruturação M&A',
+      description: 'Monitore as etapas de estruturação da transação.',
+    );
+  }
+
+  Widget _buildIPSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.copyright,
+      color: AppColors.secondaryGreen,
+      title: 'Proteção Intelectual',
+      description: 'Acompanhe o registro e proteção dos direitos intelectuais.',
+    );
+  }
+
+  Widget _buildCorporateSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.building,
+      color: AppColors.secondaryYellow,
+      title: 'Governança Corporativa',
+      description: 'Monitore as práticas de governança e compliance corporativo.',
+    );
+  }
+
+  // Helper para construir seções específicas
+  Widget _buildTypeSpecificSection({
+    required BuildContext context,
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String description,
+  }) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.lightText2,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 } 

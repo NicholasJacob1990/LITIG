@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
-import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_card.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_bloc.dart';
@@ -28,7 +27,7 @@ class FirmTeamScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<FirmBloc>()..add(GetFirmDetails(firmId)),
+      create: (context) => getIt<FirmBloc>()..add(GetFirmDetailsEvent(firmId: firmId)),
       child: FirmTeamView(firmId: firmId),
     );
   }
@@ -86,8 +85,8 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             return _buildErrorState(context, state.message);
           }
 
-          if (state is FirmLoaded) {
-            return _buildTeamContent(context, state.firm);
+          if (state is FirmLoaded && state.firm != null) {
+            return _buildTeamContent(context, state.firm!);
           }
 
           return _buildEmptyState(context);
@@ -129,10 +128,10 @@ class _FirmTeamViewState extends State<FirmTeamView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.05),
+        color: AppColors.primaryBlue.withValues(alpha: 0.05),
         border: Border(
           bottom: BorderSide(
-            color: AppColors.primaryBlue.withOpacity(0.1),
+            color: AppColors.primaryBlue.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -144,10 +143,10 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.primaryBlue.withOpacity(0.3),
+                color: AppColors.primaryBlue.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -210,10 +209,10 @@ class _FirmTeamViewState extends State<FirmTeamView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppColors.warning.withOpacity(0.3),
+                color: AppColors.warning.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -275,7 +274,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                     });
                   },
                   backgroundColor: Colors.transparent,
-                  selectedColor: AppColors.primaryBlue.withOpacity(0.1),
+                  selectedColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                   checkmarkColor: AppColors.primaryBlue,
                   side: BorderSide(
                     color: isSelected ? AppColors.primaryBlue : Colors.grey.shade300,
@@ -307,7 +306,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.dividerColor.withOpacity(0.3),
+          color: theme.dividerColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -396,7 +395,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
               Icon(
                 LucideIcons.filter,
                 size: 64,
-                color: Colors.grey.withOpacity(0.5),
+                color: Colors.grey.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
@@ -417,7 +416,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<FirmBloc>().add(GetFirmDetails(widget.firmId));
+        context.read<FirmBloc>().add(GetFirmDetailsEvent(firmId: widget.firmId));
       },
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -437,7 +436,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: AppColors.primaryBlue.withOpacity(0.1),
+          color: AppColors.primaryBlue.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -450,7 +449,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withOpacity(0.1),
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -539,7 +538,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         color: Theme.of(context).colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).dividerColor.withOpacity(0.3),
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -590,7 +589,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             Icon(
               LucideIcons.alertCircle,
               size: 64,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -606,7 +605,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<FirmBloc>().add(GetFirmDetails(widget.firmId));
+                context.read<FirmBloc>().add(GetFirmDetailsEvent(firmId: widget.firmId));
               },
               icon: const Icon(LucideIcons.refreshCw),
               label: const Text('Tentar Novamente'),
@@ -627,7 +626,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             Icon(
               LucideIcons.users,
               size: 64,
-              color: Colors.grey.withOpacity(0.5),
+              color: Colors.grey.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -658,6 +657,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         primaryArea: 'Direito Civil',
         specializations: const ['Direito Civil', 'Direito Imobiliário'],
         fair: 0.92,
+        equity: 0.88,
         rating: 4.8,
         distanceKm: 0.0, // Mesmo escritório
         reviewCount: 156,
@@ -678,6 +678,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         primaryArea: 'Direito Trabalhista',
         specializations: const ['Direito Trabalhista', 'Direito Sindical'],
         fair: 0.87,
+        equity: 0.91,
         rating: 4.6,
         distanceKm: 0.0,
         reviewCount: 203,
@@ -698,6 +699,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         primaryArea: 'Direito Tributário',
         specializations: const ['Direito Tributário', 'Direito Empresarial'],
         fair: 0.85,
+        equity: 0.85,
         rating: 4.7,
         distanceKm: 0.0,
         reviewCount: 98,

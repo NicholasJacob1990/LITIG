@@ -22,10 +22,10 @@ class ChatRepositoryImpl implements ChatRepository {
         final remoteRooms = await remoteDataSource.getChatRooms();
         return Right(remoteRooms.map((model) => model.toEntity()).toList());
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure('No internet connection'));
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -46,10 +46,10 @@ class ChatRepositoryImpl implements ChatRepository {
         );
         return Right(remoteRoom.toEntity());
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure('No internet connection'));
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -68,10 +68,10 @@ class ChatRepositoryImpl implements ChatRepository {
         );
         return Right(remoteMessages.map((model) => model.toEntity()).toList());
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure('No internet connection'));
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -92,10 +92,10 @@ class ChatRepositoryImpl implements ChatRepository {
         );
         return Right(remoteMessage.toEntity());
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure('No internet connection'));
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -112,10 +112,10 @@ class ChatRepositoryImpl implements ChatRepository {
         );
         return const Right(null);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure('No internet connection'));
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -126,10 +126,10 @@ class ChatRepositoryImpl implements ChatRepository {
         final count = await remoteDataSource.getUnreadCount(roomId);
         return Right(count);
       } catch (e) {
-        return Left(ServerFailure(e.toString()));
+        return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure('No internet connection'));
+      return Left(ServerFailure(message: 'No internet connection'));
     }
   }
 

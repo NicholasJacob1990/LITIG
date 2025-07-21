@@ -143,6 +143,37 @@ class ContextualCaseData extends Equatable {
       aiReason: aiReason ?? this.aiReason,
     );
   }
+
+  /// Converte a entidade para Map<String, dynamic>
+  Map<String, dynamic> toMap() {
+    return {
+      'allocation_type': allocationType.toString(),
+      'match_score': matchScore,
+      'response_deadline': responseDeadline?.toIso8601String(),
+      'partner_id': partnerId,
+      'delegated_by': delegatedBy,
+      'context_metadata': contextMetadata,
+      'partner_name': partnerName,
+      'partner_specialization': partnerSpecialization,
+      'partner_rating': partnerRating,
+      'your_share': yourShare,
+      'partner_share': partnerShare,
+      'collaboration_area': collaborationArea,
+      'response_time_left': responseTimeLeft,
+      'distance': distance,
+      'estimated_value': estimatedValue,
+      'initiator_name': initiatorName,
+      'sla_hours': slaHours,
+      'conversion_rate': conversionRate,
+      'complexity_score': complexityScore,
+      'hours_budgeted': hoursBudgeted,
+      'hourly_rate': hourlyRate,
+      'delegated_by_name': delegatedByName,
+      'deadline_days': deadlineDays,
+      'ai_success_rate': aiSuccessRate,
+      'ai_reason': aiReason,
+    };
+  }
 }
 
 /// KPI específico para contexto

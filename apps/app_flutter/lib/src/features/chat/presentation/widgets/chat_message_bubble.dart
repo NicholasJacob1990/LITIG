@@ -94,7 +94,7 @@ class ChatMessageBubble extends StatelessWidget {
                           DateFormat('HH:mm').format(message.createdAt),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: isFromCurrentUser 
-                                ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)
+                                ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
                                 : Colors.grey[600],
                           ),
                         ),
@@ -107,7 +107,7 @@ class ChatMessageBubble extends StatelessWidget {
                             size: 14,
                             color: message.isRead 
                                 ? Colors.blue[200]
-                                : Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                : Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                           ),
                         ],
                       ],
@@ -123,7 +123,7 @@ class ChatMessageBubble extends StatelessWidget {
             // Avatar for current user
             CircleAvatar(
               radius: 16,
-              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               child: Icon(
                 LucideIcons.user,
                 color: Theme.of(context).colorScheme.primary,
@@ -191,7 +191,7 @@ class ChatMessageBubble extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isFromCurrentUser 
-                ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.1)
+                ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1)
                 : Colors.grey[200],
             borderRadius: BorderRadius.circular(8),
           ),

@@ -40,7 +40,8 @@ class DocumentTypeMapper {
   DocumentTypeMapper._internal();
 
   /// Cache de dados de tipos de documentos
-  List<DocumentTypeData>? _cachedTypeData;
+  // TODO: Implement caching functionality
+  // List<DocumentTypeData>? _cachedTypeData;
 
   /// Retorna categoria para um tipo específico
   static DocumentCategory getCategoryForType(String documentType) {

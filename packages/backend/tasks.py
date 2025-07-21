@@ -14,6 +14,7 @@ from supabase import Client, create_client
 from .celery_app import celery_app
 from .embedding_service import generate_embedding
 from .triage_service import triage_service
+from .utils.case_type_mapper import map_area_to_case_type
 
 load_dotenv()
 
@@ -49,21 +50,42 @@ async def _process_triage_and_match_flow(
     # 3. Salva o caso no banco de dados
     case_id = str(uuid.uuid4())
     coords_to_save = coords or (-23.5505, -46.6333)
+    
+    # NOVO: Mapear área jurídica para tipo de caso
+    area = triage_result.get("area")
+    subarea = triage_result.get("subarea")
+    keywords = triage_result.get("keywords", [])
+    summary = triage_result.get("summary")
+    # Tentar extrair natureza da análise detalhada se disponível
+    nature = None
+    if detailed_analysis and isinstance(detailed_analysis, dict):
+        classificacao = detailed_analysis.get("classificacao", {})
+        if isinstance(classificacao, dict):
+            nature = classificacao.get("natureza")
+    
+    case_type = map_area_to_case_type(
+        area=area,
+        subarea=subarea,
+        keywords=keywords,
+        summary=summary,
+        nature=nature
+    )
 
     case_data = {
         "id": case_id,
         "user_id": user_id,
         "texto_cliente": text,
-        "area": triage_result.get("area"),
-        "subarea": triage_result.get("subarea"),
+        "area": area,
+        "subarea": subarea,
         "urgency_h": triage_result.get("urgency_h"),
-        "summary": triage_result.get("summary"),
-        "keywords": triage_result.get("keywords"),
+        "summary": summary,
+        "keywords": keywords,
         "sentiment": triage_result.get("sentiment"),
         "summary_embedding": triage_result.get("summary_embedding"),
         "detailed_analysis": detailed_analysis,
         "coords": coords_to_save,
-        "status": "triage_completed"
+        "status": "triage_completed",
+        "case_type": case_type  # NOVO campo
     }
 
     insert_response = supabase.table("cases").insert(case_data).execute()

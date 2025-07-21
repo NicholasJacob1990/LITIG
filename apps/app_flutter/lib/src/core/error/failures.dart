@@ -51,6 +51,11 @@ class GenericFailure extends Failure {
   const GenericFailure({required super.message, super.code});
 }
 
+/// Falha inesperada do sistema
+class UnexpectedFailure extends Failure {
+  const UnexpectedFailure({required super.message, super.code});
+}
+
 /// Falha de não encontrado
 class NotFoundFailure extends Failure {
   const NotFoundFailure({required super.message, super.code});
@@ -84,4 +89,14 @@ class UnavailableFailure extends Failure {
 /// Falha de videochamada
 class VideoCallFailure extends Failure {
   const VideoCallFailure({required super.message, super.code});
-} 
+}
+
+/// Falha de rede
+class NetworkFailure extends Failure {
+  const NetworkFailure({required super.message, super.code});
+}
+
+/// Falha de autenticação
+class AuthFailure extends Failure {
+  const AuthFailure({required super.message, super.code});
+}

@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../lawyers/presentation/bloc/lawyer_hiring_bloc.dart';
 import '../widgets/client_proposal_card.dart';
-import '../../../../injection_container.dart';
-import '../../../../shared/widgets/organisms/empty_state_widget.dart';
+import 'package:meu_app/injection_container.dart';
+import '../../../../shared/widgets/molecules/empty_state_widget.dart';
 import '../../../../shared/widgets/atoms/loading_indicator.dart';
 
 class ClientProposalsScreen extends StatefulWidget {
@@ -298,10 +298,9 @@ class _ClientProposalsScreenState extends State<ClientProposalsScreen>
     
     return EmptyStateWidget(
       icon: icon,
-      title: message,
-      subtitle: subtitle,
+      message: message,
       actionText: actionText,
-      onAction: onAction,
+      onActionPressed: onAction,
     );
   }
 
@@ -476,7 +475,7 @@ class _ClientProposalsScreenState extends State<ClientProposalsScreen>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A237E).withOpacity(0.1),
+                      color: const Color(0xFF1A237E).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -703,9 +702,9 @@ class _ClientProposalsScreenState extends State<ClientProposalsScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -26,6 +26,22 @@ class SlaSettingsEntity extends Equatable {
     this.holidays,
     this.customRules,
     this.metadata,
+    this.businessHoursStart = '09:00',
+    this.businessHoursEnd = '18:00',
+    this.urgentSlaHours = 24,
+    this.emergencySlaHours = 6,
+    this.complexCaseSlaHours = 72,
+    this.defaultSlaHours = 48,
+    // Propriedades adicionais para corrigir erros
+    this.businessStartHour = '09:00',
+    this.businessEndHour = '18:00',
+    this.maxOverrideHours = 24,
+    this.businessDays = const ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+    this.escalationPercentages = const [25, 50, 75, 100],
+    this.enableEscalation = true,
+    this.allowOverride = true,
+    this.overrideRequiredRoles = const ['partner', 'admin'],
+    this.timezone = 'America/Sao_Paulo',
   });
 
   /// ID único das configurações
@@ -85,6 +101,52 @@ class SlaSettingsEntity extends Equatable {
   /// Metadados adicionais
   final Map<String, dynamic>? metadata;
 
+  /// Timezone das configurações
+  final String timezone;
+
+  /// Horário de início do expediente
+  final String businessHoursStart;
+
+  /// Horário de fim do expediente
+  final String businessHoursEnd;
+
+  /// Horas SLA para casos urgentes
+  final int urgentSlaHours;
+
+  /// Horas SLA para casos de emergência
+  final int emergencySlaHours;
+
+  /// Horas SLA para casos complexos
+  final int? complexCaseSlaHours;
+
+  /// Horas SLA padrão
+  final int defaultSlaHours;
+
+  // Propriedades adicionais para corrigir erros
+  /// Horário de início do expediente (alias)
+  final String businessStartHour;
+
+  /// Horário de fim do expediente (alias)
+  final String businessEndHour;
+
+  /// Máximo de horas para override
+  final int maxOverrideHours;
+
+  /// Dias da semana de trabalho
+  final List<String> businessDays;
+
+  /// Percentuais de escalação
+  final List<int> escalationPercentages;
+
+  /// Se escalação está habilitada
+  final bool enableEscalation;
+
+  /// Se override está permitido
+  final bool allowOverride;
+
+  /// Roles necessários para override
+  final List<String> overrideRequiredRoles;
+
   @override
   List<Object?> get props => [
         id,
@@ -106,6 +168,20 @@ class SlaSettingsEntity extends Equatable {
         holidays,
         customRules,
         metadata,
+        businessHoursStart,
+        businessHoursEnd,
+        urgentSlaHours,
+        emergencySlaHours,
+        complexCaseSlaHours,
+        defaultSlaHours,
+        businessStartHour,
+        businessEndHour,
+        maxOverrideHours,
+        businessDays,
+        escalationPercentages,
+        enableEscalation,
+        allowOverride,
+        overrideRequiredRoles,
       ];
 
   /// Cria configurações padrão para uma firma
@@ -134,17 +210,17 @@ class SlaSettingsEntity extends Equatable {
       lastModified: now,
       lastModifiedBy: createdBy,
       businessHours: const {
-        'monday': const {'start': '09:00', 'end': '18:00'},
-        'tuesday': const {'start': '09:00', 'end': '18:00'},
-        'wednesday': const {'start': '09:00', 'end': '18:00'},
-        'thursday': const {'start': '09:00', 'end': '18:00'},
-        'friday': const {'start': '09:00', 'end': '18:00'},
-        'saturday': const {'start': '09:00', 'end': '13:00'},
-        'sunday': const {'start': null, 'end': null},
+        'monday': {'start': '09:00', 'end': '18:00'},
+        'tuesday': {'start': '09:00', 'end': '18:00'},
+        'wednesday': {'start': '09:00', 'end': '18:00'},
+        'thursday': {'start': '09:00', 'end': '18:00'},
+        'friday': {'start': '09:00', 'end': '18:00'},
+        'saturday': {'start': '09:00', 'end': '13:00'},
+        'sunday': {'start': null, 'end': null},
       },
       escalationRules: const {
         'enabled': true,
-        'levels': const [
+        'levels': [
           {'minutes': 30, 'target': 'supervisor'},
           {'minutes': 120, 'target': 'partner'},
           {'minutes': 240, 'target': 'admin'},
@@ -152,11 +228,11 @@ class SlaSettingsEntity extends Equatable {
       },
       notificationSettings: const {
         'enabled': true,
-        'channels': const ['email', 'push'],
-        'timing': const {
-          'beforeDeadline': const [60, 30, 15], // minutos antes
+        'channels': ['email', 'push'],
+        'timing': {
+          'beforeDeadline': [60, 30, 15], // minutos antes
           'atDeadline': true,
-          'afterViolation': const [15, 60, 240], // minutos depois
+          'afterViolation': [15, 60, 240], // minutos depois
         },
       },
       holidays: const [],
@@ -190,6 +266,12 @@ class SlaSettingsEntity extends Equatable {
     List<Map<String, dynamic>>? holidays,
     Map<String, dynamic>? customRules,
     Map<String, dynamic>? metadata,
+    String? businessHoursStart,
+    String? businessHoursEnd,
+    int? urgentSlaHours,
+    int? emergencySlaHours,
+    int? complexCaseSlaHours,
+    int? defaultSlaHours,
   }) {
     return SlaSettingsEntity(
       id: id ?? this.id,
@@ -211,6 +293,12 @@ class SlaSettingsEntity extends Equatable {
       holidays: holidays ?? this.holidays,
       customRules: customRules ?? this.customRules,
       metadata: metadata ?? this.metadata,
+      businessHoursStart: businessHoursStart ?? this.businessHoursStart,
+      businessHoursEnd: businessHoursEnd ?? this.businessHoursEnd,
+      urgentSlaHours: urgentSlaHours ?? this.urgentSlaHours,
+      emergencySlaHours: emergencySlaHours ?? this.emergencySlaHours,
+      complexCaseSlaHours: complexCaseSlaHours ?? this.complexCaseSlaHours,
+      defaultSlaHours: defaultSlaHours ?? this.defaultSlaHours,
     );
   }
 

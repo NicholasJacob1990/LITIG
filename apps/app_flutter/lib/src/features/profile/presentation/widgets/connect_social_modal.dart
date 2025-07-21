@@ -85,7 +85,7 @@ class _ConnectSocialModalState extends State<ConnectSocialModal> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _getProviderColor().withOpacity(0.1),
+                color: _getProviderColor().withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -119,9 +119,9 @@ class _ConnectSocialModalState extends State<ConnectSocialModal> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.withOpacity(0.3)),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -364,7 +364,7 @@ class _ConnectSocialModalState extends State<ConnectSocialModal> {
       case 'linkedin':
         return Icons.business;
       case 'instagram':
-        return Icons.photo_camera;
+        return Icons.camera_alt;
       case 'facebook':
         return Icons.facebook;
       default:

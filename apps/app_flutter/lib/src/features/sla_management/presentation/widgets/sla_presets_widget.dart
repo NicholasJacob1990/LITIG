@@ -584,7 +584,7 @@ class _SlaPresetsWidgetState extends State<SlaPresetsWidget> {
     
     // Apply preset via BLoC
     context.read<SlaSettingsBloc>().add(
-      ApplySlaPresetEvent(preset: preset),
+      ApplySlaPresetEvent(preset),
     );
   }
   
@@ -620,13 +620,13 @@ class _SlaPresetsWidgetState extends State<SlaPresetsWidget> {
     );
     
     context.read<SlaSettingsBloc>().add(
-      CreateCustomSlaPresetEvent(preset: duplicated),
+      CreateCustomSlaPresetEvent(duplicated),
     );
   }
   
   void _exportPreset(SlaPresetEntity preset) {
     context.read<SlaSettingsBloc>().add(
-      ExportSlaPresetEvent(presetId: preset.id),
+      ExportSlaPresetEvent(preset),
     );
   }
   
@@ -645,7 +645,7 @@ class _SlaPresetsWidgetState extends State<SlaPresetsWidget> {
             onPressed: () {
               Navigator.pop(context);
               context.read<SlaSettingsBloc>().add(
-                DeleteSlaPresetEvent(presetId: preset.id),
+                DeleteSlaPresetEvent(preset.id),
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),

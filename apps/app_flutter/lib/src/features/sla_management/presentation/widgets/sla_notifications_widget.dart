@@ -699,7 +699,7 @@ class _SlaNotificationsWidgetState extends State<SlaNotificationsWidget> {
 
   void _sendTestNotification(String type) {
     context.read<SlaSettingsBloc>().add(
-      TestSlaNotificationEvent(type: type),
+      TestSlaNotificationEvent(type),
     );
     
     ScaffoldMessenger.of(context).showSnackBar(

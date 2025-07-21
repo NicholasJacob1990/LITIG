@@ -31,12 +31,66 @@ class _SlaEscalationsWidgetState extends State<SlaEscalationsWidget> {
         name: 'Escalação Automática - Nível 1',
         description: 'Notificar supervisor quando 80% do prazo se esgotou',
         firmId: 'current_firm',
+        delayMinutes: 60,
+        levels: [
+          EscalationLevel(
+            level: 1,
+            name: 'Nível 1 - Supervisor',
+            description: 'Notificação para supervisor direto',
+            actions: [
+              EscalationAction(
+                type: EscalationActionType.notify,
+                description: 'Notificar supervisor',
+                parameters: {},
+              ),
+              EscalationAction(
+                type: EscalationActionType.sendEmail,
+                description: 'Enviar email ao supervisor',
+                parameters: {'template': 'sla_warning'},
+              ),
+            ],
+            recipients: [
+              EscalationRecipient(
+                type: EscalationRecipientType.role,
+                identifier: 'supervisor',
+                name: 'Supervisor Direto',
+              ),
+            ],
+          ),
+        ],
       ),
       SlaEscalationEntity.priorityBasedEscalation(
         id: 'esc_2', 
         name: 'Escalação por Prioridade',
         description: 'Escalação imediata para casos de emergência',
         firmId: 'current_firm',
+        priority: 'high',
+        levels: [
+          EscalationLevel(
+            level: 1,
+            name: 'Nível 1 - Gerente',
+            description: 'Notificação para gerente de área',
+            actions: [
+              const EscalationAction(
+                type: EscalationActionType.notify,
+                description: 'Notificar gerente',
+                parameters: {},
+              ),
+              const EscalationAction(
+                type: EscalationActionType.sendEmail,
+                description: 'Enviar email ao gerente',
+                parameters: {'template': 'priority_alert'},
+              ),
+            ],
+            recipients: [
+              const EscalationRecipient(
+                type: EscalationRecipientType.role,
+                identifier: 'manager',
+                name: 'Gerente de Área',
+              ),
+            ],
+          ),
+        ],
       ),
     ];
   }

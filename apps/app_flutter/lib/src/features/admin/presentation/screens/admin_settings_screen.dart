@@ -108,13 +108,13 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.settings,
             size: 32,
             color: AppColors.primaryBlue,
@@ -310,7 +310,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -577,7 +577,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   }
 
   void _clearCache(BuildContext context) {
-    context.read<AdminBloc>().add(UpdateAdminSettings());
+    context.read<AdminBloc>().add(const UpdateAdminSettings(settings: {'action': 'clear_cache'}));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Cache limpo com sucesso'),
@@ -587,7 +587,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   }
 
   void _optimizeDatabase(BuildContext context) {
-    context.read<AdminBloc>().add(UpdateAdminSettings());
+    context.read<AdminBloc>().add(const UpdateAdminSettings(settings: {'action': 'optimize_db'}));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Otimização de banco iniciada'),
@@ -597,7 +597,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   }
 
   void _manualBackup(BuildContext context) {
-    context.read<AdminBloc>().add(UpdateAdminSettings());
+    context.read<AdminBloc>().add(const UpdateAdminSettings(settings: {'action': 'manual_backup'}));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Backup manual iniciado'),
@@ -607,7 +607,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   }
 
   void _saveSettings(BuildContext context) {
-    context.read<AdminBloc>().add(UpdateAdminSettings());
+    context.read<AdminBloc>().add(const UpdateAdminSettings(settings: {'action': 'save_settings'}));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Configurações salvas com sucesso'),
@@ -624,7 +624,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Icon(
             LucideIcons.checkCircle,
             size: 64,
-            color: Colors.green.withOpacity(0.5),
+            color: Colors.green.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -650,7 +650,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -665,7 +665,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => context.read<AdminBloc>().add(LoadAdminDashboard()),
+            onPressed: () => context.read<AdminBloc>().add(const LoadAdminDashboard()),
             icon: const Icon(LucideIcons.refreshCw),
             label: const Text('Tentar Novamente'),
           ),
