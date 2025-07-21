@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/features/dashboard/presentation/widgets/client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/enhanced_client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/firm_dashboard.dart';
@@ -52,8 +53,8 @@ class DashboardScreen extends StatelessWidget {
             case 'client':
             case 'PF':
             default:
-              // Clientes recebem dashboard expandido
-              return EnhancedClientDashboard(userName: user.fullName ?? 'Cliente');
+              // Clientes recebem dashboard azul de triagem
+              return ClientDashboard(userName: user.fullName ?? 'Cliente');
           }
         }
         // Exibe um loader enquanto o estado de autenticação é resolvido
