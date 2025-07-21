@@ -134,9 +134,9 @@ class TaskBreakdownSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,10 +256,10 @@ class TaskBreakdownSection extends BaseInfoSection {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _getTaskStatusColor(status).withOpacity(0.05),
+        color: _getTaskStatusColor(status).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getTaskStatusColor(status).withOpacity(0.3),
+          color: _getTaskStatusColor(status).withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -290,7 +290,7 @@ class TaskBreakdownSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _getPriorityColor(priority).withOpacity(0.2),
+                  color: _getPriorityColor(priority).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -461,7 +461,7 @@ class TaskBreakdownSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -500,7 +500,7 @@ class TaskBreakdownSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -974,9 +974,9 @@ class TaskBreakdownSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1096,10 +1096,10 @@ class TaskBreakdownSection extends BaseInfoSection {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _getTaskStatusColor(status).withOpacity(0.05),
+        color: _getTaskStatusColor(status).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getTaskStatusColor(status).withOpacity(0.3),
+          color: _getTaskStatusColor(status).withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -1130,7 +1130,7 @@ class TaskBreakdownSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _getPriorityColor(priority).withOpacity(0.2),
+                  color: _getPriorityColor(priority).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -1301,7 +1301,7 @@ class TaskBreakdownSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -1340,7 +1340,7 @@ class TaskBreakdownSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
+        color: Colors.white.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(

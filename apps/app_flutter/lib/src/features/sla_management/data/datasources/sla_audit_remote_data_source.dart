@@ -163,7 +163,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 201) {
         return SlaAuditModel.fromJson(response.data);
       } else {
-        throw ServerException('Erro ao criar entrada de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao criar entrada de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -171,10 +171,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -212,7 +212,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaAuditModel.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter trilha de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter trilha de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -220,10 +220,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -251,7 +251,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao gerar relatório de compliance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao gerar relatório de compliance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -259,10 +259,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -286,7 +286,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao verificar integridade: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao verificar integridade: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -294,10 +294,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -327,7 +327,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data['download_url'] as String;
       } else {
-        throw ServerException('Erro ao exportar log de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao exportar log de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -335,10 +335,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -364,7 +364,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       } else {
-        throw ServerException('Erro ao obter eventos de segurança: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter eventos de segurança: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -372,10 +372,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -399,7 +399,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao obter estatísticas de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter estatísticas de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -407,10 +407,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -689,7 +689,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 201) {
         return SlaAuditModel.fromJson(response.data);
       } else {
-        throw ServerException('Erro ao criar entrada de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao criar entrada de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -697,10 +697,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -738,7 +738,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaAuditModel.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter trilha de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter trilha de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -746,10 +746,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -777,7 +777,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao gerar relatório de compliance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao gerar relatório de compliance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -785,10 +785,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -812,7 +812,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao verificar integridade: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao verificar integridade: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -820,10 +820,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -853,7 +853,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data['download_url'] as String;
       } else {
-        throw ServerException('Erro ao exportar log de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao exportar log de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -861,10 +861,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -890,7 +890,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       } else {
-        throw ServerException('Erro ao obter eventos de segurança: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter eventos de segurança: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -898,10 +898,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -925,7 +925,7 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao obter estatísticas de auditoria: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter estatísticas de auditoria: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -933,10 +933,10 @@ class SlaAuditRemoteDataSourceImpl implements SlaAuditRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 

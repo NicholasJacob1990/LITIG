@@ -68,8 +68,8 @@ class TimeTrackingSection extends BaseInfoSection {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isTimerActive 
-                ? Colors.green.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.3),
+                ? Colors.green.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -117,8 +117,8 @@ class TimeTrackingSection extends BaseInfoSection {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: isTimerActive 
-                        ? Colors.green.withOpacity(0.2)
-                        : Colors.grey.withOpacity(0.2),
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.grey.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -239,9 +239,9 @@ class TimeTrackingSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -472,7 +472,7 @@ class TimeTrackingSection extends BaseInfoSection {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getTrendColor(efficiencyTrend).withOpacity(0.2),
+                      color: _getTrendColor(efficiencyTrend).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -541,7 +541,7 @@ class TimeTrackingSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -923,8 +923,8 @@ class TimeTrackingSection extends BaseInfoSection {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isTimerActive 
-                ? Colors.green.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.3),
+                ? Colors.green.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -972,8 +972,8 @@ class TimeTrackingSection extends BaseInfoSection {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: isTimerActive 
-                        ? Colors.green.withOpacity(0.2)
-                        : Colors.grey.withOpacity(0.2),
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.grey.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -1094,9 +1094,9 @@ class TimeTrackingSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1327,7 +1327,7 @@ class TimeTrackingSection extends BaseInfoSection {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getTrendColor(efficiencyTrend).withOpacity(0.2),
+                      color: _getTrendColor(efficiencyTrend).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -1396,7 +1396,7 @@ class TimeTrackingSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

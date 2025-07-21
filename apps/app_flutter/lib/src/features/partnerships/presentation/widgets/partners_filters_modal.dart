@@ -167,7 +167,7 @@ class _PartnersFiltersModalState extends State<PartnersFiltersModal> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.1) : Colors.transparent,
+              color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
               border: Border.all(
                 color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
                 width: isSelected ? 2 : 1,

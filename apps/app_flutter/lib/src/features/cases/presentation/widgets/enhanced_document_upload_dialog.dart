@@ -240,7 +240,7 @@ class _EnhancedDocumentUploadDialogState extends State<EnhancedDocumentUploadDia
                 });
               },
               selectedColor: category.color,
-              backgroundColor: category.color.withOpacity(0.1),
+              backgroundColor: category.color.withValues(alpha: 0.1),
             );
           }).toList(),
         ),
@@ -260,7 +260,7 @@ class _EnhancedDocumentUploadDialogState extends State<EnhancedDocumentUploadDia
             width: 2,
           ),
           borderRadius: BorderRadius.circular(12),
-          color: Theme.of(context).primaryColor.withOpacity(0.05),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

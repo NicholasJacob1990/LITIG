@@ -79,7 +79,7 @@ class _ContractSignatureScreenState extends State<ContractSignatureScreen> {
                         decoration: BoxDecoration(
                           border: Border.all(color: Theme.of(context).dividerColor),
                           borderRadius: BorderRadius.circular(8),
-                          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
                         ),
                         child: SingleChildScrollView(
                           child: Text(

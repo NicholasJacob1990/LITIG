@@ -102,10 +102,10 @@ class StrategicDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getDocumentPriorityColor(doc['urgency']).withOpacity(0.05),
+            color: _getDocumentPriorityColor(doc['urgency']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getDocumentPriorityColor(doc['urgency']).withOpacity(0.3),
+              color: _getDocumentPriorityColor(doc['urgency']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1121,10 +1121,10 @@ class StrategicDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getDocumentPriorityColor(doc['urgency']).withOpacity(0.05),
+            color: _getDocumentPriorityColor(doc['urgency']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getDocumentPriorityColor(doc['urgency']).withOpacity(0.3),
+              color: _getDocumentPriorityColor(doc['urgency']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(

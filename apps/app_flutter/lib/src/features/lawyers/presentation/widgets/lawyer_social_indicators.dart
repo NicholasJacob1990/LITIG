@@ -128,10 +128,10 @@ class LawyerSocialIndicators extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: _getPlatformColor(platform).withOpacity(0.1),
+              color: _getPlatformColor(platform).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: _getPlatformColor(platform).withOpacity(0.3),
+                color: _getPlatformColor(platform).withValues(alpha: 0.3),
               ),
             ),
             child: Icon(
@@ -163,10 +163,10 @@ class LawyerSocialIndicators extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: _getScoreColor(score).withOpacity(0.1),
+            color: _getScoreColor(score).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getScoreColor(score).withOpacity(0.3),
+              color: _getScoreColor(score).withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -272,7 +272,7 @@ class LawyerSocialPreview extends StatelessWidget {
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -299,7 +299,7 @@ class LawyerSocialPreview extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
@@ -355,7 +355,7 @@ class LawyerSocialPreview extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
@@ -375,7 +375,7 @@ class LawyerSocialPreview extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Text(

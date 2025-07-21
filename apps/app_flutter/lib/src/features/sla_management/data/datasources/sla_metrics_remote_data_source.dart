@@ -164,7 +164,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return SlaMetricsModel.fromJson(response.data);
       } else {
-        throw ServerException('Erro ao obter métricas: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -172,10 +172,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -202,7 +202,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaComplianceMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de compliance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de compliance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -210,10 +210,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -240,7 +240,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaPerformanceMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de performance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de performance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -248,10 +248,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -278,7 +278,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaViolationMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de violação: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de violação: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -286,10 +286,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -316,7 +316,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaEscalationMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de escalação: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de escalação: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -324,10 +324,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -354,7 +354,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaTrendMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de tendência: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de tendência: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -362,10 +362,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -391,7 +391,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao gerar relatório de compliance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao gerar relatório de compliance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -399,10 +399,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -430,7 +430,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao gerar relatório de performance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao gerar relatório de performance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -438,10 +438,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -468,7 +468,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       } else {
-        throw ServerException('Erro ao obter tendências de performance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter tendências de performance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -476,10 +476,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -750,7 +750,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return SlaMetricsModel.fromJson(response.data);
       } else {
-        throw ServerException('Erro ao obter métricas: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -758,10 +758,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -788,7 +788,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaComplianceMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de compliance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de compliance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -796,10 +796,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -826,7 +826,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaPerformanceMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de performance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de performance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -834,10 +834,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -864,7 +864,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaViolationMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de violação: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de violação: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -872,10 +872,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -902,7 +902,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaEscalationMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de escalação: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de escalação: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -910,10 +910,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -940,7 +940,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
         final List<dynamic> data = response.data;
         return data.map((item) => SlaTrendMetric.fromJson(item)).toList();
       } else {
-        throw ServerException('Erro ao obter métricas de tendência: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter métricas de tendência: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -948,10 +948,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -977,7 +977,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao gerar relatório de compliance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao gerar relatório de compliance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -985,10 +985,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -1016,7 +1016,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw ServerException('Erro ao gerar relatório de performance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao gerar relatório de performance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -1024,10 +1024,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 
@@ -1054,7 +1054,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(response.data);
       } else {
-        throw ServerException('Erro ao obter tendências de performance: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao obter tendências de performance: ${response.statusCode}');
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -1062,10 +1062,10 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
           e.type == DioExceptionType.connectionError) {
         throw NetworkException('Erro de conexão');
       } else {
-        throw ServerException('Erro do servidor: ${e.message}');
+        throw ServerException(message: 'Erro do servidor: ${e.message}');
       }
     } catch (e) {
-      throw ServerException('Erro inesperado: ${e.toString()}');
+      throw ServerException(message: 'Erro inesperado: ${e.toString()}');
     }
   }
 

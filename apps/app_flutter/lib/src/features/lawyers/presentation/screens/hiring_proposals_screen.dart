@@ -40,7 +40,7 @@ class _HiringProposalsScreenState extends State<HiringProposalsScreen>
           bottom: TabBar(
             controller: _tabController,
             labelColor: Theme.of(context).colorScheme.onPrimary,
-            unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+            unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
             indicatorColor: Theme.of(context).colorScheme.onPrimary,
             tabs: const [
               Tab(
@@ -286,7 +286,7 @@ class _HiringProposalsScreenContentState extends State<HiringProposalsScreenCont
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(

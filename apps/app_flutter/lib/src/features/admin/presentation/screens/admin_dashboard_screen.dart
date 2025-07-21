@@ -247,7 +247,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     
                     LinearProgressIndicator(
                       value: (qualidadeDados['sync_coverage'] ?? 0).toDouble(),
-                      backgroundColor: AppColors.lightTextSecondary.withOpacity(0.2),
+                      backgroundColor: AppColors.lightTextSecondary.withValues(alpha: 0.2),
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
                     ),
                     

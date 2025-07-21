@@ -28,7 +28,7 @@ class NotificationCard extends StatelessWidget {
       elevation: notification.isRead ? 1 : 3,
       color: notification.isRead 
           ? theme.cardColor 
-          : theme.cardColor.withOpacity(0.95),
+          : theme.cardColor.withValues(alpha: 0.95),
       child: InkWell(
         onTap: () {
           if (!notification.isRead) {
@@ -48,7 +48,7 @@ class NotificationCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -91,7 +91,7 @@ class NotificationCard extends StatelessWidget {
                         Text(
                           _formatTimestamp(notification.createdAt),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -106,7 +106,7 @@ class NotificationCard extends StatelessWidget {
                 notification.body,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: notification.isRead 
-                      ? theme.colorScheme.onSurface.withOpacity(0.8)
+                      ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
                       : theme.colorScheme.onSurface,
                 ),
               ),
@@ -167,9 +167,9 @@ class NotificationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,
@@ -187,9 +187,9 @@ class NotificationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -309,7 +309,7 @@ class NotificationCard extends StatelessWidget {
       elevation: notification.isRead ? 1 : 3,
       color: notification.isRead 
           ? theme.cardColor 
-          : theme.cardColor.withOpacity(0.95),
+          : theme.cardColor.withValues(alpha: 0.95),
       child: InkWell(
         onTap: () {
           if (!notification.isRead) {
@@ -329,7 +329,7 @@ class NotificationCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -372,7 +372,7 @@ class NotificationCard extends StatelessWidget {
                         Text(
                           _formatTimestamp(notification.createdAt),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -387,7 +387,7 @@ class NotificationCard extends StatelessWidget {
                 notification.body,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: notification.isRead 
-                      ? theme.colorScheme.onSurface.withOpacity(0.8)
+                      ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
                       : theme.colorScheme.onSurface,
                 ),
               ),
@@ -448,9 +448,9 @@ class NotificationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,
@@ -468,9 +468,9 @@ class NotificationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

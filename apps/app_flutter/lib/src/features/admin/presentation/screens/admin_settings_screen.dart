@@ -108,9 +108,9 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -310,7 +310,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -624,7 +624,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Icon(
             LucideIcons.checkCircle,
             size: 64,
-            color: Colors.green.withOpacity(0.5),
+            color: Colors.green.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -650,7 +650,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

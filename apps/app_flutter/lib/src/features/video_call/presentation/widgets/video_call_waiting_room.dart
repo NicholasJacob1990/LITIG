@@ -16,7 +16,7 @@ class VideoCallWaitingRoom extends StatelessWidget {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.2),
+              color: Colors.blue.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(60),
               border: Border.all(color: Colors.blue, width: 2),
             ),
@@ -98,7 +98,7 @@ class VideoCallWaitingRoom extends StatelessWidget {
               style: TextStyle(color: Colors.white),
             ),
             style: TextButton.styleFrom(
-              backgroundColor: Colors.red.withOpacity(0.7),
+              backgroundColor: Colors.red.withValues(alpha: 0.7),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

@@ -279,10 +279,10 @@ class DeliveryFrameworkSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _getPhaseStatusColor(phase['status']).withOpacity(0.05),
+                  color: _getPhaseStatusColor(phase['status']).withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getPhaseStatusColor(phase['status']).withOpacity(0.3),
+                    color: _getPhaseStatusColor(phase['status']).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -540,10 +540,10 @@ class DeliveryFrameworkSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getQualityGateColor(gate['status']).withOpacity(0.05),
+            color: _getQualityGateColor(gate['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getQualityGateColor(gate['status']).withOpacity(0.3),
+              color: _getQualityGateColor(gate['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -724,10 +724,10 @@ class DeliveryFrameworkSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getTouchpointStatusColor(touchpoint['status']).withOpacity(0.05),
+            color: _getTouchpointStatusColor(touchpoint['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getTouchpointStatusColor(touchpoint['status']).withOpacity(0.3),
+              color: _getTouchpointStatusColor(touchpoint['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -1516,10 +1516,10 @@ class DeliveryFrameworkSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _getPhaseStatusColor(phase['status']).withOpacity(0.05),
+                  color: _getPhaseStatusColor(phase['status']).withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getPhaseStatusColor(phase['status']).withOpacity(0.3),
+                    color: _getPhaseStatusColor(phase['status']).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -1777,10 +1777,10 @@ class DeliveryFrameworkSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getQualityGateColor(gate['status']).withOpacity(0.05),
+            color: _getQualityGateColor(gate['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getQualityGateColor(gate['status']).withOpacity(0.3),
+              color: _getQualityGateColor(gate['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1961,10 +1961,10 @@ class DeliveryFrameworkSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getTouchpointStatusColor(touchpoint['status']).withOpacity(0.05),
+            color: _getTouchpointStatusColor(touchpoint['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getTouchpointStatusColor(touchpoint['status']).withOpacity(0.3),
+              color: _getTouchpointStatusColor(touchpoint['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Row(

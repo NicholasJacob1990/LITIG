@@ -82,7 +82,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: AppColors.primaryBlue.withOpacity(0.2),
+          color: AppColors.primaryBlue.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -299,7 +299,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryBlue.withOpacity(0.1) : Colors.transparent,
+              color: isSelected ? AppColors.primaryBlue.withValues(alpha: 0.1) : Colors.transparent,
               border: Border.all(
                 color: isSelected ? AppColors.primaryBlue : Colors.grey.shade300,
                 width: isSelected ? 1.5 : 1,
@@ -348,7 +348,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
           max: 5.0,
           divisions: 10,
           activeColor: AppColors.warning,
-          inactiveColor: AppColors.warning.withOpacity(0.3),
+          inactiveColor: AppColors.warning.withValues(alpha: 0.3),
           label: _minRating.toStringAsFixed(1),
           onChanged: (value) => setState(() => _minRating = value),
         ),
@@ -380,7 +380,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
           max: 100.0,
           divisions: 19,
           activeColor: AppColors.info,
-          inactiveColor: AppColors.info.withOpacity(0.3),
+          inactiveColor: AppColors.info.withValues(alpha: 0.3),
           label: '${_maxDistance.toInt()} km',
           onChanged: (value) => setState(() => _maxDistance = value),
         ),
@@ -412,7 +412,7 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
           max: 2000.0,
           divisions: 39,
           activeColor: AppColors.success,
-          inactiveColor: AppColors.success.withOpacity(0.3),
+          inactiveColor: AppColors.success.withValues(alpha: 0.3),
           labels: RangeLabels(
             'R\$ ${_priceRange.start.toInt()}',
             'R\$ ${_priceRange.end.toInt()}',

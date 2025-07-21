@@ -331,7 +331,7 @@ class _InternalDelegationFormState extends State<InternalDelegationForm> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: Theme.of(context).colorScheme.primaryContainer,
@@ -842,7 +842,7 @@ class _InternalDelegationFormState extends State<InternalDelegationForm> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: Theme.of(context).colorScheme.primaryContainer,

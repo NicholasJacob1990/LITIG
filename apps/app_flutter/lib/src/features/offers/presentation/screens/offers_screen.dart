@@ -72,7 +72,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
         bottom: TabBar(
           controller: _mainTabController,
           labelColor: Theme.of(context).colorScheme.onPrimary,
-          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+          unselectedLabelColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
           indicatorColor: Theme.of(context).colorScheme.onPrimary,
           tabs: [
             BlocBuilder<OffersBloc, OffersState>(
@@ -379,7 +379,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, color: color, size: 20),
@@ -517,7 +517,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -593,7 +593,7 @@ class _UnifiedLawyerWorkspaceState extends State<_UnifiedLawyerWorkspace> with T
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
