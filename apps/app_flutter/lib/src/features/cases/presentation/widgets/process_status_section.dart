@@ -36,11 +36,11 @@ class ProcessStatusSection extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
-                    Icon(LucideIcons.fileClock, size: 48, color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                    Icon(LucideIcons.fileClock, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                     const SizedBox(height: 8),
                     Text(
                       'Nenhum andamento disponível no momento.',
-                      style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                      style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                     ),
                   ],
                 ),
@@ -64,7 +64,7 @@ class ProcessStatusSection extends StatelessWidget {
             _buildHeader(context, t),
             const SizedBox(height: 16),
             Text(processStatus!.description,
-                style: t.bodyMedium!.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
+                style: t.bodyMedium!.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
             const SizedBox(height: 12),
             _buildProgressBar(theme),
             const SizedBox(height: 16),
@@ -89,7 +89,7 @@ class ProcessStatusSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: _getStatusColor(processStatus!.currentPhase).withOpacity(0.1),
+            color: _getStatusColor(processStatus!.currentPhase).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -111,14 +111,14 @@ class ProcessStatusSection extends StatelessWidget {
       children: [
         LinearProgressIndicator(
           value: processStatus!.progressPercentage / 100,
-          backgroundColor: theme.colorScheme.outline.withOpacity(0.3),
+          backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.3),
           valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor(processStatus!.currentPhase)),
           minHeight: 6,
           borderRadius: BorderRadius.circular(3),
         ),
         const SizedBox(height: 4),
         Text('${processStatus!.progressPercentage.toStringAsFixed(0)}% concluído',
-            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.7))),
+            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
       ],
     );
   }
@@ -191,7 +191,7 @@ class ProcessStatusSection extends StatelessWidget {
                   phase.description,
                   style: TextStyle(
                     fontSize: 13,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
                 if (phase.completedAt != null)

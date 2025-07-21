@@ -68,7 +68,7 @@ class ClientProposalCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: _getStatusColor(proposal.status).withOpacity(0.1),
+            color: _getStatusColor(proposal.status).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -118,16 +118,16 @@ class ClientProposalCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A237E).withOpacity(0.05),
+        color: const Color(0xFF1A237E).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF1A237E).withOpacity(0.1)),
+        border: Border.all(color: const Color(0xFF1A237E).withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A237E).withOpacity(0.1),
+              color: const Color(0xFF1A237E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -523,10 +523,10 @@ class ClientProposalCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _getStatusColor(proposal.status).withOpacity(0.1),
+        color: _getStatusColor(proposal.status).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _getStatusColor(proposal.status).withOpacity(0.3),
+          color: _getStatusColor(proposal.status).withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -569,7 +569,7 @@ class ClientProposalCard extends StatelessWidget {
   }
 
   Color _getBorderColor(String status) {
-    return _getStatusColor(status).withOpacity(0.3);
+    return _getStatusColor(status).withValues(alpha: 0.3);
   }
 
   IconData _getStatusIcon(String status) {

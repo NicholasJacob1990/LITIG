@@ -42,8 +42,8 @@ class _VideoCallControlsState extends State<VideoCallControls> {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black.withOpacity(0.3),
-            Colors.black.withOpacity(0.7),
+            Colors.black.withValues(alpha: 0.3),
+            Colors.black.withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -125,10 +125,10 @@ class _VideoCallControlsState extends State<VideoCallControls> {
         height: 56,
         decoration: BoxDecoration(
           color: backgroundColor ?? 
-                 (isEnabled ? Colors.white.withOpacity(0.2) : Colors.red.withOpacity(0.7)),
+                 (isEnabled ? Colors.white.withValues(alpha: 0.2) : Colors.red.withValues(alpha: 0.7)),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

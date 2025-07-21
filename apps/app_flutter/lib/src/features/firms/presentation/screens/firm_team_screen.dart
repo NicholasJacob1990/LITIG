@@ -129,10 +129,10 @@ class _FirmTeamViewState extends State<FirmTeamView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.05),
+        color: AppColors.primaryBlue.withValues(alpha: 0.05),
         border: Border(
           bottom: BorderSide(
-            color: AppColors.primaryBlue.withOpacity(0.1),
+            color: AppColors.primaryBlue.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -144,10 +144,10 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withOpacity(0.1),
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AppColors.primaryBlue.withOpacity(0.3),
+                color: AppColors.primaryBlue.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -210,10 +210,10 @@ class _FirmTeamViewState extends State<FirmTeamView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppColors.warning.withOpacity(0.3),
+                color: AppColors.warning.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -275,7 +275,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
                     });
                   },
                   backgroundColor: Colors.transparent,
-                  selectedColor: AppColors.primaryBlue.withOpacity(0.1),
+                  selectedColor: AppColors.primaryBlue.withValues(alpha: 0.1),
                   checkmarkColor: AppColors.primaryBlue,
                   side: BorderSide(
                     color: isSelected ? AppColors.primaryBlue : Colors.grey.shade300,
@@ -307,7 +307,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.dividerColor.withOpacity(0.3),
+          color: theme.dividerColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -396,7 +396,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
               Icon(
                 LucideIcons.filter,
                 size: 64,
-                color: Colors.grey.withOpacity(0.5),
+                color: Colors.grey.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
@@ -437,7 +437,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: AppColors.primaryBlue.withOpacity(0.1),
+          color: AppColors.primaryBlue.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -450,7 +450,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withOpacity(0.1),
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -539,7 +539,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
         color: Theme.of(context).colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).dividerColor.withOpacity(0.3),
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -590,7 +590,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             Icon(
               LucideIcons.alertCircle,
               size: 64,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -627,7 +627,7 @@ class _FirmTeamViewState extends State<FirmTeamView> {
             Icon(
               LucideIcons.users,
               size: 64,
-              color: Colors.grey.withOpacity(0.5),
+              color: Colors.grey.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

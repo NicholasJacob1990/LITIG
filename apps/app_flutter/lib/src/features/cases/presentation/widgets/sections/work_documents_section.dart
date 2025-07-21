@@ -99,10 +99,10 @@ class WorkDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getDocumentStatusColor(doc['status']).withOpacity(0.05),
+            color: _getDocumentStatusColor(doc['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getDocumentStatusColor(doc['status']).withOpacity(0.2),
+              color: _getDocumentStatusColor(doc['status']).withValues(alpha: 0.2),
             ),
           ),
           child: Column(
@@ -272,10 +272,10 @@ class WorkDocumentsSection extends BaseInfoSection {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (category['color'] as Color).withOpacity(0.1),
+                  color: (category['color'] as Color).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: (category['color'] as Color).withOpacity(0.3),
+                    color: (category['color'] as Color).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -379,7 +379,7 @@ class WorkDocumentsSection extends BaseInfoSection {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: _getActivityColor(activity['action']).withOpacity(0.2),
+                backgroundColor: _getActivityColor(activity['action']).withValues(alpha: 0.2),
                 child: Icon(
                   _getActivityIcon(activity['action']),
                   color: _getActivityColor(activity['action']),
@@ -881,10 +881,10 @@ class WorkDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getDocumentStatusColor(doc['status']).withOpacity(0.05),
+            color: _getDocumentStatusColor(doc['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getDocumentStatusColor(doc['status']).withOpacity(0.2),
+              color: _getDocumentStatusColor(doc['status']).withValues(alpha: 0.2),
             ),
           ),
           child: Column(
@@ -1054,10 +1054,10 @@ class WorkDocumentsSection extends BaseInfoSection {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (category['color'] as Color).withOpacity(0.1),
+                  color: (category['color'] as Color).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: (category['color'] as Color).withOpacity(0.3),
+                    color: (category['color'] as Color).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -1161,7 +1161,7 @@ class WorkDocumentsSection extends BaseInfoSection {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: _getActivityColor(activity['action']).withOpacity(0.2),
+                backgroundColor: _getActivityColor(activity['action']).withValues(alpha: 0.2),
                 child: Icon(
                   _getActivityIcon(activity['action']),
                   color: _getActivityColor(activity['action']),

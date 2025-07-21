@@ -60,10 +60,10 @@ class CaseComplexitySection extends BaseInfoSection {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getComplexityColor(complexityScore).withOpacity(0.1),
+            color: _getComplexityColor(complexityScore).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getComplexityColor(complexityScore).withOpacity(0.3),
+              color: _getComplexityColor(complexityScore).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -299,10 +299,10 @@ class CaseComplexitySection extends BaseInfoSection {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getProfitMarginColor(profitMargin).withOpacity(0.1),
+            color: _getProfitMarginColor(profitMargin).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getProfitMarginColor(profitMargin).withOpacity(0.3),
+              color: _getProfitMarginColor(profitMargin).withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -339,9 +339,9 @@ class CaseComplexitySection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -692,10 +692,10 @@ class CaseComplexitySection extends BaseInfoSection {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getComplexityColor(complexityScore).withOpacity(0.1),
+            color: _getComplexityColor(complexityScore).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getComplexityColor(complexityScore).withOpacity(0.3),
+              color: _getComplexityColor(complexityScore).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -931,10 +931,10 @@ class CaseComplexitySection extends BaseInfoSection {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getProfitMarginColor(profitMargin).withOpacity(0.1),
+            color: _getProfitMarginColor(profitMargin).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getProfitMarginColor(profitMargin).withOpacity(0.3),
+              color: _getProfitMarginColor(profitMargin).withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -971,9 +971,9 @@ class CaseComplexitySection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [

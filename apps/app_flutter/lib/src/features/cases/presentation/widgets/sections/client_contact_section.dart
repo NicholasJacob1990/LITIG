@@ -91,10 +91,10 @@ class ClientContactSection extends BaseInfoSection {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getRatingColor(clientRating).withOpacity(0.1),
+                color: _getRatingColor(clientRating).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _getRatingColor(clientRating).withOpacity(0.3),
+                  color: _getRatingColor(clientRating).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -248,9 +248,9 @@ class ClientContactSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -502,10 +502,10 @@ class ClientContactSection extends BaseInfoSection {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getRatingColor(clientRating).withOpacity(0.1),
+                color: _getRatingColor(clientRating).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _getRatingColor(clientRating).withOpacity(0.3),
+                  color: _getRatingColor(clientRating).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -659,9 +659,9 @@ class ClientContactSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [

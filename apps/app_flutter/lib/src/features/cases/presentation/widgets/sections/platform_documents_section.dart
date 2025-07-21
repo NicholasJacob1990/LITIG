@@ -102,10 +102,10 @@ class PlatformDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getQualityDocColor(doc['status']).withOpacity(0.05),
+            color: _getQualityDocColor(doc['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getQualityDocColor(doc['status']).withOpacity(0.3),
+              color: _getQualityDocColor(doc['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -339,10 +339,10 @@ class PlatformDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getComplianceColor(doc['status']).withOpacity(0.05),
+            color: _getComplianceColor(doc['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getComplianceColor(doc['status']).withOpacity(0.3),
+              color: _getComplianceColor(doc['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -414,7 +414,7 @@ class PlatformDocumentsSection extends BaseInfoSection {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getExpirationColor(doc['expires_in']).withOpacity(0.1),
+                    color: _getExpirationColor(doc['expires_in']).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -532,10 +532,10 @@ class PlatformDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getDeliverablePriorityColor(deliverable['priority']).withOpacity(0.05),
+            color: _getDeliverablePriorityColor(deliverable['priority']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getDeliverablePriorityColor(deliverable['priority']).withOpacity(0.3),
+              color: _getDeliverablePriorityColor(deliverable['priority']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1307,10 +1307,10 @@ class PlatformDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getQualityDocColor(doc['status']).withOpacity(0.05),
+            color: _getQualityDocColor(doc['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getQualityDocColor(doc['status']).withOpacity(0.3),
+              color: _getQualityDocColor(doc['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1544,10 +1544,10 @@ class PlatformDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _getComplianceColor(doc['status']).withOpacity(0.05),
+            color: _getComplianceColor(doc['status']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getComplianceColor(doc['status']).withOpacity(0.3),
+              color: _getComplianceColor(doc['status']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1619,7 +1619,7 @@ class PlatformDocumentsSection extends BaseInfoSection {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getExpirationColor(doc['expires_in']).withOpacity(0.1),
+                    color: _getExpirationColor(doc['expires_in']).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -1737,10 +1737,10 @@ class PlatformDocumentsSection extends BaseInfoSection {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: _getDeliverablePriorityColor(deliverable['priority']).withOpacity(0.05),
+            color: _getDeliverablePriorityColor(deliverable['priority']).withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _getDeliverablePriorityColor(deliverable['priority']).withOpacity(0.3),
+              color: _getDeliverablePriorityColor(deliverable['priority']).withValues(alpha: 0.3),
             ),
           ),
           child: Column(

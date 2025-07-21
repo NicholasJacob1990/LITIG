@@ -128,8 +128,8 @@ class BusinessOpportunitySection extends BaseInfoSection {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.05),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.05),
               ],
             ),
             borderRadius: BorderRadius.circular(12),
@@ -723,8 +723,8 @@ class BusinessOpportunitySection extends BaseInfoSection {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.05),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.05),
               ],
             ),
             borderRadius: BorderRadius.circular(12),

@@ -60,15 +60,15 @@ class MatchExplanationSection extends BaseInfoSection {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                _getScoreColor(matchScore).withOpacity(0.1),
-                _getScoreColor(matchScore).withOpacity(0.05),
+                _getScoreColor(matchScore).withValues(alpha: 0.1),
+                _getScoreColor(matchScore).withValues(alpha: 0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _getScoreColor(matchScore).withOpacity(0.3),
+              color: _getScoreColor(matchScore).withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -151,7 +151,7 @@ class MatchExplanationSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -509,7 +509,7 @@ class MatchExplanationSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -553,7 +553,7 @@ class MatchExplanationSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -779,15 +779,15 @@ class MatchExplanationSection extends BaseInfoSection {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                _getScoreColor(matchScore).withOpacity(0.1),
-                _getScoreColor(matchScore).withOpacity(0.05),
+                _getScoreColor(matchScore).withValues(alpha: 0.1),
+                _getScoreColor(matchScore).withValues(alpha: 0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _getScoreColor(matchScore).withOpacity(0.3),
+              color: _getScoreColor(matchScore).withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -870,7 +870,7 @@ class MatchExplanationSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -1228,7 +1228,7 @@ class MatchExplanationSection extends BaseInfoSection {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -1272,7 +1272,7 @@ class MatchExplanationSection extends BaseInfoSection {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

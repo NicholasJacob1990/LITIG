@@ -59,7 +59,7 @@ class LawyerCaseCard extends StatelessWidget {
                 children: [
                   Chip(
                     label: Text(caseStatus),
-                    backgroundColor: _getStatusColor(caseStatus).withOpacity(0.1),
+                    backgroundColor: _getStatusColor(caseStatus).withValues(alpha: 0.1),
                     labelStyle: TextStyle(color: _getStatusColor(caseStatus), fontWeight: FontWeight.bold),
                     side: BorderSide.none,
                   ),

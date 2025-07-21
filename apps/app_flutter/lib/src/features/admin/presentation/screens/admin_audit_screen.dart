@@ -94,9 +94,9 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         border: Border(
-          bottom: BorderSide(color: AppColors.primaryBlue.withOpacity(0.2)),
+          bottom: BorderSide(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
         ),
       ),
       child: Row(
@@ -336,9 +336,9 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -496,7 +496,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Icon(
             LucideIcons.searchX,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -522,7 +522,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Icon(
             LucideIcons.alertCircle,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -554,7 +554,7 @@ class _AdminAuditScreenState extends State<AdminAuditScreen> {
           Icon(
             LucideIcons.shield,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

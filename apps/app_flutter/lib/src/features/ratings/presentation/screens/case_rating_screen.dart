@@ -105,7 +105,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -113,7 +113,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -139,7 +139,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
           Text(
             _getHeaderSubtitle(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
             ),
             textAlign: TextAlign.center,
           ),
@@ -170,7 +170,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
             Text(
               'Como você avalia a experiência geral?',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -234,7 +234,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
             Text(
               'Avalie aspectos específicos da experiência:',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -288,7 +288,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -316,7 +316,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
             description,
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 12),
@@ -342,7 +342,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -396,7 +396,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
               'Selecione os aspectos que mais se destacaram:',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -417,7 +417,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
                       }
                     });
                   },
-                  selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                   checkmarkColor: Theme.of(context).colorScheme.primary,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   shape: RoundedRectangleBorder(
@@ -425,7 +425,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
                     side: BorderSide(
                       color: isSelected 
                           ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                     ),
                   ),
                 );
@@ -470,7 +470,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
               'Compartilhe sua experiência detalhada:',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),
@@ -486,7 +486,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -508,7 +508,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
                   '${_commentController.text.length}/500',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -616,7 +616,7 @@ class _CaseRatingScreenState extends State<CaseRatingScreen> {
     if (rating >= 4) return AppColors.success;
     if (rating >= 3) return AppColors.warning;
     if (rating >= 2) return AppColors.error;
-    return Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+    return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
   }
 
   bool _canSubmitRating() {

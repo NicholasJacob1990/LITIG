@@ -52,7 +52,7 @@ class CaseCard extends StatelessWidget {
               Text(
                 subtitle, 
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                 )
               ),
               const SizedBox(height: 16),
@@ -126,7 +126,7 @@ class CaseCard extends StatelessWidget {
                 color: theme.colorScheme.onSurface
               )
             ),
-            backgroundColor: theme.colorScheme.tertiary.withOpacity(0.1),
+            backgroundColor: theme.colorScheme.tertiary.withValues(alpha: 0.1),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8), 
@@ -149,7 +149,7 @@ class CaseCard extends StatelessWidget {
               color: theme.colorScheme.onSurface
             )
           ),
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), 
@@ -166,7 +166,7 @@ class CaseCard extends StatelessWidget {
               color: _getStatusColor(status)
             )
           ),
-          backgroundColor: _getStatusColor(status).withOpacity(0.1),
+          backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), 
@@ -212,7 +212,7 @@ class CaseCard extends StatelessWidget {
           color: theme.colorScheme.onSurface,
         ),
       ),
-      backgroundColor: (config['color'] as Color).withOpacity(0.1),
+      backgroundColor: (config['color'] as Color).withValues(alpha: 0.1),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -226,7 +226,7 @@ class CaseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: theme.colorScheme.secondary, width: 4)),
-        color: theme.colorScheme.secondary.withOpacity(0.05),
+        color: theme.colorScheme.secondary.withValues(alpha: 0.05),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -241,7 +241,7 @@ class CaseCard extends StatelessWidget {
             child: Text(
               'Pré-análise IA gerada em $preAnalysisDate',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7)
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
               ),
             ),
           ),
@@ -275,7 +275,7 @@ class CaseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: theme.colorScheme.tertiary, width: 4)),
-        color: theme.colorScheme.tertiary.withOpacity(0.05),
+        color: theme.colorScheme.tertiary.withValues(alpha: 0.05),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -301,7 +301,7 @@ class CaseCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiary.withOpacity(0.2),
+                    color: theme.colorScheme.tertiary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -323,7 +323,7 @@ class CaseCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiary.withOpacity(0.1),
+                  color: theme.colorScheme.tertiary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -347,7 +347,7 @@ class CaseCard extends StatelessWidget {
                     Text(
                       '${firm.teamSize} advogados',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                     if (firm.kpis != null) ...[
@@ -363,7 +363,7 @@ class CaseCard extends StatelessWidget {
                           Text(
                             '${(firm.kpis!.successRate * 100).toInt()}% sucesso',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -393,7 +393,7 @@ class CaseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: theme.colorScheme.outline, width: 4)),
-        color: theme.colorScheme.outline.withOpacity(0.05),
+        color: theme.colorScheme.outline.withValues(alpha: 0.05),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -411,7 +411,7 @@ class CaseCard extends StatelessWidget {
                 Text(
                   'Analisando escritórios especializados...',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -419,7 +419,7 @@ class CaseCard extends StatelessWidget {
                 Text(
                   'Recomendação será exibida após matching B2B',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 11,
                   ),
                 ),
@@ -478,7 +478,7 @@ class CaseCard extends StatelessWidget {
                 Text(
                   lawyer!.specialty, 
                   style: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7)
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                   )
                 ),
                 const SizedBox(height: 4),
@@ -488,7 +488,7 @@ class CaseCard extends StatelessWidget {
                       'Criado em ${lawyer!.createdDate}', 
                       style: TextStyle(
                         fontSize: 12, 
-                        color: theme.colorScheme.onSurface.withOpacity(0.7)
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                       )
                     ),
                     const Spacer(),
@@ -509,7 +509,7 @@ class CaseCard extends StatelessWidget {
               children: [
                 Icon(
                   LucideIcons.messageCircle, 
-                  color: theme.colorScheme.onSurface.withOpacity(0.5), 
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5), 
                   size: 28
                 ),
                 Positioned(

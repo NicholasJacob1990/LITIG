@@ -195,7 +195,7 @@ class _CaseDocumentsScreenState extends State<CaseDocumentsScreen> with TickerPr
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.primaryBlue, style: BorderStyle.solid),
         borderRadius: BorderRadius.circular(12),
-        color: AppColors.primaryBlue.withOpacity(0.05),
+        color: AppColors.primaryBlue.withValues(alpha: 0.05),
       ),
       child: Column(
         children: [
@@ -284,7 +284,7 @@ class _CaseDocumentsScreenState extends State<CaseDocumentsScreen> with TickerPr
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: _getFileTypeColor(doc.type).withOpacity(0.1),
+                color: _getFileTypeColor(doc.type).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -315,7 +315,7 @@ class _CaseDocumentsScreenState extends State<CaseDocumentsScreen> with TickerPr
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
+                            color: Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
