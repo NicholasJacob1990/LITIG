@@ -65,7 +65,6 @@ class AppCard extends StatelessWidget {
   }) {
     return AppCard(
       key: key,
-      child: child,
       variant: AppCardVariant.elevated,
       padding: padding,
       margin: margin,
@@ -76,6 +75,7 @@ class AppCard extends StatelessWidget {
       isDisabled: isDisabled,
       width: width,
       height: height,
+      child: child,
     );
   }
 
@@ -97,7 +97,6 @@ class AppCard extends StatelessWidget {
   }) {
     return AppCard(
       key: key,
-      child: child,
       variant: AppCardVariant.outlined,
       padding: padding,
       margin: margin,
@@ -110,6 +109,7 @@ class AppCard extends StatelessWidget {
       isDisabled: isDisabled,
       width: width,
       height: height,
+      child: child,
     );
   }
 
@@ -129,7 +129,6 @@ class AppCard extends StatelessWidget {
   }) {
     return AppCard(
       key: key,
-      child: child,
       variant: AppCardVariant.filled,
       padding: padding,
       margin: margin,
@@ -140,6 +139,7 @@ class AppCard extends StatelessWidget {
       isDisabled: isDisabled,
       width: width,
       height: height,
+      child: child,
     );
   }
 
@@ -159,7 +159,6 @@ class AppCard extends StatelessWidget {
   }) {
     return AppCard(
       key: key,
-      child: child,
       variant: AppCardVariant.gradient,
       gradient: gradient,
       padding: padding,
@@ -170,6 +169,7 @@ class AppCard extends StatelessWidget {
       isDisabled: isDisabled,
       width: width,
       height: height,
+      child: child,
     );
   }
 

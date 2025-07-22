@@ -33,7 +33,7 @@ class _SlaEscalationsWidgetState extends State<SlaEscalationsWidget> {
         firmId: 'current_firm',
         delayMinutes: 60,
         levels: [
-          EscalationLevel(
+          const EscalationLevel(
             level: 1,
             name: 'Nível 1 - Supervisor',
             description: 'Notificação para supervisor direto',
@@ -66,24 +66,24 @@ class _SlaEscalationsWidgetState extends State<SlaEscalationsWidget> {
         firmId: 'current_firm',
         priority: 'high',
         levels: [
-          EscalationLevel(
+          const EscalationLevel(
             level: 1,
             name: 'Nível 1 - Gerente',
             description: 'Notificação para gerente de área',
             actions: [
-              const EscalationAction(
+              EscalationAction(
                 type: EscalationActionType.notify,
                 description: 'Notificar gerente',
                 parameters: {},
               ),
-              const EscalationAction(
+              EscalationAction(
                 type: EscalationActionType.sendEmail,
                 description: 'Enviar email ao gerente',
                 parameters: {'template': 'priority_alert'},
               ),
             ],
             recipients: [
-              const EscalationRecipient(
+              EscalationRecipient(
                 type: EscalationRecipientType.role,
                 identifier: 'manager',
                 name: 'Gerente de Área',

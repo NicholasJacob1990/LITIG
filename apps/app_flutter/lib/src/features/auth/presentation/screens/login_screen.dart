@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/features/auth/domain/entities/user.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -216,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   : () {
                       context.read<AuthBloc>().add(AuthGoogleSignInRequested());
                     },
-              icon: const Icon(LucideIcons.user), // Placeholder for Google icon
+              icon: const OfficialSocialIcon(platform: SocialPlatform.google, size: 18),
               label: const Text('Entrar com Google'),
             ),
             
@@ -243,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
                     },
-                    icon: const Icon(LucideIcons.briefcase, size: 16),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.linkedin, size: 16),
                     label: const Text('LinkedIn'),
                   ),
                 ),
@@ -258,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthInstagramSignInRequested());
                     },
-                    icon: const Icon(LucideIcons.camera, size: 16),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.instagram, size: 16),
                     label: const Text('Instagram'),
                   ),
                 ),
@@ -273,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthFacebookSignInRequested());
                     },
-                    icon: const Icon(LucideIcons.facebook, size: 16),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.facebook, size: 16),
                     label: const Text('Facebook'),
                   ),
                 ),
@@ -337,8 +339,128 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_office'}),
             ),
           ],
-        )
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // === MODO DEBUG ===
+        Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.orange.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.bug_report, color: Colors.orange[700], size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Modo Debug - Teste de Usuários',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Clique em um botão abaixo para testar como diferentes tipos de usuário:',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.orange[600],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildDebugButton(context, 'Cliente', 'PF', Colors.blue),
+                  _buildDebugButton(context, 'Advogado Associado', 'lawyer_associated', Colors.green),
+                  _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', Colors.purple),
+                  _buildDebugButton(context, 'Escritório', 'lawyer_office', Colors.red),
+                  _buildDebugButton(context, 'Super Associado', 'lawyer_platform_associate', Colors.orange),
+                ],
+              ),
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  Widget _buildDebugButton(BuildContext context, String label, String userRole, Color color) {
+    return ElevatedButton(
+      onPressed: () => _switchToDebugUser(context, userRole),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        textStyle: const TextStyle(fontSize: 12),
+      ),
+      child: Text(label),
+    );
+  }
+
+  void _switchToDebugUser(BuildContext context, String userRole) {
+    final debugUsers = {
+      'PF': User(
+        id: 'debug-client-1',
+        email: 'cliente@teste.com',
+        fullName: 'João Silva (Cliente)',
+        role: 'client',
+        userRole: 'PF',
+        permissions: ['nav.view.client_home', 'nav.view.client_cases', 'nav.view.find_lawyers', 'nav.view.client_messages', 'nav.view.services', 'nav.view.client_profile'],
+      ),
+      'lawyer_associated': User(
+        id: 'debug-lawyer-1',
+        email: 'advogado@teste.com',
+        fullName: 'Maria Santos (Advogada Associada)',
+        role: 'lawyer',
+        userRole: 'lawyer_associated',
+        permissions: ['nav.view.dashboard', 'nav.view.cases', 'nav.view.schedule', 'nav.view.offers', 'nav.view.messages', 'nav.view.profile'],
+      ),
+      'lawyer_individual': User(
+        id: 'debug-lawyer-2',
+        email: 'autonomo@teste.com',
+        fullName: 'Pedro Costa (Advogado Autônomo)',
+        role: 'lawyer',
+        userRole: 'lawyer_individual',
+        permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
+      ),
+      'lawyer_office': User(
+        id: 'debug-office-1',
+        email: 'escritorio@teste.com',
+        fullName: 'Escritório Silva & Associados',
+        role: 'lawyer',
+        userRole: 'lawyer_office',
+        permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
+      ),
+      'lawyer_platform_associate': User(
+        id: 'debug-super-1',
+        email: 'super@teste.com',
+        fullName: 'Ana Super (Super Associada)',
+        role: 'lawyer',
+        userRole: 'lawyer_platform_associate',
+        permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
+      ),
+    };
+
+    final user = debugUsers[userRole];
+    if (user != null) {
+      context.read<AuthBloc>().add(AuthDebugUserSwitch(user));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Modo debug: ${user.fullName}'),
+          backgroundColor: Colors.blue,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

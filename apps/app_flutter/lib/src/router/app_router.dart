@@ -15,13 +15,12 @@ import 'package:meu_app/src/features/cases/presentation/screens/case_detail_scre
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/partners_screen.dart';
-import 'package:meu_app/src/features/lawyers/presentation/screens/lawyers_screen.dart';
 
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/settings_screen.dart';
 import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart';
-import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_bloc.dart';
 import 'package:meu_app/src/features/partnerships/presentation/screens/partnerships_screen.dart';
 import 'package:meu_app/src/features/offers/presentation/screens/offers_screen.dart';
 import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
@@ -33,7 +32,6 @@ import 'package:meu_app/src/features/sla_management/presentation/screens/sla_set
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/hiring_proposals_screen.dart';
-import 'package:meu_app/src/features/clients/presentation/screens/client_proposals_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
@@ -67,16 +65,21 @@ GoRouter appRouter(AuthBloc authBloc) {
       
       if (loggedIn && (isAuthenticating || isSplash)) {
         final userRole = authState.user.role;
+        print('DEBUG: Redirect - userRole: $userRole');
         
         switch (userRole) {
           case 'lawyer_associated':
+            print('DEBUG: Redirecting to /dashboard');
             return '/dashboard';
           case 'lawyer_office':
+            print('DEBUG: Redirecting to /firm-dashboard');
             return '/firm-dashboard';  // Dashboard específico para sócios
           case 'lawyer_individual':
           case 'lawyer_platform_associate':
-            return '/contractor-home';  // Dashboard específico para contratantes
+            print('DEBUG: Redirecting to /home');
+            return '/home';  // Dashboard específico para contratantes
           default:
+            print('DEBUG: Redirecting to /client-home');
             return '/client-home';
         }
       }
@@ -106,41 +109,36 @@ GoRouter appRouter(AuthBloc authBloc) {
           return MainTabsShell(navigationShell: navigationShell);
         },
         branches: [
+          // === ADVOGADO ASSOCIADO (branches 0-5) ===
           // 0: Advogado Associado - Painel
           StatefulShellBranch(routes: [GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen())]),
           // 1: Advogado Associado - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/cases', builder: (context, state) => const CasesScreen())]),
-          // 2: Advogado Associado - Agenda (Exemplo, rota não existente)
-          // TODO: Adicionar rota /schedule quando a tela for criada
+          // 2: Advogado Associado - Agenda
           StatefulShellBranch(routes: [GoRoute(path: '/schedule', builder: (context, state) => const Center(child: Text('Agenda')))]),
           // 3: Advogado Associado - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
-          // 3.5: Advogado Associado - Propostas de Contratação
-          StatefulShellBranch(routes: [GoRoute(path: '/hiring-proposals', builder: (context, state) => const HiringProposalsScreen())]),
           // 4: Advogado Associado - Mensagens
           StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 5: Advogado Associado - Perfil
           StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),
           
-          // 6: Advogado Contratante - Dashboard Específico
+          // === ADVOGADO CONTRATANTE (branches 6-12) ===
+          // 6: Advogado Contratante - Dashboard
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-home', builder: (context, state) => const DashboardScreen())]),
-          // 6.1: Sócio de Escritório - Dashboard da Firma
-          StatefulShellBranch(routes: [GoRoute(path: '/firm-dashboard', builder: (context, state) => const DashboardScreen())]),
-          // 6.2: Advogado Contratante - Início (legado)
-          StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),
           // 7: Advogado Contratante - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-cases', builder: (context, state) => const CasesScreen())]),
           // 8: Advogado Contratante - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-offers', builder: (context, state) => const OffersScreen())]),
           // 9: Advogado Contratante - Parceiros
-          StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const PartnersScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/partners', builder: (context, state) => const LawyersScreen())]),
           // 10: Advogado Contratante - Parcerias
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/partnerships',
                 builder: (context, state) => BlocProvider(
-                  create: (context) => getIt<PartnershipsBloc>(),
+                  create: (context) => getIt<HybridPartnershipsBloc>(),
                   child: const PartnershipsScreen(),
                 ),
               ),
@@ -151,14 +149,13 @@ GoRouter appRouter(AuthBloc authBloc) {
           // 12: Advogado Contratante - Perfil
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-profile', builder: (context, state) => const ProfileScreen())]),
 
-          // 13: Cliente - Início
-          StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),
+          // === CLIENTE (branches 13-18) ===
+          // 13: Cliente - Início (Triagem com IA)
+          StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const ChatTriageScreen())]),
           // 14: Cliente - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),
-          // 14.5: Cliente - Propostas
-          StatefulShellBranch(routes: [GoRoute(path: '/client-proposals', builder: (context, state) => const ClientProposalsScreen())]),
-          // 15: Cliente - Advogados (Busca Híbrida)
-          StatefulShellBranch(routes: [GoRoute(path: '/advogados', builder: (context, state) => const LawyersScreen())]),
+          // 15: Cliente - Advogados (Busca de Advogados)
+          StatefulShellBranch(routes: [GoRoute(path: '/find-lawyers', builder: (context, state) => const LawyersScreen())]),
           // 16: Cliente - Mensagens
           StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 17: Cliente - Serviços

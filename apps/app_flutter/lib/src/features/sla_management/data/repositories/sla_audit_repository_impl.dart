@@ -3,7 +3,6 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/sla_audit_entity.dart';
 import '../../domain/entities/sla_enums.dart';
-import '../../domain/repositories/sla_audit_repository.dart';
 import '../datasources/sla_audit_remote_data_source.dart';
 
 class SlaAuditRepositoryImpl {
@@ -33,9 +32,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao criar entrada de auditoria'));
+      return const Left(ServerFailure(message: 'Erro ao criar entrada de auditoria'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -67,9 +66,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter trilha de auditoria'));
+      return const Left(ServerFailure(message: 'Erro ao obter trilha de auditoria'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -93,9 +92,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao gerar relatório de compliance'));
+      return const Left(ServerFailure(message: 'Erro ao gerar relatório de compliance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -115,9 +114,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao verificar integridade'));
+      return const Left(ServerFailure(message: 'Erro ao verificar integridade'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -143,9 +142,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao exportar log de auditoria'));
+      return const Left(ServerFailure(message: 'Erro ao exportar log de auditoria'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -167,9 +166,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter eventos de segurança'));
+      return const Left(ServerFailure(message: 'Erro ao obter eventos de segurança'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -189,9 +188,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter estatísticas de auditoria'));
+      return const Left(ServerFailure(message: 'Erro ao obter estatísticas de auditoria'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -217,9 +216,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter atividade do usuário'));
+      return const Left(ServerFailure(message: 'Erro ao obter atividade do usuário'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -243,9 +242,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter histórico de mudanças'));
+      return const Left(ServerFailure(message: 'Erro ao obter histórico de mudanças'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -269,9 +268,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter violações de compliance'));
+      return const Left(ServerFailure(message: 'Erro ao obter violações de compliance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -289,9 +288,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao criar política de retenção'));
+      return const Left(ServerFailure(message: 'Erro ao criar política de retenção'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -303,9 +302,9 @@ class SlaAuditRepositoryImpl {
       final result = await remoteDataSource.getRetentionPolicies(firmId);
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter políticas de retenção'));
+      return const Left(ServerFailure(message: 'Erro ao obter políticas de retenção'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -325,9 +324,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao executar política de retenção'));
+      return const Left(ServerFailure(message: 'Erro ao executar política de retenção'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -347,9 +346,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter relatório de governança'));
+      return const Left(ServerFailure(message: 'Erro ao obter relatório de governança'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -367,9 +366,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao criar alerta de compliance'));
+      return const Left(ServerFailure(message: 'Erro ao criar alerta de compliance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -387,9 +386,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter alertas de compliance'));
+      return const Left(ServerFailure(message: 'Erro ao obter alertas de compliance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -409,9 +408,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter avaliação de risco'));
+      return const Left(ServerFailure(message: 'Erro ao obter avaliação de risco'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -431,9 +430,9 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao arquivar entradas de auditoria'));
+      return const Left(ServerFailure(message: 'Erro ao arquivar entradas de auditoria'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }

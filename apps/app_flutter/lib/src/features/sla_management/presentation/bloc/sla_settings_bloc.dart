@@ -1,22 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
 import '../../domain/entities/sla_settings_entity.dart';
 import '../../domain/entities/sla_preset_entity.dart';
 import '../../domain/usecases/validate_sla_settings.dart';
 import '../../domain/usecases/calculate_sla_deadline.dart';
 import 'sla_settings_event.dart';
 import 'sla_settings_state.dart';
-
+// 
 class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
   final ValidateSlaSettings validateSlaSettings;
-  final CalculateSlaDeadlineUseCase calculateSlaDeadline;
+  final CalculateSlaDeadlineUseCase calculateSlaDeadlineUseCase;
   // TODO: Add other use cases when repository implementations are available
 
   SlaSettingsBloc({
     required this.validateSlaSettings,
-    required this.calculateSlaDeadline,
+    required this.calculateSlaDeadlineUseCase,
   }) : super(const SlaSettingsInitial()) {
     on<LoadSlaSettingsEvent>(_onLoadSlaSettings);
     on<UpdateSlaSettingsEvent>(_onUpdateSlaSettings);
@@ -34,14 +31,11 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     on<UpdateBusinessHoursEvent>(_onUpdateBusinessHours);
     on<UpdateEscalationRulesEvent>(_onUpdateEscalationRules);
     on<ToggleOverrideSettingsEvent>(_onToggleOverrideSettings);
-    // Missing handlers for widget compatibility - temporarily commented
-    on<ValidateSlaSettingsEvent>(_onValidateSlaSettings);
-    on<ResetSlaSettingsEvent>(_onResetSlaSettings);
     on<TestSlaSettingsEvent>(_onTestSlaSettings);
-    on<UpdateSlaNotificationSettingsEvent>(_onUpdateSlaNotificationSettings);
-    on<UpdateSlaBusinessRulesEvent>(_onUpdateSlaBusinessRules);
-    on<UpdateSlaEscalationSettingsEvent>(_onUpdateSlaEscalationSettings);
-    on<TestSlaEscalationEvent>(_onTestSlaEscalation);
+    on<UpdateSlaNotificationSettingsEvent>(_onUpdateNotificationSettings);
+    on<UpdateSlaBusinessRulesEvent>(_onUpdateBusinessRules);
+    on<UpdateSlaEscalationSettingsEvent>(_onUpdateEscalationSettings);
+    on<TestSlaEscalationEvent>(_onTestEscalation);
   }
 
   Future<void> _onLoadSlaSettings(
@@ -72,7 +66,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onUpdateSlaSettings(
     UpdateSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
@@ -107,16 +101,16 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onSaveSlaSettings(
     SaveSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     emit(const SlaSettingsUpdating());
-
+// 
     try {
       // Validate before saving
       final validationParams = ValidateSlaSettingsParams(settings: currentState.settings);
@@ -139,17 +133,17 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
             ));
             return;
           }
-
+// 
           // TODO: Implement actual save when repository is available
           await Future.delayed(const Duration(milliseconds: 500)); // Simulate API call
-
+// 
           emit(SlaSettingsUpdated(
             settings: currentState.settings,
             message: 'Configurações salvas com sucesso!',
             validationResult: validation,
             savedAt: DateTime.now(),
           ));
-
+// 
           // Return to loaded state
           emit(currentState.copyWith(
             isModified: false,
@@ -165,29 +159,31 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onApplyPreset(
     ApplyPresetEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final preset = event.preset;
-      // final updatedSettings = currentState.settings.applyPreset(preset);
+      // Aplicar configurações do preset diretamente
       final updatedSettings = currentState.settings.copyWith(
         // Aplicar configurações do preset
-        businessHours: preset.settings.businessHours,
-        timeframes: preset.settings.timeframes,
-        escalationSettings: preset.settings.escalationSettings,
-        notificationSettings: preset.settings.notificationSettings,
+        businessHoursStart: preset.businessHoursStart,
+        businessHoursEnd: preset.businessHoursEnd,
+        urgentSlaHours: preset.urgentSlaHours,
+        emergencySlaHours: preset.emergencySlaHours,
+        complexCaseSlaHours: preset.complexCaseSlaHours,
+        defaultSlaHours: preset.defaultSlaHours,
       );
-
+// 
       // Validate the new settings
       final validationParams = ValidateSlaSettingsParams(settings: updatedSettings);
       final validationResult = await validateSlaSettings(validationParams);
-
+// 
       await validationResult.fold(
         (failure) async {
           emit(SlaSettingsError(
@@ -202,7 +198,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
             isModified: true,
             lastModified: DateTime.now(),
           ));
-
+// 
           // Show success message
           emit(SlaSettingsUpdated(
             settings: updatedSettings,
@@ -210,7 +206,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
             validationResult: validation,
             savedAt: DateTime.now(),
           ));
-
+// 
           // Return to loaded state
           emit(currentState.copyWith(
             settings: updatedSettings,
@@ -227,18 +223,18 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onValidateSettings(
     ValidateSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final validationParams = ValidateSlaSettingsParams(settings: currentState.settings);
       final result = await validateSlaSettings(validationParams);
-
+// 
       result.fold(
         (failure) {
           emit(SlaSettingsError(
@@ -257,23 +253,22 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onResetToDefault(
     ResetToDefaultEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final defaultSettings = SlaSettingsEntity.createDefault(
         firmId: currentState.settings.firmId,
         createdBy: 'system',
       );
-
+// 
       emit(currentState.copyWith(
         settings: defaultSettings,
-        validationResult: null,
         isModified: true,
         lastModified: DateTime.now(),
       ));
@@ -284,14 +279,14 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onExportSettings(
     ExportSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       // TODO: Implement export functionality
       emit(SlaSettingsUpdated(
@@ -300,7 +295,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
         validationResult: currentState.validationResult,
         savedAt: DateTime.now(),
       ));
-
+// 
       // Return to loaded state
       emit(currentState);
     } catch (e) {
@@ -310,14 +305,14 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onImportSettings(
     ImportSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       // TODO: Implement import functionality
       // For now, just show success message
@@ -327,7 +322,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
         validationResult: currentState.validationResult,
         savedAt: DateTime.now(),
       ));
-
+// 
       // Return to loaded state
       emit(currentState);
     } catch (e) {
@@ -337,14 +332,14 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onTestSlaCalculation(
     TestSlaCalculationEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       // Test SLA calculation with current settings
       final params = {
@@ -354,8 +349,13 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
         'caseType': 'civil',
       };
       
-      final result = await calculateSlaDeadline(params);
-
+      final result = await calculateSlaDeadlineUseCase.calculate(
+        firmId: params['firmId'] as String,
+        startTime: params['startTime'] as DateTime,
+        priority: params['priority'] as String,
+        caseType: params['caseType'] as String?,
+      );
+// 
       result.fold(
         (failure) {
           emit(SlaSettingsError(
@@ -370,7 +370,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
             validationResult: currentState.validationResult,
             savedAt: DateTime.now(),
           ));
-
+// 
           // Return to loaded state
           emit(currentState);
         },
@@ -382,14 +382,14 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onCreateCustomPreset(
     CreateCustomPresetEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final newPreset = SlaPresetEntity.custom(
         id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
@@ -399,20 +399,20 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
         urgentTimeframeHours: event.urgentHours,
         emergencyTimeframeHours: event.emergencyHours,
       );
-
+// 
       final updatedPresets = [...currentState.availablePresets, newPreset];
-
+// 
       emit(currentState.copyWith(
         availablePresets: updatedPresets,
       ));
-
+// 
       emit(SlaSettingsUpdated(
         settings: currentState.settings,
         message: 'Preset personalizado "${event.name}" criado com sucesso!',
         validationResult: currentState.validationResult,
         savedAt: DateTime.now(),
       ));
-
+// 
       // Return to loaded state with new preset
       emit(currentState.copyWith(
         availablePresets: updatedPresets,
@@ -424,38 +424,38 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onDeletePreset(
     DeletePresetEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
-      if (event.preset.isSystem) {
+      if (event.preset.isSystemPreset) {
         emit(const SlaSettingsError(
           message: 'Não é possível deletar presets do sistema',
           errorCode: 'DELETE_SYSTEM_PRESET_ERROR',
         ));
         return;
       }
-
+// 
       final updatedPresets = currentState.availablePresets
           .where((preset) => preset.id != event.preset.id)
           .toList();
-
+// 
       emit(currentState.copyWith(
         availablePresets: updatedPresets,
       ));
-
+// 
       emit(SlaSettingsUpdated(
         settings: currentState.settings,
         message: 'Preset "${event.preset.name}" removido com sucesso!',
         validationResult: currentState.validationResult,
         savedAt: DateTime.now(),
       ));
-
+// 
       // Return to loaded state
       emit(currentState.copyWith(
         availablePresets: updatedPresets,
@@ -467,34 +467,34 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onDuplicatePreset(
     DuplicatePresetEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final duplicatedPreset = event.preset.copyWith(
         id: 'duplicate_${DateTime.now().millisecondsSinceEpoch}',
         name: '${event.preset.name} (Cópia)',
-        isSystem: false,
+        // isSystemPreset: false,
       );
-
+// 
       final updatedPresets = [...currentState.availablePresets, duplicatedPreset];
-
+// 
       emit(currentState.copyWith(
         availablePresets: updatedPresets,
       ));
-
+// 
       emit(SlaSettingsUpdated(
         settings: currentState.settings,
         message: 'Preset duplicado como "${duplicatedPreset.name}"!',
         validationResult: currentState.validationResult,
         savedAt: DateTime.now(),
       ));
-
+// 
       // Return to loaded state
       emit(currentState.copyWith(
         availablePresets: updatedPresets,
@@ -506,7 +506,7 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onClearValidationErrors(
     ClearValidationErrorsEvent event,
     Emitter<SlaSettingsState> emit,
@@ -524,22 +524,20 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       emit(currentState.copyWith(validationResult: null));
     }
   }
-
+// 
   Future<void> _onUpdateBusinessHours(
     UpdateBusinessHoursEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final updatedSettings = currentState.settings.copyWith(
-        businessStartHour: event.startHour,
-        businessEndHour: event.endHour,
-        businessDays: event.businessDays,
-        timezone: event.timezone,
+        businessHoursStart: event.startHour.toString(),
+        businessHoursEnd: event.endHour.toString(),
       );
-
+// 
       emit(currentState.copyWith(
         settings: updatedSettings,
         isModified: true,
@@ -552,20 +550,19 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onUpdateEscalationRules(
     UpdateEscalationRulesEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final updatedSettings = currentState.settings.copyWith(
-        enableEscalation: event.enableEscalation,
-        escalationPercentages: event.escalationPercentages,
+        enableAutoEscalation: event.enableEscalation,
       );
-
+// 
       emit(currentState.copyWith(
         settings: updatedSettings,
         isModified: true,
@@ -578,21 +575,19 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onToggleOverrideSettings(
     ToggleOverrideSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
+// 
     try {
       final updatedSettings = currentState.settings.copyWith(
-        allowOverride: event.allowOverride,
-        maxOverrideHours: event.maxOverrideHours,
-        overrideRequiredRoles: event.requiredRoles,
+        allowOverrides: event.allowOverride,
       );
-
+// 
       emit(currentState.copyWith(
         settings: updatedSettings,
         isModified: true,
@@ -605,72 +600,68 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   List<SlaPresetEntity> _getDefaultPresets() {
     return [
-      SlaPresetEntity(
-        id: 'default',
-        name: 'Padrão',
-        description: 'Configurações padrão do sistema',
-        settings: SlaSettingsEntity.createDefault(
-          firmId: 'default',
-          createdBy: 'system',
-        ),
-        isSystem: true,
-        createdAt: DateTime.now(),
-      ),
+      SlaPresetEntity.conservative(),
+      SlaPresetEntity.balanced(),
+      SlaPresetEntity.aggressive(),
     ];
   }
-
+// 
   Future<void> _onValidateSlaSettings(
     ValidateSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
-    emit(SlaSettingsLoading());
-
+// 
     try {
+      emit(const SlaSettingsLoading());
+// 
       final validationParams = ValidateSlaSettingsParams(settings: currentState.settings);
       final result = await validateSlaSettings(validationParams);
-      
+// 
       result.fold(
-        (failure) => emit(SlaSettingsError(
-          message: 'Erro na validação: ${failure.message}',
-          errorCode: 'VALIDATION_ERROR',
-        )),
-        (validation) => emit(currentState.copyWith(
-          validationResult: validation,
-          lastValidated: DateTime.now(),
-        )),
+        (failure) {
+          emit(SlaSettingsError(
+            message: 'Erro na validação: ${failure.message}',
+            errorCode: 'VALIDATION_ERROR',
+          ));
+        },
+        (validation) {
+          emit(currentState.copyWith(
+            validationResult: validation,
+            lastModified: DateTime.now(),
+          ));
+        },
       );
     } catch (e) {
       emit(SlaSettingsError(
-        message: 'Erro ao validar configurações: ${e.toString()}',
+        message: 'Erro inesperado na validação: ${e.toString()}',
         errorCode: 'VALIDATION_ERROR',
       ));
     }
   }
-
+// 
   Future<void> _onResetSlaSettings(
     ResetSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
-    emit(SlaSettingsLoading());
-    
     try {
+      emit(const SlaSettingsLoading());
+// 
       final defaultSettings = SlaSettingsEntity.createDefault(
-        firmId: event.firmId,
-        createdBy: event.userId ?? 'system',
+        firmId: 'default',
+        createdBy: 'system',
       );
-      
+// 
       emit(SlaSettingsLoaded(
         settings: defaultSettings,
         availablePresets: _getDefaultPresets(),
         validationResult: null,
         isModified: false,
-        lastSaved: DateTime.now(),
+        lastModified: DateTime.now(),
       ));
     } catch (e) {
       emit(SlaSettingsError(
@@ -679,36 +670,60 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
       ));
     }
   }
-
+// 
   Future<void> _onTestSlaSettings(
     TestSlaSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
-
-    emit(SlaSettingsLoading());
-
+// 
     try {
-      // Simular teste de configurações SLA
-      await Future.delayed(const Duration(seconds: 2));
-      
-      emit(currentState.copyWith(
-        testResult: SlaTestResult(
-          isSuccess: true,
-          message: 'Configurações testadas com sucesso',
-          testDate: DateTime.now(),
-        ),
-      ));
+      emit(const SlaSettingsLoading());
+// 
+      // Criar parâmetros de teste
+      final params = {
+        'firmId': currentState.settings.firmId,
+        'startTime': DateTime.now(),
+        'priority': 'normal',
+        'caseType': 'test',
+      };
+// 
+      // Usar o use case para calcular deadline
+      final result = await calculateSlaDeadlineUseCase.calculate(
+        firmId: params['firmId'] as String,
+        startTime: params['startTime'] as DateTime,
+        priority: params['priority'] as String,
+        caseType: params['caseType'] as String?,
+      );
+// 
+      result.fold(
+        (failure) {
+          emit(SlaSettingsError(
+            message: 'Erro no teste: ${failure.message}',
+            errorCode: 'TEST_ERROR',
+          ));
+        },
+        (deadlineResult) {
+          emit(currentState.copyWith(
+            // testResult: SlaTestResult(
+            //   deadline: deadlineResult.deadline,
+            //   timeRemaining: deadlineResult.timeRemaining,
+            //   isViolated: deadlineResult.isViolated,
+            //   testDate: DateTime.now(),
+            // ),
+          ));
+        },
+      );
     } catch (e) {
       emit(SlaSettingsError(
-        message: 'Erro ao testar configurações: ${e.toString()}',
+        message: 'Erro inesperado no teste: ${e.toString()}',
         errorCode: 'TEST_ERROR',
       ));
     }
   }
-
-  Future<void> _onUpdateSlaNotificationSettings(
+// 
+  Future<void> _onUpdateNotificationSettings(
     UpdateSlaNotificationSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
@@ -717,7 +732,8 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
 
     try {
       final updatedSettings = currentState.settings.copyWith(
-        notificationSettings: event.notificationSettings,
+        // TODO: Implement notification settings update
+        notificationSettings: event.settings,
       );
 
       emit(currentState.copyWith(
@@ -728,12 +744,12 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     } catch (e) {
       emit(SlaSettingsError(
         message: 'Erro ao atualizar notificações: ${e.toString()}',
-        errorCode: 'UPDATE_ERROR',
+        errorCode: 'NOTIFICATION_UPDATE_ERROR',
       ));
     }
   }
 
-  Future<void> _onUpdateSlaBusinessRules(
+  Future<void> _onUpdateBusinessRules(
     UpdateSlaBusinessRulesEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
@@ -742,7 +758,8 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
 
     try {
       final updatedSettings = currentState.settings.copyWith(
-        businessRules: event.businessRules,
+        // TODO: Implement business rules update
+        // customRules: event.businessRules,
       );
 
       emit(currentState.copyWith(
@@ -753,12 +770,12 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     } catch (e) {
       emit(SlaSettingsError(
         message: 'Erro ao atualizar regras de negócio: ${e.toString()}',
-        errorCode: 'UPDATE_ERROR',
+        errorCode: 'BUSINESS_RULES_UPDATE_ERROR',
       ));
     }
   }
 
-  Future<void> _onUpdateSlaEscalationSettings(
+  Future<void> _onUpdateEscalationSettings(
     UpdateSlaEscalationSettingsEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
@@ -767,7 +784,8 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
 
     try {
       final updatedSettings = currentState.settings.copyWith(
-        escalationSettings: event.escalationSettings,
+        // TODO: Implement escalation settings update
+        // escalationRules: event.settings,
       );
 
       emit(currentState.copyWith(
@@ -778,35 +796,36 @@ class SlaSettingsBloc extends Bloc<SlaSettingsEvent, SlaSettingsState> {
     } catch (e) {
       emit(SlaSettingsError(
         message: 'Erro ao atualizar escalação: ${e.toString()}',
-        errorCode: 'UPDATE_ERROR',
+        errorCode: 'ESCALATION_UPDATE_ERROR',
       ));
     }
   }
 
-  Future<void> _onTestSlaEscalation(
+  Future<void> _onTestEscalation(
     TestSlaEscalationEvent event,
     Emitter<SlaSettingsState> emit,
   ) async {
     final currentState = state;
     if (currentState is! SlaSettingsLoaded) return;
 
-    emit(SlaSettingsLoading());
-
     try {
-      // Simular teste de escalação SLA
-      await Future.delayed(const Duration(seconds: 1));
-      
+      emit(const SlaSettingsLoading());
+
+      // Simular teste de escalação
+      await Future.delayed(const Duration(seconds: 2));
+
       emit(currentState.copyWith(
-        escalationTestResult: SlaEscalationTestResult(
-          isSuccess: true,
-          message: 'Escalação testada com sucesso',
-          testDate: DateTime.now(),
-        ),
+        // TODO: Implement escalation test result
+        // escalationTestResult: const SlaEscalationTestResult(
+        //   isSuccessful: true,
+        //   message: 'Teste de escalação realizado com sucesso',
+        //   details: {},
+        // ),
       ));
     } catch (e) {
       emit(SlaSettingsError(
-        message: 'Erro ao testar escalação: ${e.toString()}',
-        errorCode: 'TEST_ERROR',
+        message: 'Erro no teste de escalação: ${e.toString()}',
+        errorCode: 'ESCALATION_TEST_ERROR',
       ));
     }
   }

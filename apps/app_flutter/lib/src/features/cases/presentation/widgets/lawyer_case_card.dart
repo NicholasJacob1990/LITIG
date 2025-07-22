@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case_extensions.dart';
 import 'package:meu_app/src/shared/constants/case_type_constants.dart';
@@ -165,7 +164,7 @@ class LawyerCaseCard extends StatelessWidget {
           Expanded(
             child: Text(
               _getContextualMessage(caseData!.caseType),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
                 color: AppColors.lightText,

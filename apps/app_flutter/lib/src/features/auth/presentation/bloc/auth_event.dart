@@ -136,6 +136,16 @@ class AuthRegisterLawyerRequested extends AuthEvent {
 /// Evento para realizar logout
 class AuthLogoutRequested extends AuthEvent {}
 
+/// Evento para debug - alternar entre diferentes tipos de usuário
+class AuthDebugUserSwitch extends AuthEvent {
+  final User user;
+  
+  const AuthDebugUserSwitch(this.user);
+  
+  @override
+  List<Object?> get props => [user];
+}
+
 /// Evento para verificar o status de autenticação na inicialização
 class AuthCheckStatusRequested extends AuthEvent {} 
 

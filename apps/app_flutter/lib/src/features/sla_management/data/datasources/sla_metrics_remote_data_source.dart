@@ -1,6 +1,4 @@
 import 'package:dio/dio.dart';
-import '../../domain/repositories/sla_metrics_repository.dart';
-import '../../../../core/config/api_config.dart';
 import '../../../../core/error/exceptions.dart';
 
 /// Implementação da fonte de dados remota para métricas SLA
@@ -427,6 +425,7 @@ class SlaMetricsRemoteDataSourceImpl implements SlaMetricsRemoteDataSource {
   }
 
   /// Busca tendências de performance
+  @override
   Future<List<Map<String, dynamic>>> getPerformanceTrends({
     required String firmId,
     required DateTime startDate,

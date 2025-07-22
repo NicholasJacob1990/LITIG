@@ -25,7 +25,7 @@ class ChatRepositoryImpl implements ChatRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -49,7 +49,7 @@ class ChatRepositoryImpl implements ChatRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -71,7 +71,7 @@ class ChatRepositoryImpl implements ChatRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -95,7 +95,7 @@ class ChatRepositoryImpl implements ChatRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -115,7 +115,7 @@ class ChatRepositoryImpl implements ChatRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
 
@@ -129,7 +129,7 @@ class ChatRepositoryImpl implements ChatRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(ServerFailure(message: 'No internet connection'));
+      return const Left(ServerFailure(message: 'No internet connection'));
     }
   }
 

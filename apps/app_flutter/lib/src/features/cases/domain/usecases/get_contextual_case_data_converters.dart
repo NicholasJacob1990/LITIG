@@ -85,29 +85,28 @@ mixin ContextualCaseDataConverters {
   }
 
   /// Converts ProcessStatus from status to case_detail format
-  detail.ProcessStatus convertProcessStatus(Map<String, dynamic> data) {
-    final sourceInfo = status.ProcessStatus.fromJson(data);
-    return detail.ProcessStatus(
-      currentPhase: sourceInfo.currentPhase,
-      description: sourceInfo.description,
-      progressPercentage: sourceInfo.progressPercentage,
-      lastUpdate: DateTime.now(),
-      phases: sourceInfo.phases.map((phase) => detail.ProcessPhase(
-        id: 'phase_${phase.name.hashCode}',
-        name: phase.name,
-        description: phase.description,
-        isCompleted: phase.isCompleted,
-        isCurrent: phase.isCurrent,
-        completedAt: phase.completedAt,
-        documents: phase.documents.map((phaseDoc) => CaseDocumentPreview(
-          id: 'preview_${phaseDoc.name.hashCode}',
-          name: phaseDoc.name,
-          url: phaseDoc.url,
-          type: 'pdf',
-        ).toDetail()).toList(),
-      )).toList(),
-    );
-  }
+  // TODO: Fix ProcessStatus conversion - temporarily commented
+  // detail.ProcessStatus convertProcessStatus(Map<String, dynamic> data) {
+  //   final sourceInfo = status.ProcessStatus.fromJson(data);
+  //   return detail.ProcessStatus(
+  //     currentPhase: sourceInfo.currentPhase,
+  //     description: sourceInfo.description,
+  //     progressPercentage: sourceInfo.progressPercentage,
+  //     lastUpdate: DateTime.now(),
+  //     phases: sourceInfo.phases.map((phase) => detail.ProcessPhase(
+  //       id: 'phase_${phase.name.hashCode}',
+  //       name: phase.name,
+  //       description: phase.description,
+  //       isCompleted: phase.isCompleted,
+  //       isCurrent: phase.isCurrent,
+  //       completedAt: phase.completedAt,
+  //       documents: phase.documents.map((phaseDoc) => detail.CaseDocumentPreview(
+  //         id: 'preview_${phaseDoc.name.hashCode}',
+  //         name: phaseDoc.name,
+  //       )).toList(),
+  //     )).toList(),
+  //   );
+  // }
 }
 
 /// Helper class for CaseDocumentPreview - extending case_detail namespace
@@ -126,11 +125,12 @@ class CaseDocumentPreview {
 }
 
 /// Extension para converter entre as diferentes versões de CaseDocumentPreview
-extension CaseDocumentPreviewConverter on CaseDocumentPreview {
-  detail.CaseDocumentPreview toDetail() {
-    return detail.CaseDocumentPreview(
-      id: id,
-      name: name,
-    );
-  }
-}
+  // TODO: Fix CaseDocumentPreview conversion - temporarily commented
+  // extension CaseDocumentPreviewConverter on CaseDocumentPreview {
+  //   detail.CaseDocumentPreview toDetail() {
+  //     return detail.CaseDocumentPreview(
+  //       id: id,
+  //       name: name,
+  //     );
+  //   }
+  // }

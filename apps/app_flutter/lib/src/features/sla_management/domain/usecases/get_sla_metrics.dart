@@ -37,12 +37,12 @@ class GetSlaMetrics implements UseCase<SlaMetricsEntity, GetSlaMetricsParams> {
         periodEnd: params.endDate,
         complianceMetrics: ComplianceMetrics(
           overallRate: 0.85,
-          byPriority: {'high': 0.9, 'medium': 0.85, 'low': 0.8},
+          byPriority: const {'high': 0.9, 'medium': 0.85, 'low': 0.8},
           totalCases: complianceMetrics.length,
           compliantCases: (complianceMetrics.length * 0.85).round(),
           nonCompliantCases: (complianceMetrics.length * 0.15).round(),
         ),
-        performanceMetrics: PerformanceMetrics(
+        performanceMetrics: const PerformanceMetrics(
           averageResponseTime: Duration(hours: 2, minutes: 30),
           medianResponseTime: Duration(hours: 2),
           fastestResponseTime: Duration(minutes: 30),
@@ -72,10 +72,10 @@ class GetSlaMetrics implements UseCase<SlaMetricsEntity, GetSlaMetricsParams> {
             'incomplete': (violationMetrics.length * 0.3).round(),
             'other': (violationMetrics.length * 0.1).round(),
           },
-          averageDelayTime: Duration(hours: 5, minutes: 12),
+          averageDelayTime: const Duration(hours: 5, minutes: 12),
           totalDelayTime: Duration(hours: violationMetrics.length * 5),
         ),
-        escalationMetrics: EscalationMetrics(
+        escalationMetrics: const EscalationMetrics(
           totalEscalations: 0,
           escalationRate: 0.0,
           escalationsByLevel: {
@@ -88,31 +88,31 @@ class GetSlaMetrics implements UseCase<SlaMetricsEntity, GetSlaMetricsParams> {
         ),
         trendsData: TrendsData(
           complianceTrend: [
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 4)), value: 0.85),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 3)), value: 0.87),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 2)), value: 0.86),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 1)), value: 0.88),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 4)), value: 0.85),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 3)), value: 0.87),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 2)), value: 0.86),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 1)), value: 0.88),
             DataPoint(timestamp: DateTime.now(), value: 0.89),
           ],
           performanceTrend: [
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 4)), value: 2.5),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 3)), value: 2.3),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 2)), value: 2.4),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 1)), value: 2.2),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 4)), value: 2.5),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 3)), value: 2.3),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 2)), value: 2.4),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 1)), value: 2.2),
             DataPoint(timestamp: DateTime.now(), value: 2.1),
           ],
           violationTrend: [
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 4)), value: 5.0),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 3)), value: 4.0),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 2)), value: 6.0),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 1)), value: 3.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 4)), value: 5.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 3)), value: 4.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 2)), value: 6.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 1)), value: 3.0),
             DataPoint(timestamp: DateTime.now(), value: 4.0),
           ],
           volumeTrend: [
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 4)), value: 10.0),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 3)), value: 12.0),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 2)), value: 11.0),
-            DataPoint(timestamp: DateTime.now().subtract(Duration(days: 1)), value: 13.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 4)), value: 10.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 3)), value: 12.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 2)), value: 11.0),
+            DataPoint(timestamp: DateTime.now().subtract(const Duration(days: 1)), value: 13.0),
             DataPoint(timestamp: DateTime.now(), value: 14.0),
           ],
         ),
@@ -163,7 +163,7 @@ class GetSlaComplianceReport implements UseCase<Map<String, dynamic>, GetSlaComp
     try {
       final complianceMetrics = await repository.getComplianceMetrics(
         firmId: params.firmId,
-        startDate: DateTime.now().subtract(Duration(days: 30)),
+        startDate: DateTime.now().subtract(const Duration(days: 30)),
         endDate: DateTime.now(),
       );
       
@@ -203,7 +203,7 @@ class GetSlaPerformanceTrends implements UseCase<List<Map<String, dynamic>>, Get
     try {
       final performanceMetrics = await repository.getPerformanceMetrics(
         firmId: params.firmId,
-        startDate: DateTime.now().subtract(Duration(days: 30)),
+        startDate: DateTime.now().subtract(const Duration(days: 30)),
         endDate: DateTime.now(),
       );
       

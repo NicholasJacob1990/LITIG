@@ -50,13 +50,14 @@ mixin ContextualCaseBlocHelpers {
       ),
       nextSteps: const [],
       documents: const [],
-      processStatus: detail.ProcessStatus(
-        currentPhase: 'inicial',
-        description: 'Caso em análise inicial',
-        progressPercentage: 10.0,
-        lastUpdate: DateTime.now(),
-        phases: const [],
-      ),
+      // TODO: Fix ProcessStatus - temporarily commented
+      // processStatus: detail.ProcessStatus(
+      //   currentPhase: 'inicial',
+      //   description: 'Caso em análise inicial',
+      //   progressPercentage: 10.0,
+      //   lastUpdate: DateTime.now(),
+      //   phases: const [],
+      // ),
     );
   }
 

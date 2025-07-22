@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
@@ -258,7 +259,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                       // Para registro, usamos um evento específico que pode capturar dados sociais
                       context.read<AuthBloc>().add(AuthGoogleRegisterRequested());
                     },
-              icon: const Icon(Icons.login), // Google icon placeholder
+              icon: const OfficialSocialIcon(platform: SocialPlatform.google, size: 18),
               label: const Text('Cadastrar com Google'),
             ),
             
@@ -285,7 +286,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthLinkedInRegisterRequested());
                     },
-                    icon: const Icon(Icons.business, size: 16),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.linkedin, size: 16),
                     label: const Text('LinkedIn'),
                   ),
                 ),
@@ -300,7 +301,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthInstagramRegisterRequested());
                     },
-                    icon: const Icon(Icons.camera_alt, size: 16),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.instagram, size: 16),
                     label: const Text('Instagram'),
                   ),
                 ),
@@ -315,7 +316,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthFacebookRegisterRequested());
                     },
-                    icon: const Icon(Icons.facebook, size: 16),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.facebook, size: 16),
                     label: const Text('Facebook'),
                   ),
                 ),

@@ -260,7 +260,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.checkCircle,
             size: 14,
             color: AppColors.success,
@@ -518,7 +518,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.background,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: theme.dividerColor),
                 ),
@@ -636,7 +636,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(LucideIcons.image, color: AppColors.primaryBlue),
+              leading: const Icon(LucideIcons.image, color: AppColors.primaryBlue),
               title: const Text('Imagem'),
               onTap: () {
                 Navigator.pop(context);
@@ -644,7 +644,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
               },
             ),
             ListTile(
-              leading: Icon(LucideIcons.fileText, color: AppColors.primaryBlue),
+              leading: const Icon(LucideIcons.fileText, color: AppColors.primaryBlue),
               title: const Text('Documento'),
               onTap: () {
                 Navigator.pop(context);
@@ -653,7 +653,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
             ),
             if (widget.provider == 'whatsapp') ...[
               ListTile(
-                leading: Icon(LucideIcons.mapPin, color: AppColors.primaryBlue),
+                leading: const Icon(LucideIcons.mapPin, color: AppColors.primaryBlue),
                 title: const Text('Localização'),
                 onTap: () {
                   Navigator.pop(context);
@@ -700,8 +700,8 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
               },
             ),
             ListTile(
-              leading: Icon(LucideIcons.trash2, color: AppColors.error),
-              title: Text('Deletar conversa', style: TextStyle(color: AppColors.error)),
+              leading: const Icon(LucideIcons.trash2, color: AppColors.error),
+              title: const Text('Deletar conversa', style: TextStyle(color: AppColors.error)),
               onTap: () {
                 Navigator.pop(context);
                 _deleteChat();
@@ -757,8 +757,8 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
 
   void _archiveChat() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Conversa arquivada'),
+      const SnackBar(
+        content: Text('Conversa arquivada'),
         backgroundColor: AppColors.success,
       ),
     );
@@ -766,8 +766,8 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
 
   void _muteChat() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Notificações silenciadas'),
+      const SnackBar(
+        content: Text('Notificações silenciadas'),
         backgroundColor: AppColors.warning,
       ),
     );
@@ -796,8 +796,8 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
               Navigator.pop(context);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Conversa deletada'),
+                const SnackBar(
+                  content: Text('Conversa deletada'),
                   backgroundColor: AppColors.error,
                 ),
               );
@@ -813,37 +813,37 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
   ProviderConfig _getProviderConfig(String provider) {
     switch (provider.toLowerCase()) {
       case 'linkedin':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'LinkedIn',
           icon: LucideIcons.linkedin,
-          color: const Color(0xFF0077B5),
+          color: Color(0xFF0077B5),
         );
       case 'instagram':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Instagram',
           icon: LucideIcons.instagram,
-          color: const Color(0xFFE4405F),
+          color: Color(0xFFE4405F),
         );
       case 'whatsapp':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'WhatsApp',
           icon: LucideIcons.messageCircle,
-          color: const Color(0xFF25D366),
+          color: Color(0xFF25D366),
         );
       case 'gmail':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Gmail',
           icon: LucideIcons.mail,
-          color: const Color(0xFFEA4335),
+          color: Color(0xFFEA4335),
         );
       case 'outlook':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Outlook',
           icon: LucideIcons.building,
-          color: const Color(0xFF0078D4),
+          color: Color(0xFF0078D4),
         );
       default:
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Mensagem',
           icon: LucideIcons.messageCircle,
           color: Colors.grey,

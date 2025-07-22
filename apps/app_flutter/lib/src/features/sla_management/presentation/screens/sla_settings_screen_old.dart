@@ -103,7 +103,7 @@ class _SlaSettingsScreenState extends State<SlaSettingsScreen>
         BlocBuilder<SlaSettingsBloc, SlaSettingsState>(
           builder: (context, state) {
             if (state is SlaSettingsLoaded) {
-              final loadedState = state as SlaSettingsLoaded;
+              final loadedState = state;
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

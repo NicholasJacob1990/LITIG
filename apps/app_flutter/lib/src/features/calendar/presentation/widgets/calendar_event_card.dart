@@ -228,7 +228,7 @@ class CalendarEventCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.calendar,
                   size: 12,
                   color: AppColors.info,
@@ -277,31 +277,31 @@ class CalendarEventCard extends StatelessWidget {
   EventTypeConfig _getTypeConfig(CalendarEventType type) {
     switch (type) {
       case CalendarEventType.audiencia:
-        return EventTypeConfig(
+        return const EventTypeConfig(
           label: 'Audiência',
           icon: LucideIcons.gavel,
           color: AppColors.error,
         );
       case CalendarEventType.consulta:
-        return EventTypeConfig(
+        return const EventTypeConfig(
           label: 'Consulta',
           icon: LucideIcons.messageCircle,
           color: AppColors.info,
         );
       case CalendarEventType.prazo:
-        return EventTypeConfig(
+        return const EventTypeConfig(
           label: 'Prazo',
           icon: LucideIcons.alertTriangle,
           color: AppColors.warning,
         );
       case CalendarEventType.reuniao:
-        return EventTypeConfig(
+        return const EventTypeConfig(
           label: 'Reunião',
           icon: LucideIcons.users,
           color: AppColors.primaryBlue,
         );
       case CalendarEventType.outros:
-        return EventTypeConfig(
+        return const EventTypeConfig(
           label: 'Outros',
           icon: LucideIcons.calendar,
           color: AppColors.lightText2,
@@ -312,22 +312,22 @@ class CalendarEventCard extends StatelessWidget {
   UrgencyConfig _getUrgencyConfig(EventUrgency urgency) {
     switch (urgency) {
       case EventUrgency.baixa:
-        return UrgencyConfig(
+        return const UrgencyConfig(
           label: 'Baixa',
           color: AppColors.success,
         );
       case EventUrgency.media:
-        return UrgencyConfig(
+        return const UrgencyConfig(
           label: 'Média',
           color: AppColors.info,
         );
       case EventUrgency.alta:
-        return UrgencyConfig(
+        return const UrgencyConfig(
           label: 'Alta',
           color: AppColors.warning,
         );
       case EventUrgency.critica:
-        return UrgencyConfig(
+        return const UrgencyConfig(
           label: 'Crítica',
           color: AppColors.error,
         );

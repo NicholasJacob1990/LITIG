@@ -345,8 +345,8 @@ class CasesScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Área: ${_getCaseArea(index)}'),
             Text('Status: ${_getCaseStatus(index)}'),
-            Text('Cliente: João Silva'),
-            Text('Advogado Responsável: Dr. Maria Santos'),
+            const Text('Cliente: João Silva'),
+            const Text('Advogado Responsável: Dr. Maria Santos'),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -417,7 +417,7 @@ class LawyersScreen extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${_getLawyerSpecialty(index)}'),
+                  Text(_getLawyerSpecialty(index)),
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 16),

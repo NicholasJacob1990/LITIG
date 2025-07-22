@@ -205,7 +205,7 @@ class ContextualCaseDetailSectionFactory {
         priority: SectionPriority.critical,
         child: CaseAssignmentSection(
           caseDetail: caseDetail,
-          contextualData: contextualData?.toMap(),
+          contextualData: contextualData.toMap(),
         ),
       ),
       const SizedBox(height: 16),

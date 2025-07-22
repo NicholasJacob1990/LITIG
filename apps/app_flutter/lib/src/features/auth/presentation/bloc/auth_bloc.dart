@@ -46,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterLawyerRequested>(_onRegisterLawyerRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthStateChanged>(_onAuthStateChanged);
+    on<AuthDebugUserSwitch>(_onDebugUserSwitch);
   }
 
   Future<void> _onCheckStatusRequested(
@@ -257,6 +258,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(const AuthError('Ocorreu um erro desconhecido.'));
     }
+  }
+
+  void _onDebugUserSwitch(AuthDebugUserSwitch event, Emitter<AuthState> emit) {
+    emit(Authenticated(event.user));
   }
 
   @override

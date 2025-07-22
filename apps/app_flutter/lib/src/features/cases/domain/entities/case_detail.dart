@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'litigation_party.dart';
+import 'process_status.dart';
 
 class CaseDetail extends Equatable {
   final String id;
@@ -251,71 +252,4 @@ class CaseDocument extends Equatable {
       ];
 }
 
-class ProcessStatus extends Equatable {
-  final String currentPhase;
-  final String description;
-  final double progressPercentage;
-  final DateTime lastUpdate;
-  final List<ProcessPhase> phases;
-
-  const ProcessStatus({
-    required this.currentPhase,
-    required this.description,
-    required this.progressPercentage,
-    required this.lastUpdate,
-    required this.phases,
-  });
-
-  @override
-  List<Object?> get props => [
-        currentPhase,
-        description,
-        progressPercentage,
-        lastUpdate,
-        phases,
-      ];
-}
-
-class ProcessPhase extends Equatable {
-  final String id;
-  final String name;
-  final String description;
-  final bool isCompleted;
-  final bool isCurrent;
-  final DateTime? completedAt;
-  final List<CaseDocumentPreview> documents;
-
-  const ProcessPhase({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.isCompleted,
-    required this.isCurrent,
-    this.completedAt,
-    this.documents = const [],
-  });
-
-  @override
-  List<Object?> get props => [
-        id,
-        name,
-        description,
-        isCompleted,
-        isCurrent,
-        completedAt,
-        documents,
-      ];
-}
-
-class CaseDocumentPreview extends Equatable {
-  final String id;
-  final String name;
-
-  const CaseDocumentPreview({
-    required this.id,
-    required this.name,
-  });
-
-  @override
-  List<Object?> get props => [id, name];
-} 
+ 

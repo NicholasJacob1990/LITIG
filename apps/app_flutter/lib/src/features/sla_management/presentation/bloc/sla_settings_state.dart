@@ -186,8 +186,8 @@ class SlaPresetsLoaded extends SlaSettingsState {
   List<Object?> get props => [presets, selectedPreset];
 
   // Helper getters
-  List<SlaPresetEntity> get systemPresets => presets.where((p) => p.isSystem).toList();
-  List<SlaPresetEntity> get customPresets => presets.where((p) => !p.isSystem).toList();
+  List<SlaPresetEntity> get systemPresets => presets.where((p) => p.isSystemPreset).toList();
+  List<SlaPresetEntity> get customPresets => presets.where((p) => !p.isSystemPreset).toList();
   bool get hasCustomPresets => customPresets.isNotEmpty;
 }
 
@@ -387,5 +387,23 @@ class SlaSettingsMultiStepOperation extends SlaSettingsState {
   bool get isFirstStep => currentStep == 1;
   bool get isLastStep => currentStep == totalSteps;
   double get progressPercent => progress * 100;
-} 
+}
+
+// Test Result Classes
+class SlaEscalationTestResult {
+  final bool isSuccessful;
+  final String message;
+  final Map<String, dynamic> details;
+
+  const SlaEscalationTestResult({
+    required this.isSuccessful,
+    required this.message,
+    required this.details,
+  });
+
+  @override
+  String toString() {
+    return 'SlaEscalationTestResult(isSuccessful: $isSuccessful, message: $message)';
+  }
+}
 

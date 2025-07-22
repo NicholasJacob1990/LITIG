@@ -81,7 +81,7 @@ class CalendarSyncWidget extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         LucideIcons.checkCircle,
                         size: 12,
                         color: AppColors.success,
@@ -118,7 +118,7 @@ class CalendarSyncWidget extends StatelessWidget {
                   tooltip: 'Sincronizar agora',
                 ),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     LucideIcons.unlink,
                     color: AppColors.error,
                     size: 20,
@@ -180,16 +180,16 @@ class CalendarSyncWidget extends StatelessWidget {
   ProviderConfig _getProviderConfig(CalendarProvider provider) {
     switch (provider) {
       case CalendarProvider.google:
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Google Calendar',
           icon: LucideIcons.calendar,
-          color: const Color(0xFF4285F4), // Google Blue
+          color: Color(0xFF4285F4), // Google Blue
         );
       case CalendarProvider.outlook:
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Microsoft Outlook',
           icon: LucideIcons.mail,
-          color: const Color(0xFF0078D4), // Microsoft Blue
+          color: Color(0xFF0078D4), // Microsoft Blue
         );
     }
   }

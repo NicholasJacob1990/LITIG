@@ -69,7 +69,8 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 32),
                     
                     // Dashboard Contextual Completo (baseado no tipo de usuário)
-                    _buildContextualDashboard(context, user),
+                    if (user.role == 'lawyer' || user.role == 'lawyer_associated' || user.role == 'lawyer_office')
+                      _buildContextualDashboard(context, user),
                     const SizedBox(height: 24),
                     
                     // Seção de Escritório (apenas para advogados)

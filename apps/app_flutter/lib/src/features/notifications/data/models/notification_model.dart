@@ -41,6 +41,7 @@ class NotificationModel extends NotificationEntity {
     };
   }
 
+  @override
   NotificationModel copyWith({
     String? id,
     String? title,

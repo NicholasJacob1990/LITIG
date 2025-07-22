@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
   
   # State Management
@@ -22,10 +24,11 @@ dependencies:
   
   # UI Components
   lucide_icons: ^0.250.0
+  font_awesome_flutter: ^10.8.0
   cached_network_image: ^3.3.1
   
   # Date & Time
-  intl: ^0.19.0
+  intl: ^0.20.2
   timeago: ^3.6.1
   
   # Navigation

@@ -5,15 +5,80 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/triage/presentation/bloc/chat_triage_bloc.dart';
 import 'package:meu_app/src/features/triage/presentation/bloc/chat_triage_event.dart';
 import 'package:meu_app/src/features/triage/presentation/bloc/chat_triage_state.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart';
 
 class ChatTriageScreen extends StatelessWidget {
   const ChatTriageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatTriageBloc()..add(StartConversation()),
-      child: const ChatTriageView(),
+    print('DEBUG: ChatTriageScreen sendo carregada');
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        String userName = 'Usuário';
+        if (authState is Authenticated) {
+          userName = authState.user.fullName ?? 'Usuário';
+        }
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Triagem Inteligente'),
+                Text(
+                  'Olá, $userName',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            centerTitle: false,
+            actions: [
+              IconButton(
+                icon: const Icon(LucideIcons.logOut),
+                onPressed: () {
+                  context.read<AuthBloc>().add(AuthLogoutRequested());
+                  context.go('/login');
+                },
+                tooltip: 'Sair',
+              ),
+            ],
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(LucideIcons.bot, size: 64, color: Color(0xFF1E40AF)),
+                const SizedBox(height: 24),
+                Text(
+                  'Seu Problema Jurídico, Resolvido com Inteligência',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Use nossa IA para uma pré-análise gratuita e seja conectado ao advogado certo para o seu caso.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 48),
+                ElevatedButton.icon(
+                  icon: const Icon(LucideIcons.playCircle),
+                  label: const Text('Iniciar Consulta com IA'),
+                  onPressed: () => context.go('/triage'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -77,10 +142,38 @@ class _ChatTriageViewState extends State<ChatTriageView> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        String userName = 'Usuário';
+        if (authState is Authenticated) {
+          userName = authState.user.fullName ?? 'Usuário';
+        }
+        
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Triagem Inteligente'),
-        centerTitle: true,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Triagem Inteligente'),
+                Text(
+                  'Olá, $userName',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            centerTitle: false,
+            actions: [
+              IconButton(
+                icon: const Icon(LucideIcons.logOut),
+                onPressed: () {
+                  context.read<AuthBloc>().add(AuthLogoutRequested());
+                  context.go('/login');
+                },
+                tooltip: 'Sair',
+              ),
+            ],
       ),
       body: BlocConsumer<ChatTriageBloc, ChatTriageState>(
         listener: (context, state) {
@@ -88,7 +181,6 @@ class _ChatTriageViewState extends State<ChatTriageView> {
             _scrollToBottom();
           } else if (state is ChatTriageFinished) {
             _showTriageCompletedNotification(context, state.caseId);
-            // Navegar para aba advogados com highlight do caso
             context.go('/advogados?case_highlight=${state.caseId}');
           } else if (state is ChatTriageError) {
              ScaffoldMessenger.of(context).showSnackBar(
@@ -107,41 +199,42 @@ class _ChatTriageViewState extends State<ChatTriageView> {
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: state.messages.length + (state.isTyping ? 1 : 0),
+                        padding: const EdgeInsets.all(16),
+                        itemCount: state.messages.length,
                     itemBuilder: (context, index) {
-                      if (state.isTyping && index == state.messages.length) {
-                        return const MessageBubble(message: ChatMessage(text: '...', isUser: false), isTyping: true);
-                      }
                       final message = state.messages[index];
-                      return MessageBubble(message: message);
-                    },
-                  ),
-                ),
-                _buildMessageInput(),
-              ],
-            );
-          }
-          
-          return const Center(child: Text('Inicie a conversa.'));
-        },
+                          final isUser = message.isUser;
+                          
+                          return Align(
+                            alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isUser ? Theme.of(context).colorScheme.primary : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
-
-  Widget _buildMessageInput() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                message.text,
+                                style: TextStyle(
+                                  color: isUser ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Digite sua mensagem...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                              decoration: const InputDecoration(
+                                hintText: 'Descreva seu problema jurídico...',
+                                border: OutlineInputBorder(),
               ),
               onSubmitted: (_) => _sendMessage(),
             ),
@@ -153,38 +246,25 @@ class _ChatTriageViewState extends State<ChatTriageView> {
           ),
         ],
       ),
+                    ),
+                  ],
     );
   }
-}
 
-class MessageBubble extends StatelessWidget {
-  final ChatMessage message;
-  final bool isTyping;
-
-  const MessageBubble({super.key, required this.message, this.isTyping = false});
+              return const Center(
+                child: Text('Erro ao carregar triagem'),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   @override
-  Widget build(BuildContext context) {
-    final alignment = message.isUser ? Alignment.centerRight : Alignment.centerLeft;
-    final color = message.isUser ? Theme.of(context).primaryColor : Colors.grey[300];
-    final textColor = message.isUser ? Colors.white : Colors.black;
-
-    return Align(
-      alignment: alignment,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: isTyping 
-          ? const SizedBox(width: 25, height: 25, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.black),))
-          : Text(
-          message.text,
-          style: TextStyle(color: textColor),
-        ),
-      ),
-    );
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 } 

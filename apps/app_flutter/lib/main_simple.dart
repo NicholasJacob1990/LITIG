@@ -257,8 +257,8 @@ class LawyersPage extends StatelessWidget {
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 16),
-                        Text('${(4.0 + (index * 0.1)).toStringAsFixed(1)}'),
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        Text((4.0 + (index * 0.1)).toStringAsFixed(1)),
                       ],
                     ),
                     onTap: () {

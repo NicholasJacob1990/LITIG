@@ -10,6 +10,7 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/injection_container.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class CasesScreen extends StatelessWidget {
   const CasesScreen({super.key});
@@ -41,10 +42,14 @@ class CasesScreen extends StatelessWidget {
             Expanded(
               child: BlocBuilder<CasesBloc, CasesState>(
                 builder: (context, state) {
+                  AppLogger.info('CasesScreen: Estado atual - ${state.runtimeType}');
+                  
                   if (state is CasesLoading || state is CasesInitial) {
+                    AppLogger.info('CasesScreen: Mostrando loading');
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (state is CasesError) {
+                    AppLogger.error('CasesScreen: Erro - ${state.message}');
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -62,7 +67,9 @@ class CasesScreen extends StatelessWidget {
                     );
                   }
                   if (state is CasesLoaded) {
+                    AppLogger.info('CasesScreen: ${state.filteredCases.length} casos carregados');
                     if (state.filteredCases.isEmpty) {
+                      AppLogger.info('CasesScreen: Nenhum caso encontrado');
                       return _buildEmptyState(state.activeFilter);
                     }
                     return BlocBuilder<AuthBloc, auth_states.AuthState>(
@@ -72,6 +79,7 @@ class CasesScreen extends StatelessWidget {
                           itemCount: state.filteredCases.length,
                           itemBuilder: (context, index) {
                             final caseData = state.filteredCases[index];
+                            AppLogger.info('CasesScreen: Renderizando caso ${index + 1}: ${caseData.title}');
                             
                             // Use ContextualCaseCard for lawyers, CaseCard for clients
                             if (authState is auth_states.Authenticated && _isLawyer(authState.user.role)) {

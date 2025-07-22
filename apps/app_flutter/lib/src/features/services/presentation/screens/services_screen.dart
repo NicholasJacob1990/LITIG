@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class ServicesScreen extends StatelessWidget {
@@ -15,22 +16,22 @@ class ServicesScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         children: const [
           ServiceCard(
-            icon: LucideIcons.sparkles,
-            title: 'Triagem com IA',
-            description: 'Inicie uma pré-análise do seu caso com nossa inteligência artificial.',
-            route: '/triage',
+            icon: LucideIcons.messageCircle,
+            title: 'Mensagens',
+            description: 'Comunique-se diretamente com advogados e acompanhe conversas.',
+            route: '/client-messages',
           ),
           ServiceCard(
             icon: LucideIcons.search,
             title: 'Buscar Advogados',
             description: 'Encontre advogados especialistas por área e localização.',
-            route: '/lawyers',
+            route: '/find-lawyers',
           ),
            ServiceCard(
             icon: LucideIcons.clipboardList,
             title: 'Meus Casos',
             description: 'Acompanhe o andamento de todos os seus casos em um só lugar.',
-            route: '/cases',
+            route: '/client-cases',
           ),
         ],
       ),
@@ -61,8 +62,13 @@ class ServiceCard extends StatelessWidget {
         title: Text(title),
         subtitle: Text(description),
         onTap: () {
-          // Lógica de navegação a ser implementada com GoRouter
-          // Ex: context.go(route);
+          if (route.isNotEmpty) {
+            context.go(route);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Em breve: $title')),
+            );
+          }
         },
       ),
     );

@@ -1,6 +1,7 @@
 /// Enumerações para o sistema SLA
 /// 
 /// Define todos os tipos e estados usados no sistema de auditoria e gerenciamento SLA
+library;
 
 /// Tipos de eventos de auditoria
 enum AuditEventType {

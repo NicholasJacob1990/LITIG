@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 part 'cases_event.dart';
 part 'cases_state.dart';
@@ -14,15 +15,18 @@ class CasesBloc extends Bloc<CasesEvent, CasesState> {
   }
 
   Future<void> _onFetchCases(FetchCases event, Emitter<CasesState> emit) async {
+    AppLogger.info('CasesBloc: Iniciando busca de casos');
     emit(CasesLoading());
     try {
       final cases = await getMyCasesUseCase();
+      AppLogger.info('CasesBloc: ${cases.length} casos carregados');
       emit(CasesLoaded(
         allCases: cases,
         filteredCases: cases,
         activeFilter: 'Todos',
       ));
     } catch (e) {
+      AppLogger.error('CasesBloc: Erro ao carregar casos', error: e);
       emit(CasesError(e.toString()));
     }
   }

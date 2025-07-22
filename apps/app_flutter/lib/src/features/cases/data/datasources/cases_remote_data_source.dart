@@ -85,10 +85,11 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
 
   // Dados mock para fallback quando a API não está disponível
   List<Case> _getMockCases() {
-    return [
+    AppLogger.info('Retornando dados mock dos casos');
+    final mockCases = [
       CaseModel(
         id: 'mock-case-1',
-        title: 'Caso de Exemplo - Trabalhista',
+        title: 'Rescisão Indireta - Assédio Moral',
         status: 'Em Andamento',
         createdAt: DateTime.now().subtract(const Duration(days: 15)),
         lawyerName: 'Dr. João Silva',
@@ -104,7 +105,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       ),
       CaseModel(
         id: 'mock-case-2',
-        title: 'Processo Civil - Consumidor',
+        title: 'Devolução de Produto Defeituoso - Notebook',
         status: 'Aguardando',
         createdAt: DateTime.now().subtract(const Duration(days: 8)),
         lawyerName: 'Dra. Maria Santos',
@@ -120,7 +121,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       ),
       CaseModel(
         id: 'mock-case-3',
-        title: 'Consultoria Empresarial',
+        title: 'Revisão Contratual - Contrato de Prestação de Serviços',
         status: 'Concluído',
         createdAt: DateTime.now().subtract(const Duration(days: 30)),
         lawyerName: 'Dr. Carlos Oliveira',
@@ -134,7 +135,44 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
           pendingDocsText: 'Caso finalizado',
         ),
       ),
+      CaseModel(
+        id: 'mock-case-4',
+        title: 'Pensão Alimentícia - Revisão de Valor',
+        status: 'Em Andamento',
+        createdAt: DateTime.now().subtract(const Duration(days: 45)),
+        lawyerName: 'Dra. Ana Costa',
+        lawyerId: 'mock-lawyer-4',
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Ana+Costa&background=EC4899&color=fff',
+          name: 'Dra. Ana Costa',
+          specialty: 'Família e Sucessões',
+          unreadMessages: 5,
+          createdDate: '2024-11-15',
+          pendingDocsText: '3 documentos pendentes',
+        ),
+      ),
+      CaseModel(
+        id: 'mock-case-5',
+        title: 'Multa de Trânsito Indevida - Rodízio',
+        status: 'Aguardando',
+        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        lawyerName: 'Dr. Pedro Alves',
+        lawyerId: 'mock-lawyer-5',
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Pedro+Alves&background=6366F1&color=fff',
+          name: 'Dr. Pedro Alves',
+          specialty: 'Trânsito e Administrativo',
+          unreadMessages: 1,
+          createdDate: '2025-01-18',
+          pendingDocsText: 'Aguardando CNH',
+        ),
+      ),
     ];
+    AppLogger.info('Retornando ${mockCases.length} casos mock');
+    for (final caso in mockCases) {
+      AppLogger.info('Caso: ${caso.title} - Status: ${caso.status}');
+    }
+    return mockCases;
   }
 
   Case _getMockCaseById(String caseId) {

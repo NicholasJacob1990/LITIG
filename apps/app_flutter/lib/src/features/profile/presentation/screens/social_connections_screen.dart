@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../shared/widgets/official_social_icons.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../core/services/social_auth_service.dart';
@@ -63,20 +62,24 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
     );
 
     if (result != null && result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result.message),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
       _loadConnectedAccounts(); // Recarregar lista
     } else if (result != null && !result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result.message),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -106,7 +109,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
         backgroundColor: AppColors.lightBackground,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back,
             color: AppColors.lightText,
           ),
@@ -148,7 +151,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
                   color: AppColors.primaryBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.share,
                   color: AppColors.primaryBlue,
                   size: 24,
@@ -186,7 +189,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.check_circle,
                     color: AppColors.success,
                     size: 20,
@@ -219,7 +222,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
       return AppCard(
         child: Column(
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               color: AppColors.error,
               size: 48,
@@ -257,7 +260,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
           provider: 'linkedin',
           title: 'LinkedIn',
           description: 'Conecte sua rede profissional',
-          icon: LucideIcons.linkedin,
+          icon: SocialPlatform.linkedin,
           color: const Color(0xFF0A66C2),
           isConnected: _isProviderConnected('linkedin'),
           account: _getConnectedAccount('linkedin'),
@@ -272,7 +275,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
           provider: 'instagram',
           title: 'Instagram',
           description: 'Mostre sua presença visual',
-          icon: LucideIcons.instagram,
+          icon: SocialPlatform.instagram,
           color: const Color(0xFFE4405F),
           isConnected: _isProviderConnected('instagram'),
           account: _getConnectedAccount('instagram'),
@@ -287,12 +290,42 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
           provider: 'facebook',
           title: 'Facebook',
           description: 'Amplie seu alcance social',
-          icon: Icons.facebook,
+          icon: SocialPlatform.facebook,
           color: const Color(0xFF1877F2),
           isConnected: _isProviderConnected('facebook'),
           account: _getConnectedAccount('facebook'),
           onConnect: () => _connectSocialAccount('facebook'),
           onDisconnect: () => _disconnectAccount('facebook'),
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // WhatsApp
+        SocialPlatformCard(
+          provider: 'whatsapp',
+          title: 'WhatsApp',
+          description: 'Facilite comunicação direta',
+          icon: SocialPlatform.whatsapp,
+          color: const Color(0xFF25D366),
+          isConnected: _isProviderConnected('whatsapp'),
+          account: _getConnectedAccount('whatsapp'),
+          onConnect: () => _connectSocialAccount('whatsapp'),
+          onDisconnect: () => _disconnectAccount('whatsapp'),
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Twitter/X
+        SocialPlatformCard(
+          provider: 'twitter',
+          title: 'Twitter/X',
+          description: 'Compartilhe pensamentos e updates',
+          icon: SocialPlatform.x,
+          color: const Color(0xFF000000),
+          isConnected: _isProviderConnected('twitter'),
+          account: _getConnectedAccount('twitter'),
+          onConnect: () => _connectSocialAccount('twitter'),
+          onDisconnect: () => _disconnectAccount('twitter'),
         ),
       ],
     );
@@ -386,7 +419,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.security,
                 color: AppColors.primaryBlue,
                 size: 24,
@@ -441,12 +474,14 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
 
     if (confirm == true) {
       // TODO: Implementar desconexão via API
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${provider.toUpperCase()} desconectado com sucesso'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${provider.toUpperCase()} desconectado com sucesso'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
       _loadConnectedAccounts();
     }
   }

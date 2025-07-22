@@ -173,8 +173,8 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showNewChatDialog(context),
         backgroundColor: AppColors.primaryBlue,
-        child: const Icon(LucideIcons.plus, color: Colors.white),
         tooltip: 'Nova Conversa',
+        child: const Icon(LucideIcons.plus, color: Colors.white),
       ),
     );
   }
@@ -275,7 +275,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.link,
                 size: 16,
                 color: AppColors.info,
@@ -291,7 +291,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
               const Spacer(),
               TextButton(
                 onPressed: () => _showAccountsDialog(context),
-                child: Text(
+                child: const Text(
                   'Gerenciar',
                   style: TextStyle(color: AppColors.info),
                 ),
@@ -576,11 +576,11 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
               },
             ),
             ListTile(
-              leading: Icon(
+              leading: const Icon(
                 LucideIcons.trash2,
                 color: AppColors.error,
               ),
-              title: Text(
+              title: const Text(
                 'Deletar',
                 style: TextStyle(color: AppColors.error),
               ),
@@ -612,15 +612,15 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
                   title: Text(account.accountName ?? config.name),
                   subtitle: Text(account.accountEmail ?? 'Conectado'),
                   trailing: IconButton(
-                    icon: Icon(LucideIcons.x, color: AppColors.error),
+                    icon: const Icon(LucideIcons.x, color: AppColors.error),
                     onPressed: () => _disconnectAccount(account),
                   ),
                 );
               }),
               const Divider(),
               ListTile(
-                leading: Icon(LucideIcons.plus, color: AppColors.primaryBlue),
-                title: Text(
+                leading: const Icon(LucideIcons.plus, color: AppColors.primaryBlue),
+                title: const Text(
                   'Conectar Nova Conta',
                   style: TextStyle(color: AppColors.primaryBlue),
                 ),
@@ -778,37 +778,37 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
   ProviderConfig _getProviderConfig(String provider) {
     switch (provider.toLowerCase()) {
       case 'linkedin':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'LinkedIn',
           icon: LucideIcons.linkedin,
-          color: const Color(0xFF0077B5),
+          color: Color(0xFF0077B5),
         );
       case 'instagram':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Instagram',
           icon: LucideIcons.instagram,
-          color: const Color(0xFFE4405F),
+          color: Color(0xFFE4405F),
         );
       case 'whatsapp':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'WhatsApp',
           icon: LucideIcons.messageCircle,
-          color: const Color(0xFF25D366),
+          color: Color(0xFF25D366),
         );
       case 'gmail':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Gmail',
           icon: LucideIcons.mail,
-          color: const Color(0xFFEA4335),
+          color: Color(0xFFEA4335),
         );
       case 'outlook':
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Outlook',
           icon: LucideIcons.building,
-          color: const Color(0xFF0078D4),
+          color: Color(0xFF0078D4),
         );
       default:
-        return ProviderConfig(
+        return const ProviderConfig(
           name: 'Mensagem',
           icon: LucideIcons.messageCircle,
           color: Colors.grey,

@@ -540,6 +540,60 @@ class SlaPresetEntity extends Equatable {
         metadata,
       ];
 
+  /// Método estático para criar um preset customizado
+  static SlaPresetEntity custom({
+    required String id,
+    required String name,
+    required String description,
+    required int normalTimeframeHours,
+    required int urgentTimeframeHours,
+    required int emergencyTimeframeHours,
+    String? firmId,
+    String? createdBy,
+  }) {
+    final now = DateTime.now();
+    return SlaPresetEntity(
+      id: id,
+      name: name,
+      description: description,
+      category: 'custom',
+      defaultSlaHours: normalTimeframeHours,
+      urgentSlaHours: urgentTimeframeHours,
+      emergencySlaHours: emergencyTimeframeHours,
+      complexCaseSlaHours: normalTimeframeHours * 2,
+      businessHoursStart: '09:00',
+      businessHoursEnd: '18:00',
+      includeWeekends: false,
+      notificationTimings: const {
+        'normal': [25, 50, 75, 90],
+        'urgent': [50, 75, 90],
+        'emergency': [75, 90],
+      },
+      escalationRules: const {
+        'enabled': true,
+        'levels': [
+          {'threshold': 75, 'action': 'email_supervisor'},
+          {'threshold': 90, 'action': 'email_partner'},
+          {'threshold': 100, 'action': 'emergency_escalation'},
+        ],
+      },
+      overrideSettings: const {
+        'allowOverride': true,
+        'requireApproval': true,
+        'maxOverrideHours': 24,
+        'approvalRoles': ['partner', 'admin'],
+      },
+      isSystemPreset: false,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+      firmId: firmId,
+      createdBy: createdBy,
+      tags: const ['custom'],
+      metadata: const {},
+    );
+  }
+
   @override
   String toString() {
     return 'SlaPresetEntity('

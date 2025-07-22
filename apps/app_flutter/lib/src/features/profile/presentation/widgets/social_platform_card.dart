@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/official_social_icons.dart';
 
 import '../../../../core/services/social_auth_service.dart';
 import '../../../../shared/utils/app_colors.dart';
@@ -12,7 +13,7 @@ class SocialPlatformCard extends StatelessWidget {
   final String provider;
   final String title;
   final String description;
-  final IconData icon;
+  final SocialPlatform icon;
   final Color color;
   final bool isConnected;
   final SocialAccount? account;
@@ -74,9 +75,8 @@ class SocialPlatformCard extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            icon,
-            color: color,
+          child: OfficialSocialIcon(
+            platform: icon,
             size: 24,
           ),
         ),
@@ -139,7 +139,7 @@ class SocialPlatformCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.info_outline,
               color: AppColors.textSecondary,
               size: 16,

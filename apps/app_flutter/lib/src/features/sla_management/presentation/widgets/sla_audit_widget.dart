@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/sla_audit_entity.dart';
+import '../../domain/entities/sla_enums.dart';
 import '../bloc/sla_settings_bloc.dart';
+import '../bloc/sla_settings_event.dart';
 import '../bloc/sla_settings_state.dart';
 
 class SlaAuditWidget extends StatefulWidget {
@@ -36,26 +38,50 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
   void _loadAuditEvents() {
     // Load mock audit events for demonstration
     final mockEvents = [
-      SlaAuditEntity.settingsChange(
+      SlaAuditEntity(
         id: 'audit_1',
         firmId: 'current_firm',
-        userId: 'user_1',
+        eventType: AuditEventType.configurationChange,
+        eventCategory: AuditEventCategory.slaManagement,
+        action: 'update_sla_settings',
         description: 'Alteração nos tempos de resposta SLA',
-        metadata: {'old_value': '48h', 'new_value': '24h'},
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+        userId: 'user_1',
+        userRole: 'admin',
+        ipAddress: '192.168.1.100',
+        userAgent: 'Flutter App',
+        severity: AuditSeverity.info,
+        metadata: const {'old_value': '48h', 'new_value': '24h'},
       ),
-      SlaAuditEntity.violation(
+      SlaAuditEntity(
         id: 'audit_2',
         firmId: 'current_firm',
-        userId: 'user_2',
+        eventType: AuditEventType.slaViolation,
+        eventCategory: AuditEventCategory.slaManagement,
+        action: 'sla_violation_detected',
         description: 'Violação de SLA detectada para caso #12345',
-        metadata: {'case_id': '12345', 'deadline': '2025-01-15 18:00'},
+        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+        userId: 'user_2',
+        userRole: 'lawyer',
+        ipAddress: '192.168.1.101',
+        userAgent: 'Flutter App',
+        severity: AuditSeverity.warning,
+        metadata: const {'case_id': '12345', 'deadline': '2025-01-15 18:00'},
       ),
-      SlaAuditEntity.escalation(
+      SlaAuditEntity(
         id: 'audit_3',
         firmId: 'current_firm',
-        userId: 'system',
+        eventType: AuditEventType.escalation,
+        eventCategory: AuditEventCategory.slaManagement,
+        action: 'auto_escalation_executed',
         description: 'Escalação automática executada',
-        metadata: {'escalation_level': '2', 'reason': 'timeout'},
+        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
+        userId: 'system',
+        userRole: 'system',
+        ipAddress: '127.0.0.1',
+        userAgent: 'System Process',
+        severity: AuditSeverity.error,
+        metadata: const {'escalation_level': '2', 'reason': 'timeout'},
       ),
     ];
     
@@ -628,65 +654,75 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
   }
 
   // Helper methods
-  Color _getEventTypeColor(String eventType) {
+  Color _getEventTypeColor(AuditEventType eventType) {
     switch (eventType) {
-      case 'settings_change':
+      case AuditEventType.configurationChange:
         return Colors.blue;
-      case 'violation':
+      case AuditEventType.slaViolation:
         return Colors.red;
-      case 'escalation':
+      case AuditEventType.escalation:
         return Colors.orange;
-      case 'override':
-        return Colors.purple;
-      case 'system':
+      case AuditEventType.systemEvent:
         return Colors.green;
+      case AuditEventType.create:
+      case AuditEventType.update:
+      case AuditEventType.delete:
+        return Colors.purple;
       default:
         return Colors.grey;
     }
   }
 
-  IconData _getEventTypeIcon(String eventType) {
+  IconData _getEventTypeIcon(AuditEventType eventType) {
     switch (eventType) {
-      case 'settings_change':
+      case AuditEventType.configurationChange:
         return Icons.settings;
-      case 'violation':
+      case AuditEventType.slaViolation:
         return Icons.warning;
-      case 'escalation':
+      case AuditEventType.escalation:
         return Icons.trending_up;
-      case 'override':
-        return Icons.admin_panel_settings;
-      case 'system':
+      case AuditEventType.systemEvent:
         return Icons.computer;
+      case AuditEventType.create:
+        return Icons.add;
+      case AuditEventType.update:
+        return Icons.edit;
+      case AuditEventType.delete:
+        return Icons.delete;
       default:
         return Icons.event;
     }
   }
 
-  Color _getSeverityColor(String severity) {
+  Color _getSeverityColor(AuditSeverity? severity) {
     switch (severity) {
-      case 'low':
-        return Colors.green;
-      case 'medium':
+      case AuditSeverity.info:
+        return Colors.blue;
+      case AuditSeverity.warning:
         return Colors.orange;
-      case 'high':
+      case AuditSeverity.error:
         return Colors.red;
-      case 'critical':
+      case AuditSeverity.critical:
         return Colors.purple;
+      case AuditSeverity.high:
+        return Colors.red;
       default:
         return Colors.grey;
     }
   }
 
-  String _getSeverityLabel(String severity) {
+  String _getSeverityLabel(AuditSeverity? severity) {
     switch (severity) {
-      case 'low':
-        return 'BAIXA';
-      case 'medium':
-        return 'MÉDIA';
-      case 'high':
-        return 'ALTA';
-      case 'critical':
+      case AuditSeverity.info:
+        return 'INFO';
+      case AuditSeverity.warning:
+        return 'AVISO';
+      case AuditSeverity.error:
+        return 'ERRO';
+      case AuditSeverity.critical:
         return 'CRÍTICA';
+      case AuditSeverity.high:
+        return 'ALTA';
       default:
         return 'N/A';
     }
@@ -714,12 +750,12 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
   List<SlaAuditEntity> _getFilteredEvents() {
     var filtered = _auditEvents.where((event) {
       // Filter by event type
-      if (_selectedEventType != 'all' && event.eventType != _selectedEventType) {
+      if (_selectedEventType != 'all' && event.eventType.name != _selectedEventType) {
         return false;
       }
       
       // Filter by severity
-      if (_selectedSeverity != 'all' && event.severity != _selectedSeverity) {
+      if (_selectedSeverity != 'all' && event.severity?.name != _selectedSeverity) {
         return false;
       }
       
@@ -798,15 +834,15 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('Tipo', event.eventType),
+            _buildDetailRow('Tipo', event.eventType.name),
             _buildDetailRow('Descrição', event.description),
             _buildDetailRow('Usuário', event.userId),
-            _buildDetailRow('Severidade', event.severity),
+            _buildDetailRow('Severidade', event.severity?.name ?? 'N/A'),
             _buildDetailRow('Timestamp', event.timestamp.toString()),
-            if (event.metadata.isNotEmpty) ...[
+            if (event.metadata?.isNotEmpty == true) ...[
               const SizedBox(height: 8),
               Text('Metadados:', style: Theme.of(context).textTheme.labelMedium),
-              ...event.metadata.entries.map((e) => _buildDetailRow(e.key, e.value.toString())),
+              ...event.metadata!.entries.map((e) => _buildDetailRow(e.key, e.value.toString())),
             ],
           ],
         ),
@@ -849,8 +885,8 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
   void _exportAuditLog() {
     context.read<SlaSettingsBloc>().add(
       ExportSlaAuditLogEvent(
+        'pdf',
         dateRange: _selectedDateRange!,
-        format: 'pdf',
       ),
     );
     
@@ -862,7 +898,7 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
   void _generateComplianceReport() {
     context.read<SlaSettingsBloc>().add(
       GenerateSlaComplianceReportEvent(
-        dateRange: _selectedDateRange!,
+        _selectedDateRange!,
       ),
     );
     
@@ -873,7 +909,7 @@ class _SlaAuditWidgetState extends State<SlaAuditWidget> {
 
   void _verifyIntegrity() {
     context.read<SlaSettingsBloc>().add(
-      VerifySlaIntegrityEvent(),
+      const VerifySlaIntegrityEvent(),
     );
     
     ScaffoldMessenger.of(context).showSnackBar(

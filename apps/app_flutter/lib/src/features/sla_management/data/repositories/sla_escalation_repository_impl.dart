@@ -26,7 +26,7 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   }) async {
     try {
       // Mock implementation - replace with actual data source calls
-      return Right([]);
+      return const Right([]);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao obter escalações ativas'));
     } on NetworkException {
@@ -46,7 +46,7 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   }) async {
     try {
       // Mock implementation - replace with actual data source calls
-      return Right([]);
+      return const Right([]);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao obter histórico de escalações'));
     } on NetworkException {
@@ -132,7 +132,7 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   }) async {
     try {
       // Mock implementation - replace with actual data source calls
-      return Right([]);
+      return const Right([]);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao obter regras de escalação'));
     } on NetworkException {
@@ -236,7 +236,7 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   }) async {
     try {
       // Mock implementation - replace with actual data source calls
-      return Right([]);
+      return const Right([]);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao obter escalações pendentes'));
     } on NetworkException {
@@ -372,7 +372,7 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   }) async {
     try {
       // Mock implementation - replace with actual data source calls
-      return Right([]);
+      return const Right([]);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao obter logs de escalação'));
     } on NetworkException {
@@ -406,7 +406,7 @@ class SlaEscalationRepositoryImpl implements SlaEscalationRepository {
   }) async {
     try {
       // Mock implementation - replace with actual data source calls
-      return Right([]);
+      return const Right([]);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao obter comentários'));
     } on NetworkException {

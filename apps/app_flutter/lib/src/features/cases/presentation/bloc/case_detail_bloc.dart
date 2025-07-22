@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/case_detail.dart';
+import '../../domain/entities/process_status.dart' as process_status;
 
 sealed class CaseDetailEvent {}
 
@@ -165,53 +166,47 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
           isRequired: false,
         ),
       ],
-      processStatus: ProcessStatus(
+      processStatus: process_status.ProcessStatus(
         currentPhase: 'analise_inicial',
         description: 'Análise inicial dos documentos em andamento',
         progressPercentage: 35.0,
-        lastUpdate: DateTime.now().subtract(const Duration(hours: 2)),
-        phases: const [
-          ProcessPhase(
-            id: 'phase_001',
+        phases: [
+          process_status.ProcessPhase(
             name: 'Recebimento',
             description: 'Recebimento e catalogação dos documentos',
             isCompleted: true,
             isCurrent: false,
             completedAt: null,
-            documents: [ // Adicionado
-              CaseDocumentPreview(id: 'doc_001', name: 'Contrato Original.pdf'),
-              CaseDocumentPreview(id: 'doc_002', name: 'Comprovante de Renda.pdf'),
+            documents: [
+              process_status.PhaseDocument(name: 'Contrato Original.pdf', url: ''),
+              process_status.PhaseDocument(name: 'Comprovante de Renda.pdf', url: ''),
             ],
           ),
-          ProcessPhase(
-            id: 'phase_002',
+          process_status.ProcessPhase(
             name: 'Análise Inicial',
             description: 'Análise preliminar da documentação',
             isCompleted: false,
             isCurrent: true,
             completedAt: null,
-            documents: [ // Adicionado
-              CaseDocumentPreview(id: 'doc_003', name: 'Análise Preliminar.docx'),
+            documents: [
+              process_status.PhaseDocument(name: 'Análise Preliminar.docx', url: ''),
             ],
           ),
-          ProcessPhase(
-            id: 'phase_003',
+          process_status.ProcessPhase(
             name: 'Consulta',
             description: 'Consulta com o cliente',
             isCompleted: false,
             isCurrent: false,
             completedAt: null,
           ),
-          ProcessPhase(
-            id: 'phase_004',
+          process_status.ProcessPhase(
             name: 'Elaboração',
             description: 'Elaboração da estratégia jurídica',
             isCompleted: false,
             isCurrent: false,
             completedAt: null,
           ),
-          ProcessPhase(
-            id: 'phase_005',
+          process_status.ProcessPhase(
             name: 'Finalização',
             description: 'Entrega final dos documentos',
             isCompleted: false,

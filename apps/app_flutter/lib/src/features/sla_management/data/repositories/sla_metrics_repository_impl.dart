@@ -30,9 +30,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter métricas SLA'));
+      return const Left(ServerFailure(message: 'Erro ao obter métricas SLA'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -144,9 +144,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao gerar relatório de compliance'));
+      return const Left(ServerFailure(message: 'Erro ao gerar relatório de compliance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -170,9 +170,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao gerar relatório de performance'));
+      return const Left(ServerFailure(message: 'Erro ao gerar relatório de performance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -194,9 +194,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter tendências de performance'));
+      return const Left(ServerFailure(message: 'Erro ao obter tendências de performance'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -218,9 +218,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter dados de benchmark'));
+      return const Left(ServerFailure(message: 'Erro ao obter dados de benchmark'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -240,9 +240,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter análise preditiva'));
+      return const Left(ServerFailure(message: 'Erro ao obter análise preditiva'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -274,9 +274,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao gerar relatório customizado'));
+      return const Left(ServerFailure(message: 'Erro ao gerar relatório customizado'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -300,9 +300,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao exportar métricas'));
+      return const Left(ServerFailure(message: 'Erro ao exportar métricas'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -322,9 +322,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter resumo de métricas'));
+      return const Left(ServerFailure(message: 'Erro ao obter resumo de métricas'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -348,9 +348,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter top performers'));
+      return const Left(ServerFailure(message: 'Erro ao obter top performers'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -370,9 +370,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter dashboard KPI'));
+      return const Left(ServerFailure(message: 'Erro ao obter dashboard KPI'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -394,9 +394,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       );
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao agendar relatório'));
+      return const Left(ServerFailure(message: 'Erro ao agendar relatório'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
@@ -408,9 +408,9 @@ class SlaMetricsRepositoryImpl implements SlaMetricsRepository {
       final result = await remoteDataSource.getScheduledReports(firmId);
       return Right(result);
     } on ServerException {
-      return Left(ServerFailure(message: 'Erro ao obter relatórios agendados'));
+      return const Left(ServerFailure(message: 'Erro ao obter relatórios agendados'));
     } on NetworkException {
-      return Left(NetworkFailure(message: 'Erro de conexão'));
+      return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
       return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
     }

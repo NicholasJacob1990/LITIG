@@ -6,7 +6,6 @@ import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case_extensions.dart';
 import 'package:meu_app/src/shared/constants/case_type_constants.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
-import 'package:meu_app/src/shared/utils/app_colors.dart';
 
 class CaseListCard extends StatelessWidget {
   final String caseId;

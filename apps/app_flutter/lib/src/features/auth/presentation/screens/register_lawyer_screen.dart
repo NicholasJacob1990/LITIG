@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
@@ -276,7 +277,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                       // Para registro de advogado, ainda precisará preencher dados profissionais obrigatórios
                       context.read<AuthBloc>().add(AuthGoogleRegisterRequested());
                     },
-              icon: const Icon(Icons.login, size: 18),
+              icon: const OfficialSocialIcon(platform: SocialPlatform.google, size: 18),
               label: const Text('Conectar com Google'),
             ),
             
@@ -295,7 +296,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthLinkedInRegisterRequested());
                     },
-                    icon: const Icon(Icons.business, size: 14),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.linkedin, size: 14),
                     label: const Text('LinkedIn', style: TextStyle(fontSize: 12)),
                   ),
                 ),
@@ -310,7 +311,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthInstagramRegisterRequested());
                     },
-                    icon: const Icon(Icons.camera_alt, size: 14),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.instagram, size: 14),
                     label: const Text('Instagram', style: TextStyle(fontSize: 12)),
                   ),
                 ),
@@ -325,7 +326,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthFacebookRegisterRequested());
                     },
-                    icon: const Icon(Icons.facebook, size: 14),
+                    icon: const OfficialSocialIcon(platform: SocialPlatform.facebook, size: 14),
                     label: const Text('Facebook', style: TextStyle(fontSize: 12)),
                   ),
                 ),

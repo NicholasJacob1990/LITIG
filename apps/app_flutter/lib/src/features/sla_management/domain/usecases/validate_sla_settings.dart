@@ -401,5 +401,5 @@ class SlaValidationWarning {
 enum SlaValidationSeverity { error, warning }
 
 class ValidationFailure extends Failure {
-  const ValidationFailure({required String message}) : super(message: message);
+  const ValidationFailure({required super.message});
 } 

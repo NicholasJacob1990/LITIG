@@ -16,7 +16,7 @@ class ClientAgendaScreen extends StatefulWidget {
 class _ClientAgendaScreenState extends State<ClientAgendaScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  DateTime _selectedDate = DateTime.now();
+  final DateTime _selectedDate = DateTime.now();
   List<CalendarEvent> _events = [];
   bool _isLoading = false;
   bool _isGoogleSynced = false;
@@ -367,7 +367,7 @@ class _ClientAgendaScreenState extends State<ClientAgendaScreen>
               children: [
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       LucideIcons.info,
                       size: 20,
                       color: AppColors.info,

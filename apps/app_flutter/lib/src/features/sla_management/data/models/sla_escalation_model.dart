@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../../domain/entities/sla_escalation_entity.dart';
 
 class SlaEscalationModel extends SlaEscalationEntity {
