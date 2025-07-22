@@ -46,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterLawyerRequested>(_onRegisterLawyerRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthStateChanged>(_onAuthStateChanged);
+    on<AuthTestLoginRequested>(_onTestLoginRequested);
   }
 
   Future<void> _onCheckStatusRequested(
@@ -256,6 +257,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthError(e.message));
     } catch (e) {
       emit(const AuthError('Ocorreu um erro desconhecido.'));
+    }
+  }
+
+  Future<void> _onTestLoginRequested(AuthTestLoginRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      // Para teste, simular login bem-sucedido com dados mock
+      emit(Authenticated(event.user));
+    } catch (e) {
+      emit(const AuthError('Ocorreu um erro durante o login de teste.'));
     }
   }
 

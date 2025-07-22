@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meu_app/src/features/auth/domain/entities/user.dart';
+import 'package:meu_app/src/features/cases/domain/entities/contextual_case_data.dart';
 import 'dart:io';
 
 abstract class AuthEvent extends Equatable {
@@ -137,5 +138,22 @@ class AuthRegisterLawyerRequested extends AuthEvent {
 class AuthLogoutRequested extends AuthEvent {}
 
 /// Evento para verificar o status de autenticação na inicialização
-class AuthCheckStatusRequested extends AuthEvent {} 
+class AuthCheckStatusRequested extends AuthEvent {}
 
+/// Evento para login de teste com dados mock
+class AuthTestLoginRequested extends AuthEvent {
+  final User user;
+  final String role;
+  final String allocationType;
+  final ContextualCaseData? contextualData;
+
+  const AuthTestLoginRequested({
+    required this.user,
+    required this.role,
+    required this.allocationType,
+    this.contextualData,
+  });
+
+  @override
+  List<Object?> get props => [user, role, allocationType, contextualData];
+}
