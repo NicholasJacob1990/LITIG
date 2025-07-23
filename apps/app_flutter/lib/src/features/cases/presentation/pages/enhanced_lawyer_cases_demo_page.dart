@@ -1,0 +1,497 @@
+import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../domain/entities/client_info.dart';
+import '../../domain/entities/business_context.dart';
+import '../../domain/entities/match_analysis.dart';
+import '../../data/datasources/lawyer_cases_enhanced_data_source.dart';
+import '../widgets/lawyer_case_card_enhanced.dart' as enhanced_card;
+import '../widgets/sections/client_profile_section.dart';
+import '../widgets/sections/business_context_section.dart';
+import '../widgets/sections/lawyer_match_analysis_section.dart';
+import '../../../../shared/utils/app_colors.dart';
+
+/// Página de demonstração do espelhamento completo casos advogados ↔ clientes
+/// Mostra toda a funcionalidade implementada incluindo:
+/// - ClientInfo detalhado (contraparte LawyerInfo)
+/// - BusinessContext (análise comercial)
+/// - MatchAnalysis (específica por tipo de advogado)
+/// - Seções espelhadas equivalentes
+class EnhancedLawyerCasesDemoPage extends StatefulWidget {
+  const EnhancedLawyerCasesDemoPage({super.key});
+
+  @override
+  State<EnhancedLawyerCasesDemoPage> createState() => _EnhancedLawyerCasesDemoPageState();
+}
+
+class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPage>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
+  String _selectedRole = 'lawyer_associated';
+
+  final List<Map<String, String>> _lawyerRoles = [
+    {'key': 'lawyer_associated', 'name': 'Associado', 'description': 'Casos delegados pelo supervisor'},
+    {'key': 'lawyer_platform_associate', 'name': 'Super Associado', 'description': 'Casos via algoritmo da plataforma'},
+    {'key': 'lawyer_individual', 'name': 'Autônomo', 'description': 'Casos algorítmicos + captação direta'},
+    {'key': 'lawyer_office', 'name': 'Escritório', 'description': 'Casos algorítmicos + captação direta'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _lawyerRoles.length, vsync: this);
+    _loadMockData();
+    
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        setState(() {
+          _selectedRole = _lawyerRoles[_tabController.index]['key']!;
+          _loadMockData();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _loadMockData() {
+    // Dados são carregados diretamente no _buildRoleContent
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Demo: Espelhamento Casos Advogados'),
+        backgroundColor: AppColors.primaryBlue,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          isScrollable: true,
+          tabs: _lawyerRoles.map((role) => Tab(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(role['name']!, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(role['description']!, style: const TextStyle(fontSize: 10)),
+              ],
+            ),
+          )).toList(),
+        ),
+      ),
+      body: Column(
+        children: [
+          _buildInfoHeader(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: _lawyerRoles.map((role) => _buildRoleContent(role['key']!)).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoHeader() {
+    final currentRole = _lawyerRoles.firstWhere((role) => role['key'] == _selectedRole);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.primaryBlue.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                LucideIcons.info,
+                color: AppColors.primaryBlue,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Demonstração: ${currentRole['name']}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryBlue,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _getRoleDescription(_selectedRole),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildFeatureBadge('ClientInfo Detalhado'),
+              const SizedBox(width: 8),
+              _buildFeatureBadge('BusinessContext'),
+              const SizedBox(width: 8),
+              _buildFeatureBadge('MatchAnalysis'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.success.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.success.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: AppColors.success,
+        ),
+      ),
+    );
+  }
+
+  String _getRoleDescription(String role) {
+    switch (role) {
+      case 'lawyer_associated':
+        return 'Visualização para advogados associados que recebem casos delegados. Inclui contexto de delegação, objetivos de aprendizado e orientações do supervisor.';
+      case 'lawyer_platform_associate':
+        return 'Visualização para super associados que recebem casos via algoritmo. Inclui score algorítmico, análise de competição e expectativas do cliente.';
+      case 'lawyer_individual':
+      case 'lawyer_office':
+        return 'Visualização para advogados contratantes que recebem casos via algoritmo + captação direta. Inclui análise comercial, ROI e potencial de expansão.';
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildRoleContent(String role) {
+    final cases = LawyerCasesEnhancedDataSource.getMockCasesForLawyer(
+      lawyerId: 'lawyer_demo',
+      lawyerRole: role,
+    );
+    
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: cases.length,
+      itemBuilder: (context, index) {
+        final caseData = cases[index];
+        return _buildEnhancedCaseCardFromData(caseData, role);
+      },
+    );
+  }
+
+  Widget _buildEnhancedCaseCardFromData(EnhancedCaseData caseData, String role) {
+    // Por enquanto, criar dados mock para BusinessContext e MatchAnalysis
+    const businessContext = BusinessContext(
+      estimatedValue: 50000.0,
+      investmentRequired: 5000.0,
+      roiProjection: 85.0,
+      revenueModel: 'success_fee',
+      expectedHours: 120.0,
+      hourlyRateRecommended: 450.0,
+      estimatedDuration: const Duration(days: 180),
+      criticalDeadlines: const ['Audiência em 30 dias', 'Perícia em 60 dias'],
+      complexityScore: 65.0,
+      complexityFactors: const ['Múltiplas testemunhas', 'Documentação extensa'],
+      difficultyLevel: 'medium',
+      requiredSkills: const ['Direito trabalhista', 'Negociação'],
+      marketSegment: 'Trabalhista',
+      marketDemand: 75.0,
+      marketTrends: const ['Aumento de casos de assédio', 'Foco em compliance'],
+      competitivePosition: 'Referência regional',
+      upsellOpportunities: const ['Consultoria preventiva', 'Compliance trabalhista'],
+      expansionPotential: 80.0,
+      referralOpportunities: const ['Outros colaboradores da empresa'],
+      strategicValue: 'Cliente com potencial recorrente',
+      competition: const CompetitiveAnalysis(
+        competitorCount: 3,
+        competitorProfiles: ['Especialista trabalhista', 'Escritório tradicional'],
+        differentiation: 'Atendimento personalizado e agilidade',
+        winProbability: 85.0,
+      ),
+      riskProfile: const RiskProfile(
+        legalRisk: 25.0,
+        financialRisk: 20.0,
+        reputationalRisk: 15.0,
+        clientRisk: 30.0,
+        riskSummary: 'Risco baixo com boa documentação',
+        mitigationStrategies: ['Documentar todas interações', 'Coletar provas antecipadamente'],
+      ),
+    );
+    
+    // Criar MatchAnalysis baseado no role
+    MatchAnalysis matchAnalysis;
+    switch (role) {
+      case 'lawyer_associated':
+        matchAnalysis = const InternalMatchAnalysis(
+          matchScore: 85.0,
+          matchReason: 'Delegação do supervisor',
+          strengths: ['Experiência em casos similares', 'Disponibilidade imediata'],
+          considerations: ['Primeira experiência com assédio moral'],
+          recommendation: 'Acompanhar de perto com supervisão',
+          delegatedBy: 'Dr. João Supervisor',
+          learningObjectives: 'Desenvolvimento de argumentação e prática em audiências',
+          supervisorNotes: 'Excelente oportunidade de aprendizado',
+          resources: ['Manual de Assédio Moral', 'Jurisprudência atualizada'],
+          escalationPath: 'Escalar para supervisor em questões complexas',
+        );
+        break;
+      case 'lawyer_platform_associate':
+        matchAnalysis = const AlgorithmMatchAnalysis(
+          matchScore: 90.0,
+          matchReason: 'Match algorítmico',
+          strengths: ['Alta taxa de sucesso', 'Especialização compatível'],
+          considerations: ['Carga de trabalho atual'],
+          recommendation: 'Aceitar com prioridade alta',
+          algorithmScore: 92.5,
+          matchExplanation: 'Perfil ideal para o caso',
+          competitors: ['3 outros advogados visualizaram'],
+          conversionRate: 85.0,
+          clientExpectation: 'Resolução rápida e eficiente',
+        );
+        break;
+      default:
+        matchAnalysis = const BusinessMatchAnalysis(
+          matchScore: 88.0,
+          matchReason: 'Oportunidade comercial',
+          strengths: ['ROI positivo', 'Cliente recorrente'],
+          considerations: ['Investimento de tempo'],
+          recommendation: 'Aceitar e buscar fidelização',
+          caseSource: 'algorithm',
+          businessFit: 85.0,
+          acquisitionCost: 'R\$ 0',
+          profitabilityScore: 82.0,
+          upsellOpportunities: ['Consultoria preventiva'],
+        );
+    }
+    
+    return enhanced_card.LawyerCaseCardEnhanced(
+      caseId: caseData.caseId,
+      title: caseData.title,
+      status: caseData.status,
+      caseType: 'Trabalhista', // Mock
+      clientInfo: caseData.clientInfo,
+      businessContext: businessContext,
+      matchAnalysis: matchAnalysis,
+      userRole: role,
+      onTap: () => _showCaseDetailsFromData(caseData, businessContext, matchAnalysis, role),
+      onContactClient: () => _contactClient(caseData.clientInfo),
+      onViewDetails: () => _showCaseDetailsFromData(caseData, businessContext, matchAnalysis, role),
+    );
+  }
+
+  void _showCaseDetailsFromData(
+    EnhancedCaseData caseData,
+    BusinessContext businessContext,
+    MatchAnalysis matchAnalysis,
+    String role,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        caseData.title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(LucideIcons.x),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    ClientProfileSection(
+                      clientInfo: caseData.clientInfo,
+                      matchContext: 'Cliente selecionado via ${matchAnalysis.matchReason}',
+                    ),
+                    const SizedBox(height: 16),
+                    BusinessContextSection(
+                      businessContext: businessContext,
+                    ),
+                    const SizedBox(height: 16),
+                    LawyerMatchAnalysisSection(
+                      analysis: matchAnalysis,
+                      lawyerRole: role,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+
+  void _contactClient(ClientInfo clientInfo) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              _getContactIcon(clientInfo.preferredCommunication),
+              color: AppColors.primaryBlue,
+            ),
+            const SizedBox(width: 8),
+            const Text('Contatar Cliente'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Cliente: ${clientInfo.name}'),
+            const SizedBox(height: 8),
+            Text('Comunicação preferida: ${_getPreferredCommunicationLabel(clientInfo.preferredCommunication)}'),
+            const SizedBox(height: 8),
+            Text('Contato: ${clientInfo.preferredCommunication == 'email' ? clientInfo.email : clientInfo.phone}'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.info.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(LucideIcons.info, size: 16, color: AppColors.info),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Tempo médio de resposta: ${clientInfo.responseTimeFormatted}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.info,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Conectando via ${_getPreferredCommunicationLabel(clientInfo.preferredCommunication)}...'),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryBlue,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Contatar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getContactIcon(String communication) {
+    switch (communication) {
+      case 'whatsapp':
+        return LucideIcons.messageCircle;
+      case 'phone':
+        return LucideIcons.phone;
+      case 'teams':
+        return LucideIcons.video;
+      default:
+        return LucideIcons.mail;
+    }
+  }
+
+  String _getPreferredCommunicationLabel(String communication) {
+    switch (communication) {
+      case 'whatsapp':
+        return 'WhatsApp';
+      case 'phone':
+        return 'Telefone';
+      case 'teams':
+        return 'Teams';
+      case 'email':
+        return 'E-mail';
+      default:
+        return 'E-mail';
+    }
+  }
+}

@@ -10,7 +10,7 @@ import os
 from typing import Dict, Any, Callable
 
 try:
-    from .algoritmo_match import ProfessionalMaturityData
+    from algoritmo_match import ProfessionalMaturityData
 except ImportError:
     # Fallback para execução standalone
     from algoritmo_match import ProfessionalMaturityData

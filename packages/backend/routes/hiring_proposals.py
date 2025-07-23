@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import logging
 import os
 from supabase import create_client, Client
-from ..auth import get_current_user
+from auth import get_current_user
 
 # Setup Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://test.supabase.co")

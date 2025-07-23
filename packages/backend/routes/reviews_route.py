@@ -9,9 +9,9 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from .. import supabase
-from ..services.review_service import ReviewService
-from ..auth import get_current_user
-from ..api.schemas import ReviewCreate, ReviewResponse
+from services.review_service import ReviewService
+from auth import get_current_user
+from api.schemas import ReviewCreate, ReviewResponse
 
 router = APIRouter(
     prefix="/reviews",

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..auth import get_current_user
-from ..services.redis_service import redis_service
+from auth import get_current_user
+from services.redis_service import redis_service
 
 router = APIRouter(prefix="/health", tags=["Health Checks"])
 

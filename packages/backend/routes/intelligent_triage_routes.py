@@ -10,13 +10,13 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sse_starlette.sse import EventSourceResponse
 
-from ..auth import get_current_user
-from ..services.conversation_state_manager import conversation_state_manager
-from ..services.intelligent_triage_orchestrator import (
+from auth import get_current_user
+from services.conversation_state_manager import conversation_state_manager
+from services.intelligent_triage_orchestrator import (
     OrchestrationResult,
     intelligent_triage_orchestrator,
 )
-from ..models import TriageMessage, TriageMessageResponse, TriageStartBody
+from models import TriageMessage, TriageMessageResponse, TriageStartBody
 
 # Configuração do rate limiter
 limiter = Limiter(key_func=get_remote_address)

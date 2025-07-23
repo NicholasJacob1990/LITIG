@@ -75,7 +75,6 @@ class _InlineSearchFiltersState extends State<InlineSearchFilters>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

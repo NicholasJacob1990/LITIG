@@ -205,7 +205,7 @@ const Map<String, List<String>> tabOrderByProfile = {
     'home',
     'contractor_offers',
     'partners',
-    'partnerships',
+    // 'partnerships', // REMOVIDO: Super Associados não fazem parcerias
     'contractor_cases',
     'contractor_messages',
     'contractor_profile',

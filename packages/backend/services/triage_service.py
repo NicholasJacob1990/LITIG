@@ -12,7 +12,7 @@ import openai
 from dotenv import load_dotenv
 
 # Importação do serviço de embedding
-from .embedding_service import generate_embedding
+from embedding_service import generate_embedding
 
 load_dotenv()
 

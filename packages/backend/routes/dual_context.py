@@ -7,9 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, Optional
 import logging
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
-from ..services.dual_context_service import create_dual_context_service
+from auth import get_current_user
+from config import get_supabase_client
+from services.dual_context_service import create_dual_context_service
 
 logger = logging.getLogger(__name__)
 

@@ -32,7 +32,7 @@ from sqlalchemy import select, text
 from backend.database import get_async_session
 from backend.models.lawyer import Lawyer
 from backend.models.law_firm import LawFirm
-from backend.services.unipile_sdk_wrapper import UnipileSDKWrapper
+from backend.services.unipile_app_service import get_unipile_app_service
 
 
 class DataSource(Enum):
@@ -265,10 +265,10 @@ class HybridLegalDataService:
             Tuple com dados e transparência
         """
         try:
-            unipile_wrapper = UnipileSDKWrapper()
+            unipile_service = get_unipile_app_service()
             
             # Buscar dados de comunicação usando o SDK
-            data, transparency = await unipile_wrapper.get_communication_data(
+            data, transparency = await unipile_service.get_communication_data(
                 oab_number=oab_number,
                 email=None  # Pode ser expandido para incluir email se disponível
             )

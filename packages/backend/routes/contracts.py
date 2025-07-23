@@ -8,11 +8,11 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel, Field
 
-from ..auth import get_current_user
-from ..models import Contract, ContractStatus, FeeModel
-from ..services.contract_service import ContractService
-from ..services.sign_service import SignService
-from ..logger import AUDIT_LOGGER
+from auth import get_current_user
+from models import Contract, ContractStatus, FeeModel
+from services.contract_service import ContractService
+from services.sign_service import SignService
+from logger import AUDIT_LOGGER
 
 router = APIRouter(prefix="/contracts", tags=["contracts"])
 

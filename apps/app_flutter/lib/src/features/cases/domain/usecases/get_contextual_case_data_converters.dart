@@ -1,8 +1,7 @@
 import '../entities/case_detail.dart' as detail;
+import '../entities/process_status.dart';
 import '../entities/lawyer_info.dart';
 import '../entities/case_detail_models.dart' as models;
-import '../entities/case_document.dart' as doc;
-import '../entities/process_status.dart' as status;
 
 /// Converters for contextual case data to handle type conflicts
 mixin ContextualCaseDataConverters {
@@ -35,78 +34,65 @@ mixin ContextualCaseDataConverters {
 
   /// Converts PreAnalysis from models to case_detail format
   detail.PreAnalysis convertPreAnalysis(Map<String, dynamic> data) {
-    final sourceInfo = models.PreAnalysis.fromJson(data);
     return detail.PreAnalysis(
-      summary: sourceInfo.summary,
-      legalArea: sourceInfo.tag,
-      urgencyLevel: sourceInfo.urgency.toString(),
-      keyPoints: sourceInfo.requiredDocs,
+      summary: data['summary'] ?? 'Análise prévia do caso',
+      legalArea: data['tag'] ?? 'Civil',
+      urgencyLevel: data['urgency']?.toString() ?? 'Média',
+      keyPoints: List<String>.from(data['required_docs'] ?? []),
       recommendation: 'Recomendação baseada na análise prévia',
       analyzedAt: DateTime.now(),
-      requiredDocuments: sourceInfo.requiredDocs,
-      riskAssessment: sourceInfo.risk,
-      estimatedCosts: sourceInfo.costs.fold<Map<String, double>>(
-        {},
-        (map, cost) => map..[cost.label] = double.tryParse(
-          cost.value.replaceAll(RegExp(r'[^0-9.,]'), '').replaceAll(',', '.'),
-        ) ?? 0.0,
-      ),
+      requiredDocuments: List<String>.from(data['required_docs'] ?? []),
+      riskAssessment: data['risk'] ?? 'Baixo',
+      estimatedCosts: Map<String, double>.from(data['costs'] ?? {}),
     );
   }
 
   /// Converts NextStep from models to case_detail format
   detail.NextStep convertNextStep(Map<String, dynamic> data) {
-    final sourceInfo = models.NextStep.fromJson(data);
     return detail.NextStep(
-      id: 'step_${sourceInfo.title.hashCode}',
-      title: sourceInfo.title,
-      description: sourceInfo.description,
-      dueDate: DateTime.tryParse(sourceInfo.dueDate) ?? 
+      id: 'step_${(data['title'] ?? '').hashCode}',
+      title: data['title'] ?? 'Próximo Passo',
+      description: data['description'] ?? 'Descrição do próximo passo',
+      dueDate: DateTime.tryParse(data['due_date'] ?? '') ?? 
                 DateTime.now().add(const Duration(days: 7)),
-      priority: sourceInfo.priority.toLowerCase(),
-      isCompleted: sourceInfo.status == 'DONE',
+      priority: (data['priority'] ?? 'medium').toLowerCase(),
+      isCompleted: data['status'] == 'DONE',
       responsibleParty: 'lawyer',
     );
   }
 
   /// Converts CaseDocument from doc to case_detail format
   detail.CaseDocument convertCaseDocument(Map<String, dynamic> data) {
-    final sourceInfo = doc.CaseDocument.fromJson(data);
     return detail.CaseDocument(
-      id: 'doc_${sourceInfo.name.hashCode}',
-      name: sourceInfo.name,
-      type: sourceInfo.type,
-      url: '/documents/${sourceInfo.name}',
-      uploadedAt: DateTime.tryParse(sourceInfo.date) ?? DateTime.now(),
+      id: 'doc_${(data['name'] ?? '').hashCode}',
+      name: data['name'] ?? 'Documento',
+      type: data['type'] ?? 'pdf',
+      url: '/documents/${data['name'] ?? 'documento'}',
+      uploadedAt: DateTime.tryParse(data['date'] ?? '') ?? DateTime.now(),
       uploadedBy: 'client',
-      sizeBytes: int.tryParse(sourceInfo.size.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1024,
-      isRequired: sourceInfo.category == 'required',
+      sizeBytes: int.tryParse((data['size'] ?? '1024').replaceAll(RegExp(r'[^0-9]'), '')) ?? 1024,
+      isRequired: data['category'] == 'required',
     );
   }
 
   /// Converts ProcessStatus from status to case_detail format
-  // TODO: Fix ProcessStatus conversion - temporarily commented
-  // detail.ProcessStatus convertProcessStatus(Map<String, dynamic> data) {
-  //   final sourceInfo = status.ProcessStatus.fromJson(data);
-  //   return detail.ProcessStatus(
-  //     currentPhase: sourceInfo.currentPhase,
-  //     description: sourceInfo.description,
-  //     progressPercentage: sourceInfo.progressPercentage,
-  //     lastUpdate: DateTime.now(),
-  //     phases: sourceInfo.phases.map((phase) => detail.ProcessPhase(
-  //       id: 'phase_${phase.name.hashCode}',
-  //       name: phase.name,
-  //       description: phase.description,
-  //       isCompleted: phase.isCompleted,
-  //       isCurrent: phase.isCurrent,
-  //       completedAt: phase.completedAt,
-  //       documents: phase.documents.map((phaseDoc) => detail.CaseDocumentPreview(
-  //         id: 'preview_${phaseDoc.name.hashCode}',
-  //         name: phaseDoc.name,
-  //       )).toList(),
-  //     )).toList(),
-  //   );
-  // }
+  ProcessStatus convertProcessStatus(Map<String, dynamic> data) {
+    return ProcessStatus(
+      currentPhase: data['current_phase'] as String? ?? 'Em Andamento',
+      description: data['description'] as String? ?? 'Processo em andamento',
+      progressPercentage: (data['progress_percentage'] as num?)?.toDouble() ?? 50.0,
+      phases: (data['phases'] as List<dynamic>?)?.map((phase) => 
+        ProcessPhase(
+          name: phase['name'] as String,
+          description: phase['description'] as String,
+          isCompleted: phase['is_completed'] as bool? ?? false,
+          isCurrent: phase['is_current'] as bool? ?? false,
+          completedAt: phase['completed_at'] != null ? 
+            DateTime.tryParse(phase['completed_at'] as String) : null,
+        ),
+      ).toList() ?? [],
+    );
+  }
 }
 
 /// Helper class for CaseDocumentPreview - extending case_detail namespace

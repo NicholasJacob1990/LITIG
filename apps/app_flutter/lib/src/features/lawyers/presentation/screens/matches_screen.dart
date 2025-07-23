@@ -17,7 +17,6 @@ class MatchesScreen extends StatefulWidget {
 class _MatchesScreenState extends State<MatchesScreen> {
   String _currentPreset = 'balanced';
   String _sortBy = 'compatibility'; // compatibility, rating, distance
-  final bool _showFilters = false;
 
   void _showFiltersModal() {
     showModalBottomSheet(

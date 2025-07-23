@@ -6,18 +6,18 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from .intelligent_interviewer_service import intelligent_interviewer_service
-from .triage_service import triage_service
-from .lex9000_integration_service import lex9000_integration_service
-from .conversation_state_manager import conversation_state_manager
-from .redis_service import redis_service
-from .notify_service import send_notification_to_client
-from .match_service import find_and_notify_matches
-from ..models import MatchRequest
-from ..models.triage_result import TriageResult, OrchestrationResult
-from ..models.strategy import Strategy
-from ..core.embedding_utils import generate_embedding
-from ..utils.case_type_mapper import map_area_to_case_type
+from intelligent_interviewer_service import intelligent_interviewer_service
+from triage_service import triage_service
+from lex9000_integration_service import lex9000_integration_service
+from conversation_state_manager import conversation_state_manager
+from redis_service import redis_service
+from notify_service import send_notification_to_client
+from match_service import find_and_notify_matches
+from models import MatchRequest
+from models.triage_result import TriageResult, OrchestrationResult
+from models.strategy import Strategy
+from core.embedding_utils import generate_embedding
+from utils.case_type_mapper import map_area_to_case_type
 
 
 @dataclass
@@ -155,7 +155,7 @@ class IntelligentTriageOrchestrator:
                 try:
                     user_id = orchestration.get("user_id")
                     if user_id and result:
-                        from .notify_service import send_notification_to_client
+                        from notify_service import send_notification_to_client
                         await send_notification_to_client(
                             client_id=user_id,
                             notification_type="caseUpdate",

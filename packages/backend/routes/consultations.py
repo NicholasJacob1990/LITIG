@@ -7,8 +7,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from ..auth import get_current_user
-from ..services.consultation_service import ConsultationService
+from auth import get_current_user
+from services.consultation_service import ConsultationService
 
 router = APIRouter(prefix="/consultations", tags=["consultations"])
 

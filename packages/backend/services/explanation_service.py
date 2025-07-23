@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 from dotenv import load_dotenv
 
-from ..algoritmo_match import KPI, Case, Lawyer, MatchmakingAlgorithm
-from ..models import ExplainRequest, ExplainResponse, Explanation
+from algoritmo_match import KPI, Case, Lawyer, MatchmakingAlgorithm
+from models import ExplainRequest, ExplainResponse, Explanation
 from supabase import Client, create_client
 
 # Configuração

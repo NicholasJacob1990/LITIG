@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
-"""algoritmo_match_v2_7_rc3.py
-Algoritmo de Match Jurídico Inteligente — v2.7-rc3
+"""algoritmo_match_v2_8_academic.py
+Algoritmo de Match Jurídico Inteligente — v2.8-academic
 ======================================================================
-Novidades v2.7-rc3 🚀
--------------------
-1.  **Feature-E (Firm Reputation)**: Reputação de escritórios integrada ao algoritmo.
-2.  **B2B Two-Pass Algorithm**: Ranking em dois passos para casos corporativos.
-3.  **SUCCESS_FEE_MULT**: Configurável via variável de ambiente para A/B testing.
-4.  **Safe Conflict Scan**: Timeout configurável para evitar dead-locks.
-5.  **Melhorias de Observabilidade**: Logs estruturados com versionamento.
-6.  **Otimizações de Performance**: Deduplicação de objetos LawFirm.
+Novidades v2.8-academic 🚀
+--------------------------
+1.  **Academic Enrichment**: Feature Q enriquecida com dados acadêmicos externos
+    - Avaliação de universidades via rankings QS/THE
+    - Análise de periódicos por fator de impacto (JCR/Qualis)
+    - Cache Redis com TTL configurável
+    - Rate limiting e fallback resiliente
+2.  **Async Feature Calculation**: `qualification_score_async()` e `all_async()`
+3.  **External APIs Integration**: Perplexity + Deep Research com polling
+4.  **Enhanced Logging**: TTL acadêmico e flags de enriquecimento nos logs
+
+Funcionalidades anteriores mantidas:
+- Feature-E (Firm Reputation), B2B Two-Pass Algorithm
+- Safe Conflict Scan, SUCCESS_FEE_MULT configurável  
+- Observabilidade completa, otimizações de performance
 ======================================================================
 """
 
@@ -27,16 +34,35 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Literal, Set, cast
 from datetime import datetime
 import re
+import unicodedata
+import hashlib
+import math
 
 # type: ignore - para ignorar erros de importação não resolvidos
 import numpy as np
 import redis.asyncio as aioredis
+
+# --- Academic Enrichment Dependencies ---
+try:
+    import aiohttp
+    from aiolimiter import AsyncLimiter
+    HAS_ACADEMIC_ENRICHMENT = True
+except ImportError:
+    # Fallback quando dependências acadêmicas não estão disponíveis
+    HAS_ACADEMIC_ENRICHMENT = False
+    class AsyncLimiter:
+        def __init__(self, *args, **kwargs):
+            pass
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *args):
+            pass
 import httpx
 
 # LTR Service Integration
 LTR_ENDPOINT = os.getenv("LTR_ENDPOINT", "http://ltr-service:8080/ltr/score")
 try:
-    from .services.availability_service import get_lawyers_availability_status
+    from services.availability_service import get_lawyers_availability_status
 except ImportError:
     # Fallback para testes - mock da função
     async def get_lawyers_availability_status(lawyer_ids):
@@ -44,7 +70,7 @@ except ImportError:
 
 # --- Conflitos de interesse --------------------------------------------------
 try:
-    from .services.conflict_service import conflict_scan  # type: ignore
+    from services.conflict_service import conflict_scan  # type: ignore
 except ImportError:
     # Fail-open: sem serviço, assume sem conflitos
     def conflict_scan(case, lawyer):  # type: ignore
@@ -75,13 +101,13 @@ except ImportError:  # Prometheus opcional
 AVAIL_DEGRADED = cast(Any, AVAIL_DEGRADED)
 
 try:
-    from .const import algorithm_version  # Nova constante centralizada
+    from const import algorithm_version  # Nova constante centralizada
 except ImportError:
     from const import algorithm_version  # Fallback para execução standalone
 
 # Feature Flags para controle de rollout B2B
 try:
-    from .services.feature_flags import (
+    from services.feature_flags import (
         is_firm_matching_enabled,
         get_corporate_preset,
         is_b2b_enabled_for_user,
@@ -162,6 +188,24 @@ def _validate_preset_weights():
 CONFLICT_TIMEOUT_SEC = float(os.getenv("CONFLICT_TIMEOUT", "2.0"))
 PRICE_DECAY_K = float(os.getenv("PRICE_DECAY_K", "5.0"))  # Configurável para A/B testing
 SUCCESS_FEE_MULT = float(os.getenv("SUCCESS_FEE_MULT", "10.0"))  # Multiplicador para estimar valor do caso
+
+# --- Academic Enrichment Configuration ---
+PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
+OPENAI_DEEP_KEY = os.getenv("OPENAI_DEEP_KEY")
+UNI_RANK_TTL_H = int(os.getenv("UNI_RANK_TTL_H", "720"))  # 30 dias default para universidades
+JOUR_RANK_TTL_H = int(os.getenv("JOUR_RANK_TTL_H", "720"))  # 30 dias default para periódicos
+
+# Deep Research timeouts (conforme documentação oficial)
+DEEP_POLL_SECS = int(os.getenv("DEEP_POLL_SECS", "10"))  # intervalo entre polls
+DEEP_MAX_MIN = int(os.getenv("DEEP_MAX_MIN", "15"))      # encerra após 15 min
+
+# Rate limiters para APIs externas
+if HAS_ACADEMIC_ENRICHMENT:
+    PXP_LIM = AsyncLimiter(30, 60)  # 30 req/min para Perplexity
+    ESC_LIM = AsyncLimiter(20, 60)  # 20 req/min se já usa Escavador
+else:
+    PXP_LIM = AsyncLimiter()  # Dummy limiter
+    ESC_LIM = AsyncLimiter()  # Dummy limiter
 
 # Executar validação na inicialização
 _validate_preset_weights()
@@ -267,7 +311,7 @@ OVERLOAD_FLOOR = float(os.getenv("OVERLOAD_FLOOR", "0.01"))  # Reduzido de 0.05 
 # =============================================================================
 # 2. Logging em JSON
 # =============================================================================
-from .logger import AUDIT_LOGGER
+from logger import AUDIT_LOGGER
 
 # =============================================================================
 # 3. Utilitários
@@ -285,6 +329,25 @@ def haversine(coord_a: Tuple[float, float], coord_b: Tuple[float, float]) -> flo
 def cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     denom = float(np.linalg.norm(vec_a) * np.linalg.norm(vec_b)) or 1e-9
     return float(np.dot(vec_a, vec_b) / denom)
+
+
+def canonical(text: str) -> str:
+    """Remove acentos, normaliza e converte para slug para uso como chave de cache."""
+    if not text:
+        return ""
+    # Remove acentos e caracteres especiais
+    normalized = unicodedata.normalize('NFKD', text)
+    ascii_text = normalized.encode('ascii', 'ignore').decode('ascii')
+    # Converte para lowercase e substitui espaços por underscores
+    slug = re.sub(r'[^a-z0-9\s]', '', ascii_text.lower())
+    slug = re.sub(r'\s+', '_', slug.strip())
+    return slug
+
+
+def _chunks(lst: List, n: int):
+    """Divide uma lista em chunks de tamanho máximo n."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 
 def safe_json_dump(data: Dict, max_list_size: int = 100) -> Dict:
@@ -549,6 +612,22 @@ class RedisCache:
         
         await self._redis.set(cache_key, json.dumps(features), ex=ttl)
 
+    async def get_academic_score(self, key: str) -> Optional[float]:
+        """Recupera score acadêmico do cache."""
+        cache_key = f"{self._prefix}:acad:{key}"
+        raw = await self._redis.get(cache_key)
+        if raw:
+            try:
+                return float(raw)
+            except (ValueError, TypeError):
+                return None
+        return None
+
+    async def set_academic_score(self, key: str, score: float, *, ttl_h: int):
+        """Armazena score acadêmico no cache com TTL em horas."""
+        cache_key = f"{self._prefix}:acad:{key}"
+        await self._redis.set(cache_key, str(score), ex=ttl_h * 3600)
+
     async def close(self) -> None:
         """Fecha a conexão com o Redis."""
         await self._redis.close()
@@ -575,6 +654,345 @@ except Exception:
 
 # Cast para resolver linting
 MATCH_RANK_TOTAL = cast(Any, MATCH_RANK_TOTAL)
+
+# =============================================================================
+# Academic Enrichment HTTP Wrappers
+# =============================================================================
+
+async def perplexity_chat(payload: Dict[str, Any]) -> Optional[Dict]:
+    """Wrapper para API do Perplexity com rate limiting e tratamento de erros."""
+    if not HAS_ACADEMIC_ENRICHMENT or not PERPLEXITY_API_KEY:
+        AUDIT_LOGGER.info("Perplexity API não configurada - usando fallback", {
+            "has_enrichment": HAS_ACADEMIC_ENRICHMENT,
+            "has_api_key": bool(PERPLEXITY_API_KEY)
+        })
+        return None
+    
+    async with PXP_LIM:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://api.perplexity.ai/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+                        "Content-Type": "application/json"
+                    },
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=30)
+                ) as response:
+                    if response.status == 429:
+                        # Rate limit hit, aguardar um pouco mais
+                        await asyncio.sleep(2)
+                        return None
+                    
+                    if response.status != 200:
+                        AUDIT_LOGGER.warning("Perplexity API error", {
+                            "status": response.status, 
+                            "payload_size": len(str(payload))
+                        })
+                        return None
+                    
+                    data = await response.json()
+                    content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    
+                    # Parse JSON da resposta (modelo configurado para retornar JSON)
+                    try:
+                        return json.loads(content)
+                    except json.JSONDecodeError:
+                        return None
+                        
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            AUDIT_LOGGER.warning("Perplexity request failed", {"error": str(e)})
+            return None
+
+
+async def deep_research_request(payload: Dict[str, Any]) -> Optional[Dict]:
+    """Wrapper para Deep Research API com polling - 100% spec oficial OpenAI."""
+    if not HAS_ACADEMIC_ENRICHMENT or not OPENAI_DEEP_KEY:
+        AUDIT_LOGGER.info("Deep Research API não configurada - pulando fallback", {
+            "has_enrichment": HAS_ACADEMIC_ENRICHMENT,
+            "has_deep_key": bool(OPENAI_DEEP_KEY)
+        })
+        return None
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            # 1. Enviar requisição inicial (endpoint oficial)
+            async with session.post(
+                "https://api.openai.com/v1/responses",
+                headers={
+                    "Authorization": f"Bearer {OPENAI_DEEP_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                if response.status != 202:
+                    AUDIT_LOGGER.warning("Deep Research API error", {
+                        "status": response.status,
+                        "expected": 202
+                    })
+                    return None
+                
+                task_data = await response.json()
+                task_id = task_data.get("id")
+                
+                if not task_id:
+                    AUDIT_LOGGER.warning("Deep Research: task_id não retornado")
+                    return None
+            
+            # 2. Polling até completar (conforme timeouts configuráveis)
+            max_attempts = (DEEP_MAX_MIN * 60) // DEEP_POLL_SECS  # ex: 15min / 10s = 90
+            
+            for attempt in range(max_attempts):
+                await asyncio.sleep(DEEP_POLL_SECS)
+                
+                async with session.get(
+                    f"https://api.openai.com/v1/responses/{task_id}",
+                    headers={"Authorization": f"Bearer {OPENAI_DEEP_KEY}"},
+                    timeout=aiohttp.ClientTimeout(total=10)
+                ) as poll_response:
+                    if poll_response.status != 200:
+                        continue
+                    
+                    result = await poll_response.json()
+                    status = result.get("status")
+                    
+                    if status == "completed":
+                        # Extração conforme spec oficial: response.output.message (não choices)
+                        output = result.get("response", {}).get("output", {})
+                        
+                        # Estrutura de saída completa conforme spec:
+                        # - web_search_call, code_interpreter_call, mcp_tool_call (para auditoria)
+                        # - message (resposta final que precisamos)
+                        content = output.get("message", {}).get("content", "")
+                        
+                        # Log de auditoria com ferramentas usadas
+                        tool_calls_used = {
+                            "web_search": len(output.get("web_search_call", [])),
+                            "code_interpreter": len(output.get("code_interpreter_call", [])),
+                            "mcp_tool": len(output.get("mcp_tool_call", []))
+                        }
+                        
+                        try:
+                            parsed = json.loads(content)
+                            AUDIT_LOGGER.info("Deep Research completed", {
+                                "task_id": task_id,
+                                "attempts": attempt + 1,
+                                "duration_sec": (attempt + 1) * DEEP_POLL_SECS,
+                                "tool_calls_used": tool_calls_used
+                            })
+                            return parsed
+                        except json.JSONDecodeError as e:
+                            AUDIT_LOGGER.warning("Deep Research: JSON inválido", {
+                                "task_id": task_id,
+                                "content_preview": content[:100],
+                                "tool_calls_used": tool_calls_used,
+                                "error": str(e)
+                            })
+                            return None
+                    elif status == "failed":
+                        AUDIT_LOGGER.warning("Deep Research task failed", {
+                            "task_id": task_id,
+                            "attempt": attempt + 1
+                        })
+                        return None
+            
+            # Timeout após DEEP_MAX_MIN minutos
+            AUDIT_LOGGER.warning("Deep Research timeout", {
+                "task_id": task_id,
+                "max_minutes": DEEP_MAX_MIN,
+                "total_attempts": max_attempts
+            })
+            return None
+            
+    except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+        AUDIT_LOGGER.warning("Deep Research request failed", {"error": str(e)})
+        return None
+
+# =============================================================================
+# Academic Enrichment Core Logic
+# =============================================================================
+
+class AcademicEnricher:
+    """Classe responsável por enriquecer dados acadêmicos usando APIs externas."""
+    
+    def __init__(self, cache: RedisCache):
+        self.cache = cache
+        # Importar templates organizados
+        try:
+            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            self.templates = AcademicPromptTemplates()
+            self.validator = AcademicPromptValidator()
+        except ImportError:
+            # Fallback para execução standalone
+            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            self.templates = AcademicPromptTemplates()
+            self.validator = AcademicPromptValidator()
+    
+    async def score_universities(self, names: List[str]) -> Dict[str, float]:
+        """Avalia universidades retornando scores de 0.0 a 1.0."""
+        if not names:
+            return {}
+        
+        if not HAS_ACADEMIC_ENRICHMENT:
+            AUDIT_LOGGER.info("Academic enrichment desabilitado - dependências não instaladas", {
+                "universities_count": len(names)
+            })
+            return {}
+        
+        if not PERPLEXITY_API_KEY:
+            AUDIT_LOGGER.info("Perplexity API não configurada - universidades usarão score padrão", {
+                "universities": names,
+                "fallback_score": 0.5
+            })
+            return {}
+        
+        # 1. Verificar cache primeiro
+        results = {}
+        uncached = []
+        
+        for name in names:
+            key = f"uni:{canonical(name)}"
+            cached_score = await self.cache.get_academic_score(key)
+            if cached_score is not None:
+                results[name] = cached_score
+            else:
+                uncached.append(name)
+        
+        if not uncached:
+            return results
+        
+        # 2. Processar em lotes via Perplexity usando templates consolidados
+        for chunk in _chunks(uncached, 15):  # Máximo 15 por requisição
+            # Validar e sanitizar nomes
+            sanitized_chunk = []
+            for name in chunk:
+                try:
+                    sanitized = self.validator.sanitize_institution_name(name)
+                    sanitized_chunk.append(sanitized)
+                except ValueError:
+                    continue  # Pular nomes inválidos
+            
+            if not sanitized_chunk:
+                continue
+            
+            # Usar template consolidado
+            payload = self.templates.perplexity_universities_payload(sanitized_chunk)
+            
+            response = await perplexity_chat(payload)
+            if response and "universities" in response:
+                for uni_data in response["universities"]:
+                    name = uni_data.get("name", "")
+                    score = float(uni_data.get("ranking_score", 0.5))
+                    score = max(0.0, min(1.0, score))  # Clamp 0-1
+                    
+                    if name and name in chunk:
+                        results[name] = score
+                        # Cachear resultado
+                        key = f"uni:{canonical(name)}"
+                        await self.cache.set_academic_score(key, score, ttl_h=UNI_RANK_TTL_H)
+        
+        return results
+    
+    async def score_journals(self, names: List[str]) -> Dict[str, float]:
+        """Avalia periódicos acadêmicos retornando scores de 0.0 a 1.0."""
+        if not names:
+            return {}
+        
+        if not HAS_ACADEMIC_ENRICHMENT:
+            AUDIT_LOGGER.info("Academic enrichment desabilitado - dependências não instaladas", {
+                "journals_count": len(names)
+            })
+            return {}
+        
+        if not PERPLEXITY_API_KEY:
+            AUDIT_LOGGER.info("Perplexity API não configurada - periódicos usarão score padrão", {
+                "journals": names,
+                "fallback_score": 0.5
+            })
+            return {}
+        
+        # 1. Verificar cache primeiro
+        results = {}
+        uncached = []
+        
+        for name in names:
+            key = f"jour:{canonical(name)}"
+            cached_score = await self.cache.get_academic_score(key)
+            if cached_score is not None:
+                results[name] = cached_score
+            else:
+                uncached.append(name)
+        
+        if not uncached:
+            return results
+        
+        # 2. Processar em lotes via Perplexity usando templates consolidados
+        for chunk in _chunks(uncached, 15):
+            # Validar e sanitizar nomes
+            sanitized_chunk = []
+            for name in chunk:
+                try:
+                    sanitized = self.validator.sanitize_institution_name(name)
+                    sanitized_chunk.append(sanitized)
+                except ValueError:
+                    continue  # Pular nomes inválidos
+            
+            if not sanitized_chunk:
+                continue
+            
+            # Usar template consolidado
+            payload = self.templates.perplexity_journals_payload(sanitized_chunk)
+            
+            response = await perplexity_chat(payload)
+            if response and "journals" in response:
+                for journal_data in response["journals"]:
+                    name = journal_data.get("name", "")
+                    score = float(journal_data.get("impact_score", 0.5))
+                    score = max(0.0, min(1.0, score))  # Clamp 0-1
+                    
+                    if name and name in chunk:
+                        results[name] = score
+                        # Cachear resultado
+                        key = f"jour:{canonical(name)}"
+                        await self.cache.set_academic_score(key, score, ttl_h=JOUR_RANK_TTL_H)
+        
+        # 3. Fallback: Deep Research para periódicos não resolvidos
+        missing = [name for name in uncached if name not in results]
+        for name in missing:
+            score = await self._deep_research_journal(name)
+            if score is not None:
+                results[name] = score
+                key = f"jour:{canonical(name)}"
+                await self.cache.set_academic_score(key, score, ttl_h=JOUR_RANK_TTL_H)
+        
+        return results
+    
+
+
+    async def _deep_research_journal(self, journal_name: str) -> Optional[float]:
+        """Fallback usando Deep Research para um periódico específico."""
+        try:
+            # Sanitizar nome do periódico
+            sanitized_name = self.validator.sanitize_institution_name(journal_name)
+            
+            # Usar template consolidado
+            payload = self.templates.deep_research_journal_fallback_payload(sanitized_name)
+            
+            response = await deep_research_request(payload)
+            if response and "score" in response:
+                score = float(response["score"])
+                return max(0.0, min(1.0, score))
+            
+            return None
+            
+        except (ValueError, TypeError) as e:
+            AUDIT_LOGGER.warning("Deep Research journal fallback error", {
+                "journal": journal_name,
+                "error": str(e)
+            })
+            return None
 
 # =============================================================================
 # 6. Feature calculator expandido
@@ -656,13 +1074,26 @@ class FeatureCalculator:
         dist = haversine(self.case.coords, self.lawyer.geo_latlon)
         return np.clip(1 - dist / self.case.radius_km, 0, 1)
 
-    def qualification_score(self) -> float:
-        """(v2.7) Métrica de reputação com experiência, títulos, publicações, pareceres e reconhecimentos."""
-        # ── Experiência ───────────────────────────────────────────────
-        score_exp = min(1.0, self.cv.get("anos_experiencia", 0) / 25)
+    async def qualification_score_async(self) -> float:
+        """(v2.8) Métrica de reputação enriquecida com dados acadêmicos externos."""
+        cv = self.cv
+        enricher = AcademicEnricher(cache)
 
-        # ── Títulos acadêmicos ────────────────────────────────────────
-        titles: List[Dict[str, str]] = self.cv.get("pos_graduacoes", [])
+        # ── 1. Experiência (inalterado) ──────────────────────────────
+        score_exp = min(1.0, cv.get("anos_experiencia", 0) / 25)
+
+        # ── 2. Universidades com enriquecimento acadêmico ────────────
+        titles: List[Dict[str, str]] = cv.get("pos_graduacoes", [])
+        
+        # Extrair nomes de universidades
+        uni_names = [t.get("instituicao", "") for t in titles if t.get("instituicao")]
+        uni_names = [name.strip() for name in uni_names if name.strip()]
+        
+        # Obter scores acadêmicos das universidades
+        uni_scores = await enricher.score_universities(uni_names) if uni_names else {}
+        score_uni = float(np.mean(list(uni_scores.values()))) if uni_scores else 0.5
+
+        # Contagem de títulos (lógica original mantida)
         counts = {"lato": 0, "mestrado": 0, "doutorado": 0}
         for t in titles:
             level = str(t.get("nivel", "")).lower()
@@ -673,15 +1104,24 @@ class FeatureCalculator:
                        0.2 * min(counts["mestrado"], 2) / 2 + \
                        0.3 * min(counts["doutorado"], 2) / 2
 
-        # ── Publicações gerais ───────────────────────────────────────
-        pubs = self.cv.get("num_publicacoes", 0)
-        score_pub = min(1.0, log1p(pubs) / log1p(10))
+        # ── 3. Publicações com qualidade de periódicos ──────────────
+        pubs = cv.get("publicacoes", [])
+        
+        # Qualidade dos periódicos
+        journ_names = [p.get("journal", "") for p in pubs if p.get("journal")]
+        journ_names = [name.strip() for name in journ_names if name.strip()]
+        journ_scores = await enricher.score_journals(journ_names) if journ_names else {}
+        score_pub_qual = float(np.mean(list(journ_scores.values()))) if journ_scores else 0.5
+        
+        # Quantidade de publicações (lógica original)
+        num_pubs = len(pubs) if pubs else cv.get("num_publicacoes", 0)
+        score_pub_qty = min(1.0, math.log1p(num_pubs) / math.log1p(20))
 
-        # ── Pareceres relevantes ─────────────────────────────────────
+        # ── 4. Pareceres relevantes (inalterado) ────────────────────
         num_pareceres_rel = len([p for p in self.lawyer.pareceres if self.case.area.lower() in p.area.lower()])
-        score_par = min(1.0, log1p(num_pareceres_rel) / log1p(5))
+        score_par = min(1.0, math.log1p(num_pareceres_rel) / math.log1p(5))
 
-        # ── Reconhecimentos de mercado ───────────────────────────────
+        # ── 5. Reconhecimentos de mercado (inalterado) ──────────────
         pesos_rec = {
             "análise advocacia 500": 1.0,
             "chambers and partners": 1.0,
@@ -694,7 +1134,63 @@ class FeatureCalculator:
                 pontos_rec += pesos_rec.get(rec.publicacao.lower(), 0.4)
         score_rec = np.clip(pontos_rec / 3.0, 0, 1)
 
-        # ── Combinação final ─────────────────────────────────────────
+        # ── 6. Combinação final enriquecida ─────────────────────────
+        final_score = (
+            0.30 * score_exp +        # 30% experiência
+            0.20 * score_titles +     # 20% títulos acadêmicos 
+            0.15 * score_uni +        # 15% reputação das universidades (NOVO)
+            0.10 * score_pub_qual +   # 10% qualidade dos periódicos (NOVO)
+            0.05 * score_pub_qty +    # 5% quantidade de publicações
+            0.10 * score_par +        # 10% pareceres
+            0.10 * score_rec          # 10% reconhecimentos
+        )
+
+        # Integração com CV score v2.2 (reduzida devido ao enriquecimento)
+        cv_score = self.lawyer.kpi.cv_score
+        return 0.85 * final_score + 0.15 * cv_score
+
+    def qualification_score(self) -> float:
+        """Versão síncrona de fallback para compatibilidade."""
+        # Quando APIs acadêmicas não estão disponíveis, usar lógica original simplificada
+        cv = self.cv
+        
+        # Experiência
+        score_exp = min(1.0, cv.get("anos_experiencia", 0) / 25)
+
+        # Títulos acadêmicos
+        titles: List[Dict[str, str]] = cv.get("pos_graduacoes", [])
+        counts = {"lato": 0, "mestrado": 0, "doutorado": 0}
+        for t in titles:
+            level = str(t.get("nivel", "")).lower()
+            if level in counts and self.case.area.lower() in str(t.get("area", "")).lower():
+                counts[level] += 1
+
+        score_titles = 0.1 * min(counts["lato"], 2) / 2 + \
+                       0.2 * min(counts["mestrado"], 2) / 2 + \
+                       0.3 * min(counts["doutorado"], 2) / 2
+
+        # Publicações (lógica original)
+        pubs = cv.get("num_publicacoes", 0)
+        score_pub = min(1.0, math.log1p(pubs) / math.log1p(10))
+
+        # Pareceres relevantes
+        num_pareceres_rel = len([p for p in self.lawyer.pareceres if self.case.area.lower() in p.area.lower()])
+        score_par = min(1.0, math.log1p(num_pareceres_rel) / math.log1p(5))
+
+        # Reconhecimentos de mercado
+        pesos_rec = {
+            "análise advocacia 500": 1.0,
+            "chambers and partners": 1.0,
+            "the legal 500": 0.9,
+            "leaders league": 0.9,
+        }
+        pontos_rec = 0.0
+        for rec in self.lawyer.reconhecimentos:
+            if self.case.area.lower() in rec.area.lower():
+                pontos_rec += pesos_rec.get(rec.publicacao.lower(), 0.4)
+        score_rec = np.clip(pontos_rec / 3.0, 0, 1)
+
+        # Combinação final (pesos originais)
         base_score = (
             0.30 * score_exp +
             0.25 * score_titles +
@@ -919,6 +1415,22 @@ class FeatureCalculator:
             "M": self.maturity_score(),  # 🆕 Feature M (Maturity)
         }
 
+    async def all_async(self) -> Dict[str, float]:
+        """Versão assíncrona com enriquecimento acadêmico na feature Q."""
+        return {
+            "A": self.area_match(),
+            "S": self.case_similarity(),
+            "T": self.success_rate(),
+            "G": self.geo_score(),
+            "Q": await self.qualification_score_async(),  # Único await interno
+            "U": self.urgency_capacity(),
+            "R": self.review_score(),
+            "C": self.soft_skill(),
+            "E": self.firm_reputation(),
+            "P": self.price_fit(),
+            "M": self.maturity_score(),
+        }
+
 # =============================================================================
 # 7. Core algorithm expandido
 # =============================================================================
@@ -926,6 +1438,20 @@ class FeatureCalculator:
 
 class MatchmakingAlgorithm:
     """Gera ranking justo de advogados para um caso com features v2.2."""
+    
+    def __init__(self, cache=None):
+        """Inicializa algoritmo com templates acadêmicos."""
+        self.cache = cache
+        # Importar templates organizados
+        try:
+            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            self.templates = AcademicPromptTemplates()
+            self.validator = AcademicPromptValidator()
+        except ImportError:
+            # Fallback para execução standalone
+            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            self.templates = AcademicPromptTemplates()
+            self.validator = AcademicPromptValidator()
 
     @staticmethod
     def equity_weight(kpi: KPI, max_cases: int) -> float:
@@ -1104,7 +1630,7 @@ class MatchmakingAlgorithm:
             firm.scores = {
                 "firm_reputation": reputation_score,
                 "team_size_score": min(1.0, firm.team_size / 50.0),  # Normalizar até 50 pessoas
-                "features": calculator.all(),
+                "features": await calculator.all_async(),  # Usar versão assíncrona
                 "preset": "b2b_firm",
                 "step": "firm_ranking",
                 "algorithm_version": algorithm_version  # Versionamento centralizado
@@ -1156,6 +1682,17 @@ class MatchmakingAlgorithm:
         # Auto-ajustar preset para casos corporativos se feature flag habilitada
         if preset == "balanced" and hasattr(case, 'type') and case.type == "CORPORATE":
             preset = get_corporate_preset()
+        
+        # --- Detecção Automática do Preset Econômico ---
+        # Ativa modo econômico quando cliente informou orçamento baixo
+        if preset == "balanced":
+            if hasattr(case, 'expected_fee_max') and case.expected_fee_max and case.expected_fee_max < 1500:
+                preset = "economic"
+                AUDIT_LOGGER.info("Auto-activated economic preset", {
+                    "case_id": case.id,
+                    "max_budget": case.expected_fee_max,
+                    "threshold": 1500
+                })
         
         # Verificar se matching de escritórios está habilitado
         firm_matching_enabled = is_firm_matching_enabled()
@@ -1364,12 +1901,12 @@ class MatchmakingAlgorithm:
             if availability_map.get(lw.id, default_availability):
                 available_lawyers.append(lw)
 
-        # 3. Calcular features com cache
+        # 3. Calcular features com cache (incluindo enriquecimento acadêmico)
         for lw in available_lawyers:
             # Evitar cache para clones de LawFirm
             if getattr(lw, "is_firm_clone", False):  # clones não devem poluir Redis
                 calculator = FeatureCalculator(case, lw)
-                feats = calculator.all()
+                feats = await calculator.all_async()  # Usar versão assíncrona
                 lw.scores["features"] = feats
             else:
                 # Tentar recuperar features estáticas do cache
@@ -1382,6 +1919,7 @@ class MatchmakingAlgorithm:
                     feats["S"] = calculator.case_similarity()
                     feats["T"] = calculator.success_rate()
                     feats["G"] = calculator.geo_score()         # recálculo para geografia
+                    feats["Q"] = await calculator.qualification_score_async()  # Sempre recalcular Q com enriquecimento
                     feats["U"] = calculator.urgency_capacity()  # recálculo para urgência
                     feats["C"] = calculator.soft_skill()        # recálculo de soft-skills
                     feats["R"] = calculator.review_score()
@@ -1391,11 +1929,12 @@ class MatchmakingAlgorithm:
                 else:
                     # Se não há cache, calcular tudo e salvar features estáticas
                     calculator = FeatureCalculator(case, lw)
-                    feats = calculator.all()
-                    # Somente Q permanece verdadeiramente estático;
-                    # G depende de radius_km → não cachear.
-                    static_to_cache = {"Q": feats["Q"]}
-                    await cache.set_static_feats(lw.id, static_to_cache)
+                    feats = await calculator.all_async()  # Usar versão assíncrona
+                    # Q agora depende de dados externos, não cachear mais
+                    # Manter cache apenas para features realmente estáticas (nenhuma por enquanto)
+                    static_to_cache = {}  # Por enquanto, não cachear nada até otimizar
+                    if static_to_cache:
+                        await cache.set_static_feats(lw.id, static_to_cache)
 
                 # Atribuição unificada de features
                 lw.scores["features"] = feats
@@ -1455,6 +1994,12 @@ class MatchmakingAlgorithm:
                 "weights_used": safe_json_dump({k: float(v) for k, v in weights.items()}),
                 "degraded_mode": degraded_mode,
                 "algorithm_version": algorithm_version,
+                "uni_rank_ttl_h": UNI_RANK_TTL_H,
+                "journal_rank_ttl_h": JOUR_RANK_TTL_H,
+                "academic_enrich": HAS_ACADEMIC_ENRICHMENT,
+                "dr_background": True,  # Deep Research sempre background
+                "dr_poll_s": DEEP_POLL_SECS,
+                "dr_max_min": DEEP_MAX_MIN,
             }
             AUDIT_LOGGER.info(
                 f"Lawyer {lw.id} ranked for case {case.id}", log_context)
@@ -1584,14 +2129,94 @@ if __name__ == "__main__":
             print()
 
         print(f"\n📊 Observações {algorithm_version}:")
-        print("• Feature-E (Firm Reputation) integrada")
-        print("• Algoritmo B2B Two-Pass implementado")
-        print("• Safe conflict scan com timeout")
-        print("• Configurações via variáveis de ambiente")
-        print("• Logs estruturados com versionamento")
+        print("• Academic Enrichment: Universidades e periódicos avaliados via APIs externas")
+        print("• Templates consolidados: Prompts padronizados para Perplexity e Deep Research")
+        print("• Cache inteligente: TTL configurável para dados acadêmicos")
+        print("• Validação robusta: Sanitização e validação de inputs")
+        print("• Feature-E (Firm Reputation) e B2B Two-Pass mantidos")
+        print("• Safe conflict scan e configurações via ENV")
+        print("• Logs estruturados com métricas acadêmicas")
+
+    async def test_academic_enrichment():
+        """Testes mínimos para enriquecimento acadêmico."""
+        print("\n🧪 Testando Academic Enrichment com Templates Consolidados")
+        print("=" * 60)
+        
+        # Teste básico do AcademicEnricher
+        enricher = AcademicEnricher(cache)
+        
+        # Teste templates
+        print("📋 Testando templates de prompts...")
+        try:
+            # Teste template de universidades
+            unis_payload = enricher.templates.perplexity_universities_payload(['USP', 'Harvard'])
+            assert unis_payload["model"] == "sonar-deep-research"
+            assert "response_format" in unis_payload
+            print("✅ Template universidades OK")
+            
+            # Teste template de periódicos 
+            jour_payload = enricher.templates.perplexity_journals_payload(['RDA', 'HLR'])
+            assert jour_payload["search_mode"] == "academic"
+            print("✅ Template periódicos OK")
+            
+            # Teste template Deep Research
+            fallback_payload = enricher.templates.deep_research_journal_fallback_payload('Revista Teste')
+            assert fallback_payload["background"] == True
+            assert fallback_payload["model"] == "o3-deep-research"
+            print("✅ Template Deep Research OK")
+            
+        except Exception as e:
+            print(f"❌ Erro nos templates: {e}")
+            return
+        
+        # Teste validador
+        print("🔍 Testando validador...")
+        try:
+            enricher.validator.validate_batch_size(['a', 'b'], 15)  # OK
+            enricher.validator.sanitize_institution_name("Universidade de São Paulo")  # OK
+            print("✅ Validador funcionando")
+        except Exception as e:
+            print(f"❌ Erro no validador: {e}")
+            return
+        
+        # Teste universidades e periódicos
+        if HAS_ACADEMIC_ENRICHMENT and PERPLEXITY_API_KEY:
+            print("⚡ Testando com APIs reais...")
+            uni_scores = await enricher.score_universities(['Universidade de São Paulo', 'Harvard Law School'])
+            print(f"Scores de universidades: {uni_scores}")
+            
+            jour_scores = await enricher.score_journals(['Revista de Direito Administrativo', 'Harvard Law Review'])
+            print(f"Scores de periódicos: {jour_scores}")
+        else:
+            print("⚠️  APIs acadêmicas não configuradas - testando fallback")
+            uni_scores = await enricher.score_universities(['USP', 'Harvard'])
+            jour_scores = await enricher.score_journals(['RDA', 'HLR'])
+            assert uni_scores == {}  # Deve retornar vazio sem APIs
+            assert jour_scores == {}
+            print("✅ Fallback funcionando corretamente")
+        
+        # Teste cache
+        key = "uni:universidade_de_sao_paulo"
+        await cache.set_academic_score(key, 0.85, ttl_h=1)
+        cached_score = await cache.get_academic_score(key)
+        assert cached_score == 0.85, f"Cache falhou: esperado 0.85, obtido {cached_score}"
+        print("✅ Cache Redis funcionando")
+        
+        # Teste canonical()
+        assert canonical("Universidade de São Paulo") == "universidade_de_sao_paulo"
+        assert canonical("Harvard Law School") == "harvard_law_school"
+        print("✅ Função canonical() funcionando")
+        
+        print("🎉 Todos os testes passaram!")
+        print("📊 Templates consolidados prontos para produção!")
+
+    async def run_all_demos():
+        """Executa todos os demos e testes."""
+        await demo_v2()
+        await test_academic_enrichment()
 
     import asyncio
-    asyncio.run(demo_v2())
+    asyncio.run(run_all_demos())
 
 
 @atexit.register

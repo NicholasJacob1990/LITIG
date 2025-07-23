@@ -262,7 +262,6 @@ class _ClientProposalsScreenState extends State<ClientProposalsScreen>
 
   Widget _buildEmptyState(String filter) {
     String message;
-    String subtitle;
     IconData icon;
     String? actionText;
     VoidCallback? onAction;
@@ -270,29 +269,24 @@ class _ClientProposalsScreenState extends State<ClientProposalsScreen>
     switch (filter) {
       case 'pending':
         message = 'Nenhuma proposta pendente';
-        subtitle = 'Suas propostas aguardando resposta aparecerão aqui.';
         icon = LucideIcons.clock;
         actionText = 'Enviar Nova Proposta';
         onAction = _navigateToLawyers;
         break;
       case 'accepted':
         message = 'Nenhuma proposta aceita';
-        subtitle = 'Quando um advogado aceitar sua proposta, aparecerá aqui.';
         icon = LucideIcons.checkCircle;
         break;
       case 'rejected':
         message = 'Nenhuma proposta rejeitada';
-        subtitle = 'Propostas rejeitadas pelos advogados aparecerão aqui.';
         icon = LucideIcons.xCircle;
         break;
       case 'archive':
         message = 'Nenhuma proposta arquivada';
-        subtitle = 'Propostas expiradas ou canceladas aparecerão aqui.';
         icon = LucideIcons.archive;
         break;
       default:
         message = 'Nenhuma proposta encontrada';
-        subtitle = 'Suas propostas aparecerão aqui.';
         icon = LucideIcons.folderOpen;
     }
     

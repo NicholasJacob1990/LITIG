@@ -1,7 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'allocation_type.dart';
+import 'client_info.dart';
+import 'business_context.dart';
+import 'match_analysis.dart';
 
 /// Dados contextuais específicos por tipo de alocação
+/// EXPANDIDO para incluir BusinessContext e ClientInfo para espelhamento completo
 class ContextualCaseData extends Equatable {
   const ContextualCaseData({
     required this.allocationType,
@@ -10,6 +14,11 @@ class ContextualCaseData extends Equatable {
     this.partnerId,
     this.delegatedBy,
     this.contextMetadata = const {},
+    // Novos campos para espelhamento
+    this.clientInfo,
+    this.businessContext,
+    this.matchAnalysis,
+    // Campos existentes mantidos para compatibilidade
     this.partnerName,
     this.partnerSpecialization,
     this.partnerRating,
@@ -37,6 +46,14 @@ class ContextualCaseData extends Equatable {
   final String? partnerId;
   final String? delegatedBy;
   final Map<String, dynamic> contextMetadata;
+
+  // ✅ NOVOS CAMPOS PARA ESPELHAMENTO COMPLETO
+  /// Informações completas do cliente (contraparte da LawyerInfo)
+  final ClientInfo? clientInfo;
+  /// Contexto comercial do caso (análise financeira, risco, oportunidades)
+  final BusinessContext? businessContext;
+  /// Análise de match específica por tipo de advogado
+  final MatchAnalysis? matchAnalysis;
   
   // Dados específicos por contexto
   final String? partnerName;
@@ -67,6 +84,11 @@ class ContextualCaseData extends Equatable {
     partnerId,
     delegatedBy,
     contextMetadata,
+    // Novos campos
+    clientInfo,
+    businessContext,
+    matchAnalysis,
+    // Campos existentes
     partnerName,
     partnerSpecialization,
     partnerRating,
@@ -95,6 +117,11 @@ class ContextualCaseData extends Equatable {
     String? partnerId,
     String? delegatedBy,
     Map<String, dynamic>? contextMetadata,
+    // Novos campos
+    ClientInfo? clientInfo,
+    BusinessContext? businessContext,
+    MatchAnalysis? matchAnalysis,
+    // Campos existentes
     String? partnerName,
     String? partnerSpecialization,
     double? partnerRating,
@@ -122,6 +149,11 @@ class ContextualCaseData extends Equatable {
       partnerId: partnerId ?? this.partnerId,
       delegatedBy: delegatedBy ?? this.delegatedBy,
       contextMetadata: contextMetadata ?? this.contextMetadata,
+      // Novos campos
+      clientInfo: clientInfo ?? this.clientInfo,
+      businessContext: businessContext ?? this.businessContext,
+      matchAnalysis: matchAnalysis ?? this.matchAnalysis,
+      // Campos existentes
       partnerName: partnerName ?? this.partnerName,
       partnerSpecialization: partnerSpecialization ?? this.partnerSpecialization,
       partnerRating: partnerRating ?? this.partnerRating,
@@ -292,4 +324,4 @@ class ContextualHighlight extends Equatable {
       'color': color,
     };
   }
-} 
+}

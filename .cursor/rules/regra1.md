@@ -19,15 +19,6 @@ Nova funcionalidade deve abranger:
 - **Frontend**: BLoC + UI + serviços
 - **Navegação**: Rotas + menus contextuais
 
-## Documentação Obrigatória
-Arquivo `@status.md` **DEVE** ser atualizado após qualquer alteração:
-```markdown
-## [YYYY-MM-DD] - [Funcionalidade]
-- Backend/Frontend/Navegação: [implementações]
-- Arquivos: [criados/alterados]
-- Status: [CONCLUÍDO/PARCIAL/PENDENTE]
----
-```
 
 ## To-Dos e Rastreabilidade
 - **Documente todos os TO-DOs** com complexidade proporcional

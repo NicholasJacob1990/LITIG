@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, s
 from pydantic import BaseModel
 from supabase.client import Client
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
+from auth import get_current_user
+from config import get_supabase_client
 
 router = APIRouter(prefix="/documents/enhanced", tags=["documents-enhanced"])
 

@@ -7,7 +7,7 @@ from typing import Dict
 from fastapi import APIRouter, HTTPException
 
 # Importar a variável _current_weights diretamente do módulo do algoritmo
-from ..algoritmo_match import PRESET_WEIGHTS, _current_weights, load_weights
+from algoritmo_match import PRESET_WEIGHTS, _current_weights, load_weights
 
 router = APIRouter()
 

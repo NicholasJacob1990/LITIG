@@ -9,7 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 # Importar serviços atualizados
-from ..services.offer_service import (
+from services.offer_service import (
     get_pending_offers, 
     accept_offer, 
     reject_offer, 
@@ -17,9 +17,9 @@ from ..services.offer_service import (
     get_lawyer_offers, 
     update_offer_status,
 )
-from ..auth import get_current_user
-from ..models import Offer, OfferStatusUpdate
-from ..logger import AUDIT_LOGGER
+from auth import get_current_user
+from models import Offer, OfferStatusUpdate
+from logger import AUDIT_LOGGER
 
 router = APIRouter(
     prefix="/offers",

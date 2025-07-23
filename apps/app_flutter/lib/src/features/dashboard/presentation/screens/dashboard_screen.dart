@@ -11,15 +11,6 @@ import 'package:meu_app/src/core/utils/logger.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  // Função helper para verificar se é advogado (múltiplos valores possíveis)
-  bool _isLawyer(String? userRole) {
-    if (userRole == null) return false;
-    return userRole == 'lawyer' || 
-           userRole == 'LAWYER' || 
-           userRole == 'advogado' ||
-           userRole == 'Lawyer';
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, auth_states.AuthState>(

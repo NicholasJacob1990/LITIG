@@ -65,6 +65,8 @@ class CaseCard extends StatelessWidget {
               // Seções específicas por tipo de caso
               if (caseData?.isConsultivo == true)
                 _buildConsultancySpecificSection(context),
+              if (caseData?.isContencioso == true)
+                _buildLitigationSpecificSection(context),
               if (caseData?.isContrato == true)
                 _buildContractSpecificSection(context),
               if (caseData?.isCompliance == true)
@@ -77,6 +79,8 @@ class CaseCard extends StatelessWidget {
                 _buildIPSpecificSection(context),
               if (caseData?.isCorporativo == true && !caseData!.isMA && !caseData!.isDueDiligence)
                 _buildCorporateSpecificSection(context),
+              if (caseData?.isCustom == true)
+                _buildCustomSpecificSection(context),
               
               // Seção de recomendação de escritório (para casos corporativos)
               if (caseData?.shouldShowFirmRecommendation == true) ...[
@@ -652,6 +656,16 @@ class CaseCard extends StatelessWidget {
     );
   }
 
+  Widget _buildLitigationSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.gavel,
+      color: AppColors.error,
+      title: 'Acompanhamento Processual',
+      description: 'Monitore prazos processuais, audiências e movimentações do processo judicial.',
+    );
+  }
+
   Widget _buildContractSpecificSection(BuildContext context) {
     return _buildTypeSpecificSection(
       context: context,
@@ -709,6 +723,16 @@ class CaseCard extends StatelessWidget {
       color: AppColors.secondaryYellow,
       title: 'Governança Corporativa',
       description: 'Monitore as práticas de governança e compliance corporativo.',
+    );
+  }
+
+  Widget _buildCustomSpecificSection(BuildContext context) {
+    return _buildTypeSpecificSection(
+      context: context,
+      icon: LucideIcons.settings,
+      color: AppColors.lightText2,
+      title: 'Caso Especializado',
+      description: 'Acompanhe o desenvolvimento deste caso jurídico personalizado.',
     );
   }
 

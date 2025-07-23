@@ -30,3 +30,7 @@ docusign-esign
 sse-starlette
 anthropic
 python-multipart
+aiohttp
+aiolimiter
+unidecode
+unified-python-sdk==0.48.9

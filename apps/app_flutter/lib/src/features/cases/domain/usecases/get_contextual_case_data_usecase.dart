@@ -111,7 +111,7 @@ class GetContextualCaseDataUseCase with ContextualCaseDataConverters {
       documents: (data['documents'] as List<dynamic>? ?? [])
           .map((document) => convertCaseDocument(document as Map<String, dynamic>))
           .toList(),
-      processStatus: convertProcessStatus(data['process_status'] as Map<String, dynamic>),
+      processStatus: convertProcessStatus(data['process_status'] as Map<String, dynamic>? ?? {}),
     );
   }
 
@@ -180,3 +180,4 @@ class ContextualCaseDataResult {
     return 'ContextualCaseDataResult(caseId: ${caseDetail.id}, allocationType: ${contextualData.allocationType})';
   }
 } 
+

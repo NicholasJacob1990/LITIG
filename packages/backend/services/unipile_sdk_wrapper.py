@@ -22,7 +22,25 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from backend.services.hybrid_legal_data_service import DataSource, DataTransparency
+try:
+    from services.hybrid_legal_data_service import DataSource, DataTransparency
+except ImportError:
+    # Fallback para quando hybrid_legal_data_service não está disponível
+    from enum import Enum
+    from datetime import datetime
+    
+    class DataSource(Enum):
+        UNIPILE = "unipile"
+    
+    class DataTransparency:
+        def __init__(self, source, last_updated, confidence_score, data_freshness_hours, validation_status, source_url, api_version):
+            self.source = source
+            self.last_updated = last_updated
+            self.confidence_score = confidence_score
+            self.data_freshness_hours = data_freshness_hours
+            self.validation_status = validation_status
+            self.source_url = source_url
+            self.api_version = api_version
 
 
 @dataclass
@@ -182,6 +200,25 @@ class UnipileSDKWrapper:
             self.logger.error(f"Erro ao conectar Facebook: {e}")
             return None
     
+    async def connect_outlook(self) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta do Outlook (OAuth)."""
+        try:
+            # O Unipile SDK provavelmente lida com o fluxo OAuth, então não passamos credenciais aqui.
+            # O Node.js service pode retornar uma URL de autorização ou lidar com o redirecionamento.
+            result = await self._execute_node_command("connect-outlook")
+
+            if result and result.get("success", False):
+                self.logger.info("Conta Outlook conectada com sucesso.")
+                return result
+            else:
+                error_msg = result.get('error') if result else 'Resultado vazio'
+                self.logger.error(f"Erro ao conectar Outlook: {error_msg}")
+                return None
+
+        except Exception as e:
+            self.logger.error(f"Exceção ao conectar Outlook: {e}")
+            return None
+
     async def get_instagram_profile(self, account_id: str) -> Optional[Dict[str, Any]]:
         """Recupera perfil completo do Instagram com métricas."""
         try:
@@ -295,13 +332,12 @@ class UnipileSDKWrapper:
             # 1. Listar contas para encontrar dados relevantes
             accounts = await self.list_accounts()
             
-                         # 2. Buscar perfil por email se fornecido
-             profile = None
-             if email:
-                 self.logger.info(f"Buscando perfil por email: {email}")
-             
-             # 3. Buscar dados de comunicação tradicional
-             communication_data = await self._analyze_communication_data(accounts)
+            # 2. Buscar perfil por email se fornecido
+            if email:
+                self.logger.info(f"Buscando perfil por email: {email}")
+            
+            # 3. Buscar dados de comunicação tradicional
+            communication_data = await self._analyze_communication_data(accounts)
             
             # 4. 🆕 Buscar dados sociais se há contas Instagram/Facebook
             social_accounts = {}
@@ -322,25 +358,28 @@ class UnipileSDKWrapper:
             
             # 6. Consolidar dados tradicionais + sociais
             if communication_data or social_data:
-                consolidated_data = {
-                    **communication_data if communication_data else {},
-                    "social_presence": social_data.get("social_score", {}) if social_data else {},
-                    "platform_details": social_data.get("profiles", {}) if social_data else {},
-                    "data_sources": ["unipile_communication", "unipile_social"] if social_data else ["unipile_communication"]
-                }
+                consolidated_data = {}
+                if communication_data:
+                    consolidated_data.update(communication_data)
+                if social_data:
+                    consolidated_data["social_presence"] = social_data.get("social_score", {})
+                    consolidated_data["platform_details"] = social_data.get("profiles", {})
+                    consolidated_data["data_sources"] = ["unipile_communication", "unipile_social"]
+                else:
+                    consolidated_data["data_sources"] = ["unipile_communication"]
                 
                 # Validar dados consolidados
                 if self._validate_communication_data(consolidated_data):
                     transparency.confidence_score = 0.85  # Maior score com dados sociais
-                transparency.validation_status = "validated"
+                    transparency.validation_status = "validated"
                     transparency.data_freshness_hours = self._calculate_freshness(
                         consolidated_data.get("last_updated")
                     )
                 
-                # Enriquecer dados com informações específicas para advogados
+                    # Enriquecer dados com informações específicas para advogados
                     enriched_data = self._enrich_lawyer_data(consolidated_data, oab_number)
-                
-                return enriched_data, transparency
+                    
+                    return enriched_data, transparency
                 else:
                     transparency.validation_status = "failed"
                     self.logger.warning(f"Dados inválidos do Unipile para OAB {oab_number}")
@@ -938,3 +977,473 @@ class UnipileSDKWrapper:
                 "node_service_status": "error",
                 "error": str(e)
             }
+
+    # ========================================
+    # 📧 MÉTODOS DE EMAIL (COMPLETOS)
+    # ========================================
+    
+    async def connect_gmail(self) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta Gmail via OAuth."""
+        try:
+            result = await self._execute_node_command("connect-gmail")
+            if result.get("success", False):
+                self.logger.info("Gmail conectado com sucesso")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar Gmail: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar Gmail: {e}")
+            return None
+    
+    async def send_email(self, account_id: str, email_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Envia um email."""
+        try:
+            email_json = json.dumps(email_data)
+            result = await self._execute_node_command("send-email", account_id, email_json)
+            if result.get("success", False):
+                self.logger.info(f"Email enviado para {email_data.get('to', 'destinatário desconhecido')}")
+                return result
+            else:
+                self.logger.error(f"Erro ao enviar email: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao enviar email: {e}")
+            return None
+    
+    async def list_emails(self, account_id: str, options: Dict = {}) -> List[Dict[str, Any]]:
+        """Lista emails de uma conta."""
+        try:
+            options_json = json.dumps(options) if options else '{}'
+            result = await self._execute_node_command("list-emails", account_id, options_json)
+            if result.get("success", False):
+                emails = result.get("data", [])
+                self.logger.info(f"Listados {len(emails)} emails da conta {account_id}")
+                return emails
+            else:
+                self.logger.error(f"Erro ao listar emails: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro ao listar emails: {e}")
+            return []
+    
+    async def reply_to_email(self, account_id: str, email_id: str, reply_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Responde a um email."""
+        try:
+            reply_json = json.dumps(reply_data)
+            result = await self._execute_node_command("reply-to-email", account_id, email_id, reply_json)
+            if result.get("success", False):
+                self.logger.info(f"Resposta enviada para email {email_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao responder email: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao responder email: {e}")
+            return None
+    
+    async def delete_email(self, account_id: str, email_id: str) -> Optional[Dict[str, Any]]:
+        """Deleta um email."""
+        try:
+            result = await self._execute_node_command("delete-email", account_id, email_id)
+            if result.get("success", False):
+                self.logger.info(f"Email {email_id} deletado")
+                return result
+            else:
+                self.logger.error(f"Erro ao deletar email: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao deletar email: {e}")
+            return None
+    
+    async def create_email_draft(self, account_id: str, draft_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Cria um rascunho de email."""
+        try:
+            draft_json = json.dumps(draft_data)
+            result = await self._execute_node_command("create-email-draft", account_id, draft_json)
+            if result.get("success", False):
+                self.logger.info(f"Rascunho criado para {draft_data.get('to', 'destinatário')}")
+                return result
+            else:
+                self.logger.error(f"Erro ao criar rascunho: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao criar rascunho: {e}")
+            return None
+    
+    async def list_gmail_folders(self, account_id: str) -> List[Dict[str, Any]]:
+        """Lista pastas/labels do Gmail."""
+        try:
+            result = await self._execute_node_command("list-gmail-folders", account_id)
+            if result.get("success", False):
+                folders = result.get("data", [])
+                self.logger.info(f"Listadas {len(folders)} pastas/labels do Gmail")
+                return folders
+            else:
+                self.logger.error(f"Erro ao listar pastas Gmail: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro ao listar pastas Gmail: {e}")
+            return []
+    
+    async def move_email(self, account_id: str, email_id: str, folder_id: str) -> Optional[Dict[str, Any]]:
+        """Move um email para uma pasta."""
+        try:
+            result = await self._execute_node_command("move-email", account_id, email_id, folder_id)
+            if result.get("success", False):
+                self.logger.info(f"Email {email_id} movido para pasta {folder_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao mover email: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao mover email: {e}")
+            return None
+
+    # ========================================
+    # 💬 MÉTODOS DE MENSAGENS (COMPLETOS)
+    # ========================================
+    
+    async def connect_linkedin(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        """Conecta uma conta LinkedIn."""
+        try:
+            result = await self._execute_node_command("connect-linkedin", username, password)
+            if result.get("success", False):
+                self.logger.info(f"LinkedIn conectado: {username}")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar LinkedIn: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar LinkedIn: {e}")
+            return None
+    
+    async def connect_whatsapp(self) -> Optional[Dict[str, Any]]:
+        """Conecta WhatsApp via QR code."""
+        try:
+            result = await self._execute_node_command("connect-whatsapp")
+            if result.get("success", False):
+                self.logger.info("WhatsApp conectado com sucesso")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar WhatsApp: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar WhatsApp: {e}")
+            return None
+    
+    async def connect_telegram(self) -> Optional[Dict[str, Any]]:
+        """Conecta Telegram via QR code."""
+        try:
+            result = await self._execute_node_command("connect-telegram")
+            if result.get("success", False):
+                self.logger.info("Telegram conectado com sucesso")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar Telegram: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar Telegram: {e}")
+            return None
+    
+    async def connect_messenger(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        """Conecta Messenger/Facebook."""
+        try:
+            result = await self._execute_node_command("connect-messenger", username, password)
+            if result.get("success", False):
+                self.logger.info(f"Messenger conectado: {username}")
+                return result
+            else:
+                self.logger.error(f"Erro ao conectar Messenger: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao conectar Messenger: {e}")
+            return None
+    
+    async def get_all_chats(self, account_id: str, options: Dict = {}) -> List[Dict[str, Any]]:
+        """Lista todos os chats de uma conta."""
+        try:
+            options_json = json.dumps(options) if options else '{}'
+            result = await self._execute_node_command("get-all-chats", account_id, options_json)
+            if result.get("success", False):
+                chats = result.get("data", [])
+                self.logger.info(f"Listados {len(chats)} chats da conta {account_id}")
+                return chats
+            else:
+                self.logger.error(f"Erro ao listar chats: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro ao listar chats: {e}")
+            return []
+    
+    async def get_all_messages_from_chat(self, account_id: str, chat_id: str, options: Dict = {}) -> List[Dict[str, Any]]:
+        """Lista todas as mensagens de um chat."""
+        try:
+            options_json = json.dumps(options) if options else '{}'
+            result = await self._execute_node_command("get-all-messages-from-chat", account_id, chat_id, options_json)
+            if result.get("success", False):
+                messages = result.get("data", [])
+                self.logger.info(f"Listadas {len(messages)} mensagens do chat {chat_id}")
+                return messages
+            else:
+                self.logger.error(f"Erro ao listar mensagens: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro ao listar mensagens: {e}")
+            return []
+    
+    async def start_new_chat(self, account_id: str, user_id: str, initial_message: str = None) -> Optional[Dict[str, Any]]:
+        """Inicia um novo chat."""
+        try:
+            result = await self._execute_node_command("start-new-chat", account_id, user_id, initial_message or "")
+            if result.get("success", False):
+                self.logger.info(f"Novo chat iniciado com {user_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao iniciar chat: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao iniciar chat: {e}")
+            return None
+    
+    async def send_message(self, account_id: str, chat_id: str, message_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Envia uma mensagem em um chat."""
+        try:
+            message_json = json.dumps(message_data)
+            result = await self._execute_node_command("send-message", account_id, chat_id, message_json)
+            if result.get("success", False):
+                self.logger.info(f"Mensagem enviada no chat {chat_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao enviar mensagem: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao enviar mensagem: {e}")
+            return None
+
+    # ========================================
+    # 💼 MÉTODOS LINKEDIN AVANÇADOS (COMPLETOS)
+    # ========================================
+    
+    async def get_user_profile(self, account_id: str, user_id: str = None) -> Optional[Dict[str, Any]]:
+        """Obtém perfil de usuário LinkedIn."""
+        try:
+            result = await self._execute_node_command("get-user-profile", account_id, user_id or "me")
+            if result.get("success", False):
+                self.logger.info(f"Perfil LinkedIn obtido: {user_id or 'próprio'}")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter perfil: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao obter perfil LinkedIn: {e}")
+            return None
+    
+    async def get_company_profile(self, account_id: str, company_id: str) -> Optional[Dict[str, Any]]:
+        """Obtém perfil de empresa LinkedIn."""
+        try:
+            result = await self._execute_node_command("get-company-profile", account_id, company_id)
+            if result.get("success", False):
+                self.logger.info(f"Perfil da empresa LinkedIn obtido: {company_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter perfil da empresa: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao obter perfil da empresa: {e}")
+            return None
+    
+    async def get_own_profile(self, account_id: str) -> Optional[Dict[str, Any]]:
+        """Obtém próprio perfil LinkedIn."""
+        try:
+            result = await self._execute_node_command("get-own-profile", account_id)
+            if result.get("success", False):
+                self.logger.info("Próprio perfil LinkedIn obtido")
+                return result
+            else:
+                self.logger.error(f"Erro ao obter próprio perfil: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao obter próprio perfil: {e}")
+            return None
+    
+    async def list_user_connections(self, account_id: str, user_id: str = None) -> List[Dict[str, Any]]:
+        """Lista conexões de um usuário LinkedIn."""
+        try:
+            result = await self._execute_node_command("list-user-connections", account_id, user_id or "me")
+            if result.get("success", False):
+                connections = result.get("data", [])
+                self.logger.info(f"Listadas {len(connections)} conexões")
+                return connections
+            else:
+                self.logger.error(f"Erro ao listar conexões: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro ao listar conexões: {e}")
+            return []
+    
+    async def get_user_posts(self, account_id: str, user_id: str = None, options: Dict = {}) -> List[Dict[str, Any]]:
+        """Obtém posts de um usuário LinkedIn."""
+        try:
+            options_json = json.dumps(options) if options else '{}'
+            result = await self._execute_node_command("get-user-posts", account_id, user_id or "me", options_json)
+            if result.get("success", False):
+                posts = result.get("data", [])
+                self.logger.info(f"Obtidos {len(posts)} posts do LinkedIn")
+                return posts
+            else:
+                self.logger.error(f"Erro ao obter posts: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro ao obter posts LinkedIn: {e}")
+            return []
+    
+    async def search_linkedin_profiles(self, account_id: str, search_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Busca perfis no LinkedIn."""
+        try:
+            search_json = json.dumps(search_params)
+            result = await self._execute_node_command("search-linkedin-profiles", account_id, search_json)
+            if result.get("success", False):
+                profiles = result.get("data", [])
+                self.logger.info(f"Encontrados {len(profiles)} perfis na busca")
+                return profiles
+            else:
+                self.logger.error(f"Erro na busca de perfis: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro na busca de perfis LinkedIn: {e}")
+            return []
+    
+    async def search_linkedin_companies(self, account_id: str, search_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Busca empresas no LinkedIn."""
+        try:
+            search_json = json.dumps(search_params)
+            result = await self._execute_node_command("search-linkedin-companies", account_id, search_json)
+            if result.get("success", False):
+                companies = result.get("data", [])
+                self.logger.info(f"Encontradas {len(companies)} empresas na busca")
+                return companies
+            else:
+                self.logger.error(f"Erro na busca de empresas: {result.get('error')}")
+                return []
+        except Exception as e:
+            self.logger.error(f"Erro na busca de empresas LinkedIn: {e}")
+            return []
+    
+    async def send_linkedin_inmail(self, account_id: str, recipient_id: str, subject: str, message: str) -> Optional[Dict[str, Any]]:
+        """Envia InMail no LinkedIn."""
+        try:
+            inmail_data = {
+                "recipient_id": recipient_id,
+                "subject": subject,
+                "message": message
+            }
+            inmail_json = json.dumps(inmail_data)
+            result = await self._execute_node_command("send-linkedin-inmail", account_id, inmail_json)
+            if result.get("success", False):
+                self.logger.info(f"InMail enviado para {recipient_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao enviar InMail: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao enviar InMail: {e}")
+            return None
+    
+    async def send_linkedin_invitation(self, account_id: str, recipient_id: str, message: str = None) -> Optional[Dict[str, Any]]:
+        """Envia convite de conexão no LinkedIn."""
+        try:
+            invitation_data = {
+                "recipient_id": recipient_id,
+                "message": message or "Gostaria de me conectar com você."
+            }
+            invitation_json = json.dumps(invitation_data)
+            result = await self._execute_node_command("send-linkedin-invitation", account_id, invitation_json)
+            if result.get("success", False):
+                self.logger.info(f"Convite enviado para {recipient_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao enviar convite: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao enviar convite LinkedIn: {e}")
+            return None
+
+    # ========================================
+    # 🔔 MÉTODOS DE WEBHOOKS (COMPLETOS)
+    # ========================================
+    
+    async def setup_message_webhook(self, webhook_url: str, events: List[str] = None) -> Optional[Dict[str, Any]]:
+        """Configura webhook para mensagens."""
+        try:
+            webhook_data = {
+                "url": webhook_url,
+                "events": events or ["message.created", "message.deleted", "message.reaction"]
+            }
+            webhook_json = json.dumps(webhook_data)
+            result = await self._execute_node_command("setup-message-webhook", webhook_json)
+            if result.get("success", False):
+                self.logger.info(f"Webhook de mensagens configurado: {webhook_url}")
+                return result
+            else:
+                self.logger.error(f"Erro ao configurar webhook: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao configurar webhook de mensagens: {e}")
+            return None
+    
+    async def setup_email_webhook(self, webhook_url: str, events: List[str] = None) -> Optional[Dict[str, Any]]:
+        """Configura webhook para emails."""
+        try:
+            webhook_data = {
+                "url": webhook_url,
+                "events": events or ["email.created", "email.opened", "email.clicked"]
+            }
+            webhook_json = json.dumps(webhook_data)
+            result = await self._execute_node_command("setup-email-webhook", webhook_json)
+            if result.get("success", False):
+                self.logger.info(f"Webhook de emails configurado: {webhook_url}")
+                return result
+            else:
+                self.logger.error(f"Erro ao configurar webhook: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao configurar webhook de emails: {e}")
+            return None
+    
+    async def setup_email_tracking(self, account_id: str, tracking_params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Configura rastreamento de emails."""
+        try:
+            tracking_json = json.dumps(tracking_params)
+            result = await self._execute_node_command("setup-email-tracking", account_id, tracking_json)
+            if result.get("success", False):
+                self.logger.info(f"Rastreamento de emails configurado para conta {account_id}")
+                return result
+            else:
+                self.logger.error(f"Erro ao configurar rastreamento: {result.get('error')}")
+                return None
+        except Exception as e:
+            self.logger.error(f"Erro ao configurar rastreamento de emails: {e}")
+            return None
+
+    # ========================================
+    # 🛠️ MÉTODOS AUXILIARES
+    # ========================================
+    
+    def _validate_communication_data(self, data: Dict) -> bool:
+        """Valida dados de comunicação."""
+        required_fields = ["communication_score", "connected_accounts"]
+        return all(field in data for field in required_fields)
+    
+    def _calculate_freshness(self, last_updated: Optional[str]) -> int:
+        """Calcula freshness dos dados em horas."""
+        if not last_updated:
+            return 24  # Padrão 24h se não informado
+        
+        try:
+            last_update_dt = datetime.fromisoformat(last_updated.replace('Z', '+00:00')).replace(tzinfo=None)
+            now = datetime.now()
+            delta = now - last_update_dt
+            return int(delta.total_seconds() / 3600)
+        except:
+            return 24

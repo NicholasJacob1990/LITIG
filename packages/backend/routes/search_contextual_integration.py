@@ -9,14 +9,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 import logging
 
-from ..auth import get_current_user
-from ..services.search_contextual_integration_service import (
+from auth import get_current_user
+from services.search_contextual_integration_service import (
     SearchContextualIntegrationService,
     SearchMatchResult,
     SearchMatchType,
     SearchOrigin
 )
-from ..models.user import User
+from models.user import User
 
 logger = logging.getLogger(__name__)
 

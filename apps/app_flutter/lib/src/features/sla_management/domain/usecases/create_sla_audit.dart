@@ -92,15 +92,10 @@ class GetSlaAuditTrail implements UseCase<List<SlaAuditEntity>, GetSlaAuditTrail
   @override
   Future<Either<Failure, List<SlaAuditEntity>>> call(GetSlaAuditTrailParams params) async {
     return await repository.getEntityAuditTrail(
-      firmId: params.firmId,
-      entityId: params.entityId,
-      entityType: params.entityType,
-      eventTypes: params.eventTypes,
-      userId: params.userId,
+      entityType: params.entityType ?? 'sla_case',
+      entityId: params.entityId ?? '',
       startDate: params.startDate,
       endDate: params.endDate,
-      limit: params.limit,
-      offset: params.offset,
     );
   }
 }
@@ -196,10 +191,12 @@ class ExportAuditLog implements UseCase<String, ExportAuditLogParams> {
     return await repository.exportAuditLogs(
       firmId: params.firmId,
       format: params.format,
-      startDate: params.startDate,
-      endDate: params.endDate,
-      includeMetadata: params.includeMetadata,
-      encryptFile: params.encryptFile,
+      startDate: params.startDate ?? DateTime.now().subtract(const Duration(days: 30)),
+      endDate: params.endDate ?? DateTime.now(),
+      filters: {
+        'includeMetadata': params.includeMetadata,
+        'encryptFile': params.encryptFile,
+      },
     );
   }
 }

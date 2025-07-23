@@ -30,8 +30,8 @@ from jinja2 import Environment, FileSystemLoader
 
 from supabase import create_client
 
-from ..config import settings
-from ..models import Contract
+from config import settings
+from models import Contract
 
 
 class SignService:

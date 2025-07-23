@@ -11,10 +11,10 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import logging
 
-from ..models.user import User
-from ..database import get_db_connection
-from ..utils.cache import cache_result
-from ..utils.redis_client import get_redis_client
+from models.user import User
+from database import get_db_connection
+from utils.cache import cache_result
+from utils.redis_client import get_redis_client
 
 logger = logging.getLogger(__name__)
 

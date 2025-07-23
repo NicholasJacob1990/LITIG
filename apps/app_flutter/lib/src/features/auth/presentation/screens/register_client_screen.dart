@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
@@ -62,7 +63,8 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cadastro de Cliente'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.primaryBlue,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: BlocListener<AuthBloc, auth_states.AuthState>(
@@ -146,10 +148,10 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
         });
       },
       style: SegmentedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
-        foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-        selectedForegroundColor: Theme.of(context).colorScheme.onPrimary,
-        selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: AppColors.lightCard,
+        foregroundColor: AppColors.textSecondary,
+        selectedForegroundColor: Colors.white,
+        selectedBackgroundColor: AppColors.primaryBlue,
       ),
     );
   }
@@ -227,17 +229,17 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
   Widget _buildDivider(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: Divider(color: Colors.grey[300])),
+        Expanded(child: Divider(color: AppColors.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'ou cadastre-se com',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
             ),
           ),
         ),
-        Expanded(child: Divider(color: Colors.grey[300])),
+        Expanded(child: Divider(color: AppColors.border)),
       ],
     );
   }
@@ -269,7 +271,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
             Text(
               'Outras opções sociais (em breve):',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -280,8 +282,8 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF0077B5), // LinkedIn Blue
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.info,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.info),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthLinkedInRegisterRequested());
@@ -295,8 +297,8 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFFE4405F), // Instagram Pink
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.error,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.error),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthInstagramRegisterRequested());
@@ -310,8 +312,8 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF1877F2), // Facebook Blue
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.primaryBlue,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.primaryBlue),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthFacebookRegisterRequested());

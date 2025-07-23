@@ -6,7 +6,7 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from ..auth import get_current_user
+from auth import get_current_user
 
 logger = logging.getLogger(__name__)
 

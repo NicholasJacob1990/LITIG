@@ -13,7 +13,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
 
-from backend.services.unipile_sdk_wrapper import UnipileSDKWrapper, UnipileAccount, UnipileProfile
+from backend.services.unipile_app_service import get_unipile_app_service
 from backend.auth import get_current_user
 
 router = APIRouter(prefix="/api/v1/unipile", tags=["unipile"])
@@ -29,8 +29,8 @@ async def health_check():
         Status da conexão e informações de configuração
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        health_data = await unipile_wrapper.health_check()
+        unipile_service = get_unipile_app_service()
+        health_data = await unipile_service.health_check()
         
         return JSONResponse(
             status_code=200 if health_data["status"] == "healthy" else 503,
@@ -57,8 +57,8 @@ async def list_accounts(current_user = Depends(get_current_user)):
     Baseado em: https://developer.unipile.com/reference/accountscontroller_listaccounts
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        accounts = await unipile_wrapper.list_accounts()
+        unipile_service = get_unipile_app_service()
+        accounts = await unipile_service.list_accounts()
         
         return {
             "accounts": [
@@ -89,8 +89,8 @@ async def get_profile(
     Busca perfil de usuário por email.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        profile = await unipile_wrapper.get_profile_by_email(email)
+        unipile_service = get_unipile_app_service()
+        profile = await unipile_service.get_profile_by_email(email)
         
         if not profile:
             raise HTTPException(status_code=404, detail="Perfil não encontrado")
@@ -123,8 +123,8 @@ async def get_lawyer_communication_data(
     Busca dados de comunicação para um advogado específico.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        data, transparency = await unipile_wrapper.get_communication_data(
+        unipile_service = get_unipile_app_service()
+        data, transparency = await unipile_service.get_communication_data(
             oab_number=oab_number,
             email=email
         )
@@ -155,19 +155,19 @@ async def test_integration(
     Testa integração completa com Unipile.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         # 1. Health check
-        health = await unipile_wrapper.health_check()
+        health = await unipile_service.health_check()
         
         # 2. Listar contas
-        accounts = await unipile_wrapper.list_accounts()
+        accounts = await unipile_service.list_accounts()
         
         # 3. Buscar perfil de teste
-        profile = await unipile_wrapper.get_profile_by_email(test_email)
+        profile = await unipile_service.get_profile_by_email(test_email)
         
         # 4. Buscar dados de comunicação
-        comm_data, transparency = await unipile_wrapper.get_communication_data(
+        comm_data, transparency = await unipile_service.get_communication_data(
             oab_number="TEST123",
             email=test_email
         )
@@ -201,23 +201,13 @@ async def get_configuration(current_user = Depends(get_current_user)):
     Retorna configuração atual do Unipile.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
+        config_data = await unipile_service.get_configuration()
         
         return {
-            "configuration": {
-                "base_url": unipile_wrapper.base_url,
-                "has_api_token": bool(unipile_wrapper.api_token),
-                "dsn_configured": bool(unipile_wrapper.dsn),
-                "endpoints": {
-                    "accounts": f"{unipile_wrapper.base_url}/accounts",
-                    "users": f"{unipile_wrapper.base_url}/users",
-                    "documentation": "https://developer.unipile.com/reference/accountscontroller_listaccounts"
-                }
-            },
-            "environment_variables": {
-                "UNIPILE_API_TOKEN": "configured" if unipile_wrapper.api_token else "missing",
-                "UNIPILE_DSN": "configured" if unipile_wrapper.dsn else "not_set"
-            },
+            "configuration": config_data,
+            "using_app_service": True,
+            "service_layer": "UnipileAppService with CompatibilityLayer",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
@@ -288,8 +278,8 @@ async def connect_instagram(
     }
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        result = await unipile_wrapper.connect_instagram_simple(
+        unipile_service = get_unipile_app_service()
+        result = await unipile_service.connect_instagram_simple(
             credentials.get("username", ""),
             credentials.get("password", "")
         )
@@ -328,8 +318,8 @@ async def connect_facebook(
     }
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        result = await unipile_wrapper.connect_facebook_simple(
+        unipile_service = get_unipile_app_service()
+        result = await unipile_service.connect_facebook_simple(
             credentials.get("username", ""),
             credentials.get("password", "")
         )
@@ -362,8 +352,8 @@ async def get_instagram_profile(
     Obtém perfil completo do Instagram com métricas.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        result = await unipile_wrapper.get_instagram_data(account_id)
+        unipile_service = get_unipile_app_service()
+        result = await unipile_service.get_instagram_data(account_id)
         
         if result:
             return {
@@ -388,8 +378,8 @@ async def get_facebook_profile(
     Obtém perfil completo do Facebook com métricas.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
-        result = await unipile_wrapper.get_facebook_data(account_id)
+        unipile_service = get_unipile_app_service()
+        result = await unipile_service.get_facebook_data(account_id)
         
         if result:
             return {
@@ -414,7 +404,7 @@ async def get_social_profiles(
     Obtém dados consolidados de todas as redes sociais para um advogado.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         # TODO: Buscar accounts_ids do banco baseado no lawyer_id
         # Por agora, retornar mock data para teste
@@ -424,7 +414,7 @@ async def get_social_profiles(
             "facebook": "fb_sample_789"
         }
         
-        result = await unipile_wrapper.get_social_score(sample_accounts)
+        result = await unipile_service.get_social_score(sample_accounts)
         
         if result:
             return {
@@ -465,10 +455,10 @@ async def sync_social_data(
     }
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         platforms_data = platforms.get("platforms", {})
-        result = await unipile_wrapper.get_social_score(platforms_data)
+        result = await unipile_service.get_social_score(platforms_data)
         
         # TODO: Salvar no banco de dados
         # TODO: Atualizar hybrid_legal_data_service com novos dados
@@ -505,7 +495,7 @@ async def connect_linkedin(
         }
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         username = credentials.get("username")
         password = credentials.get("password")
@@ -513,7 +503,7 @@ async def connect_linkedin(
         if not username or not password:
             raise HTTPException(status_code=400, detail="Username e password são obrigatórios")
         
-        result = await unipile_wrapper.connect_linkedin(username, password)
+        result = await unipile_service.connect_linkedin(username, password)
         
         if result:
             return {
@@ -551,7 +541,7 @@ async def connect_email(
         }
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         provider = email_data.get("provider")
         email = email_data.get("email")
@@ -560,7 +550,7 @@ async def connect_email(
         if not provider or not email:
             raise HTTPException(status_code=400, detail="Provider e email são obrigatórios")
         
-        result = await unipile_wrapper.connect_email(provider, email, credentials)
+        result = await unipile_service.connect_email(provider, email, credentials)
         
         if result:
             return {
@@ -589,10 +579,10 @@ async def list_emails(
     Lista emails de uma conta específica usando o SDK oficial.
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         options = {"limit": limit}
-        emails = await unipile_wrapper.list_emails(account_id, options)
+        emails = await unipile_service.list_emails(account_id, options)
         
         return {
             "emails": emails,
@@ -623,13 +613,13 @@ async def send_email(
         }
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
         account_id = email_data.get("account_id")
         if not account_id:
             raise HTTPException(status_code=400, detail="account_id é obrigatório")
         
-        result = await unipile_wrapper.send_email(account_id, email_data)
+        result = await unipile_service.send_email(account_id, email_data)
         
         if result:
             return {
@@ -662,9 +652,9 @@ async def get_company_profile(
         identifier: Identificador da empresa (ex: "Unipile")
     """
     try:
-        unipile_wrapper = UnipileSDKWrapper()
+        unipile_service = get_unipile_app_service()
         
-        profile = await unipile_wrapper.get_company_profile(account_id, identifier)
+        profile = await unipile_service.get_company_profile(account_id, identifier)
         
         if profile:
             return {

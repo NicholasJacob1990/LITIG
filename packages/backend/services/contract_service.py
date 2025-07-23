@@ -13,7 +13,7 @@ import os
 import uuid
 from jinja2 import Environment, FileSystemLoader, Template
 
-from ..api.schemas import (
+from api.schemas import (
     PartnershipResponseSchema,
     ContractResponseSchema
 )

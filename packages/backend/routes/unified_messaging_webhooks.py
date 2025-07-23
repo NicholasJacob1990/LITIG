@@ -13,8 +13,8 @@ import json
 import logging
 from datetime import datetime
 
-from ..services.unified_messaging_service import UnifiedMessagingService
-from ..services.notification_service import NotificationService
+from services.unified_messaging_service import UnifiedMessagingService
+from services.notification_service import NotificationService
 
 logger = logging.getLogger(__name__)
 

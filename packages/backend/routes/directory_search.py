@@ -7,8 +7,8 @@ import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 
-from ..services.directory_search_service import DirectorySearchService, DirectorySearchRequest
-from ..api.schemas import MatchedLawyerSchema # Reutilizar schema de resposta
+from services.directory_search_service import DirectorySearchService, DirectorySearchRequest
+from api.schemas import MatchedLawyerSchema # Reutilizar schema de resposta
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ import anthropic
 import openai
 from dotenv import load_dotenv
 
-from .conversation_state_manager import conversation_state_manager
+from conversation_state_manager import conversation_state_manager
 
 load_dotenv()
 

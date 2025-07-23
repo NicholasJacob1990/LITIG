@@ -130,3 +130,32 @@ def get_database_url() -> str:
     
     # Construir URL do PostgreSQL
     return f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
+
+# ===== CONFIGURAÇÕES UNIPILE SDK =====
+
+# Configuração do SDK oficial Python da Unipile
+UNIPILE_PREFERRED_SERVICE = os.getenv("UNIPILE_PREFERRED_SERVICE", "sdk_official")  # sdk_official, wrapper_nodejs, auto_fallback
+UNIPILE_API_TOKEN = os.getenv("UNIPILE_API_TOKEN", "")
+UNIFIED_API_KEY = os.getenv("UNIFIED_API_KEY", "")  # Nome alternativo
+UNIPILE_SERVER_REGION = os.getenv("UNIPILE_SERVER_REGION", "north-america")  # north-america, europe, australia
+UNIPILE_DSN = os.getenv("UNIPILE_DSN", "api.unipile.com")
+
+# Configurações avançadas do SDK
+UNIPILE_ENABLE_FALLBACK = os.getenv("UNIPILE_ENABLE_FALLBACK", "true").lower() == "true"
+UNIPILE_HEALTH_CHECK_INTERVAL = int(os.getenv("UNIPILE_HEALTH_CHECK_INTERVAL", "300"))  # 5 minutos
+UNIPILE_TIMEOUT_SECONDS = int(os.getenv("UNIPILE_TIMEOUT_SECONDS", "30"))
+
+# Configurações de rate limiting para APIs do Unipile
+UNIPILE_RATE_LIMIT_REQUESTS = int(os.getenv("UNIPILE_RATE_LIMIT_REQUESTS", "100"))
+UNIPILE_RATE_LIMIT_WINDOW = int(os.getenv("UNIPILE_RATE_LIMIT_WINDOW", "3600"))  # 1 hora
+
+# URLs por região
+UNIPILE_REGIONS = {
+    "north-america": "https://api.unified.to",
+    "europe": "https://api-eu.unified.to", 
+    "australia": "https://api-au.unified.to"
+}
+
+# Configuração de logging específica do Unipile
+UNIPILE_LOG_LEVEL = os.getenv("UNIPILE_LOG_LEVEL", "INFO")
+UNIPILE_LOG_REQUESTS = os.getenv("UNIPILE_LOG_REQUESTS", "false").lower() == "true"

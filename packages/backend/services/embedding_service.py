@@ -11,9 +11,9 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 from dotenv import load_dotenv
 
-from .embedding_service_parallel import parallel_embedding_service
+from embedding_service_parallel import parallel_embedding_service
 from supabase import Client, create_client
-from ..metrics import external_api_duration, fallback_usage_total, track_time
+from metrics import external_api_duration, fallback_usage_total, track_time
 
 # Configuração
 load_dotenv()

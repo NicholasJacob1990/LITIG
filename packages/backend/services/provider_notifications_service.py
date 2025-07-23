@@ -9,9 +9,9 @@ from typing import Dict, List, Optional, Tuple
 
 from supabase import create_client
 
-from ..config import settings
-from .email_service import email_service
-from .provider_insights_service import ProviderInsightsService
+from config import settings
+from email_service import email_service
+from provider_insights_service import ProviderInsightsService
 
 logger = logging.getLogger(__name__)
 

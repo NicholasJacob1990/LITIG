@@ -14,9 +14,9 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel, Field
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
-from ..services.notification_service import notify_service
+from auth import get_current_user
+from config import get_supabase_client
+from services.notification_service import notify_service
 
 logger = logging.getLogger(__name__)
 

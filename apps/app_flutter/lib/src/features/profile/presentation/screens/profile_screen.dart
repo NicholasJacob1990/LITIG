@@ -6,6 +6,9 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart';
 import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_bloc.dart';
 import 'package:meu_app/injection_container.dart';
+import 'package:meu_app/src/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:meu_app/src/features/profile/presentation/bloc/profile_state.dart';
+import 'package:meu_app/src/features/profile/presentation/bloc/profile_event.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -21,80 +24,61 @@ class ProfileScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(LucideIcons.settings),
               onPressed: () {
-                context.go('/profile/settings');
+                // Detecta o contexto atual e navega adequadamente
+                final currentLocation = GoRouterState.of(context).uri.toString();
+                if (currentLocation.contains('/contractor-profile')) {
+                  context.go('/contractor-profile/settings');
+                } else if (currentLocation.contains('/client-profile')) {
+                  context.go('/client-profile/settings');
+                } else if (currentLocation.contains('/profile')) {
+                  context.go('/profile/settings');
+                } else {
+                  // Fallback para rota independente
+                  context.go('/profile-details/settings');
+                }
               },
             ),
           ],
         ),
         body: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state is Authenticated) {
-              final user = state.user;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Área do perfil centralizada
-                    Center(
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            child: user.fullName != null && user.fullName!.isNotEmpty
-                                ? Text(user.fullName!.substring(0, 2).toUpperCase(), style: const TextStyle(fontSize: 40))
-                                : const Icon(LucideIcons.user, size: 40),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(user.fullName ?? 'Usuário', style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 8),
-                          Text(user.email ?? 'E-mail não informado', style: Theme.of(context).textTheme.bodyLarge),
-                          const SizedBox(height: 8),
-                          if (user.role != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                _getRoleDisplayName(user.role!),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    
-                    // Dashboard Contextual Completo (baseado no tipo de usuário)
-                    if (user.role == 'lawyer' || user.role == 'lawyer_associated' || user.role == 'lawyer_office')
-                      _buildContextualDashboard(context, user),
-                    const SizedBox(height: 24),
-                    
-                    // Seção de Escritório (apenas para advogados)
-                    if (user.role == 'lawyer' || user.role == 'associate_lawyer')
-                      const _LawyerFirmSection(),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Botão de editar perfil
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          context.go('/profile/edit');
-                        },
-                        icon: const Icon(LucideIcons.edit),
-                        label: const Text('Editar Perfil'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+          builder: (context, authState) {
+            if (authState is Authenticated) {
+              final user = authState.user;
+              return BlocProvider(
+                create: (context) => getIt<ProfileBloc>()..add(LoadProfile(user.id!)),
+                child: BlocBuilder<ProfileBloc, ProfileState>(
+                  builder: (context, profileState) {
+                    if (profileState is ProfileLoaded) {
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            // Área do perfil centralizada
+                            _buildProfileHeader(context, user, profileState.socialProfiles),
+                            const SizedBox(height: 32),
+                            
+                            // Menu Completo do Perfil
+                            _buildProfileMenu(context, user),
+                            
+                            const SizedBox(height: 24),
+                            
+                            // Dashboard Contextual Resumido
+                            if (user.role == 'lawyer' || user.role == 'lawyer_associated' || user.role == 'lawyer_office')
+                              _buildContextualDashboard(context, user),
+                            
+                            // Seção de Escritório
+                            if (user.role == 'lawyer' || user.role == 'associate_lawyer') ...[
+                              const SizedBox(height: 24),
+                              const _LawyerFirmSection(),
+                            ],
+                            
+                            const SizedBox(height: 20),
+                          ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
                 ),
               );
             }
@@ -102,6 +86,81 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileHeader(BuildContext context, dynamic user, Map<String, dynamic>? socialProfiles) {
+    return Center(
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            child: user.fullName != null && user.fullName!.isNotEmpty
+                ? Text(user.fullName!.substring(0, 2).toUpperCase(), style: const TextStyle(fontSize: 40))
+                : const Icon(LucideIcons.user, size: 40),
+          ),
+          const SizedBox(height: 20),
+          Text(user.fullName ?? 'Usuário', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(user.email ?? 'E-mail não informado', style: Theme.of(context).textTheme.bodyLarge),
+          const SizedBox(height: 16),
+          if (socialProfiles != null && socialProfiles.isNotEmpty)
+            _buildSocialBadges(context, socialProfiles),
+          const SizedBox(height: 8),
+          if (user.role != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                _getRoleDisplayName(user.role!),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialBadges(BuildContext context, Map<String, dynamic> socialProfiles) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: socialProfiles.entries.map((entry) {
+        final provider = entry.key;
+        final data = entry.value;
+        IconData icon;
+        Color color;
+
+        switch (provider) {
+          case 'instagram':
+            icon = LucideIcons.instagram;
+            color = const Color(0xFFE4405F);
+            break;
+          case 'linkedin':
+            icon = LucideIcons.linkedin;
+            color = const Color(0xFF0077B5);
+            break;
+          default:
+            icon = LucideIcons.share2;
+            color = Colors.grey;
+        }
+
+        return Chip(
+          avatar: Icon(icon, color: color, size: 16),
+          label: Text(
+            '${data['followers'] ?? 0} seguidores',
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: color.withOpacity(0.1),
+          side: BorderSide(color: color.withOpacity(0.2)),
+        );
+      }).toList(),
     );
   }
 
@@ -115,6 +174,180 @@ class ProfileScreen extends StatelessWidget {
         // Dashboard contextual expandido baseado no tipo de usuário
         _buildExpandedDashboardByUserType(context, user.role),
       ],
+    );
+  }
+
+  /// **Menu Completo do Perfil - Baseado no PLANO_ACAO_PERFIL_CLIENTE.md**
+  Widget _buildProfileMenu(BuildContext context, dynamic user) {
+    final isClient = user.role == 'client' || user.role == 'PF';
+    final isLawyer = user.role?.contains('lawyer') == true;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header do Menu
+        Row(
+          children: [
+            const Icon(LucideIcons.user, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              isClient ? 'Perfil do Cliente' : 'Perfil Profissional',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        // Dashboard Pessoal
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.barChart3,
+          title: 'Dashboard',
+          subtitle: 'Métricas e indicadores pessoais',
+          color: Colors.blue,
+          onTap: () => _showComingSoon(context, 'Dashboard Pessoal'),
+        ),
+        
+        // Dados Pessoais
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.fileText,
+          title: 'Dados Pessoais',
+          subtitle: isClient ? 'Informações básicas e documentos' : 'Informações profissionais',
+          color: Colors.green,
+          onTap: () => context.push('/profile/personal-data'),
+        ),
+        
+        // Documentos
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.folder,
+          title: 'Documentos',
+          subtitle: isClient ? 'Upload e gestão de documentos' : 'Certificações e comprovantes',
+          color: Colors.orange,
+          onTap: () => context.push('/profile/documents'),
+        ),
+        
+        // Comunicação
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.messageCircle,
+          title: 'Comunicação',
+          subtitle: 'Preferências de contato e notificações',
+          color: Colors.purple,
+          onTap: () => context.push('/profile-details/communication-preferences'),
+        ),
+        
+        // Conexões Sociais (ITEM ADICIONADO)
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.share2,
+          title: 'Conexões Sociais',
+          subtitle: 'Conecte seu LinkedIn, Instagram e mais',
+          color: Colors.cyan,
+          onTap: () => context.push('/profile-details/social-connections'),
+        ),
+        
+        // Financeiro (principalmente para clientes, mas útil para advogados também)
+        if (isClient || isLawyer)
+          _buildProfileMenuCard(
+            context,
+            icon: LucideIcons.dollarSign,
+            title: isClient ? 'Dashboard Financeiro' : 'Controle Financeiro',
+            subtitle: isClient ? 'Contratos e pagamentos' : 'Faturamento e recebimentos',
+            color: Colors.teal,
+            onTap: () => context.push('/financial'),
+          ),
+        
+        // Contratos (principalmente para clientes)
+        if (isClient)
+          _buildProfileMenuCard(
+            context,
+            icon: LucideIcons.fileCheck,
+            title: 'Contratos e Serviços',
+            subtitle: 'Contratos vigentes e histórico',
+            color: Colors.indigo,
+            onTap: () => context.push('/contracts'),
+          ),
+        
+        // Privacidade e Segurança
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.shield,
+          title: 'Privacidade e Segurança',
+          subtitle: 'Configurações LGPD e controle de acesso',
+          color: Colors.red,
+          onTap: () => context.push('/profile/privacy-settings'),
+        ),
+        
+        // Configurações Gerais
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.settings,
+          title: 'Configurações',
+          subtitle: 'Aparência, idioma e preferências gerais',
+          color: Colors.grey,
+          onTap: () => context.push('/profile/settings'),
+        ),
+        
+        // Editar Perfil (ação rápida)
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => context.push('/profile/edit'),
+            icon: const Icon(LucideIcons.edit),
+            label: const Text('Editar Perfil Básico'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildProfileMenuCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(subtitle),
+        trailing: const Icon(LucideIcons.chevronRight),
+        onTap: onTap,
+      ),
+    );
+  }
+  
+  void _showComingSoon(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature - Em breve!'),
+        backgroundColor: Colors.blue,
+      ),
     );
   }
 
@@ -867,20 +1100,5 @@ class _LawyerFirmSection extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  String _getRoleDisplayName(String role) {
-    switch (role) {
-      case 'partner':
-        return 'Sócio';
-      case 'associate':
-        return 'Associado';
-      case 'junior':
-        return 'Júnior';
-      case 'senior':
-        return 'Sênior';
-      default:
-        return role;
-    }
   }
 } 

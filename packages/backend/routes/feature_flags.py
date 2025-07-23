@@ -9,9 +9,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from pydantic import BaseModel, Field
 import logging
 
-from ..auth import get_current_user
-from ..services.feature_flag_service import FeatureFlagService, FeatureStatus, RolloutStrategy
-from ..models.user import User
+from auth import get_current_user
+from services.feature_flag_service import FeatureFlagService, FeatureStatus, RolloutStrategy
+from models.user import User
 
 logger = logging.getLogger(__name__)
 

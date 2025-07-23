@@ -10,15 +10,15 @@ from enum import Enum
 import logging
 import json
 
-from ..services.contextual_case_service import ContextualCaseService
-from ..services.case_allocation_service import CaseAllocationService
-from ..services.contextual_metrics_service import ContextualMetricsService
-from ..services.feature_flag_service import FeatureFlagService
-from ..models.case import Case
-from ..models.user import User
-from ..models.lawyer import Lawyer
-from ..database import get_db_connection
-from ..utils.cache import cache_result
+from services.contextual_case_service import ContextualCaseService
+from services.case_allocation_service import CaseAllocationService
+from services.contextual_metrics_service import ContextualMetricsService
+from services.feature_flag_service import FeatureFlagService
+from models.case import Case
+from models.user import User
+from models.lawyer import Lawyer
+from database import get_db_connection
+from utils.cache import cache_result
 
 logger = logging.getLogger(__name__)
 

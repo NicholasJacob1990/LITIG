@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// Widget personalizado para ícones oficiais de redes sociais
-/// Baseado nas diretrizes oficiais de marca de 2025
+/// Utiliza SVGs oficiais das marcas para maior fidelidade visual
 class OfficialSocialIcon extends StatelessWidget {
   final SocialPlatform platform;
   final double size;
   final bool isButton;
   final VoidCallback? onTap;
+  final Color? colorFilter;
 
   const OfficialSocialIcon({
     super.key,
@@ -14,6 +16,7 @@ class OfficialSocialIcon extends StatelessWidget {
     this.size = 24,
     this.isButton = false,
     this.onTap,
+    this.colorFilter,
   });
 
   @override
@@ -36,19 +39,61 @@ class OfficialSocialIcon extends StatelessWidget {
   }
 
   Widget _buildIcon() {
+    final String assetPath = _getAssetPath(platform);
+    
+    // Preserva as cores originais dos SVGs oficiais, a menos que seja especificamente solicitado
+    return SvgPicture.asset(
+      assetPath,
+      width: size,
+      height: size,
+      colorFilter: colorFilter != null 
+        ? ColorFilter.mode(colorFilter!, BlendMode.srcIn)
+        : null, // Não aplica filtro para preservar as cores oficiais
+      fit: BoxFit.contain,
+    );
+  }
+
+  String _getAssetPath(SocialPlatform platform) {
     switch (platform) {
       case SocialPlatform.facebook:
-        return _FacebookIcon(size: size);
+        return 'assets/icons/facebook.svg';
       case SocialPlatform.instagram:
-        return _InstagramIcon(size: size);
+        return 'assets/icons/instagram.svg';
       case SocialPlatform.linkedin:
-        return _LinkedInIcon(size: size);
+        return 'assets/icons/linkedin.svg';
       case SocialPlatform.x:
-        return _XIcon(size: size);
+        // Usando LinkedIn como fallback mais apropriado para contexto profissional
+        return 'assets/icons/linkedin.svg';
       case SocialPlatform.whatsapp:
-        return _WhatsAppIcon(size: size);
+        return 'assets/icons/whatsapp.svg';
       case SocialPlatform.google:
-        return _GoogleIcon(size: size);
+        return 'assets/icons/gmail.svg'; // Gmail representa bem o Google
+      case SocialPlatform.gmail:
+        return 'assets/icons/gmail.svg';
+      case SocialPlatform.outlook:
+        return 'assets/icons/outlook.svg';
+    }
+  }
+
+  Color? _getDefaultColor(SocialPlatform platform) {
+    // Esta função agora é usada apenas como referência para cores oficiais
+    // Os SVGs mantêm suas cores originais por padrão
+    switch (platform) {
+      case SocialPlatform.facebook:
+        return const Color(0xFF1877F2); // Facebook Blue oficial
+      case SocialPlatform.instagram:
+        return const Color(0xFFE4405F); // Instagram Pink oficial  
+      case SocialPlatform.linkedin:
+        return const Color(0xFF0078D4); // LinkedIn Blue oficial
+      case SocialPlatform.x:
+        return Colors.black; // X preto oficial
+      case SocialPlatform.whatsapp:
+        return const Color(0xFF25D366); // WhatsApp Green oficial
+      case SocialPlatform.google:
+      case SocialPlatform.gmail:
+        return const Color(0xFFEA4335); // Gmail Red oficial
+      case SocialPlatform.outlook:
+        return const Color(0xFF0078D4); // Outlook Blue oficial
     }
   }
 }
@@ -60,191 +105,48 @@ enum SocialPlatform {
   x,
   whatsapp,
   google,
+  gmail,
+  outlook,
 }
 
-/// Ícone oficial do Facebook
-/// Baseado nas diretrizes: https://en.facebookbrand.com/
-class _FacebookIcon extends StatelessWidget {
-  final double size;
+/// Classe utilitária para cores oficiais das redes sociais
+class SocialMediaColors {
+  static const Color facebook = Color(0xFF1877F2);
+  static const Color instagram = Color(0xFFE4405F);
+  static const Color linkedin = Color(0xFF0A66C2);
+  static const Color x = Colors.black;
+  static const Color whatsapp = Color(0xFF25D366);
+  static const Color google = Color(0xFF4285F4);
+  static const Color gmail = Color(0xFFEA4335);
+  static const Color outlook = Color(0xFF0078D4);
   
-  const _FacebookIcon({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1877F2), // Facebook Blue oficial
-        borderRadius: BorderRadius.circular(size * 0.1),
-      ),
-      child: Center(
-        child: Text(
-          'f',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.6,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Arial',
-          ),
-        ),
-      ),
-    );
+  static Color getColor(SocialPlatform platform) {
+    switch (platform) {
+      case SocialPlatform.facebook:
+        return facebook;
+      case SocialPlatform.instagram:
+        return instagram;
+      case SocialPlatform.linkedin:
+        return linkedin;
+      case SocialPlatform.x:
+        return x;
+      case SocialPlatform.whatsapp:
+        return whatsapp;
+      case SocialPlatform.google:
+        return google;
+      case SocialPlatform.gmail:
+        return gmail;
+      case SocialPlatform.outlook:
+        return outlook;
+    }
   }
 }
 
-/// Ícone oficial do Instagram
-/// Baseado nas diretrizes: https://about.meta.com/brand/resources/instagram/
-class _InstagramIcon extends StatelessWidget {
+/// Widget para casos especiais onde precisamos do ícone do Google com gradiente
+class GoogleIcon extends StatelessWidget {
   final double size;
   
-  const _InstagramIcon({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFFF58529), // Instagram Orange
-            Color(0xFFDD2A7B), // Instagram Pink
-            Color(0xFF8134AF), // Instagram Purple
-            Color(0xFF515BD4), // Instagram Blue
-          ],
-        ),
-        borderRadius: BorderRadius.circular(size * 0.2),
-      ),
-      child: Stack(
-        children: [
-          Center(
-            child: Container(
-              width: size * 0.65,
-              height: size * 0.65,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.white,
-                  width: size * 0.06,
-                ),
-                borderRadius: BorderRadius.circular(size * 0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            top: size * 0.18,
-            right: size * 0.18,
-            child: Container(
-              width: size * 0.15,
-              height: size * 0.15,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Ícone oficial do LinkedIn
-/// Baseado nas diretrizes: https://brand.linkedin.com/
-class _LinkedInIcon extends StatelessWidget {
-  final double size;
-  
-  const _LinkedInIcon({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A66C2), // LinkedIn Blue oficial 2025
-        borderRadius: BorderRadius.circular(size * 0.1),
-      ),
-      child: Center(
-        child: Text(
-          'in',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.4,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Arial',
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Ícone oficial do X (ex-Twitter)
-/// Baseado nas diretrizes: https://about.x.com/en/who-we-are/brand-toolkit
-class _XIcon extends StatelessWidget {
-  final double size;
-  
-  const _XIcon({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.black, // X usa preto ou branco
-        borderRadius: BorderRadius.circular(size * 0.1),
-      ),
-      child: Center(
-        child: Text(
-          '𝕏',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.6,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Ícone oficial do WhatsApp
-/// Baseado nas diretrizes oficiais do WhatsApp
-class _WhatsAppIcon extends StatelessWidget {
-  final double size;
-  
-  const _WhatsAppIcon({required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: const Color(0xFF25D366), // WhatsApp Green oficial
-        borderRadius: BorderRadius.circular(size * 0.2),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.phone,
-          color: Colors.white,
-          size: size * 0.6,
-        ),
-      ),
-    );
-  }
-}
-
-/// Ícone oficial do Google
-/// Baseado nas diretrizes do Google Brand
-class _GoogleIcon extends StatelessWidget {
-  final double size;
-  
-  const _GoogleIcon({required this.size});
+  const GoogleIcon({super.key, this.size = 24});
 
   @override
   Widget build(BuildContext context) {
@@ -275,32 +177,5 @@ class _GoogleIcon extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Classe utilitária para cores oficiais das redes sociais
-class SocialMediaColors {
-  static const Color facebook = Color(0xFF1877F2);
-  static const Color instagram = Color(0xFFE4405F);
-  static const Color linkedin = Color(0xFF0A66C2);
-  static const Color x = Colors.black;
-  static const Color whatsapp = Color(0xFF25D366);
-  static const Color google = Color(0xFF4285F4);
-  
-  static Color getColor(SocialPlatform platform) {
-    switch (platform) {
-      case SocialPlatform.facebook:
-        return facebook;
-      case SocialPlatform.instagram:
-        return instagram;
-      case SocialPlatform.linkedin:
-        return linkedin;
-      case SocialPlatform.x:
-        return x;
-      case SocialPlatform.whatsapp:
-        return whatsapp;
-      case SocialPlatform.google:
-        return google;
-    }
   }
 }

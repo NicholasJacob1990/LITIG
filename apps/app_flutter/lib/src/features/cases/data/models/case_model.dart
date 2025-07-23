@@ -10,6 +10,10 @@ class CaseModel extends Case {
     super.lawyerId,
     required super.createdAt,
     super.lawyer,
+    super.recommendedFirm,
+    super.firmMatchScore,
+    super.caseType,
+    super.allocationType,
   });
 
   factory CaseModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +25,10 @@ class CaseModel extends Case {
       lawyerId: json['lawyer_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String? ?? DateTime.now().toIso8601String()),
       lawyer: json['lawyer'] != null ? LawyerInfo.fromJson(json['lawyer']) : null,
+      recommendedFirm: null, // TODO: Implementar fromJson na LawFirm quando necessário
+      firmMatchScore: json['firm_match_score']?.toDouble(),
+      caseType: json['case_type'] as String?,
+      allocationType: json['allocation_type'] as String?,
     );
   }
 

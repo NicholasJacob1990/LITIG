@@ -27,7 +27,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 
-from ..services.contextual_offers_service import (
+from services.contextual_offers_service import (
     ContextualOffersService,
     AllocationType,
     OfferStatus,

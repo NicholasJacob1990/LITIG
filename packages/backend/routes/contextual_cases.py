@@ -7,9 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, List
 import logging
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
-from ..services.contextual_case_service import create_contextual_case_service
+from auth import get_current_user
+from config import get_supabase_client
+from services.contextual_case_service import create_contextual_case_service
 
 logger = logging.getLogger(__name__)
 

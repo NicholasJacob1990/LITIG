@@ -157,17 +157,17 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
+                Container(
+                  decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                  border: Border.all(
                         color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
+                  ),
+                  ),
+                  child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
+                    children: [
                         _buildViewToggle(
                           icon: LucideIcons.list,
                           isSelected: !_showMapView,
@@ -224,13 +224,13 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                       'Mais Experientes', 
                       'Prioriza expertise',
                       LucideIcons.award,
-                    ),
-                  ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
         
         // Resultados das recomendações
         Expanded(
@@ -302,8 +302,8 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
+        children: [
+          Icon(
               icon,
               size: 20,
               color: isSelected 
@@ -315,7 +315,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+          Text(
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -325,7 +325,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                       : Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                Text(
+          Text(
                   description,
                   style: TextStyle(
                     fontSize: 11,

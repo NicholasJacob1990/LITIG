@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 from uuid import UUID
 import logging
 
-from ..config import get_supabase_client
-from ..auth import get_current_user
+from config import get_supabase_client
+from auth import get_current_user
 
 logger = logging.getLogger(__name__)
 

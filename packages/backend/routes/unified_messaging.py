@@ -12,7 +12,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 import logging
 
-from ..services.unified_messaging_service import (
+from services.unified_messaging_service import (
     UnifiedMessagingService,
     UnifiedAccount,
     UnifiedChat,

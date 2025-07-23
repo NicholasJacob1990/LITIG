@@ -1,10 +1,10 @@
 vveimport logging
 from typing import List, Optional
 from pydantic import BaseModel
-from ..database import get_db_connection
+from database import get_db_connection
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from ..api.schemas import MatchedLawyerSchema
+from api.schemas import MatchedLawyerSchema
 
 logger = logging.getLogger(__name__)
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/case_detail.dart';
 import '../../domain/entities/contextual_case_data.dart';
 import '../../domain/entities/allocation_type.dart';
+import '../../domain/entities/process_status.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../../shared/utils/app_colors.dart';
 import '../../../../core/utils/logger.dart';
@@ -111,19 +112,19 @@ class ContextualCaseDetailSectionFactory {
     
     List<Widget> sections = [
       // EXPERIÊNCIA ATUAL DO CLIENTE - NÃO ALTERAR
-      const LazySection(
+      LazySection(
         priority: SectionPriority.critical,
-        child: LawyerResponsibleSection(),
+        child: LawyerResponsibleSection(lawyer: caseDetail?.assignedLawyer),
       ),
       const SizedBox(height: 16),
-      const LazySection(
+      LazySection(
         priority: SectionPriority.high,
-        child: ConsultationInfoSection(),
+        child: ConsultationInfoSection(consultation: caseDetail?.consultation),
       ),
       const SizedBox(height: 16),
-      const LazySection(
+      LazySection(
         priority: SectionPriority.high,
-        child: PreAnalysisSection(),
+        child: PreAnalysisSection(preAnalysis: caseDetail?.preAnalysis),
       ),
       const SizedBox(height: 16),
       
@@ -139,19 +140,25 @@ class ContextualCaseDetailSectionFactory {
       if (caseDetail?.isLitigation == true && caseDetail!.parties.isNotEmpty)
         const SizedBox(height: 16),
       
-      const LazySection(
+      LazySection(
         priority: SectionPriority.medium,
-        child: NextStepsSection(),
+        child: NextStepsSection(nextSteps: caseDetail?.nextSteps ?? []),
       ),
       const SizedBox(height: 16),
-      const LazySection(
+      LazySection(
         priority: SectionPriority.medium,
-        child: DocumentsSection(),
+        child: DocumentsSection(
+          documents: caseDetail?.documents ?? [],
+          caseId: caseDetail?.id ?? '',
+        ),
       ),
       const SizedBox(height: 16),
-      const LazySection(
+      LazySection(
         priority: SectionPriority.low,
-        child: ProcessStatusSection(),
+        child: ProcessStatusSection(
+          processStatus: caseDetail?.processStatus ?? _getMockProcessStatus(),
+          caseId: caseDetail?.id ?? '',
+        ),
       ),
       const SizedBox(height: 24), // Espaço extra no final
     ];
@@ -453,8 +460,45 @@ class ContextualCaseDetailSectionFactory {
     return role == 'lawyer_platform_associate';
   }
   
-  static String _buildCacheKey(User user, CaseDetail? caseDetail, ContextualCaseData? contextualData) {
-    return '${user.role}_${caseDetail?.id}_${contextualData?.allocationType}';
+  static String _buildCacheKey(User currentUser, CaseDetail? caseDetail, ContextualCaseData? contextualData) {
+    return '${currentUser.id}-${caseDetail?.id}-${contextualData?.allocationType}';
+  }
+  
+  /// Mock process status for fallback cases
+  static ProcessStatus _getMockProcessStatus() {
+    return ProcessStatus(
+      currentPhase: 'Em Andamento',
+      description: 'Seu processo está avançando conforme o planejado. A fase atual é a coleta de provas.',
+      progressPercentage: 45.0,
+      phases: [
+        ProcessPhase(
+          name: 'Petição Inicial',
+          description: 'Apresentação formal da sua causa à justiça.',
+          isCompleted: true,
+          isCurrent: false,
+          completedAt: DateTime(2024, 5, 20),
+          documents: const [
+            PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
+          ],
+        ),
+        ProcessPhase(
+          name: 'Coleta de Provas',
+          description: 'Reunindo todas as evidências e documentos necessários.',
+          isCompleted: false,
+          isCurrent: true,
+          documents: [
+            PhaseDocument(name: 'Contrato_Servico.pdf', url: ''),
+            PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
+          ],
+        ),
+        ProcessPhase(
+          name: 'Audiência de Conciliação',
+          description: 'Tentativa de acordo amigável entre as partes.',
+          isCompleted: false,
+          isCurrent: false,
+        ),
+      ],
+    );
   }
   
   /// Limpar cache quando necessário (exemplo: mudança de dados)

@@ -11,10 +11,10 @@ from backend.services.match_service import MatchRequest, find_and_notify_matches
 from backend.services.triage_router_service import Strategy, triage_router_service
 from supabase import Client, create_client
 
-from .celery_app import celery_app
-from .embedding_service import generate_embedding
-from .triage_service import triage_service
-from .utils.case_type_mapper import map_area_to_case_type
+from celery_app import celery_app
+from embedding_service import generate_embedding
+from triage_service import triage_service
+from utils.case_type_mapper import map_area_to_case_type
 
 load_dotenv()
 

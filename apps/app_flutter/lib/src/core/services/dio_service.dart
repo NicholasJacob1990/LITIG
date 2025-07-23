@@ -389,6 +389,58 @@ class DioService {
       rethrow;
     }
   }
+
+  // ========== MÉTODOS GENÉRICOS HTTP ==========
+  
+  /// GET request genérico
+  static Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
+    try {
+      return await dio.get(path, queryParameters: queryParameters);
+    } catch (e) {
+      AppLogger.error('Erro no GET request', error: e);
+      rethrow;
+    }
+  }
+
+  /// POST request genérico
+  static Future<Response> post(String path, {dynamic data}) async {
+    try {
+      return await dio.post(path, data: data);
+    } catch (e) {
+      AppLogger.error('Erro no POST request', error: e);
+      rethrow;
+    }
+  }
+
+  /// PATCH request genérico
+  static Future<Response> patch(String path, {dynamic data}) async {
+    try {
+      return await dio.patch(path, data: data);
+    } catch (e) {
+      AppLogger.error('Erro no PATCH request', error: e);
+      rethrow;
+    }
+  }
+
+  /// PUT request genérico
+  static Future<Response> put(String path, {dynamic data}) async {
+    try {
+      return await dio.put(path, data: data);
+    } catch (e) {
+      AppLogger.error('Erro no PUT request', error: e);
+      rethrow;
+    }
+  }
+
+  /// DELETE request genérico
+  static Future<Response> delete(String path) async {
+    try {
+      return await dio.delete(path);
+    } catch (e) {
+      AppLogger.error('Erro no DELETE request', error: e);
+      rethrow;
+    }
+  }
 }
 
 class AuthInterceptor extends Interceptor {

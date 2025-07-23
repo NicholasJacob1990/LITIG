@@ -15,9 +15,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from pydantic import BaseModel, Field
 import logging
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
-from ..services.auto_context_service import AutoContextService
+from auth import get_current_user
+from config import get_supabase_client
+from services.auto_context_service import AutoContextService
 
 logger = logging.getLogger(__name__)
 

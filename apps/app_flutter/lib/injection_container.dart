@@ -10,6 +10,8 @@ import 'package:meu_app/src/core/network/network_info.dart';
 import 'package:meu_app/src/core/services/simple_api_service.dart';
 import 'package:meu_app/src/core/services/storage_service.dart';
 import 'package:meu_app/src/core/services/ocr_service.dart';
+import 'package:meu_app/src/core/services/calendar_service.dart';
+import 'package:meu_app/src/core/services/social_auth_service.dart';
 
 // Auth
 import 'package:meu_app/src/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -35,6 +37,9 @@ import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_kpis_u
 import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_actions_usecase.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/update_case_allocation.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/contextual_case_bloc.dart';
+
+// Calendar
+import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart';
 
 // Documents
 import 'package:meu_app/src/features/cases/data/datasources/documents_remote_data_source.dart';
@@ -98,6 +103,29 @@ import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partn
 
 // Search
 import 'package:meu_app/src/features/search/data/datasources/search_remote_data_source.dart';
+
+// Profile
+import 'package:meu_app/src/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:meu_app/src/features/profile/data/datasources/profile_local_data_source.dart';
+import 'package:meu_app/src/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:meu_app/src/features/profile/domain/repositories/profile_repository.dart';
+import 'package:meu_app/src/features/profile/presentation/bloc/profile_bloc.dart';
+
+// Contracts
+import 'package:meu_app/src/features/contracts/data/datasources/contracts_remote_data_source.dart';
+import 'package:meu_app/src/features/contracts/data/repositories/contracts_repository_impl.dart';
+import 'package:meu_app/src/features/contracts/domain/repositories/contracts_repository.dart';
+import 'package:meu_app/src/features/contracts/presentation/bloc/contracts_bloc.dart';
+
+// Financial
+import 'package:meu_app/src/features/financial/data/datasources/financial_remote_data_source.dart';
+import 'package:meu_app/src/features/financial/data/repositories/financial_repository_impl.dart';
+import 'package:meu_app/src/features/financial/domain/repositories/financial_repository.dart';
+import 'package:meu_app/src/features/financial/domain/usecases/get_financial_data.dart';
+import 'package:meu_app/src/features/financial/domain/usecases/export_financial_data.dart';
+import 'package:meu_app/src/features/financial/domain/usecases/mark_payment_received.dart';
+import 'package:meu_app/src/features/financial/domain/usecases/request_payment_repass.dart';
+import 'package:meu_app/src/features/financial/presentation/bloc/financial_bloc.dart';
 import 'package:meu_app/src/features/search/data/repositories/search_repository_impl.dart';
 import 'package:meu_app/src/features/search/domain/repositories/search_repository.dart';
 import 'package:meu_app/src/features/search/domain/usecases/perform_search.dart';
@@ -184,6 +212,8 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(getIt()));
   getIt.registerLazySingleton<SimpleApiService>(() => SimpleApiService(getIt()));
   getIt.registerLazySingleton<StorageService>(() => StorageService());
+  getIt.registerLazySingleton<CalendarService>(() => CalendarService());
+  getIt.registerLazySingleton<SocialAuthService>(() => SocialAuthService());
 
   // Auth
   // Datasources
@@ -249,6 +279,9 @@ Future<void> configureDependencies() async {
       getContextualActions: getIt(),
       updateCaseAllocation: getIt(),
       ));
+
+  // Blocs
+  getIt.registerFactory(() => CalendarBloc());
 
   // Documents
   // Datasources
@@ -566,6 +599,70 @@ Future<void> configureDependencies() async {
 
   // OCR Service
   getIt.registerLazySingleton<OCRService>(() => OCRService());
+
+  // Profile
+  // Data Sources
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(),
+  );
+  getIt.registerLazySingleton<ProfileLocalDataSource>(
+    () => ProfileLocalDataSourceImpl(),
+  );
+
+  // Repositories
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      remoteDataSource: getIt(),
+      localDataSource: getIt(),
+    ),
+  );
+
+  // BLoC
+  getIt.registerFactory(
+    () => ProfileBloc(
+      profileRepository: getIt(),
+      socialAuthService: getIt(),
+    ),
+  );
+
+  // Contracts
+  // Data Sources
+  getIt.registerLazySingleton<ContractsRemoteDataSource>(
+    () => ContractsRemoteDataSourceImpl(),
+  );
+
+  // Repositories
+  getIt.registerLazySingleton<ContractsRepository>(
+    () => ContractsRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // BLoC
+  getIt.registerFactory(() => ContractsBloc(repository: getIt()));
+
+  // Financial
+  // Data Sources
+  getIt.registerLazySingleton<FinancialRemoteDataSource>(
+    () => FinancialRemoteDataSourceImpl(),
+  );
+
+  // Repositories
+  getIt.registerLazySingleton<FinancialRepository>(
+    () => FinancialRepositoryImpl(remoteDataSource: getIt()),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => GetFinancialData(getIt()));
+  getIt.registerLazySingleton(() => ExportFinancialData(getIt()));
+  getIt.registerLazySingleton(() => MarkPaymentReceived(getIt()));
+  getIt.registerLazySingleton(() => RequestPaymentRepass(getIt()));
+
+  // BLoC
+  getIt.registerFactory(() => FinancialBloc(
+    getFinancialData: getIt(),
+    exportFinancialData: getIt(),
+    markPaymentReceived: getIt(),
+    requestPaymentRepass: getIt(),
+  ));
 
   // Admin System
   // TODO: Implement AdminRepository when data layer is created

@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from ..config import get_settings
-from ..metrics import (
+from config import get_settings
+from metrics import (
     ab_test_conversions_total,
     ab_test_exposure_total,
     ab_test_performance_gauge,

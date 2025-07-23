@@ -37,12 +37,29 @@ from routes.weights import router as weights_router
 from routes.ab_testing import router as ab_testing_router
 from routes.reports import router as reports_router
 from routes.unipile import router as unipile_router
+from routes.unipile_v2 import router as unipile_v2_router
 from routes.providers import router as providers_router
 from routes.users import router as users_router
 from routes.auto_context import router as auto_context_router
 from middleware.auto_context_middleware import AutoContextMiddleware
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
+from packages.backend.routes import (
+    users,
+    cases,
+    documents,
+    triage,
+    matching,
+    financial,
+    admin,
+    analytics,
+    calendar,
+    social,
+    instagram,
+    facebook,
+    outlook
+)
+from routes.lawyer_routes import router as lawyer_routes
 
 # Carrega as variáveis de ambiente do arquivo .env
 # find_dotenv() sobe a árvore de diretórios para encontrar o .env
@@ -149,9 +166,17 @@ app.include_router(triage_router, prefix="/api/v2", tags=["Intelligent Triage"])
 app.include_router(ab_testing_router, prefix="/api/v2.2", tags=["AB Testing"])
 app.include_router(reports_router, prefix="/api/v2.2", tags=["Reports"])
 app.include_router(unipile_router, prefix="/api/v2.2", tags=["Unipile"])
+app.include_router(unipile_v2_router, tags=["Unipile-v2"])
 app.include_router(providers_router, prefix="/api", tags=["Providers"])
 app.include_router(users_router, prefix="/api", tags=["Users"])
 app.include_router(auto_context_router, prefix="/api", tags=["Auto Context"])
+app.include_router(instagram.router)
+app.include_router(facebook.router)
+app.include_router(outlook.router)
+app.include_router(social.router)
+
+# Rotas de Advogados
+app.include_router(lawyer_routes.router, prefix="/api/v1/lawyers", tags=["lawyers"])
 
 # CORREÇÃO: Rate limiter aplicado individualmente nas rotas em routes.py
 # Removido limiter.limit("60/minute")(api_router) que causava erro nos testes
@@ -166,7 +191,7 @@ async def read_root():
 @app.get("/cache/stats", tags=["Monitoring"])
 async def get_cache_stats():
     """Retorna estatísticas do cache Redis."""
-    from .services.cache_service_simple import simple_cache_service
+    from services.cache_service_simple import simple_cache_service
     stats = await simple_cache_service.get_cache_stats()
     return stats
 

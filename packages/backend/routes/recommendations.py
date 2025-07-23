@@ -7,8 +7,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..auth import get_current_user
-from ..models import (  # Reutilizar os modelos existentes
+from auth import get_current_user
+from models import (  # Reutilizar os modelos existentes
     MatchRequest,
     MatchResponse,
     MatchResult,

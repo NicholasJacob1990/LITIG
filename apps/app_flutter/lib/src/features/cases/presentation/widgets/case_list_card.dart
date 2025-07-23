@@ -38,7 +38,7 @@ class CaseListCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => context.go('/cases/$caseId'),
+        onTap: () => context.go('/case-detail/$caseId'),
         borderRadius: BorderRadius.circular(12),
       child: Padding(
           padding: const EdgeInsets.all(16.0),

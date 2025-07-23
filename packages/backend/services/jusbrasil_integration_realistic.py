@@ -22,7 +22,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from ..algoritmo_match import KPI, Case, Lawyer, MatchmakingAlgorithm
+from algoritmo_match import KPI, Case, Lawyer, MatchmakingAlgorithm
 
 logger = logging.getLogger(__name__)
 

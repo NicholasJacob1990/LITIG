@@ -1,12 +1,7 @@
 import 'package:meu_app/src/features/cases/domain/entities/case_detail.dart' as detail;
 import 'package:meu_app/src/features/cases/domain/entities/contextual_case_data.dart';
 import 'package:meu_app/src/features/cases/domain/entities/allocation_type.dart';
-import 'package:meu_app/src/features/cases/domain/entities/case_detail_models.dart' as models;
-import 'package:meu_app/src/features/cases/domain/entities/case_document.dart' as doc;
 import 'package:meu_app/src/features/cases/domain/entities/process_status.dart' as status;
-import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_case_data_usecase.dart';
-import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_kpis.dart';
-import 'package:meu_app/src/features/cases/domain/usecases/get_contextual_actions.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 
 /// Helper methods for ContextualCaseBloc
@@ -50,14 +45,12 @@ mixin ContextualCaseBlocHelpers {
       ),
       nextSteps: const [],
       documents: const [],
-      // TODO: Fix ProcessStatus - temporarily commented
-      // processStatus: detail.ProcessStatus(
-      //   currentPhase: 'inicial',
-      //   description: 'Caso em análise inicial',
-      //   progressPercentage: 10.0,
-      //   lastUpdate: DateTime.now(),
-      //   phases: const [],
-      // ),
+      processStatus: const status.ProcessStatus(
+        currentPhase: 'inicial',
+        description: 'Caso em fase inicial',
+        progressPercentage: 10.0,
+        phases: [],
+      ),
     );
   }
 

@@ -13,7 +13,7 @@ from supabase import Client
 import uuid
 import os
 
-from ..api.schemas import (
+from api.schemas import (
     PartnershipResponseSchema,
     PartnershipStatsSchema,
     PartnershipStatus,

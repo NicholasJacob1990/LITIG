@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
@@ -170,9 +171,9 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: AppColors.lightCard,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: AppColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -187,7 +188,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                   Text(
                     'Opcional: Enriqueça seu perfil profissional com dados sociais',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -290,8 +291,8 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF0077B5), // LinkedIn Blue
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.info,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.info),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthLinkedInRegisterRequested());
@@ -305,8 +306,8 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFFE4405F), // Instagram Pink
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.error,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.error),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthInstagramRegisterRequested());
@@ -320,8 +321,8 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF1877F2), // Facebook Blue
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.primaryBlue,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.primaryBlue),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthFacebookRegisterRequested());
@@ -336,7 +337,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
             Text(
               'Após conectar, você ainda precisará preencher todos os dados profissionais obrigatórios.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
                 fontSize: 11,
               ),
               textAlign: TextAlign.center,
@@ -435,15 +436,15 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+            border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(8),
-            color: Colors.blue.withValues(alpha: 0.05),
+            color: AppColors.infoLight,
           ),
           child: CheckboxListTile(
             title: const Text('Sou associado do escritório titular LITGO'),
             subtitle: Text(
               'Super-Associados captam casos diretamente da plataforma e precisam assinar um contrato de associação específico.',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             value: _isPlatformAssociate,
             onChanged: (value) {
@@ -452,7 +453,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
               });
             },
             controlAffinity: ListTileControlAffinity.leading,
-            activeColor: Colors.blue,
+            activeColor: AppColors.info,
           ),
         ),
       ],

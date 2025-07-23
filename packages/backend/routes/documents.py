@@ -20,8 +20,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from supabase import create_client, Client
 
-from ..auth import get_current_user
-from ..services.ocr_validation_service import OCRValidationService
+from auth import get_current_user
+from services.ocr_validation_service import OCRValidationService
 
 # Configuração Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")

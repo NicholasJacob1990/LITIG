@@ -8,9 +8,9 @@
 // // from datetime import datetime, timedelta
 // // import logging
 // // 
-// // from ..auth import get_current_user
-// // from ..dependencies import get_supabase_client
-// // from ..models import User
+// // from auth import get_current_user
+// // from dependencies import get_supabase_client
+// // from models import User
 // // 
 // // logger = logging.getLogger(__name__)
 // // router = APIRouter(prefix="/api/firms", tags=["firm-sla-settings"])
@@ -496,9 +496,9 @@
 // // from datetime import datetime, timedelta
 // // import logging
 // // 
-// // from ..auth import get_current_user
-// // from ..dependencies import get_supabase_client
-// // from ..models import User
+// // from auth import get_current_user
+// // from dependencies import get_supabase_client
+// // from models import User
 // // 
 // // logger = logging.getLogger(__name__)
 // // router = APIRouter(prefix="/api/firms", tags=["firm-sla-settings"])

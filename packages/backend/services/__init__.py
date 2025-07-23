@@ -35,9 +35,11 @@ else:
     print("AVISO: Variáveis SUPABASE_URL e SUPABASE_SERVICE_KEY não configuradas. Rodando em modo de desenvolvimento.")
 
 # Importar serviço de explicação IA
-from .explanation_service import (  # noqa: E402
-    generate_explanations_for_matches as explanation_service,
-)
+try:
+    from explanation_service import ExplanationService  # noqa: E402
+    explanation_service = ExplanationService()
+except ImportError:
+    explanation_service = None
 
 
 async def generate_explanations_for_matches(

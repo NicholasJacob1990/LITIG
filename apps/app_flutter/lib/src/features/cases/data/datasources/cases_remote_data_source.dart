@@ -94,6 +94,8 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
         createdAt: DateTime.now().subtract(const Duration(days: 15)),
         lawyerName: 'Dr. João Silva',
         lawyerId: 'mock-lawyer-1',
+        caseType: 'litigation',
+        allocationType: 'direct',
         lawyer: const LawyerInfo(
           avatarUrl: 'https://ui-avatars.com/api/?name=Joao+Silva&background=3B82F6&color=fff',
           name: 'Dr. João Silva',
@@ -110,6 +112,8 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
         createdAt: DateTime.now().subtract(const Duration(days: 8)),
         lawyerName: 'Dra. Maria Santos',
         lawyerId: 'mock-lawyer-2',
+        caseType: 'consultancy',
+        allocationType: 'direct',
         lawyer: const LawyerInfo(
           avatarUrl: 'https://ui-avatars.com/api/?name=Maria+Santos&background=10B981&color=fff',
           name: 'Dra. Maria Santos',

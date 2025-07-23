@@ -7,8 +7,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from ..auth import get_current_user
-from ..services.process_event_service import ProcessEventService
+from auth import get_current_user
+from services.process_event_service import ProcessEventService
 
 router = APIRouter(prefix="/process-events", tags=["process-events"])
 

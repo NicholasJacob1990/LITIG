@@ -24,9 +24,9 @@ from typing import Dict, List, Optional, Any, Tuple, Union
 import json
 import hashlib
 
-from .escavador_integration import EscavadorClient
-# from .jusbrasil_integration_realistic import JusbrasilRealisticService
-from .hybrid_legal_data_service import HybridLegalDataService
+from escavador_integration import EscavadorClient
+# from jusbrasil_integration_realistic import JusbrasilRealisticService
+from hybrid_legal_data_service import HybridLegalDataService
 
 logger = logging.getLogger(__name__)
 

@@ -13,9 +13,9 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from pydantic import BaseModel, Field
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
-from ..services.provider_insights_service import ProviderInsightsService
+from auth import get_current_user
+from config import get_supabase_client
+from services.provider_insights_service import ProviderInsightsService
 
 logger = logging.getLogger(__name__)
 

@@ -14,7 +14,7 @@ from fastapi.security import HTTPBearer
 from supabase import Client
 import uuid
 
-from ..api.schemas import (
+from api.schemas import (
     PartnershipCreateSchema,
     PartnershipResponseSchema,
     PartnershipListResponseSchema,
@@ -25,9 +25,9 @@ from ..api.schemas import (
     MatchedLawyerSchema,
     ErrorResponseSchema
 )
-from ..services.partnership_service import PartnershipService
-from ..services.contract_service import ContractService
-from ..services.match_service import MatchService
+from services.partnership_service import PartnershipService
+from services.contract_service import ContractService
+from services.match_service import MatchService
 
 router = APIRouter(prefix="/partnerships", tags=["Parcerias"])
 security = HTTPBearer()

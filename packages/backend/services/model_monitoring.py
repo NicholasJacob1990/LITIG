@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from ..config import get_settings
-from ..metrics import (
+from config import get_settings
+from metrics import (
     data_drift_gauge,
     model_performance_gauge,
     prediction_latency_histogram,

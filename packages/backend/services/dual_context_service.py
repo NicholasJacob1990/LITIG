@@ -8,8 +8,8 @@ from datetime import datetime
 from uuid import uuid4
 import logging
 
-from ..config import get_supabase_client
-from ..services.case_allocation_service import create_case_allocation_service
+from config import get_supabase_client
+from services.case_allocation_service import create_case_allocation_service
 
 logger = logging.getLogger(__name__)
 

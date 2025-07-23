@@ -13,10 +13,12 @@ import 'package:meu_app/src/core/theme/theme_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:meu_app/src/core/utils/logger.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meu_app/src/core/services/notification_service.dart';
 import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
+import 'package:meu_app/src/shared/utils/development_helper.dart';
+import 'package:meu_app/src/features/profile/presentation/bloc/profile_bloc.dart';
 
 String get _supabaseUrl {
   if (kIsWeb) {
@@ -31,11 +33,17 @@ String get _supabaseUrl {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Firebase initialization - temporarily disabled
-  // await Firebase.initializeApp();
-  
-  // Configure Firebase Messaging for background messages
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Firebase initialization
+  try {
+    await Firebase.initializeApp();
+    AppLogger.success('Firebase inicializado com sucesso');
+    
+    // Configure Firebase Messaging for background messages
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    AppLogger.error('Erro ao inicializar Firebase', error: e);
+    AppLogger.warning('Continuando sem Firebase - notificações podem não funcionar');
+  }
   
   // Setup dependency injection
   await setupInjection();
@@ -43,20 +51,41 @@ Future<void> main() async {
   // Initialize notification service
   await _initializeNotificationService();
   
+  // Initialize development helpers (including mock server)
+  if (kDebugMode) {
+    await DevelopmentHelper.initializeForDevelopment();
+  }
+  
   runApp(const MyApp());
 }
 
 /// Handler para mensagens Firebase em background
-// @pragma('vm:entry-point')
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   await Firebase.initializeApp();
-//   debugPrint('Handling a background message: ${message.messageId}');
-//   
-//   // Processar dados da notificação se necessário
-//   if (message.data.isNotEmpty) {
-//     debugPrint('Message data: ${message.data}');
-//   }
-// }
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  
+  AppLogger.info('Handling background message: ${message.messageId}');
+  
+  try {
+    // Inicializar serviço de notificações locais
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    
+    // Processar dados da notificação
+    if (message.data.isNotEmpty) {
+      AppLogger.info('Message data: ${message.data}');
+      
+      // Mostrar notificação local
+      await notificationService.showLocalNotification(
+        title: message.notification?.title ?? 'Nova notificação',
+        body: message.notification?.body ?? 'Você tem uma nova mensagem',
+        data: message.data,
+      );
+    }
+  } catch (e) {
+    AppLogger.error('Erro ao processar mensagem em background', error: e);
+  }
+}
 
 /// Inicializa o serviço de notificações
 Future<void> _initializeNotificationService() async {
@@ -122,6 +151,7 @@ class _MyAppState extends State<MyApp> {
   late final AuthBloc _authBloc;
   late final ThemeCubit _themeCubit;
   late final NotificationBloc _notificationBloc;
+  late final ProfileBloc _profileBloc;
 
   @override
   void initState() {
@@ -129,6 +159,7 @@ class _MyAppState extends State<MyApp> {
     _authBloc = getIt<AuthBloc>();
     _themeCubit = ThemeCubit();
     _notificationBloc = getIt<NotificationBloc>();
+    _profileBloc = getIt<ProfileBloc>();
     
     // Inicializar busca de notificações para usuários logados
     _authBloc.stream.listen((authState) {
@@ -145,6 +176,7 @@ class _MyAppState extends State<MyApp> {
     _authBloc.close();
     _themeCubit.close();
     _notificationBloc.close();
+    _profileBloc.close();
     super.dispose();
   }
 
@@ -155,6 +187,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider<ThemeCubit>.value(value: _themeCubit),
         BlocProvider<NotificationBloc>.value(value: _notificationBloc),
+        BlocProvider<ProfileBloc>.value(value: _profileBloc),
         // Outros BLoCs existentes...
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

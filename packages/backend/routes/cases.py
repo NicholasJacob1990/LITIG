@@ -9,10 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from ..auth import get_current_user
-from ..config import get_supabase_client
-from ..services.case_service import create_case_service
-from ..services.explainability import (
+from auth import get_current_user
+from config import get_supabase_client
+from services.case_service import create_case_service
+from services.explainability import (
     PublicExplanation, 
     generate_public_explanation,
     log_explanation_access

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
+import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
@@ -91,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Icon(
           LucideIcons.shieldCheck,
           size: 64,
-          color: Theme.of(context).colorScheme.primary,
+          color: AppColors.primaryBlue,
         ),
         const SizedBox(height: 16),
         Text(
@@ -99,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: GoogleFonts.inter(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -153,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         child: Text(
           'Esqueceu a senha?',
-          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+          style: const TextStyle(color: AppColors.primaryBlue),
         ),
       ),
     );
@@ -175,8 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.onPrimary,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
                     ),
                   ),
                 )
@@ -194,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'ou',
-            style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
         ),
         const Expanded(child: Divider()),
@@ -239,8 +240,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF0077B5), // LinkedIn Blue
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF0077B5)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.info,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.info),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
@@ -254,8 +255,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFFE4405F), // Instagram Pink
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFFE4405F)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.error,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.error),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthInstagramSignInRequested());
@@ -269,8 +270,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : const Color(0xFF1877F2), // Facebook Blue
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : const Color(0xFF1877F2)),
+                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.primaryBlue,
+                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.primaryBlue),
                     ),
                     onPressed: isLoading ? null : () {
                       context.read<AuthBloc>().add(AuthFacebookSignInRequested());
@@ -298,11 +299,11 @@ class _LoginScreenState extends State<LoginScreen> {
             const Text('Não tem uma conta?'),
             TextButton(
               onPressed: () => context.go('/register-client'),
-              child: Text(
+              child: const Text(
                 'Cadastre-se como Cliente',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppColors.primaryBlue,
                 ),
               ),
             ),
@@ -316,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 24),
 
         // Cadastro de Advogado
-        Text('É advogado(a)? Cadastre-se como:', style: Theme.of(context).textTheme.titleMedium),
+        Text('É advogado(a)? Cadastre-se como:', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 16),
         Wrap(
           spacing: 12.0,
@@ -348,21 +349,21 @@ class _LoginScreenState extends State<LoginScreen> {
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.orange.withValues(alpha: 0.1),
+            color: AppColors.warningLight,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+            border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Icon(Icons.bug_report, color: Colors.orange[700], size: 20),
+                  Icon(Icons.bug_report, color: AppColors.warning, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     'Modo Debug - Teste de Usuários',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.orange[700],
+                      color: AppColors.warning,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -372,7 +373,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Clique em um botão abaixo para testar como diferentes tipos de usuário:',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.orange[600],
+                  color: AppColors.warning,
                 ),
               ),
               const SizedBox(height: 12),
@@ -380,11 +381,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildDebugButton(context, 'Cliente', 'PF', Colors.blue),
-                  _buildDebugButton(context, 'Advogado Associado', 'lawyer_associated', Colors.green),
-                  _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', Colors.purple),
-                  _buildDebugButton(context, 'Escritório', 'lawyer_office', Colors.red),
-                  _buildDebugButton(context, 'Super Associado', 'lawyer_platform_associate', Colors.orange),
+                  _buildDebugButton(context, 'Cliente', 'PF', AppColors.info),
+                  _buildDebugButton(context, 'Advogado Associado', 'lawyer_associated', AppColors.success),
+                  _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', AppColors.primaryPurple),
+                  _buildDebugButton(context, 'Escritório', 'lawyer_office', AppColors.error),
+                  _buildDebugButton(context, 'Super Associado', 'lawyer_platform_associate', AppColors.warning),
                 ],
               ),
             ],
@@ -409,7 +410,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _switchToDebugUser(BuildContext context, String userRole) {
     final debugUsers = {
-      'PF': User(
+      'PF': const User(
         id: 'debug-client-1',
         email: 'cliente@teste.com',
         fullName: 'João Silva (Cliente)',
@@ -417,7 +418,7 @@ class _LoginScreenState extends State<LoginScreen> {
         userRole: 'PF',
         permissions: ['nav.view.client_home', 'nav.view.client_cases', 'nav.view.find_lawyers', 'nav.view.client_messages', 'nav.view.services', 'nav.view.client_profile'],
       ),
-      'lawyer_associated': User(
+      'lawyer_associated': const User(
         id: 'debug-lawyer-1',
         email: 'advogado@teste.com',
         fullName: 'Maria Santos (Advogada Associada)',
@@ -425,7 +426,7 @@ class _LoginScreenState extends State<LoginScreen> {
         userRole: 'lawyer_associated',
         permissions: ['nav.view.dashboard', 'nav.view.cases', 'nav.view.schedule', 'nav.view.offers', 'nav.view.messages', 'nav.view.profile'],
       ),
-      'lawyer_individual': User(
+      'lawyer_individual': const User(
         id: 'debug-lawyer-2',
         email: 'autonomo@teste.com',
         fullName: 'Pedro Costa (Advogado Autônomo)',
@@ -433,7 +434,7 @@ class _LoginScreenState extends State<LoginScreen> {
         userRole: 'lawyer_individual',
         permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
       ),
-      'lawyer_office': User(
+      'lawyer_office': const User(
         id: 'debug-office-1',
         email: 'escritorio@teste.com',
         fullName: 'Escritório Silva & Associados',
@@ -441,7 +442,7 @@ class _LoginScreenState extends State<LoginScreen> {
         userRole: 'lawyer_office',
         permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
       ),
-      'lawyer_platform_associate': User(
+      'lawyer_platform_associate': const User(
         id: 'debug-super-1',
         email: 'super@teste.com',
         fullName: 'Ana Super (Super Associada)',
@@ -457,7 +458,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Modo debug: ${user.fullName}'),
-          backgroundColor: Colors.blue,
+          backgroundColor: AppColors.info,
           duration: const Duration(seconds: 2),
         ),
       );

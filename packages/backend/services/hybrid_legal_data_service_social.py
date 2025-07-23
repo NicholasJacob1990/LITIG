@@ -33,11 +33,8 @@ from backend.database import get_async_session
 from backend.models.lawyer import Lawyer
 from backend.models.law_firm import LawFirm
 
-# Import corrigido para evitar erros
-try:
-    from backend.services.unipile_sdk_wrapper_clean import UnipileSDKWrapper
-except ImportError:
-    from backend.services.unipile_sdk_wrapper import UnipileSDKWrapper
+# Import atualizado para usar UnipileAppService
+from backend.services.unipile_app_service import get_unipile_app_service
 
 
 class DataSource(Enum):
@@ -192,10 +189,10 @@ class HybridLegalDataServiceSocial:
         🆕 Busca dados do Unipile incluindo redes sociais.
         """
         try:
-            unipile_wrapper = UnipileSDKWrapper()
+            unipile_service = get_unipile_app_service()
             
             # Buscar dados de comunicação + sociais
-            data, transparency = await unipile_wrapper.get_communication_data(oab_number)
+            data, transparency = await unipile_service.get_communication_data(oab_number)
             
             if data:
                 # Enriquecer com análise social

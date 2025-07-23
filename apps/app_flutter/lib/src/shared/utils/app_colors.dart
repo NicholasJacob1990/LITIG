@@ -14,6 +14,7 @@ class AppColors {
   static const Color secondaryRed = Color(0xFFEF4444);
   static const Color secondaryYellow = Color(0xFFF59E0B);
   static const Color secondaryPurple = Color(0xFF8B5CF6);
+  static const Color primaryPurple = Color(0xFF8B5CF6); // Alias para secondaryPurple
   
   // Cores de acentos para gradientes
   static const Color accentPurpleStart = Color(0xFF8B5CF6);
@@ -38,6 +39,11 @@ class AppColors {
   static const Color border = lightBorder;
   static const Color background = lightBackground;
   
+  // Cores Material Design compatíveis
+  static const Color surface = lightCard;
+  static const Color outline = lightBorder;
+  static const Color onSurface = lightText;
+  
   // Cores de fundo - Dark Theme
   static const Color darkBackground = Color(0xFF0F172A);
   static const Color darkCard = Color(0xFF1E293B);
@@ -47,53 +53,47 @@ class AppColors {
   static const Color darkText = Color(0xFFF1F5F9);
   static const Color darkText2 = Color(0xFFCBD5E1);
   static const Color darkTextSecondary = Color(0xFF94A3B8);
-  
+
   // Cores de status
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
   static const Color info = Color(0xFF3B82F6);
-  
-  // Cores de status com opacidade
-  static const Color successLight = Color(0xFFD1FAE5);
-  static const Color warningLight = Color(0xFFFEF3C7);
-  static const Color errorLight = Color(0xFFFEE2E2);
-  static const Color infoLight = Color(0xFFDBEAFE);
-  
-  // Cores específicas para casos jurídicos
-  static const Color caseActive = Color(0xFF10B981);
-  static const Color casePending = Color(0xFFF59E0B);
-  static const Color caseClosed = Color(0xFF6B7280);
-  static const Color caseUrgent = Color(0xFFEF4444);
-  
-  // Gradientes
-  static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryBlue, primaryDark],
-  );
-  
-  static const LinearGradient successGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [secondaryGreen, Color(0xFF059669)],
-  );
-  
-  // Métodos utilitários
-  static Color withOpacity(Color color, double opacity) {
-    return color.withValues(alpha: opacity);
+
+  // Cores para elementos específicos
+  static const Color divider = Color(0xFFE2E8F0);
+  static const Color shadow = Color(0x1A000000);
+  static const Color overlay = Color(0x80000000);
+
+  // Cores específicas do app legal
+  static const Color lawyerBlue = Color(0xFF1E40AF);
+  static const Color clientGreen = Color(0xFF10B981);
+  static const Color urgent = Color(0xFFEF4444);
+  static const Color pending = Color(0xFFF59E0B);
+  static const Color completed = Color(0xFF10B981);
+
+  // Cores para providers sociais
+  static const Color linkedInBlue = Color(0xFF0077B5);
+  static const Color whatsAppGreen = Color(0xFF25D366);
+  static const Color instagramPurple = Color(0xFFE4405F);
+  static const Color gmailRed = Color(0xFFEA4335);
+  static const Color outlookBlue = Color(0xFF0078D4);
+
+  // Helper para obter cores baseadas no tema
+  static Color getTextColor(bool isDark) {
+    return isDark ? darkText : lightText;
   }
-  
-  static Color darken(Color color, [double amount = 0.1]) {
-    final hsl = HSLColor.fromColor(color);
-    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
-    return hslDark.toColor();
+
+  static Color getBackgroundColor(bool isDark) {
+    return isDark ? darkBackground : lightBackground;
   }
-  
-  static Color lighten(Color color, [double amount = 0.1]) {
-    final hsl = HSLColor.fromColor(color);
-    final hslLight = hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
-    return hslLight.toColor();
+
+  static Color getCardColor(bool isDark) {
+    return isDark ? darkCard : lightCard;
+  }
+
+  static Color getBorderColor(bool isDark) {
+    return isDark ? darkBorder : lightBorder;
   }
 }
 

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from supabase import create_client
 
-from ..config import settings
+from config import settings
 
 
 class ProcessEventService:

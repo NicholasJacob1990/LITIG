@@ -19,7 +19,11 @@ import 'package:meu_app/src/features/lawyers/presentation/screens/partners_scree
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/settings_screen.dart';
-import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart';
+import 'package:meu_app/src/features/profile/presentation/screens/personal_data_screen.dart';
+import 'package:meu_app/src/features/profile/presentation/screens/documents_screen.dart';
+import 'package:meu_app/src/features/profile/presentation/screens/communication_preferences_screen.dart';
+import 'package:meu_app/src/features/profile/presentation/screens/privacy_settings_screen.dart';
+import 'package:meu_app/src/features/profile/presentation/screens/social_connections_screen.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_bloc.dart';
 import 'package:meu_app/src/features/partnerships/presentation/screens/partnerships_screen.dart';
 import 'package:meu_app/src/features/offers/presentation/screens/offers_screen.dart';
@@ -31,7 +35,6 @@ import 'package:meu_app/src/features/cases/presentation/screens/case_documents_s
 import 'package:meu_app/src/features/sla_management/presentation/screens/sla_settings_screen.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
-import 'package:meu_app/src/features/lawyers/presentation/screens/hiring_proposals_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
@@ -45,6 +48,52 @@ import 'package:meu_app/src/features/admin/presentation/screens/admin_settings_s
 import 'package:meu_app/src/features/admin/presentation/bloc/admin_bloc.dart';
 import 'package:meu_app/src/features/admin/domain/services/admin_auth_service.dart';
 import 'package:meu_app/injection_container.dart';
+import 'package:meu_app/src/features/cases/presentation/pages/lawyer_cases_demo_page.dart';
+import 'package:meu_app/src/features/cases/presentation/pages/enhanced_lawyer_cases_demo_page.dart';
+import 'package:meu_app/src/features/messaging/presentation/screens/unified_messaging_screen.dart';
+import 'package:meu_app/src/features/messaging/presentation/screens/unified_chat_screen.dart';
+import 'package:meu_app/src/features/messaging/presentation/screens/connect_accounts_screen.dart';
+import 'package:meu_app/src/features/messaging/presentation/screens/internal_chat_screen.dart';
+import 'package:meu_app/src/features/contracts/presentation/screens/contracts_screen.dart';
+import 'package:meu_app/src/features/financial/presentation/screens/financial_dashboard_screen.dart';
+import 'package:meu_app/src/features/calendar/presentation/screens/unified_calendar_screen.dart';
+import 'package:meu_app/src/features/messaging/presentation/screens/unified_chats_screen.dart';
+
+// Definição da rota de perfil reutilizável com sub-rotas
+final profileGoRoute = GoRoute(
+  path: '/profile', // Usaremos um path base e o shell controlará o acesso
+  builder: (context, state) => const ProfileScreen(),
+  routes: [
+    GoRoute(
+      path: 'edit',
+      builder: (context, state) => const EditProfileScreen(),
+    ),
+    GoRoute(
+      path: 'settings',
+      builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: 'personal-data',
+      builder: (context, state) => const PersonalDataScreen(),
+    ),
+    GoRoute(
+      path: 'documents',
+      builder: (context, state) => const DocumentsScreen(),
+    ),
+    GoRoute(
+      path: 'communication-preferences',
+      builder: (context, state) => const CommunicationPreferencesScreen(),
+    ),
+    GoRoute(
+      path: 'privacy-settings',
+      builder: (context, state) => const PrivacySettingsScreen(),
+    ),
+    GoRoute(
+      path: 'social-connections',
+      builder: (context, state) => const SocialConnectionsScreen(),
+    ),
+  ],
+);
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -86,8 +135,12 @@ GoRouter appRouter(AuthBloc authBloc) {
       return null;
     },
     routes: [
-      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+              GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+        GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+        GoRoute(path: '/demo-lawyer-cases', builder: (context, state) => const LawyerCasesDemoPage()),
+        GoRoute(path: '/demo-enhanced-lawyer-cases', builder: (context, state) => const EnhancedLawyerCasesDemoPage()),
+        GoRoute(path: '/contracts', builder: (context, state) => const ContractsScreen()),
+        GoRoute(path: '/financial', builder: (context, state) => const FinancialDashboardScreen()),
       GoRoute(path: '/register-client', builder: (context, state) => const RegisterClientScreen()),
       GoRoute(
         path: '/register-lawyer',
@@ -119,9 +172,44 @@ GoRouter appRouter(AuthBloc authBloc) {
           // 3: Advogado Associado - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
           // 4: Advogado Associado - Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const ChatRoomsScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const UnifiedChatsScreen())]),
           // 5: Advogado Associado - Perfil
-          StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())]),
+          StatefulShellBranch(routes: [
+             GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'settings',
+                    builder: (context, state) => const SettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'edit',
+                    builder: (context, state) => const EditProfileScreen(),
+                  ),
+                  GoRoute(
+                    path: 'personal-data',
+                    builder: (context, state) => const PersonalDataScreen(),
+                  ),
+                  GoRoute(
+                    path: 'documents',
+                    builder: (context, state) => const DocumentsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'communication-preferences',
+                    builder: (context, state) => const CommunicationPreferencesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'privacy-settings',
+                    builder: (context, state) => const PrivacySettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'social-connections',
+                    builder: (context, state) => const SocialConnectionsScreen(),
+                  ),
+                ],
+            ),
+          ]),
           
           // === ADVOGADO CONTRATANTE (branches 6-12) ===
           // 6: Advogado Contratante - Dashboard
@@ -145,9 +233,44 @@ GoRouter appRouter(AuthBloc authBloc) {
             ],
           ),
           // 11: Advogado Contratante - Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const ChatRoomsScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const UnifiedChatsScreen())]),
           // 12: Advogado Contratante - Perfil
-          StatefulShellBranch(routes: [GoRoute(path: '/contractor-profile', builder: (context, state) => const ProfileScreen())]),
+           StatefulShellBranch(routes: [
+             GoRoute(
+                path: '/contractor-profile',
+                builder: (context, state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'settings',
+                    builder: (context, state) => const SettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'edit',
+                    builder: (context, state) => const EditProfileScreen(),
+                  ),
+                  GoRoute(
+                    path: 'personal-data',
+                    builder: (context, state) => const PersonalDataScreen(),
+                  ),
+                  GoRoute(
+                    path: 'documents',
+                    builder: (context, state) => const DocumentsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'communication-preferences',
+                    builder: (context, state) => const CommunicationPreferencesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'privacy-settings',
+                    builder: (context, state) => const PrivacySettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'social-connections',
+                    builder: (context, state) => const SocialConnectionsScreen(),
+                  ),
+                ],
+            ),
+          ]),
 
           // === CLIENTE (branches 13-18) ===
           // 13: Cliente - Início (Triagem com IA)
@@ -157,12 +280,88 @@ GoRouter appRouter(AuthBloc authBloc) {
           // 15: Cliente - Advogados (Busca de Advogados)
           StatefulShellBranch(routes: [GoRoute(path: '/find-lawyers', builder: (context, state) => const LawyersScreen())]),
           // 16: Cliente - Mensagens
-          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const ChatRoomsScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const UnifiedChatsScreen())]),
           // 17: Cliente - Serviços
           StatefulShellBranch(routes: [GoRoute(path: '/services', builder: (context, state) => const ServicesScreen())]),
           // 18: Cliente - Perfil
-          StatefulShellBranch(routes: [GoRoute(path: '/client-profile', builder: (context, state) => const ProfileScreen())]),
+           StatefulShellBranch(routes: [
+             GoRoute(
+                path: '/client-profile',
+                builder: (context, state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'settings',
+                    builder: (context, state) => const SettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'edit',
+                    builder: (context, state) => const EditProfileScreen(),
+                  ),
+                  GoRoute(
+                    path: 'personal-data',
+                    builder: (context, state) => const PersonalDataScreen(),
+                  ),
+                  GoRoute(
+                    path: 'documents',
+                    builder: (context, state) => const DocumentsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'communication-preferences',
+                    builder: (context, state) => const CommunicationPreferencesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'privacy-settings',
+                    builder: (context, state) => const PrivacySettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'social-connections',
+                    builder: (context, state) => const SocialConnectionsScreen(),
+                  ),
+                ],
+            ),
+          ]),
         ],
+      ),
+      
+      // Rotas de mensagens unificadas
+      GoRoute(
+        path: '/unified-messages',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const UnifiedChatsScreen(),
+      ),
+      GoRoute(
+        path: '/unified-chat',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          final chatId = extra['chatId'] as String;
+          final chatName = extra['chatName'] as String;
+          final provider = extra['provider'] as String;
+          
+          return UnifiedChatScreen(
+            chatId: chatId,
+            chatName: chatName,
+            provider: provider,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/connect-accounts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ConnectAccountsScreen(),
+      ),
+      GoRoute(
+        path: '/internal-chat/:recipientId',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final recipientId = state.pathParameters['recipientId']!;
+          final recipientName = state.uri.queryParameters['recipientName'];
+          
+          return InternalChatScreen(
+            recipientId: recipientId,
+            recipientName: recipientName,
+          );
+        },
       ),
       
       // Rotas fora da shell
@@ -186,6 +385,43 @@ GoRouter appRouter(AuthBloc authBloc) {
         builder: (context, state) => FirmDetailScreen(firmId: state.pathParameters['firmId']!),
       ),
       
+      // Rotas de Perfil (aninhadas) - Esta é a rota PAI que contém as sub-rotas
+      GoRoute(
+        path: '/profile-details', // Renomeado para evitar conflito com shell routes
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProfileScreen(), // Rota pai
+        routes: [
+          GoRoute(
+            path: 'edit',
+            builder: (context, state) => const EditProfileScreen(),
+          ),
+          GoRoute(
+            path: 'settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: 'personal-data',
+            builder: (context, state) => const PersonalDataScreen(),
+          ),
+          GoRoute(
+            path: 'documents',
+            builder: (context, state) => const DocumentsScreen(),
+          ),
+          GoRoute(
+            path: 'communication-preferences',
+            builder: (context, state) => const CommunicationPreferencesScreen(),
+          ),
+          GoRoute(
+            path: 'privacy-settings',
+            builder: (context, state) => const PrivacySettingsScreen(),
+          ),
+          GoRoute(
+            path: 'social-connections',
+            builder: (context, state) => const SocialConnectionsScreen(),
+          ),
+        ],
+      ),
+      
       // ✅ NOVO: Rota crítica "Ver Equipe Completa"
       GoRoute(
         path: '/firm/:firmId/lawyers',
@@ -200,16 +436,7 @@ GoRouter appRouter(AuthBloc authBloc) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ChatTriageScreen(),
       ),
-      GoRoute(
-        path: '/profile/edit',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const EditProfileScreen(),
-      ),
-      GoRoute(
-        path: '/profile/settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SettingsScreen(),
-      ),
+
       GoRoute(
         path: '/sla-settings',
         parentNavigatorKey: _rootNavigatorKey,
@@ -372,6 +599,43 @@ GoRouter appRouter(AuthBloc authBloc) {
             child: const AdminSettingsScreen(),
           );
         },
+      ),
+      
+      // Rotas de perfil independentes (fallback)
+      GoRoute(
+        path: '/profile-details',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProfileScreen(),
+        routes: [
+          GoRoute(
+            path: 'settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: 'edit',
+            builder: (context, state) => const EditProfileScreen(),
+          ),
+          GoRoute(
+            path: 'personal-data',
+            builder: (context, state) => const PersonalDataScreen(),
+          ),
+          GoRoute(
+            path: 'documents',
+            builder: (context, state) => const DocumentsScreen(),
+          ),
+          GoRoute(
+            path: 'communication-preferences',
+            builder: (context, state) => const CommunicationPreferencesScreen(),
+          ),
+          GoRoute(
+            path: 'privacy-settings',
+            builder: (context, state) => const PrivacySettingsScreen(),
+          ),
+          GoRoute(
+            path: 'social-connections',
+            builder: (context, state) => const SocialConnectionsScreen(),
+          ),
+        ],
       ),
     ],
   );

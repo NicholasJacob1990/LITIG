@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import List, Optional
 
-from ..config import get_supabase_client
+from config import get_supabase_client
 from supabase.client import Client
 from fastapi import Depends
 
