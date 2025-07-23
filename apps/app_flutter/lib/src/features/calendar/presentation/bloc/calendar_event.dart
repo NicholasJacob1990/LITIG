@@ -1,41 +1,78 @@
-part of 'calendar_bloc.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class CalendarBlocEvent extends Equatable {
-  const CalendarBlocEvent();
-
-  @override
-  List<Object> get props => [];
-}
-
-/// Evento para carregar os eventos do calendário para um determinado período.
-class LoadCalendarEvents extends CalendarBlocEvent {
-  final DateTime startDate;
-  final DateTime endDate;
-
-  const LoadCalendarEvents({required this.startDate, required this.endDate});
+abstract class CalendarEvent extends Equatable {
+  const CalendarEvent();
 
   @override
-  List<Object> get props => [startDate, endDate];
+  List<Object?> get props => [];
 }
 
-/// Evento para criar um novo evento no calendário.
-class CreateCalendarEvent extends CalendarBlocEvent {
+class LoadCalendarEvents extends CalendarEvent {
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final bool refresh;
+  
+  const LoadCalendarEvents({
+    this.startDate,
+    this.endDate,
+    this.refresh = false,
+  });
+  
+  @override
+  List<Object?> get props => [startDate, endDate, refresh];
+}
+
+class CreateCalendarEvent extends CalendarEvent {
   final String title;
+  final String description;
   final DateTime startTime;
   final DateTime endTime;
-  final String? description;
   final String? location;
-  final List<Map<String, String>>? participants;
-
+  final String? accountId;
+  
   const CreateCalendarEvent({
     required this.title,
+    required this.description,
     required this.startTime,
     required this.endTime,
-    this.description,
     this.location,
-    this.participants,
+    this.accountId,
   });
-
+  
   @override
-  List<Object> get props => [title, startTime, endTime];
+  List<Object?> get props => [title, description, startTime, endTime, location, accountId];
+}
+
+class UpdateCalendarEvent extends CalendarEvent {
+  final String eventId;
+  final String title;
+  final String description;
+  final DateTime startTime;
+  final DateTime endTime;
+  final String? location;
+  
+  const UpdateCalendarEvent({
+    required this.eventId,
+    required this.title,
+    required this.description,
+    required this.startTime,
+    required this.endTime,
+    this.location,
+  });
+  
+  @override
+  List<Object?> get props => [eventId, title, description, startTime, endTime, location];
+}
+
+class DeleteCalendarEvent extends CalendarEvent {
+  final String eventId;
+  
+  const DeleteCalendarEvent({required this.eventId});
+  
+  @override
+  List<Object?> get props => [eventId];
+}
+
+class SyncCalendars extends CalendarEvent {
+  const SyncCalendars();
 } 
