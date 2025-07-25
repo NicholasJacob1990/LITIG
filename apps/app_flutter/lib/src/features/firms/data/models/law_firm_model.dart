@@ -23,6 +23,8 @@ class LawFirmModel {
     this.specializations = const [],
     this.rating = 0.0,
     this.isBoutique = false,
+    this.plan = 'FREE', // NOVO: Padrão FREE
+    this.partnerTier = 'STANDARD', // NOVO: Padrão STANDARD
   });
 
   /// Identificador único do escritório
@@ -61,6 +63,12 @@ class LawFirmModel {
   /// Indica se é um escritório boutique (especializado)
   final bool isBoutique;
 
+  /// Plano do escritório (FREE, PRO, PARTNER)
+  final String plan;
+
+  /// Tier de parceria (STANDARD, SILVER, GOLD, PLATINUM)
+  final String partnerTier;
+
   /// Cria uma instância a partir de um Map JSON
   factory LawFirmModel.fromJson(Map<String, dynamic> json) => _$LawFirmModelFromJson(json);
 
@@ -82,6 +90,8 @@ class LawFirmModel {
       specializations: specializations,
       rating: rating,
       isBoutique: isBoutique,
+      plan: plan, // NOVO
+      partnerTier: partnerTier, // NOVO
     );
   }
 

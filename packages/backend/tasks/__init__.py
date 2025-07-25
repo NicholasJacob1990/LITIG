@@ -2,7 +2,7 @@
 Módulo de tarefas Celery para processamento assíncrono.
 """
 
-from triage_tasks import (
+from .triage_tasks import (
     analyze_documents_async,
     batch_process_cases,
     generate_embeddings_async,

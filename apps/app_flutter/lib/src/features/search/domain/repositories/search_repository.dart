@@ -4,5 +4,7 @@ import 'package:meu_app/src/features/search/domain/entities/search_params.dart';
 
 abstract class SearchRepository {
   Future<Either<Failure, List<dynamic>>> performSearch(SearchParams params);
+  Future<Either<Failure, List<dynamic>>> performSemanticFirmSearch(SearchParams params);
 } 
+ 
  

@@ -91,39 +91,3 @@ class GetSlaComplianceReportParams {
     };
   }
 }
-      ));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro ao gerar relatório de compliance: ${e.toString()}'));
-    }
-  }
-}
-
-/// Parâmetros para obter relatório de compliance SLA
-class GetSlaComplianceReportParams {
-  final String firmId;
-  final DateTime startDate;
-  final DateTime endDate;
-  final bool includeDetails;
-  final String? groupBy; // 'case_type', 'priority', 'lawyer', 'month'
-  final Map<String, dynamic>? filters;
-
-  GetSlaComplianceReportParams({
-    required this.firmId,
-    required this.startDate,
-    required this.endDate,
-    this.includeDetails = false,
-    this.groupBy,
-    this.filters,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'firmId': firmId,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
-      'includeDetails': includeDetails,
-      if (groupBy != null) 'groupBy': groupBy,
-      if (filters != null) 'filters': filters,
-    };
-  }
-}

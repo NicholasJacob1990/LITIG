@@ -25,7 +25,7 @@ from unified_python_sdk.models import errors
 
 # Integração com sistema híbrido
 try:
-    from backend.services.hybrid_legal_data_service import DataSource, DataTransparency
+    from services.hybrid_legal_data_service import DataSource, DataTransparency
 except ImportError:
     from enum import Enum
     

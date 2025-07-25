@@ -64,10 +64,10 @@ class PaymentStatusCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _getStatusColor(payment.status).withOpacity(0.1),
+        color: _getStatusColor(payment.status).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getStatusColor(payment.status).withOpacity(0.3),
+          color: _getStatusColor(payment.status).withValues(alpha: 0.3),
         ),
       ),
       child: Row(

@@ -35,7 +35,7 @@ class ContractService:
         """Gera contrato para parceria jurídica"""
         
         # Dados para o template
-            contract_data = {
+        contract_data = {
             'partnership_id': partnership.id,
             'creator_name': partnership.creator_name or "Advogado Contratante",
             'partner_name': partnership.partner_name or "Advogado Contratado",

@@ -999,7 +999,7 @@ class _EnhancedInternalChatScreenState extends State<EnhancedInternalChatScreen>
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: (message.isMe ? Colors.white : AppColors.primaryBlue).withOpacity(0.1),
+            color: (message.isMe ? Colors.white : AppColors.primaryBlue).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -1029,7 +1029,7 @@ class _EnhancedInternalChatScreenState extends State<EnhancedInternalChatScreen>
         return Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

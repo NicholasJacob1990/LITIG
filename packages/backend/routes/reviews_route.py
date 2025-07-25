@@ -8,7 +8,13 @@ Rotas da API para criar e gerenciar avaliações (reviews).
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from .. import supabase
+import os
+from supabase import create_client, Client
+
+# Setup Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://test.supabase.co")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "test-service-key")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 from services.review_service import ReviewService
 from auth import get_current_user
 from api.schemas import ReviewCreate, ReviewResponse

@@ -479,7 +479,7 @@ class ThirdPartySharingSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: SwitchListTile(
@@ -588,7 +588,7 @@ class DataRightOption extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(
-              color: isDestructive ? Colors.red.withOpacity(0.3) : Colors.grey[300]!,
+              color: isDestructive ? Colors.red.withValues(alpha: 0.3) : Colors.grey[300]!,
             ),
             borderRadius: BorderRadius.circular(8),
           ),

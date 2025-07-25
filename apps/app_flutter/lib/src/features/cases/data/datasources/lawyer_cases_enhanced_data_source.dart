@@ -1,7 +1,6 @@
 import 'dart:core';
 import '../../domain/entities/client_info.dart';
 import '../../domain/entities/lawyer_metrics.dart';
-import '../../domain/entities/allocation_type.dart';
 import '../../../../core/utils/logger.dart';
 
 /// Classe para agrupar todos os dados de um caso melhorado

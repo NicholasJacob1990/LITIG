@@ -1,19 +1,21 @@
+import 'package:dio/dio.dart';
 import 'package:meu_app/src/core/error/exceptions.dart';
-import 'package:meu_app/src/core/services/api_service.dart';
 import 'package:meu_app/src/features/search/domain/entities/search_params.dart';
+import 'package:meu_app/src/core/services/api_service.dart'; // Mantido para a lógica original
 import 'package:meu_app/src/features/lawyers/data/models/lawyer_model.dart';
 import 'package:meu_app/src/features/firms/data/models/law_firm_model.dart';
 
 abstract class SearchRemoteDataSource {
   Future<List<dynamic>> performSearch(SearchParams params);
+  Future<List<dynamic>> performSemanticFirmSearch(SearchParams params);
 }
 
-/// Wrapper para resultados de busca com metadados de contexto
+// Classe Wrapper restaurada
 class SearchResultWrapper {
-  final dynamic item; // LawyerModel ou LawFirmModel
-  final String searchContext; // 'semantic', 'directory', 'hybrid'
+  final dynamic item;
+  final String searchContext;
   final double searchScore;
-  final String? badge; // Badge para exibição na UI
+  final String? badge;
   
   SearchResultWrapper({
     required this.item,
@@ -24,7 +26,9 @@ class SearchResultWrapper {
 }
 
 class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
-  SearchRemoteDataSourceImpl();
+  final Dio dio;
+
+  SearchRemoteDataSourceImpl({required this.dio});
 
   @override
   Future<List<dynamic>> performSearch(SearchParams params) async {
@@ -54,6 +58,30 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
       
     } catch (e) {
       throw ServerException(message: 'Falha ao realizar a busca híbrida.');
+    }
+  }
+
+  @override
+  Future<List<dynamic>> performSemanticFirmSearch(SearchParams params) async {
+    if (params.query == null || params.query!.trim().isEmpty) {
+      return [];
+    }
+    
+    try {
+      final response = await dio.post(
+        '/api/firms/semantic-search',
+        data: {
+          'query': params.query,
+          'top_k': 15,
+        },
+      );
+      if (response.statusCode == 200 && response.data is List) {
+        return response.data;
+      } else {
+        throw ServerException(message: 'Erro ao buscar escritórios via busca semântica.');
+      }
+    } on DioException catch (e) {
+      throw ServerException(message: e.response?.data['detail'] ?? 'Erro de rede ao buscar escritórios.');
     }
   }
 
@@ -131,65 +159,6 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
     }
   }
 
-  /// Busca textual por nome e especialização (mock)
-  Future<List<dynamic>> _searchByNameAndSpecialty(String query) async {
-    // Mock de dados para demonstração da busca híbrida
-    List<LawyerModel> mockLawyers = [
-      const LawyerModel(
-        id: 'dir_lawyer_1',
-        name: 'Maria Silva - Direito Trabalhista',
-        avatarUrl: 'https://ui-avatars.com/api/?name=Maria+Silva',
-        oab: '123456/SP',
-        expertiseAreas: ['Direito do Trabalho', 'Ações Indenizatórias'],
-        score: 0.75,
-        estimatedResponseTimeHours: 12,
-        rating: 4.8,
-        reviewTexts: ['Excelente profissional, muito atenciosa.'],
-        isAvailable: true,
-        totalCases: 89,
-        estimatedSuccessRate: 0.92,
-        specializationScore: 0.88,
-        activityLevel: 'high',
-      ),
-      const LawyerModel(
-        id: 'dir_lawyer_2', 
-        name: 'João Santos - Direito Civil',
-        avatarUrl: 'https://ui-avatars.com/api/?name=João+Santos',
-        oab: '654321/RJ',
-        expertiseAreas: ['Direito de Família', 'Contratos'],
-        score: 0.81,
-        estimatedResponseTimeHours: 6,
-        rating: 4.9,
-        reviewTexts: ['Resolveu meu caso rapidamente.', 'Muito competente.'],
-        isAvailable: true,
-        totalCases: 120,
-        estimatedSuccessRate: 0.95,
-        specializationScore: 0.91,
-        activityLevel: 'very_high',
-      ),
-    ];
-    
-    final queryLower = query.toLowerCase();
-    List<dynamic> results = [];
-    
-    // Busca em advogados
-    results.addAll(mockLawyers.where((lawyer) =>
-        lawyer.name.toLowerCase().contains(queryLower) ||
-        lawyer.oab.toLowerCase().contains(queryLower)
-    ));
-    
-    return results;
-  }
-
-  /// Aplica filtros específicos na busca direta
-  List<dynamic> _applyDirectoryFilters(List<dynamic> results, SearchParams params) {
-    return results.where((item) {
-      // Por ora, mantém todos os resultados
-      // Em produção, aplicaria filtros baseados nos campos dos modelos
-      return true;
-    }).toList();
-  }
-
   /// Combina resultados semânticos e de diretório com deduplicação
   List<SearchResultWrapper> _combineAndRankResults(
     List<SearchResultWrapper> semanticResults,
@@ -248,35 +217,10 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
     }).toList();
   }
 
-  /// Calcula score para busca direta (baseado em filtros)
-  double _calculateDirectoryScore(dynamic item, SearchParams params) {
-    double score = 0.6; // Score base para busca direta
-    
-    if (item is LawyerModel) {
-      // Bonifica por OAB válida
-      if (item.oab != 'N/A' && item.oab.isNotEmpty) {
-        score += 0.1;
-      }
-      
-      // Bonifica por nome completo
-      if (item.name.split(' ').length > 2) {
-        score += 0.1;
-      }
-    } else if (item is LawFirmModel) {
-      // Bonifica por nome do escritório
-      if (item.name.isNotEmpty) {
-        score += 0.2;
-      }
-    }
-    
-    return score.clamp(0.0, 1.0);
-  }
-
   /// Extrai ID único do item
   String _getItemId(dynamic item) {
     if (item is LawyerModel) return 'lawyer_${item.id}';
     if (item is LawFirmModel) return 'firm_${item.id}';
     return 'unknown_${item.hashCode}';
   }
-} 
- 
+}

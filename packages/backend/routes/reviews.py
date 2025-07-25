@@ -8,10 +8,10 @@ Rotas da API para criar e gerenciar avaliações (reviews).
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from backend.services import supabase
-from backend.services.review_service import ReviewService
-from backend.auth import get_current_user
-from backend.api.schemas import ReviewCreate, ReviewResponse
+from services import supabase
+from services.review_service import ReviewService
+from auth import get_current_user
+from api.schemas import ReviewCreate, ReviewResponse
 
 router = APIRouter(
     prefix="/reviews",

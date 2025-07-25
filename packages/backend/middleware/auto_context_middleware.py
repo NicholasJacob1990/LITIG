@@ -15,9 +15,9 @@ from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from ..services.auto_context_service import AutoContextService
-from ..config import get_supabase_client
-from ..auth import get_current_user_from_request
+from services.auto_context_service import AutoContextService
+from config import get_supabase_client
+from auth import get_current_user_from_request
 
 logger = logging.getLogger(__name__)
 

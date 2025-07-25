@@ -5,10 +5,10 @@ import uuid
 
 from dotenv import load_dotenv
 
-from backend.services.match_service import MatchRequest, find_and_notify_matches
+from services.match_service import MatchRequest, find_and_notify_matches
 
 # Importar os serviços necessários
-from backend.services.triage_router_service import Strategy, triage_router_service
+from services.triage_router_service import Strategy, triage_router_service
 from supabase import Client, create_client
 
 from celery_app import celery_app

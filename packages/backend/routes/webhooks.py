@@ -2,7 +2,7 @@
 """Webhooks – recebe eventos externos (DocuSign, etc.)."""
 from fastapi import APIRouter, HTTPException, Request, status
 
-from backend.config import settings
+from config import settings
 from supabase import create_client
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])

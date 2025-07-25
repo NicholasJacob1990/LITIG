@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/core/theme/app_colors.dart';
 import 'package:meu_app/src/core/services/social_auth_service.dart';
-import 'package:meu_app/src/core/utils/logger.dart';
-import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 
 /// Widget para gestão de redes sociais no perfil
 /// Suporta todos os tipos de usuário: client, lawyer_*, admin
@@ -59,7 +56,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
       decoration: BoxDecoration(
         color: AppColors.lightCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border.withOpacity(0.2)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +77,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -220,7 +217,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
             Text(
               'Conecte suas contas para unificar comunicações',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.onSurface.withOpacity(0.6),
+                color: AppColors.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -257,7 +254,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: AppColors.outline.withOpacity(0.1),
+            color: AppColors.outline.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -266,7 +263,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _getPlatformColor(platform).withOpacity(0.1),
+              color: _getPlatformColor(platform).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -292,7 +289,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isActive ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -309,7 +306,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
                 Text(
                   accountEmail,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurface.withOpacity(0.6),
+                    color: AppColors.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 if (connectedAt != null) ...[
@@ -317,7 +314,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
                   Text(
                     'Conectada em ${_formatDate(connectedAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.onSurface.withOpacity(0.4),
+                      color: AppColors.onSurface.withValues(alpha: 0.4),
                       fontSize: 11,
                     ),
                   ),
@@ -329,7 +326,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
             icon: Icon(
               LucideIcons.moreVertical,
               size: 16,
-              color: AppColors.onSurface.withOpacity(0.6),
+              color: AppColors.onSurface.withValues(alpha: 0.6),
             ),
             onSelected: (value) => _handleAccountAction(context, account, value),
             itemBuilder: (context) => [
@@ -438,7 +435,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: color, size: 20),

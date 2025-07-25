@@ -19,7 +19,7 @@ from celery import Task, states
 from celery.result import AsyncResult
 
 from celery_app import celery_app
-from redis_service import redis_service
+from services.redis_service import redis_service
 
 logger = logging.getLogger(__name__)
 

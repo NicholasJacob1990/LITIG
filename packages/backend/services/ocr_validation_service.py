@@ -22,6 +22,11 @@ try:
     TESSERACT_AVAILABLE = True
 except ImportError:
     TESSERACT_AVAILABLE = False
+    # Mock para quando PIL não está disponível
+    class MockImage:
+        class Image:
+            pass
+    Image = MockImage
     print("Aviso: Tesseract OCR não disponível. Para instalar: pip install pytesseract pillow")
 
 # OCR Engines Avançados (opcionais)

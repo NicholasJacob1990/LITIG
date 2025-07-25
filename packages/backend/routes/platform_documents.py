@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from uuid import UUID
 
-from backend.auth import get_current_user
-from backend.services.document_service import PlatformDocumentService, PlatformDocumentResponse
+from auth import get_current_user
+from services.document_service import PlatformDocumentService, PlatformDocumentResponse
 
 router = APIRouter(prefix="/platform-documents", tags=["Platform Documents"])
 

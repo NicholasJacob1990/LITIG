@@ -16,7 +16,7 @@ import numpy as np
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-from backend.algoritmo_match import (
+from algoritmo_match import (
     EMBEDDING_DIM,
     KPI,
     Case,
@@ -24,7 +24,7 @@ from backend.algoritmo_match import (
     Lawyer,
     MatchmakingAlgorithm,
 )
-from backend.services.cache_service_simple import simple_cache_service
+from services.cache_service_simple import simple_cache_service
 
 logger = logging.getLogger(__name__)
 

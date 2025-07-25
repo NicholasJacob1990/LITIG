@@ -45,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
             if (authState is Authenticated) {
               final user = authState.user;
               return BlocProvider(
-                create: (context) => getIt<ProfileBloc>()..add(LoadProfile(user.id!)),
+                create: (context) => getIt<ProfileBloc>()..add(LoadProfile(user.id)),
                 child: BlocBuilder<ProfileBloc, ProfileState>(
                   builder: (context, profileState) {
                     if (profileState is ProfileLoaded) {
@@ -157,8 +157,8 @@ class ProfileScreen extends StatelessWidget {
             '${data['followers'] ?? 0} seguidores',
             style: TextStyle(color: color, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: color.withOpacity(0.1),
-          side: BorderSide(color: color.withOpacity(0.2)),
+          backgroundColor: color.withValues(alpha: 0.1),
+          side: BorderSide(color: color.withValues(alpha: 0.2)),
         );
       }).toList(),
     );
@@ -248,6 +248,16 @@ class ProfileScreen extends StatelessWidget {
           subtitle: 'Conecte seu LinkedIn, Instagram e mais',
           color: Colors.cyan,
           onTap: () => context.push('/profile-details/social-connections'),
+        ),
+        
+        // Planos e Assinaturas (NOVO)
+        _buildProfileMenuCard(
+          context,
+          icon: LucideIcons.crown,
+          title: _getPlanMenuTitle(user.role),
+          subtitle: _getPlanMenuSubtitle(user.role),
+          color: _getPlanMenuColor(user.role),
+          onTap: () => context.push('/billing/plans'),
         ),
         
         // Financeiro (principalmente para clientes, mas útil para advogados também)
@@ -867,6 +877,36 @@ class ProfileScreen extends StatelessWidget {
         return 'Cliente';
       default:
         return role;
+    }
+  }
+
+  String _getPlanMenuTitle(String? role) {
+    if (role?.contains('lawyer') == true) {
+      return 'Planos Profissionais';
+    } else if (role?.contains('firm') == true || role?.contains('office') == true) {
+      return 'Planos Corporativos';
+    } else {
+      return 'Planos e Assinaturas';
+    }
+  }
+
+  String _getPlanMenuSubtitle(String? role) {
+    if (role?.contains('lawyer') == true) {
+      return 'Upgrade para PRO e acesse casos premium';
+    } else if (role?.contains('firm') == true || role?.contains('office') == true) {
+      return 'Planos Partner e Premium para escritórios';
+    } else {
+      return 'Planos VIP e Enterprise disponíveis';
+    }
+  }
+
+  Color _getPlanMenuColor(String? role) {
+    if (role?.contains('lawyer') == true) {
+      return Colors.green;
+    } else if (role?.contains('firm') == true || role?.contains('office') == true) {
+      return Colors.purple;
+    } else {
+      return Colors.amber;
     }
   }
 }

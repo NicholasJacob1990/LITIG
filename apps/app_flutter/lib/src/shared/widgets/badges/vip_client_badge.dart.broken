@@ -1,0 +1,123 @@
+import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
+/// Badge discreto para identificar clientes VIP/Enterprise
+/// Deve ser exibido apenas para advogados/escritórios
+class VipClientBadge extends StatelessWidget {
+  final String? clientPlan;
+  final EdgeInsets? padding;
+  final double? fontSize;
+  final IconData? icon;
+
+  const VipClientBadge({
+    super.key,
+    required this.clientPlan,
+    this.padding,
+    this.fontSize,
+    this.icon,
+  });
+
+  /// Verifica se deve exibir o badge
+  bool get shouldShow => 
+    clientPlan?.toUpperCase() == 'VIP' || 
+    clientPlan?.toUpperCase() == 'ENTERPRISE';
+
+  /// Retorna o texto do badge
+  String get badgeText {
+    switch (clientPlan?.toUpperCase()) {
+      case 'VIP':
+        return 'Cliente VIP';
+      case 'ENTERPRISE':
+        return 'Cliente Enterprise';
+      default:
+        return '';
+    }
+  }
+
+  /// Retorna a cor baseada no plano
+  Color get badgeColor {
+    switch (clientPlan?.toUpperCase()) {
+      case 'VIP':
+        return Colors.purple.shade600;
+      case 'ENTERPRISE':
+        return Colors.indigo.shade700;
+      default:
+        return Colors.blue.shade600;
+    }
+  }
+
+  /// Retorna a cor de fundo
+  Color get backgroundColor {
+    switch (clientPlan?.toUpperCase()) {
+      case 'VIP':
+        return Colors.purple.shade50;
+      case 'ENTERPRISE':
+        return Colors.indigo.shade50;
+      default:
+        return Colors.blue.shade50;
+    }
+  }
+
+  /// Retorna a cor da borda
+  Color get borderColor {
+    switch (clientPlan?.toUpperCase()) {
+      case 'VIP':
+        return Colors.purple.shade300;
+      case 'ENTERPRISE':
+        return Colors.indigo.shade300;
+      default:
+        return Colors.blue.shade300;
+    }
+  }
+
+  /// Retorna o ícone baseado no plano
+  IconData get planIcon {
+    switch (clientPlan?.toUpperCase()) {
+      case 'VIP':
+        return LucideIcons.crown;
+      case 'ENTERPRISE':
+        return LucideIcons.building2;
+      default:
+        return LucideIcons.user;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!shouldShow) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    
+    return Container(
+      key: Key('vip_client_badge_${clientPlan?.toLowerCase()}'),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderColor,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon ?? planIcon,
+            size: (fontSize ?? 12) + 2,
+            color: badgeColor,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            badgeText,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: fontSize ?? 12,
+              fontWeight: FontWeight.w600,
+              color: badgeColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+} 

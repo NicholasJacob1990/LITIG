@@ -28,12 +28,12 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -69,7 +69,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.info.withOpacity(0.1),
+            color: AppColors.info.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
@@ -92,7 +92,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
               Text(
                 _getSubtitle(),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -121,10 +121,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: analysis.matchColor.withOpacity(0.1),
+        color: analysis.matchColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: analysis.matchColor.withOpacity(0.3),
+          color: analysis.matchColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -143,10 +143,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: analysis.matchColor.withOpacity(0.1),
+        color: analysis.matchColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: analysis.matchColor.withOpacity(0.3),
+          color: analysis.matchColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -157,7 +157,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: analysis.matchColor.withOpacity(0.2),
+              color: analysis.matchColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Center(
@@ -187,7 +187,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
                 Text(
                   'Baseado em experiência, disponibilidade e especialização',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -202,7 +202,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -213,7 +213,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
               Icon(
                 LucideIcons.lightbulb,
                 size: 16,
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 8),
               Text(
@@ -228,7 +228,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
           Text(
             analysis.matchReason,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -245,10 +245,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.green.withOpacity(0.3),
+                color: Colors.green.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -288,7 +288,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
                         child: Text(
                           strength,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
@@ -305,10 +305,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
+              color: Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.orange.withOpacity(0.3),
+                color: Colors.orange.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -348,7 +348,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
                         child: Text(
                           consideration,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.8),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
@@ -383,10 +383,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.primaryBlue.withOpacity(0.3),
+          color: AppColors.primaryBlue.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -426,10 +426,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primaryPurple.withOpacity(0.1),
+        color: AppColors.primaryPurple.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.primaryPurple.withOpacity(0.3),
+          color: AppColors.primaryPurple.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -466,7 +466,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
           Text(
             algorithm.matchExplanation,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           if (algorithm.competitors.isNotEmpty) ...[
@@ -485,10 +485,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.success.withOpacity(0.3),
+          color: AppColors.success.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -543,7 +543,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
             child: Text(
               '$label:',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -552,7 +552,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
             child: Text(
               value,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.8),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -565,10 +565,10 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.1),
+        color: AppColors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.warning.withOpacity(0.3),
+          color: AppColors.warning.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -596,7 +596,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
           Text(
             analysis.recommendation,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.8),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
               fontWeight: FontWeight.w500,
             ),
           ),

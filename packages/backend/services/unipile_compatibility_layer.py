@@ -23,7 +23,7 @@ from enum import Enum
 
 # SDK oficial
 try:
-    from backend.services.unipile_official_sdk import UnipileOfficialSDK
+    from services.unipile_official_sdk import UnipileOfficialSDK
     SDK_OFFICIAL_AVAILABLE = True
 except ImportError as e:
     SDK_OFFICIAL_AVAILABLE = False
@@ -31,7 +31,7 @@ except ImportError as e:
 
 # Wrapper Node.js existente
 try:
-    from backend.services.unipile_sdk_wrapper import UnipileSDKWrapper, UnipileAccount, UnipileProfile
+    from services.unipile_sdk_wrapper import UnipileSDKWrapper, UnipileAccount, UnipileProfile
     WRAPPER_NODEJS_AVAILABLE = True
 except ImportError as e:
     WRAPPER_NODEJS_AVAILABLE = False
@@ -65,7 +65,7 @@ except ImportError as e:
 
 # Sistema híbrido
 try:
-    from backend.services.hybrid_legal_data_service import DataSource, DataTransparency
+    from services.hybrid_legal_data_service import DataSource, DataTransparency
 except ImportError:
     from enum import Enum
     

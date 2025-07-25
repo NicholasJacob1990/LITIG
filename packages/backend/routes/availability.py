@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 
-from backend.services.availability_service import availability_service
-from backend.auth import get_current_user
+from services.availability_service import availability_service
+from auth import get_current_user
 
 router = APIRouter(
     prefix="/availability",

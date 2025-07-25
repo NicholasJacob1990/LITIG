@@ -6,8 +6,8 @@ Rotas da API para métricas financeiras dos advogados.
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any
 
-from backend.services.financial_reports_service import financial_reports_service
-from backend.auth import get_current_user
+from services.financial_reports_service import financial_reports_service
+from auth import get_current_user
 
 router = APIRouter(
     prefix="/financials",

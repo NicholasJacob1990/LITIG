@@ -12,3 +12,5 @@ env/
 # IDE
 .vscode/
 .idea/ 
+.venv/
+models/

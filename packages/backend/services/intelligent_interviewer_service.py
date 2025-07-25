@@ -4,13 +4,16 @@ import os
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Tuple
+from typing import Dict, List, Literal, Optional, Tuple, Any
+import re # NOVO: Importar para extrair JSON da resposta da IA
 
 import anthropic
 import openai
 from dotenv import load_dotenv
 
-from conversation_state_manager import conversation_state_manager
+from services.conversation_state_manager import conversation_state_manager
+# NOVO: Importar o serviço de catálogo
+from services.triage_service import triage_service
 
 load_dotenv()
 
@@ -34,6 +37,85 @@ class TriageResult:
     processing_time_ms: int
 
 
+# NOVO: Prompt Mestre para a IA Entrevistadora (Justus)
+MASTER_INTERVIEWER_PROMPT_TEMPLATE = """
+Você é "Justus", um assistente jurídico sênior da LITIG-1. Sua missão é conduzir uma entrevista empática e inteligente com o cliente para entender o caso e, ao mesmo tempo, realizar uma pré-classificação jurídica e uma avaliação de complexidade em tempo real.
+
+**SEU PAPEL DUPLO:**
+1.  **Entrevistador Empático:** Faça uma pergunta clara e objetiva por vez para guiar o cliente. Mantenha um tom profissional, acessível e acolhedor.
+2.  **Analisador Estratégico:** A cada resposta, você deve reavaliar o caso internamente.
+
+**FORMATO DA SUA RESPOSTA:**
+Sua resposta DEVE SEMPRE consistir em duas partes: um bloco JSON de análise interna e a próxima pergunta para o cliente.
+
+```json
+{{
+    "internal_analysis": {{
+        "estimated_area": "Sua melhor estimativa da área principal usando o catálogo.",
+        "estimated_subarea": "Sua melhor estimativa da subárea mais específica usando o catálogo.",
+        "complexity": "low|medium|high",
+        "confidence": 0.0-1.0,
+        "strategy_recommendation": "simple|failover|ensemble",
+        "reasoning": "Breve justificativa para sua avaliação de complexidade e classificação."
+    }}
+}}
+```
+[AQUI VAI A SUA PRÓXIMA PERGUNTA PARA O CLIENTE. SEJA CLARO E FAÇA UMA PERGUNTA POR VEZ.]
+
+**DIRETRIZES DA ENTREVISTA:**
+- **Início:** Comece com uma saudação e uma pergunta aberta.
+- **Desenvolvimento:** Use a metodologia de triagem (Identificação -> Detalhamento -> Aspectos Técnicos) para aprofundar o caso. Faça perguntas direcionadas com base no que o cliente diz.
+- **Finalização:** Quando tiver informações suficientes sobre os fatos, partes, urgência e documentos, finalize a conversa. Agradeça ao cliente e informe que a análise será concluída. Sua última mensagem DEVE conter o sinal `[TRIAGE_COMPLETE]`.
+
+**CATÁLOGO DE CLASSIFICAÇÕES (Use estas categorias para `estimated_area` e `estimated_subarea`):**
+{catalog_json}
+
+**AVALIAÇÃO DE COMPLEXIDADE:**
+- **low (simple):** Casos rotineiros, poucas partes, solução padronizada (ex: cobrança simples, negativação indevida).
+- **medium (failover):** Casos padrão que exigem análise jurídica, mas sem múltiplas variáveis (ex: demissão, divórcio consensual).
+- **high (ensemble):** Múltiplas partes, questões societárias, arbitragem, recuperação judicial, casos com alta complexidade técnica ou regulatória.
+
+**EXEMPLO DE RESPOSTA (PRIMEIRA INTERAÇÃO):**
+```json
+{{
+    "internal_analysis": {{
+        "estimated_area": "Não identificado",
+        "estimated_subarea": "Não identificado",
+        "complexity": "medium",
+        "confidence": 0.2,
+        "strategy_recommendation": "failover",
+        "reasoning": "Início da conversa, aguardando descrição inicial do cliente."
+    }}
+}}
+```
+Olá! Sou o Justus, seu assistente jurídico. Para começarmos, por favor, me descreva o problema que você está enfrentando.
+
+**EXEMPLO DE RESPOSTA (MEIO DA CONVERSA):**
+```json
+{{
+    "internal_analysis": {{
+        "estimated_area": "Empresarial",
+        "estimated_subarea": "Arbitragem Societária e M&A",
+        "complexity": "high",
+        "confidence": 0.8,
+        "strategy_recommendation": "ensemble",
+        "reasoning": "O caso envolve uma disputa societária com cláusula de arbitragem, indicando alta complexidade jurídica e processual."
+    }}
+}}
+```
+Entendido. A existência de uma cláusula de arbitragem é um detalhe muito importante. Poderia me informar qual foi a câmara de arbitragem definida no contrato?
+"""
+
+
+# --- Model Configuration ---
+# Primário: Claude Sonnet para alta qualidade de conversação
+INTERVIEWER_MODEL_PROVIDER = "anthropic"
+INTERVIEWER_MODEL = "claude-3-5-sonnet-20240620"
+
+# Backup/Failover: Llama 4 Scout para resiliência e custo-benefício
+INTERVIEWER_MODEL_FAILOVER_PROVIDER = "together"
+INTERVIEWER_MODEL_LLAMA_FALLBACK = "meta-llama/Llama-4-Scout"
+
 class IntelligentInterviewerService:
     """
     IA "Entrevistadora" que conduz conversas inteligentes e detecta complexidade em tempo real.
@@ -49,108 +131,128 @@ class IntelligentInterviewerService:
         self.anthropic_client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
         self.openai_client = openai.AsyncOpenAI(
             api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+        # NOVO: Cliente para Llama 4 via Together AI
+        self.together_client = openai.AsyncOpenAI(
+            api_key=os.getenv("TOGETHER_API_KEY"),
+            base_url="https://api.together.xyz/v1",
+        ) if os.getenv("TOGETHER_API_KEY") else None
+        
+        if not self.together_client:
+            print("Aviso: Chave da API da Together AI (para Llama 4) não encontrada.")
 
         # REMOVIDO: self.active_conversations - agora usa Redis
         self.state_manager = conversation_state_manager
 
         # Prompt especializado integrando metodologia do LEX-9000 com detecção de
         # complexidade
-        self.interviewer_prompt = """
-        Você é "Justus", um assistente jurídico especializado em triagem inteligente da LITGO5, evoluído do sistema LEX-9000.
+        # self.interviewer_prompt = """
+        # Você é "Justus", um assistente jurídico especializado em triagem inteligente da LITGO5, evoluído do sistema LEX-9000.
 
-        **SEU PAPEL ÚNICO:**
-        Você é simultaneamente um entrevistador empático E um detector de complexidade em tempo real, usando metodologia jurídica estruturada.
+        # **SEU PAPEL ÚNICO:**
+        # Você é simultaneamente um entrevistador empático E um detector de complexidade em tempo real, usando metodologia jurídica estruturada.
 
-        **ESPECIALIZAÇÃO JURÍDICA:**
-        - Conhecimento profundo do ordenamento jurídico brasileiro
-        - Experiência em todas as áreas do direito:
-          • Direito Privado: Civil, Empresarial, Trabalhista, Consumidor, Família, Propriedade Intelectual
-          • Direito Público: Administrativo, Constitucional, Tributário, Criminal, Eleitoral, Ambiental
-          • Direito Especializado: Imobiliário, Bancário, Seguros, Saúde, Educacional, Previdenciário
-          • Direito Empresarial: Societário, Recuperação Judicial, Concorrencial
-          • Direito Regulatório: Telecomunicações, Energia, Regulatório
-          • Direitos Especiais: Internacional, Militar, Agrário, Marítimo, Aeronáutico
-          • Direitos Emergentes: Digital, Desportivo, Médico
-        - Capacidade de identificar urgência, complexidade e viabilidade processual
-        - Foco em aspectos práticos e estratégicos
+        # **ESPECIALIZAÇÃO JURÍDICA:**
+        # - Conhecimento profundo do ordenamento jurídico brasileiro
+        # - Experiência em todas as áreas do direito:
+        #   • Direito Privado: Civil, Empresarial, Trabalhista, Consumidor, Família, Propriedade Intelectual
+        #   • Direito Público: Administrativo, Constitucional, Tributário, Criminal, Eleitoral, Ambiental
+        #   • Direito Especializado: Imobiliário, Bancário, Seguros, Saúde, Educacional, Previdenciário
+        #   • Direito Empresarial: Societário, Recuperação Judicial, Concorrencial
+        #   • Direito Regulatório: Telecomunicações, Energia, Regulatório
+        #   • Direitos Especiais: Internacional, Militar, Agrário, Marítimo, Aeronáutico
+        #   • Direitos Emergentes: Digital, Desportivo, Médico
+        # - Capacidade de identificar urgência, complexidade e viabilidade processual
+        # - Foco em aspectos práticos e estratégicos
 
-        **METODOLOGIA DE TRIAGEM INTELIGENTE:**
+        # **METODOLOGIA DE TRIAGEM INTELIGENTE:**
 
-        ## FASE 1 - IDENTIFICAÇÃO INICIAL (1-2 perguntas)
-        - Área jurídica principal
-        - Natureza do problema (preventivo vs contencioso)
-        - Urgência temporal
-        - **AVALIAÇÃO**: Detectar se é caso simples, médio ou complexo
+        # ## FASE 1 - IDENTIFICAÇÃO INICIAL (2-3 perguntas)
+        # - Área jurídica principal
+        # - Natureza do problema (preventivo vs contencioso)
+        # - Urgência temporal
+        # - Contexto geral da situação
+        # - **AVALIAÇÃO**: Detectar se é caso simples, médio ou complexo
 
-        ## FASE 2 - DETALHAMENTO FACTUAL (2-6 perguntas conforme complexidade)
-        - Partes envolvidas e suas qualificações
-        - Cronologia dos fatos relevantes
-        - Documentação disponível
-        - Valores envolvidos (quando aplicável)
-        - Tentativas de solução extrajudicial
+        # ## FASE 2 - DETALHAMENTO FACTUAL (4-8 perguntas conforme complexidade)
+        # - Partes envolvidas e suas qualificações
+        # - Cronologia dos fatos relevantes
+        # - Documentação disponível
+        # - Valores envolvidos (quando aplicável)
+        # - Tentativas de solução extrajudicial
+        # - Localização geográfica do problema
+        # - Impacto financeiro ou pessoal
+        # - Histórico de relacionamento entre as partes
 
-        ## FASE 3 - ASPECTOS TÉCNICOS (0-4 perguntas - apenas se complexo)
-        - Prazos legais e prescrição
-        - Jurisdição competente
-        - Complexidade probatória
-        - Precedentes ou jurisprudência conhecida
+        # ## FASE 3 - ASPECTOS TÉCNICOS (2-6 perguntas - conforme complexidade)
+        # - Prazos legais e prescrição
+        # - Jurisdição competente
+        # - Complexidade probatória
+        # - Precedentes ou jurisprudência conhecida
+        # - Questões regulamentares específicas
+        # - Aspectos contratuais relevantes
 
-        **AVALIAÇÃO DE COMPLEXIDADE EM TEMPO REAL:**
+        # **AVALIAÇÃO DE COMPLEXIDADE EM TEMPO REAL:**
 
-        🟢 **BAIXA COMPLEXIDADE** (strategy: "simple") - 3-5 perguntas:
-        - Casos rotineiros: multa de trânsito, atraso de voo, produto defeituoso
-        - Questões simples de consumidor, vizinhança, cobrança indevida
-        - Situações com precedentes claros e soluções padronizadas
-        - Apenas uma parte envolvida, sem questões técnicas complexas
-        - **AÇÃO**: Colete dados básicos e finalize rapidamente
+        # 🟢 **BAIXA COMPLEXIDADE** (strategy: "simple") - 5-8 perguntas:
+        # - Casos rotineiros: multa de trânsito, atraso de voo, produto defeituoso
+        # - Questões simples de consumidor, vizinhança, cobrança indevida
+        # - Situações com precedentes claros e soluções padronizadas
+        # - Apenas uma parte envolvida, sem questões técnicas complexas
+        # - **AÇÃO**: Colete dados básicos detalhados para análise precisa
 
-        🟡 **MÉDIA COMPLEXIDADE** (strategy: "failover") - 5-8 perguntas:
-        - Casos trabalhistas padrão, contratos simples, acidentes de trânsito
-        - Questões familiares básicas, disputas de aluguel convencionais
-        - Situações que requerem análise jurídica, mas sem múltiplas variáveis
-        - Casos com alguma complexidade técnica, mas dentro do padrão
-        - **AÇÃO**: Colete dados estruturados para análise posterior
+        # 🟡 **MÉDIA COMPLEXIDADE** (strategy: "failover") - 8-12 perguntas:
+        # - Casos trabalhistas padrão, contratos simples, acidentes de trânsito
+        # - Questões familiares básicas, disputas de aluguel convencionais
+        # - Situações que requerem análise jurídica, mas sem múltiplas variáveis
+        # - Casos com alguma complexidade técnica, mas dentro do padrão
+        # - **AÇÃO**: Colete dados estruturados completos para análise posterior
 
-        🔴 **ALTA COMPLEXIDADE** (strategy: "ensemble") - 6-10 perguntas:
-        - Múltiplas partes envolvidas, questões societárias complexas
-        - Propriedade intelectual, patentes, marcas registradas
-        - Recuperação judicial, falência, reestruturação empresarial
-        - Questões internacionais, contratos complexos, litígios estratégicos
-        - Casos que envolvem jurisprudência especializada ou precedentes conflitantes
-        - **AÇÃO**: Colete dados completos e detalhados para análise ensemble
+        # 🔴 **ALTA COMPLEXIDADE** (strategy: "ensemble") - 10-15 perguntas:
+        # - Múltiplas partes envolvidas, questões societárias complexas
+        # - Propriedade intelectual, patentes, marcas registradas
+        # - Recuperação judicial, falência, reestruturação empresarial
+        # - Questões internacionais, contratos complexos, litígios estratégicos
+        # - Casos que envolvem jurisprudência especializada ou precedentes conflitantes
+        # - **AÇÃO**: Colete dados completos e detalhados para análise ensemble
 
-        **PERGUNTAS INTELIGENTES:**
-        - Seja específico conforme a área identificada
-        - Adapte as perguntas ao tipo de caso (ex: trabalhista vs civil)
-        - Priorize informações que impactam viabilidade e estratégia
-        - Considere aspectos econômicos e temporais
+        # **PERGUNTAS INTELIGENTES:**
+        # - Seja específico conforme a área identificada
+        # - Adapte as perguntas ao tipo de caso (ex: trabalhista vs civil)
+        # - Priorize informações que impactam viabilidade e estratégia
+        # - Considere aspectos econômicos e temporais
 
-        **CRITÉRIOS PARA FINALIZAÇÃO:**
-        Termine a entrevista quando tiver informações suficientes sobre:
-        ✅ Área jurídica e instituto específico
-        ✅ Fatos essenciais e cronologia
-        ✅ Partes e suas qualificações
-        ✅ Urgência e prazos
-        ✅ Viabilidade preliminar do caso
-        ✅ Documentação disponível
+        # **CRITÉRIOS PARA FINALIZAÇÃO:**
+        # Termine a entrevista quando tiver informações suficientes sobre:
+        # ✅ Área jurídica e instituto específico
+        # ✅ Fatos essenciais e cronologia detalhada
+        # ✅ Partes envolvidas e suas qualificações
+        # ✅ Urgência e prazos específicos
+        # ✅ Viabilidade preliminar do caso
+        # ✅ Documentação disponível e necessária
+        # ✅ Valores e impactos financeiros envolvidos
+        # ✅ Localização geográfica relevante
+        # ✅ Tentativas anteriores de solução
+        # ✅ Contexto e histórico do relacionamento
+        # ✅ Expectativas e objetivos do cliente
+        # ✅ Informações sobre a parte contrária (quando aplicável)
 
-        **FINALIZAÇÃO POR COMPLEXIDADE:**
-        - **Baixa**: Você mesmo pode gerar a análise final (economia de recursos)
-        - **Média/Alta**: Prepare dados estruturados para análise posterior
+        # **FINALIZAÇÃO POR COMPLEXIDADE:**
+        # - **Baixa**: Você mesmo pode gerar a análise final (economia de recursos)
+        # - **Média/Alta**: Prepare dados estruturados para análise posterior
 
-        **SINAL DE FINALIZAÇÃO:**
-        Quando a conversa estiver completa, termine com: [TRIAGE_COMPLETE:STRATEGY_X:CONFIDENCE_Y]
-        Onde X = simple/failover/ensemble e Y = 0.0-1.0
+        # **SINAL DE FINALIZAÇÃO:**
+        # Quando a conversa estiver completa, termine com: [TRIAGE_COMPLETE:STRATEGY_X:CONFIDENCE_Y]
+        # Onde X = simple/failover/ensemble e Y = 0.0-1.0
 
-        **DIRETRIZES DE CONVERSA:**
-        - Uma pergunta por vez, seja empático e profissional
-        - Mantenha linguagem profissional mas acessível
-        - Seja objetivo e prático nas perguntas
-        - Considere sempre o contexto brasileiro
-        - Não mencione "complexidade" ou "estratégias" para o cliente
-        - Foque em entender o problema completamente
-        - Use linguagem acessível, evite jargões jurídicos
-        """
+        # **DIRETRIZES DE CONVERSA:**
+        # - Uma pergunta por vez, seja empático e profissional
+        # - Mantenha linguagem profissional mas acessível
+        # - Seja objetivo e prático nas perguntas
+        # - Considere sempre o contexto brasileiro
+        # - Não mencione "complexidade" ou "estratégias" para o cliente
+        # - Foque em entender o problema completamente
+        # - Use linguagem acessível, evite jargões jurídicos
+        # """
 
     async def start_conversation(self, user_id: str) -> Tuple[str, str]:
         """
@@ -224,40 +326,50 @@ class IntelligentInterviewerService:
         return ai_response, False
 
     async def _generate_ai_response(self, state: Dict) -> str:
-        """Gera resposta da IA usando Claude com avaliação de complexidade."""
+        """Gera resposta da IA usando Claude com o prompt mestre unificado."""
+        messages = [] # O prompt de sistema agora é formatado diretamente
 
-        # Preparar histórico para o Claude
-        messages = [{"role": "system", "content": self.interviewer_prompt}]
-
-        # Adicionar mensagens da conversa (sem timestamps para o Claude)
         for msg in state["messages"]:
-            messages.append({
-                "role": msg["role"],
-                "content": msg["content"]
-            })
+            messages.append({"role": msg["role"], "content": msg["content"]})
 
         try:
+            catalog = await triage_service._get_area_catalog() # Reutiliza a função do triage_service
+            system_prompt = MASTER_INTERVIEWER_PROMPT_TEMPLATE.format(catalog_json=catalog)
+            
+            # Adiciona o system prompt no início do histórico da conversa
+            messages_with_system = [{"role": "user", "content": system_prompt}] + messages
+
             response = await self.anthropic_client.messages.create(
                 model="claude-3-5-sonnet-20240620",
-                max_tokens=300,
+                max_tokens=2048,
                 temperature=0.7,
-                messages=messages
+                # system=system_prompt, # Claude não usa 'system' como OpenAI, então incluímos como primeira mensagem
+                messages=messages_with_system
             )
+            
+            ai_full_response = response.content[0].text
+            
+            # Extrair o JSON e a mensagem de texto
+            json_part, text_part = self._extract_json_and_text(ai_full_response)
 
-            ai_response = response.content[0].text
+            if json_part:
+                # Atualizar o estado com a análise interna da IA
+                analysis = json_part.get("internal_analysis", {})
+                state["complexity_level"] = analysis.get("complexity", state["complexity_level"])
+                state["confidence_score"] = analysis.get("confidence", state["confidence_score"])
+                state["strategy_recommended"] = analysis.get("strategy_recommendation", state["strategy_recommended"])
+                state["estimated_area"] = analysis.get("estimated_area") # NOVO
+                state["estimated_subarea"] = analysis.get("estimated_subarea") # NOVO
 
             # Adicionar resposta ao histórico
             state["messages"].append({
                 "role": "assistant",
-                "content": ai_response,
-                "timestamp": datetime.now().isoformat()
+                "content": text_part, # Salva apenas a parte do texto para o cliente
+                "timestamp": datetime.now().isoformat(),
+                "internal_analysis": json_part # Salva a análise interna para auditoria
             })
 
-            # Avaliar complexidade se não for finalização
-            if not "[TRIAGE_COMPLETE:" in ai_response:
-                await self._evaluate_complexity(state)
-
-            return ai_response
+            return text_part
 
         except Exception as e:
             print(f"Erro na geração de resposta: {e}")
@@ -269,70 +381,25 @@ class IntelligentInterviewerService:
             })
             return fallback_response
 
-    async def _evaluate_complexity(self, state: Dict):
-        """Avalia a complexidade do caso baseado na conversa atual."""
-
-        # Prompt específico para avaliação de complexidade
-        complexity_prompt = """
-        Analise a conversa a seguir e determine a complexidade do caso jurídico.
-
-        Responda APENAS com um JSON no formato:
-        {
-            "complexity": "low|medium|high",
-            "confidence": 0.0-1.0,
-            "reasoning": "breve explicação",
-            "indicators": ["indicador1", "indicador2"]
-        }
-
-        Critérios:
-        - LOW: casos simples, rotineiros, com soluções padronizadas
-        - MEDIUM: casos que requerem análise jurídica padrão
-        - HIGH: casos complexos, múltiplas partes, questões especializadas
-        """
-
-        # Preparar contexto da conversa
-        conversation_text = "\n".join([
-            f"{msg['role'].upper()}: {msg['content']}"
-            for msg in state["messages"][-6:]  # Últimas 6 mensagens
-        ])
-
+    def _extract_json_and_text(self, response_text: str) -> Tuple[Optional[Dict], str]:
+        """Extrai o bloco JSON e a mensagem de texto da resposta da IA."""
         try:
-            response = await self.anthropic_client.messages.create(
-                model="claude-3-haiku-20240307",  # Modelo mais rápido para avaliação
-                max_tokens=200,
-                temperature=0.1,
-                messages=[
-                    {"role": "system", "content": complexity_prompt},
-                    {"role": "user", "content": f"Conversa:\n{conversation_text}"}
-                ]
-            )
+            json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+                json_data = json.loads(json_str)
+                # O texto para o usuário é o que vem depois do bloco JSON
+                text_part = response_text[json_match.end():].strip()
+                return json_data, text_part
+            else:
+                # Fallback se o formato não for encontrado
+                return None, response_text
+        except (json.JSONDecodeError, IndexError) as e:
+            print(f"Erro ao extrair JSON da resposta da IA: {e}")
+            return None, response_text
 
-            # Extrair JSON da resposta
-            response_text = response.content[0].text
-            if "{" in response_text and "}" in response_text:
-                json_start = response_text.find("{")
-                json_end = response_text.rfind("}") + 1
-                complexity_data = json.loads(response_text[json_start:json_end])
-
-                # Atualizar estado
-                state["complexity_level"] = complexity_data.get("complexity", "medium")
-                state["confidence_score"] = complexity_data.get("confidence", 0.5)
-
-                # Determinar estratégia recomendada
-                if state["complexity_level"] == "low":
-                    state["strategy_recommended"] = "simple"
-                elif state["complexity_level"] == "high":
-                    state["strategy_recommended"] = "ensemble"
-                else:
-                    state["strategy_recommended"] = "failover"
-
-        except Exception as e:
-            print(f"Erro na avaliação de complexidade: {e}")
-            # Manter valores padrão
-            state["complexity_level"] = "medium"
-            state["confidence_score"] = 0.5
-            state["strategy_recommended"] = "failover"
-
+    # REMOVER a função _evaluate_complexity, pois agora está unificada
+    
     async def _finalize_conversation(
             self, case_id: str, ai_response: str, state: Dict) -> Tuple[str, bool]:
         """Finaliza a conversa e processa o resultado."""
@@ -524,6 +591,76 @@ class IntelligentInterviewerService:
             "updated_at": state.get("updated_at"),
             "is_complete": state.get("is_complete", False)
         }
+
+    async def generate_response(self, conversation_history: List[Dict[str, str]]) -> str:
+        """
+        Gera uma resposta da IA com lógica de failover.
+        Tenta o provedor primário (Anthropic) e usa o backup (Llama 4) em caso de falha.
+        """
+        try:
+            # Tentativa com o provedor primário (Claude Sonnet)
+            if INTERVIEWER_MODEL_PROVIDER == "anthropic" and self.anthropic_client:
+                return await self._ask_anthropic(conversation_history, INTERVIEWER_MODEL)
+        except Exception as e:
+            print(f"Erro com o provedor primário '{INTERVIEWER_MODEL_PROVIDER}' ({INTERVIEWER_MODEL}): {e}. Acionando failover.")
+            
+            # Lógica de Failover
+            try:
+                if INTERVIEWER_MODEL_FAILOVER_PROVIDER == "together" and self.together_client:
+                     return await self._ask_llama(conversation_history, INTERVIEWER_MODEL_LLAMA_FALLBACK)
+            except Exception as e_failover:
+                print(f"Erro com o provedor de failover '{INTERVIEWER_MODEL_FAILOVER_PROVIDER}' ({INTERVIEWER_MODEL_LLAMA_FALLBACK}): {e_failover}.")
+                return "Desculpe, nosso assistente inteligente está temporariamente indisponível. Por favor, tente novamente em alguns instantes."
+
+        return "Erro de configuração: Nenhum provedor de IA disponível para o entrevistador."
+
+    async def _ask_anthropic(self, conversation_history: List[Dict[str, str]], model: str) -> str:
+        """Chama a API da Anthropic para obter uma resposta."""
+        if not self.anthropic_client:
+            raise ValueError("Cliente da Anthropic não inicializado.")
+
+        # Lógica para chamar a API da Anthropic...
+        # Exemplo:
+        system_prompt = "Você é Justus, um assistente jurídico empático e eficiente..." # Seu prompt de sistema aqui
+        response = await self.anthropic_client.messages.create(
+            model=model,
+            max_tokens=1024,
+            system=system_prompt,
+            messages=conversation_history
+        )
+        return response.content[0].text
+
+    async def _ask_openai(self, conversation_history: List[Dict[str, str]], model: str) -> str:
+        """Chama a API da OpenAI para obter uma resposta."""
+        if not self.openai_client:
+            raise ValueError("Cliente da OpenAI não inicializado.")
+
+        # Lógica para chamar a API da OpenAI...
+        # Exemplo:
+        system_prompt = "Você é Justus, um assistente jurídico empático e eficiente..." # Seu prompt de sistema aqui
+        messages_for_openai = [{"role": "system", "content": system_prompt}] + conversation_history
+        
+        response = await self.openai_client.chat.completions.create(
+            model=model,
+            max_tokens=1024,
+            messages=messages_for_openai
+        )
+        return response.choices[0].message.content
+
+    async def _ask_llama(self, conversation_history: List[Dict[str, str]], model: str) -> str:
+        """Chama um modelo Llama 4 via Together AI para obter uma resposta."""
+        if not self.together_client:
+            raise ValueError("Cliente da Together AI não inicializado.")
+
+        system_prompt = "Você é Justus, um assistente jurídico empático e eficiente..." # Seu prompt de sistema aqui
+        messages_for_llama = [{"role": "system", "content": system_prompt}] + conversation_history
+        
+        response = await self.together_client.chat.completions.create(
+            model=model,
+            max_tokens=1024,
+            messages=messages_for_llama
+        )
+        return response.choices[0].message.content
 
 
 # Instância única do serviço

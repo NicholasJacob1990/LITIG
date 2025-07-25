@@ -5,10 +5,10 @@ from pydantic import BaseModel
 from typing import Optional
 
 # Supondo que essas funções de ajuda e dependências existam e sejam semelhantes a outras rotas
-from backend.services.unipile_app_service import get_unipile_app_service
-from backend.auth import get_current_user
-from backend.models.user import User
-from backend.database import (
+from services.unipile_app_service import get_unipile_app_service
+from auth import get_current_user
+from models.user import User
+from database import (
     save_user_social_account,
     get_user_social_account
 )

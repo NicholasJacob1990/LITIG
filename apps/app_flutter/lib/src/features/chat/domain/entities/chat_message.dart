@@ -9,6 +9,7 @@ class ChatMessage extends Equatable {
   final String content;
   final String messageType;
   final String? attachmentUrl;
+  final String? senderAvatarUrl;
   final DateTime createdAt;
   final bool isRead;
 
@@ -21,6 +22,7 @@ class ChatMessage extends Equatable {
     required this.content,
     required this.messageType,
     this.attachmentUrl,
+    this.senderAvatarUrl,
     required this.createdAt,
     required this.isRead,
   });
@@ -35,6 +37,7 @@ class ChatMessage extends Equatable {
         content,
         messageType,
         attachmentUrl,
+        senderAvatarUrl,
         createdAt,
         isRead,
       ];
@@ -48,6 +51,7 @@ class ChatMessage extends Equatable {
     String? content,
     String? messageType,
     String? attachmentUrl,
+    String? senderAvatarUrl,
     DateTime? createdAt,
     bool? isRead,
   }) {
@@ -60,6 +64,7 @@ class ChatMessage extends Equatable {
       content: content ?? this.content,
       messageType: messageType ?? this.messageType,
       attachmentUrl: attachmentUrl ?? this.attachmentUrl,
+      senderAvatarUrl: senderAvatarUrl ?? this.senderAvatarUrl,
       createdAt: createdAt ?? this.createdAt,
       isRead: isRead ?? this.isRead,
     );

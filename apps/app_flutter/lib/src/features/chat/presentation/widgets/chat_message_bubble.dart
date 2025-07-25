@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/chat_message.dart';
+import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -28,14 +29,10 @@ class ChatMessageBubble extends StatelessWidget {
         children: [
           if (!isFromCurrentUser) ...[
             // Avatar for other party
-            CircleAvatar(
+            InitialsAvatar(
+              text: message.senderName,
               radius: 16,
-              backgroundColor: Colors.grey[200],
-              child: Icon(
-                LucideIcons.user,
-                color: Colors.grey[600],
-                size: 16,
-              ),
+              avatarUrl: message.senderAvatarUrl,
             ),
             const SizedBox(width: 8),
           ],

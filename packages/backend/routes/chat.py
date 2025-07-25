@@ -6,7 +6,7 @@ import json
 import logging
 import os
 from supabase import create_client, Client
-from ..auth import get_current_user
+from auth import get_current_user
 from collections import defaultdict
 
 # Setup Supabase

@@ -202,7 +202,7 @@ result = await complete_lawyer_matching(
     preset="balanced",  # Será auto-detectado como "economic"
     enrich_profiles=True,
     use_openai=True,
-    use_perplexity=True
+            use_perplexity=True  # PRIMÁRIA
 )
 
 # 3. Acessar resultados
@@ -226,7 +226,7 @@ print(f"Taxa de enriquecimento: {enrichment_stats['success_rate']:.1%}")
         "✅ Cobertura 100% das features do algoritmo",
         "✅ Dados enriquecidos em tempo real via APIs",
         "✅ Preset econômico para democratizar acesso",
-        "✅ Fallback robusto (OpenAI → Perplexity → cache)",
+        "✅ Fallback robusto (Perplexity → OpenAI → cache)",
         "✅ Parsing inteligente de relatórios",
         "✅ Logs estruturados para observabilidade",
         "✅ Controle de concorrência e rate limiting",

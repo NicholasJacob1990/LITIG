@@ -16,7 +16,7 @@ from services.intelligent_triage_orchestrator import (
     OrchestrationResult,
     intelligent_triage_orchestrator,
 )
-from models import TriageMessage, TriageMessageResponse, TriageStartBody
+# from models import TriageMessage, TriageMessageResponse, TriageStartBody  # Classes não encontradas
 
 # Configuração do rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -179,7 +179,6 @@ async def continue_conversation(
 @router.get("/status/{case_id}", response_model=OrchestrationStatusResponse)
 @limiter.limit("120/minute")
 async def get_orchestration_status(
-    request: Request,
     case_id: str,
     user: dict = Depends(get_current_user)
 ):
@@ -215,7 +214,6 @@ async def get_orchestration_status(
 @router.get("/result/{case_id}", response_model=TriageResultResponse)
 @limiter.limit("60/minute")
 async def get_triage_result(
-    request: Request,
     case_id: str,
     user: dict = Depends(get_current_user)
 ):
@@ -263,7 +261,6 @@ async def get_triage_result(
 @router.post("/force-complete", response_model=TriageResultResponse)
 @limiter.limit("10/minute")
 async def force_complete_conversation(
-    request: Request,
     payload: ForceCompleteRequest,
     user: dict = Depends(get_current_user)
 ):
@@ -311,7 +308,6 @@ async def force_complete_conversation(
 @router.delete("/cleanup/{case_id}")
 @limiter.limit("30/minute")
 async def cleanup_orchestration(
-    request: Request,
     case_id: str,
     user: dict = Depends(get_current_user)
 ):
@@ -371,7 +367,6 @@ async def stream_triage_updates(
 @router.get("/stats", response_model=Dict[str, Any])
 @limiter.limit("10/minute")
 async def get_system_stats(
-    request: Request,
     user: dict = Depends(get_current_user)
 ):
     """

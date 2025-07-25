@@ -9,6 +9,7 @@ class Lawyer extends Equatable {
   final double rating;
   final bool isAvailable;
   final double? distanceKm;
+  final String plan; // NOVO: Plano do advogado (PRO, FREE, etc.)
 
   const Lawyer({
     required this.id,
@@ -19,7 +20,14 @@ class Lawyer extends Equatable {
     required this.rating,
     required this.isAvailable,
     this.distanceKm,
+    this.plan = 'FREE', // NOVO: Padrão FREE para compatibilidade
   });
+
+  /// Verifica se o advogado tem plano PRO
+  bool get isPro => plan.toUpperCase() == 'PRO';
+
+  /// Verifica se o advogado tem plano FREE
+  bool get isFree => plan.toUpperCase() == 'FREE';
 
   @override
   List<Object?> get props => [
@@ -31,5 +39,6 @@ class Lawyer extends Equatable {
         rating,
         isAvailable,
         distanceKm,
+        plan, // NOVO
       ];
 } 

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class InitialsAvatar extends StatelessWidget {
   final String text;
   final double radius;
+  final String? avatarUrl;
 
   const InitialsAvatar({
     super.key,
     required this.text,
     this.radius = 24,
+    this.avatarUrl,
   });
 
   String get _initials {
@@ -28,6 +31,41 @@ class InitialsAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: _backgroundColor,
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: avatarUrl!,
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              width: radius * 2,
+              height: radius * 2,
+              color: _backgroundColor,
+              child: Center(
+                child: SizedBox(
+                  width: radius * 0.5,
+                  height: radius * 0.5,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => _buildInitialsAvatar(),
+          ),
+        ),
+      );
+    }
+    
+    return _buildInitialsAvatar();
+  }
+
+  Widget _buildInitialsAvatar() {
     return CircleAvatar(
       radius: radius,
       backgroundColor: _backgroundColor,

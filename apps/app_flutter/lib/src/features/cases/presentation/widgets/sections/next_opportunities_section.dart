@@ -526,7 +526,7 @@ class NextOpportunitiesSection extends BaseInfoSection {
         color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: color.withOpacity(isUrgent ? 0.4 : 0.2),
+          color: color.withValues(alpha: isUrgent ? 0.4 : 0.2),
           width: isUrgent ? 2 : 1,
         ),
       ),

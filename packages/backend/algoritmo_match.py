@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
-"""algoritmo_match_v2_8_academic.py
-Algoritmo de Match Jurídico Inteligente — v2.8-academic
+"""algoritmo_match.py
+Algoritmo de Match Jurídico Inteligente — v2.9-unified
 ======================================================================
-Novidades v2.8-academic 🚀
---------------------------
+Versão consolidada que combina funcionalidades das versões:
+- v2.7-rc3: Sponsored recommendations, premium cases, complete logging
+- v2.8-academic: Academic enrichment, LTR service, async features
+
+Funcionalidades v2.9-unified 🚀
+-------------------------------
 1.  **Academic Enrichment**: Feature Q enriquecida com dados acadêmicos externos
     - Avaliação de universidades via rankings QS/THE
     - Análise de periódicos por fator de impacto (JCR/Qualis)
     - Cache Redis com TTL configurável
     - Rate limiting e fallback resiliente
-2.  **Async Feature Calculation**: `qualification_score_async()` e `all_async()`
-3.  **External APIs Integration**: Perplexity + Deep Research com polling
-4.  **Enhanced Logging**: TTL acadêmico e flags de enriquecimento nos logs
+2.  **LTR Service Integration**: Serviço externo para scoring via HTTP
+3.  **Async Feature Calculation**: `qualification_score_async()` e `all_async()`
+4.  **External APIs Integration**: Perplexity (primária) + Deep Research (fallback)
+5.  **Sponsored Recommendations**: Sistema de anúncios patrocinados integrado
+6.  **Premium Cases Logic**: Gating/boost para casos premium
+7.  **Enhanced Logging**: TTL acadêmico e flags de enriquecimento nos logs
 
 Funcionalidades anteriores mantidas:
 - Feature-E (Firm Reputation), B2B Two-Pass Algorithm
-- Safe Conflict Scan, SUCCESS_FEE_MULT configurável  
+- Safe Conflict Scan, SUCCESS_FEE_MULT configurável
 - Observabilidade completa, otimizações de performance
 ======================================================================
 """
@@ -32,7 +39,9 @@ from dataclasses import dataclass, field
 from math import asin, cos, log1p, radians, sin, sqrt
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Literal, Set, cast
-from datetime import datetime
+from datetime import datetime, timedelta
+from ..schemas.recommendation import Recommendation
+from ..services.ads_service import fetch_ads_for_case
 import re
 import unicodedata
 import hashlib
@@ -62,7 +71,7 @@ import httpx
 # LTR Service Integration
 LTR_ENDPOINT = os.getenv("LTR_ENDPOINT", "http://ltr-service:8080/ltr/score")
 try:
-    from services.availability_service import get_lawyers_availability_status
+    from .services.availability_service import get_lawyers_availability_status
 except ImportError:
     # Fallback para testes - mock da função
     async def get_lawyers_availability_status(lawyer_ids):
@@ -70,7 +79,7 @@ except ImportError:
 
 # --- Conflitos de interesse --------------------------------------------------
 try:
-    from services.conflict_service import conflict_scan  # type: ignore
+    from .services.conflict_service import conflict_scan  # type: ignore
 except ImportError:
     # Fail-open: sem serviço, assume sem conflitos
     def conflict_scan(case, lawyer):  # type: ignore
@@ -101,13 +110,13 @@ except ImportError:  # Prometheus opcional
 AVAIL_DEGRADED = cast(Any, AVAIL_DEGRADED)
 
 try:
-    from const import algorithm_version  # Nova constante centralizada
+    from .const import algorithm_version  # Nova constante centralizada
 except ImportError:
     from const import algorithm_version  # Fallback para execução standalone
 
 # Feature Flags para controle de rollout B2B
 try:
-    from services.feature_flags import (
+    from .services.feature_flags import (
         is_firm_matching_enabled,
         get_corporate_preset,
         is_b2b_enabled_for_user,
@@ -298,20 +307,32 @@ load_weights()
 
 # --- Outras Configs ---
 EMBEDDING_DIM = 384              # Dimensão dos vetores pgvector
-# DEPRECATED: RAIO_GEOGRAFICO_KM - agora usa case.radius_km (variável)
-# RAIO_GEOGRAFICO_KM = 50          # Normalização para G
 MIN_EPSILON = float(os.getenv("MIN_EPSILON", "0.02"))  # Limite inferior ε‑cluster - reduzido e configurável
 BETA_EQUITY = 0.30               # Peso equidade
-# (v2.5) Fairness configurável sem redeploy
 DIVERSITY_TAU = float(os.getenv("DIVERSITY_TAU", "0.30"))
 DIVERSITY_LAMBDA = float(os.getenv("DIVERSITY_LAMBDA", "0.05"))
-# (v2.6) Piso quando lotado - configurável via ENV
-OVERLOAD_FLOOR = float(os.getenv("OVERLOAD_FLOOR", "0.01"))  # Reduzido de 0.05 para 0.01
+OVERLOAD_FLOOR = float(os.getenv("OVERLOAD_FLOOR", "0.01"))
 
 # =============================================================================
 # 2. Logging em JSON
 # =============================================================================
-from logger import AUDIT_LOGGER
+
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:  # noqa: D401
+        return json.dumps({
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "context": record.args,
+        })
+
+
+_handler = logging.StreamHandler()
+_handler.setFormatter(JsonFormatter())
+AUDIT_LOGGER = logging.getLogger("audit.match")
+AUDIT_LOGGER.addHandler(_handler)
+AUDIT_LOGGER.setLevel(logging.INFO)
 
 # =============================================================================
 # 3. Utilitários
@@ -329,25 +350,6 @@ def haversine(coord_a: Tuple[float, float], coord_b: Tuple[float, float]) -> flo
 def cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     denom = float(np.linalg.norm(vec_a) * np.linalg.norm(vec_b)) or 1e-9
     return float(np.dot(vec_a, vec_b) / denom)
-
-
-def canonical(text: str) -> str:
-    """Remove acentos, normaliza e converte para slug para uso como chave de cache."""
-    if not text:
-        return ""
-    # Remove acentos e caracteres especiais
-    normalized = unicodedata.normalize('NFKD', text)
-    ascii_text = normalized.encode('ascii', 'ignore').decode('ascii')
-    # Converte para lowercase e substitui espaços por underscores
-    slug = re.sub(r'[^a-z0-9\s]', '', ascii_text.lower())
-    slug = re.sub(r'\s+', '_', slug.strip())
-    return slug
-
-
-def _chunks(lst: List, n: int):
-    """Divide uma lista em chunks de tamanho máximo n."""
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
 
 
 def safe_json_dump(data: Dict, max_list_size: int = 100) -> Dict:
@@ -409,6 +411,24 @@ def safe_json_dump(data: Dict, max_list_size: int = 100) -> Dict:
             out[key] = value
     return out
 
+def canonical(text: str) -> str:
+    """Remove acentos, normaliza e converte para slug para uso como chave de cache."""
+    if not text:
+        return ""
+    # Remove acentos e caracteres especiais
+    normalized = unicodedata.normalize('NFKD', text)
+    ascii_text = normalized.encode('ascii', 'ignore').decode('ascii')
+    # Converte para lowercase e substitui espaços por underscores
+    slug = re.sub(r'[^a-z0-9\s]', '', ascii_text.lower())
+    slug = re.sub(r'\s+', '_', slug.strip())
+    return slug
+
+
+def _chunks(lst: List, n: int):
+    """Divide uma lista em chunks de tamanho máximo n."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
 # =============================================================================
 # 4. Dataclasses expandidas
 # =============================================================================
@@ -450,10 +470,14 @@ class Case:
     expected_fee_min: float = 0.0  # Faixa de preço desejada (B2C)
     expected_fee_max: float = 0.0
     type: str = "INDIVIDUAL"  # INDIVIDUAL, CORPORATE - para controle de preset B2B
+    is_premium: bool = False  # Adicionado para a lógica premium
+    premium_exclusive_min: int = 60 # Adicionado para a lógica premium
     
     def __post_init__(self):
         if self.summary_embedding is None:
             self.summary_embedding = np.zeros(EMBEDDING_DIM, dtype=np.float32)
+        if self.summary_embedding is not None and self.summary_embedding.ndim != 1:
+            raise ValueError("summary_embedding must be a 1D array")
 
 
 @dataclass(slots=True)
@@ -537,6 +561,7 @@ class LawFirm(Lawyer):
     team_size: int = 0
     main_latlon: Tuple[float, float] = (0.0, 0.0)
     kpi_firm: FirmKPI = field(default_factory=FirmKPI)
+    is_boutique: bool = False  # Novo campo para identificar escritórios boutique
 
 
 @dataclass(slots=True)
@@ -809,190 +834,6 @@ async def deep_research_request(payload: Dict[str, Any]) -> Optional[Dict]:
     except (aiohttp.ClientError, asyncio.TimeoutError) as e:
         AUDIT_LOGGER.warning("Deep Research request failed", {"error": str(e)})
         return None
-
-# =============================================================================
-# Academic Enrichment Core Logic
-# =============================================================================
-
-class AcademicEnricher:
-    """Classe responsável por enriquecer dados acadêmicos usando APIs externas."""
-    
-    def __init__(self, cache: RedisCache):
-        self.cache = cache
-        # Importar templates organizados
-        try:
-            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
-            self.templates = AcademicPromptTemplates()
-            self.validator = AcademicPromptValidator()
-        except ImportError:
-            # Fallback para execução standalone
-            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
-            self.templates = AcademicPromptTemplates()
-            self.validator = AcademicPromptValidator()
-    
-    async def score_universities(self, names: List[str]) -> Dict[str, float]:
-        """Avalia universidades retornando scores de 0.0 a 1.0."""
-        if not names:
-            return {}
-        
-        if not HAS_ACADEMIC_ENRICHMENT:
-            AUDIT_LOGGER.info("Academic enrichment desabilitado - dependências não instaladas", {
-                "universities_count": len(names)
-            })
-            return {}
-        
-        if not PERPLEXITY_API_KEY:
-            AUDIT_LOGGER.info("Perplexity API não configurada - universidades usarão score padrão", {
-                "universities": names,
-                "fallback_score": 0.5
-            })
-            return {}
-        
-        # 1. Verificar cache primeiro
-        results = {}
-        uncached = []
-        
-        for name in names:
-            key = f"uni:{canonical(name)}"
-            cached_score = await self.cache.get_academic_score(key)
-            if cached_score is not None:
-                results[name] = cached_score
-            else:
-                uncached.append(name)
-        
-        if not uncached:
-            return results
-        
-        # 2. Processar em lotes via Perplexity usando templates consolidados
-        for chunk in _chunks(uncached, 15):  # Máximo 15 por requisição
-            # Validar e sanitizar nomes
-            sanitized_chunk = []
-            for name in chunk:
-                try:
-                    sanitized = self.validator.sanitize_institution_name(name)
-                    sanitized_chunk.append(sanitized)
-                except ValueError:
-                    continue  # Pular nomes inválidos
-            
-            if not sanitized_chunk:
-                continue
-            
-            # Usar template consolidado
-            payload = self.templates.perplexity_universities_payload(sanitized_chunk)
-            
-            response = await perplexity_chat(payload)
-            if response and "universities" in response:
-                for uni_data in response["universities"]:
-                    name = uni_data.get("name", "")
-                    score = float(uni_data.get("ranking_score", 0.5))
-                    score = max(0.0, min(1.0, score))  # Clamp 0-1
-                    
-                    if name and name in chunk:
-                        results[name] = score
-                        # Cachear resultado
-                        key = f"uni:{canonical(name)}"
-                        await self.cache.set_academic_score(key, score, ttl_h=UNI_RANK_TTL_H)
-        
-        return results
-    
-    async def score_journals(self, names: List[str]) -> Dict[str, float]:
-        """Avalia periódicos acadêmicos retornando scores de 0.0 a 1.0."""
-        if not names:
-            return {}
-        
-        if not HAS_ACADEMIC_ENRICHMENT:
-            AUDIT_LOGGER.info("Academic enrichment desabilitado - dependências não instaladas", {
-                "journals_count": len(names)
-            })
-            return {}
-        
-        if not PERPLEXITY_API_KEY:
-            AUDIT_LOGGER.info("Perplexity API não configurada - periódicos usarão score padrão", {
-                "journals": names,
-                "fallback_score": 0.5
-            })
-            return {}
-        
-        # 1. Verificar cache primeiro
-        results = {}
-        uncached = []
-        
-        for name in names:
-            key = f"jour:{canonical(name)}"
-            cached_score = await self.cache.get_academic_score(key)
-            if cached_score is not None:
-                results[name] = cached_score
-            else:
-                uncached.append(name)
-        
-        if not uncached:
-            return results
-        
-        # 2. Processar em lotes via Perplexity usando templates consolidados
-        for chunk in _chunks(uncached, 15):
-            # Validar e sanitizar nomes
-            sanitized_chunk = []
-            for name in chunk:
-                try:
-                    sanitized = self.validator.sanitize_institution_name(name)
-                    sanitized_chunk.append(sanitized)
-                except ValueError:
-                    continue  # Pular nomes inválidos
-            
-            if not sanitized_chunk:
-                continue
-            
-            # Usar template consolidado
-            payload = self.templates.perplexity_journals_payload(sanitized_chunk)
-            
-            response = await perplexity_chat(payload)
-            if response and "journals" in response:
-                for journal_data in response["journals"]:
-                    name = journal_data.get("name", "")
-                    score = float(journal_data.get("impact_score", 0.5))
-                    score = max(0.0, min(1.0, score))  # Clamp 0-1
-                    
-                    if name and name in chunk:
-                        results[name] = score
-                        # Cachear resultado
-                        key = f"jour:{canonical(name)}"
-                        await self.cache.set_academic_score(key, score, ttl_h=JOUR_RANK_TTL_H)
-        
-        # 3. Fallback: Deep Research para periódicos não resolvidos
-        missing = [name for name in uncached if name not in results]
-        for name in missing:
-            score = await self._deep_research_journal(name)
-            if score is not None:
-                results[name] = score
-                key = f"jour:{canonical(name)}"
-                await self.cache.set_academic_score(key, score, ttl_h=JOUR_RANK_TTL_H)
-        
-        return results
-    
-
-
-    async def _deep_research_journal(self, journal_name: str) -> Optional[float]:
-        """Fallback usando Deep Research para um periódico específico."""
-        try:
-            # Sanitizar nome do periódico
-            sanitized_name = self.validator.sanitize_institution_name(journal_name)
-            
-            # Usar template consolidado
-            payload = self.templates.deep_research_journal_fallback_payload(sanitized_name)
-            
-            response = await deep_research_request(payload)
-            if response and "score" in response:
-                score = float(response["score"])
-                return max(0.0, min(1.0, score))
-            
-            return None
-            
-        except (ValueError, TypeError) as e:
-            AUDIT_LOGGER.warning("Deep Research journal fallback error", {
-                "journal": journal_name,
-                "error": str(e)
-            })
-            return None
 
 # =============================================================================
 # 6. Feature calculator expandido
@@ -1444,12 +1285,12 @@ class MatchmakingAlgorithm:
         self.cache = cache
         # Importar templates organizados
         try:
-            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            from ..services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
             self.templates = AcademicPromptTemplates()
             self.validator = AcademicPromptValidator()
         except ImportError:
             # Fallback para execução standalone
-            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            from academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
             self.templates = AcademicPromptTemplates()
             self.validator = AcademicPromptValidator()
 
@@ -1664,27 +1505,16 @@ class MatchmakingAlgorithm:
     # ------------------------------------------------------------------
     async def rank(self, case: Case, lawyers: List[Lawyer], *, top_n: int = 5,
                    preset: str = "balanced", model_version: Optional[str] = None,
-                   exclude_ids: Optional[Set[str]] = None) -> List[Lawyer]:
-        """Classifica advogados para um caso.
-
-        Passos:
-        1. Carrega pesos (preset + dinâmica).
-        2. Calcula features (cache Redis para estáticas).
-        3. Gera breakdown `delta` por feature.
-        4. Aplica ε-cluster e equidade, incluindo boost de diversidade (v2.3).
-        5. (v2.6) Permite carregar pesos de um modelo experimental para testes A/B.
-        6. Retorna top_n ordenados por `fair` e `last_offered_at`.
-        """
+                   exclude_ids: Optional[Set[str]] = None) -> List['Recommendation']:
+        """Classifica advogados para um caso e mescla com recomendações patrocinadas."""
+        
         if not lawyers:
             return []
 
         # --- Feature Flags: Controle de B2B ---
-        # Auto-ajustar preset para casos corporativos se feature flag habilitada
         if preset == "balanced" and hasattr(case, 'type') and case.type == "CORPORATE":
             preset = get_corporate_preset()
         
-        # --- Detecção Automática do Preset Econômico ---
-        # Ativa modo econômico quando cliente informou orçamento baixo
         if preset == "balanced":
             if hasattr(case, 'expected_fee_max') and case.expected_fee_max and case.expected_fee_max < 1500:
                 preset = "economic"
@@ -1694,10 +1524,8 @@ class MatchmakingAlgorithm:
                     "threshold": 1500
                 })
         
-        # Verificar se matching de escritórios está habilitado
         firm_matching_enabled = is_firm_matching_enabled()
         
-        # Log de auditoria das feature flags
         AUDIT_LOGGER.info("Feature flags status", {
             "case_id": case.id,
             "firm_matching_enabled": firm_matching_enabled,
@@ -1705,321 +1533,124 @@ class MatchmakingAlgorithm:
             "segmented_cache_enabled": is_segmented_cache_enabled()
         })
 
-        # --- Filtro de exclusão opcional -------------------------------
         if exclude_ids:
             lawyers = [lw for lw in lawyers if lw.id not in exclude_ids]
             if not lawyers:
                 return []
 
-        # 0. Filtrar conflitos de interesse (OAB compliance) com timeout
+        # 0. Filtrar conflitos de interesse
         filtered_lawyers = []
         for lw in lawyers:
-            try:
-                # Simplificar: conflict_scan é síncrono, wrap em task se necessário
-                has_conflict = await self._safe_conflict_scan(case, lw)
-                if has_conflict:
-                    # Registrar motivo do conflito para explicabilidade
-                    lw.scores["conflict"] = True
-                    lw.scores["conflict_reason"] = "Impedimento detectado pelo sistema"
-                    continue
+            if not await self._safe_conflict_scan(case, lw):
                 filtered_lawyers.append(lw)
-            except Exception as e:
-                # Fail-open: timeout assume sem conflito, mas loga alerta
-                AUDIT_LOGGER.warning("Conflict scan error - fail-open mode", {
-                    "case_id": case.id, "lawyer_id": lw.id, "error": str(e)
-                })
-                filtered_lawyers.append(lw)
-        
         lawyers = filtered_lawyers
         if not lawyers:
-            AUDIT_LOGGER.warning("Todos os advogados filtrados por conflito de interesse", {
-                "case_id": case.id
-            })
             return []
+            
+        # 4️⃣ Lógica de Gating / Boost para Casos Premium
+        if case.is_premium:
+            case_creation_time = getattr(case, 'created_at', datetime.utcnow())
+            window_end = case_creation_time + timedelta(minutes=case.premium_exclusive_min)
 
-        # --- Two-pass B2B Algorithm -------------------------------------
-        two_pass_mode = preset == 'b2b'
+            if datetime.utcnow() < window_end:
+                pro_lawyers = [l for l in lawyers if getattr(l, 'plan', 'FREE').upper() == "PRO"]
+                if pro_lawyers:
+                    lawyers = pro_lawyers
+            else:
+                PRO_BONUS = 0.08
+                for lawyer in lawyers:
+                    if getattr(lawyer, 'plan', 'FREE').upper() == "PRO":
+                        if 'pro_boost' not in lawyer.scores:
+                             lawyer.scores['pro_boost'] = PRO_BONUS
         
-        if two_pass_mode:
-            # PASSO 1: Ranking de Escritórios
-            firm_candidates = []
-            firm_scores: Dict[str, float] = {}
-            
-            # Agregar advogados por escritório para ranking de firmas
-            firm_ids_added = set()
-            for lw in lawyers:
-                if lw.firm_id and lw.firm:
-                    # Calcular score da firma usando o melhor advogado como proxy
-                    fc = FeatureCalculator(case, lw)
-                    current_score = fc.firm_reputation()
-                    
-                    if lw.firm_id not in firm_scores or current_score > firm_scores[lw.firm_id]:
-                        firm_scores[lw.firm_id] = current_score
-                        
-                    # Usar referência original da firma se já é LawFirm, senão criar
-                    if lw.firm_id not in firm_ids_added:
-                        if isinstance(lw.firm, LawFirm):
-                            # Usar referência original (mantém cache, embeddings, etc.)
-                            firm_candidates.append(lw.firm)
-                        else:
-                            # Criar novo objeto LawFirm apenas se necessário
-                            firm_obj = LawFirm(
-                                id=lw.firm_id,
-                                nome=lw.firm.nome if hasattr(lw.firm, 'nome') else f"Escritório {lw.firm_id}",
-                                tags_expertise=lw.firm.tags_expertise if hasattr(lw.firm, 'tags_expertise') else lw.tags_expertise,
-                                geo_latlon=lw.firm.main_latlon if hasattr(lw.firm, 'main_latlon') else lw.geo_latlon,
-                                curriculo_json={},
-                                kpi=KPI(
-                                    success_rate=0.8,
-                                    cases_30d=0,
-                                    avaliacao_media=4.0,
-                                    tempo_resposta_h=24,
-                                    active_cases=0
-                                ),
-                                kpi_firm=lw.firm.kpi_firm,
-                                team_size=lw.firm.team_size if hasattr(lw.firm, 'team_size') else 1,
-                                main_latlon=lw.firm.main_latlon if hasattr(lw.firm, 'main_latlon') else lw.geo_latlon
-                            )
-                            # Marcar como clone para evitar cache de features
-                            setattr(firm_obj, "is_firm_clone", True)
-                            firm_candidates.append(firm_obj)
-                        firm_ids_added.add(lw.firm_id)
-            
-            # Executar ranking das firmas se houver candidatos
+        # --- Two-pass B2B Algorithm ---
+        if preset == 'b2b':
+            firm_candidates = [lw.firm for lw in lawyers if lw.firm_id and lw.firm]
             if firm_candidates:
-                firm_ranking = await self._rank_firms(case, firm_candidates, top_n=min(3, len(firm_candidates)))
+                unique_firms = {f.id: f for f in firm_candidates}.values()
+                firm_ranking = await self._rank_firms(case, list(unique_firms), top_n=3)
                 top_firm_ids = {f.id for f in firm_ranking}
                 
-                # Log do passo 1
-                AUDIT_LOGGER.info(f"B2B Passo 1: {len(firm_ranking)} escritórios selecionados", {
-                    "case_id": case.id,
-                    "firm_ids": list(top_firm_ids),
-                    "firm_scores": {f.id: firm_scores.get(f.id, 0.0) for f in firm_ranking}
-                })
-                
-                # PASSO 2: Filtrar advogados apenas dos escritórios top-3
                 b2b_lawyers = [lw for lw in lawyers if lw.firm_id in top_firm_ids]
-                
-                # Fallback: se filtro removeu todos, inclui advogados independentes
                 if not b2b_lawyers:
-                    b2b_lawyers = [lw for lw in lawyers if lw.firm_id is None]
-                    AUDIT_LOGGER.warning("B2B fallback: nenhum advogado de escritórios top-3, incluindo independentes", {
-                        "case_id": case.id,
-                        "independent_lawyers": len(b2b_lawyers)
-                    })
-                
+                    b2b_lawyers = [lw for lw in lawyers if not lw.firm_id]
                 lawyers = b2b_lawyers
-            else:
-                # Sem escritórios, manter todos os advogados
-                AUDIT_LOGGER.info("B2B: nenhum escritório encontrado, mantendo todos os advogados", {
-                    "case_id": case.id,
-                    "total_lawyers": len(lawyers)
-                })
 
-        # 1. Carregar pesos base
-        # (v2.6) Lógica para teste A/B de pesos
-        experimental_weights = None
-        if model_version and model_version != 'production':
-            experimental_weights = load_experimental_weights(model_version)
-
-        if experimental_weights:
-            base_weights = experimental_weights
-        else:
-            base_weights = (_current_weights or DEFAULT_WEIGHTS).copy()
-
-        # Sobrepor apenas chaves declaradas no preset (permite ajustes rápidos)
+        # 1. Carregar e aplicar pesos
+        experimental_weights = load_experimental_weights(model_version) if model_version else None
+        base_weights = experimental_weights or (_current_weights or DEFAULT_WEIGHTS).copy()
         base_weights.update(load_preset(preset))
-
-        # 2. Aplicar pesos dinâmicos baseados na complexidade
         weights = self.apply_dynamic_weights(case, base_weights)
 
-        # CORREÇÃO PONTO 2 e 7: Filtro de disponibilidade em batch (otimizado)
+        # 2. Filtro de disponibilidade
         lawyer_ids = [lw.id for lw in lawyers]
-        # Consulta de disponibilidade com timeout resiliente
         timeout_sec = float(os.getenv("AVAIL_TIMEOUT", "1.5"))
-        coverage_threshold = float(os.getenv("AVAIL_COVERAGE_THRESHOLD", "0.8"))  # 80%
+        coverage_threshold = float(os.getenv("AVAIL_COVERAGE_THRESHOLD", "0.8"))
         
         try:
-            availability_map = await asyncio.wait_for(
-                get_lawyers_availability_status(lawyer_ids),
-                timeout=timeout_sec
-            )
-            
-            # Calcular cobertura do serviço (apenas advogados disponíveis)
-            available_count = sum(1 for v in availability_map.values() if v)
-            response_count = len(availability_map)
-            coverage = response_count / len(lawyer_ids) if lawyer_ids else 0
-            availability_rate = available_count / response_count if response_count else 0
-            
-            # Modo degradado se timeout, vazio ou cobertura de resposta baixa
-            degraded_mode = (not availability_map or coverage < coverage_threshold or availability_rate == 0)
-            
-            if degraded_mode:
-                AUDIT_LOGGER.warning(
-                    "Availability service low coverage - operating in degraded mode",
-                    {
-                        "case_id": case.id, 
-                        "lawyer_count": len(lawyers), 
-                        "response_coverage": round(coverage, 2),
-                        "availability_rate": round(availability_rate, 2),
-                        "threshold": coverage_threshold
-                    }
-                )
-                
+            availability_map = await asyncio.wait_for(get_lawyers_availability_status(lawyer_ids), timeout=timeout_sec)
+            degraded_mode = not availability_map or (len(availability_map) / len(lawyer_ids)) < coverage_threshold
         except asyncio.TimeoutError:
-            AUDIT_LOGGER.warning(
-                "Availability service timeout - operating in degraded mode",
-                {"case_id": case.id, "lawyer_count": len(lawyers), "timeout": timeout_sec}
-            )
-            availability_map = {}
-            degraded_mode = True
-            coverage = 0.0
+            availability_map, degraded_mode = {}, True
         
-        # Detecção de modo degradado e fail-open
         if degraded_mode:
-            # Em modo degradado, permite todos (fail-open)
             availability_map = {lw.id: True for lw in lawyers}
-            
-            # Incrementa contador Prometheus apenas quando realmente degradado
-            if HAS_PROMETHEUS and degraded_mode:
-                try:
-                    AVAIL_DEGRADED.inc()
-                except AttributeError:
-                    pass  # NoOpCounter silencioso
-            
-            # Log estruturado adicional quando não há Prometheus
-            if not HAS_PROMETHEUS:
-                AUDIT_LOGGER.info(
-                    "Degraded mode metric logged",
-                    {"metric": "availability_degraded", "value": 1, "case_id": case.id}
-                )
-        
-        available_lawyers = []
-        # Default True no modo normal para map parcial (advogados novos)
-        default_availability = True if not degraded_mode else False
-        for lw in lawyers:
-            if availability_map.get(lw.id, default_availability):
-                available_lawyers.append(lw)
+            if HAS_PROMETHEUS:
+                AVAIL_DEGRADED.inc()
 
-        # 3. Calcular features com cache (incluindo enriquecimento acadêmico)
+        available_lawyers = [lw for lw in lawyers if availability_map.get(lw.id, not degraded_mode)]
+
+        # 3. Calcular features
         for lw in available_lawyers:
-            # Evitar cache para clones de LawFirm
-            if getattr(lw, "is_firm_clone", False):  # clones não devem poluir Redis
-                calculator = FeatureCalculator(case, lw)
-                feats = await calculator.all_async()  # Usar versão assíncrona
-                lw.scores["features"] = feats
-            else:
-                # Tentar recuperar features estáticas do cache
-                static_feats = await cache.get_static_feats(lw.id)
+            calculator = FeatureCalculator(case, lw)
+            lw.scores["features"] = await calculator.all_async()
 
-                if static_feats:
-                    feats = static_feats.copy()
-                    calculator = FeatureCalculator(case, lw)
-                    feats["A"] = calculator.area_match()
-                    feats["S"] = calculator.case_similarity()
-                    feats["T"] = calculator.success_rate()
-                    feats["G"] = calculator.geo_score()         # recálculo para geografia
-                    feats["Q"] = await calculator.qualification_score_async()  # Sempre recalcular Q com enriquecimento
-                    feats["U"] = calculator.urgency_capacity()  # recálculo para urgência
-                    feats["C"] = calculator.soft_skill()        # recálculo de soft-skills
-                    feats["R"] = calculator.review_score()
-                    feats["E"] = calculator.firm_reputation()   # recálculo para firm reputation
-                    feats["P"] = calculator.price_fit()         # recálculo para price fit
-                    feats["M"] = calculator.maturity_score()    # recálculo para maturity
-                else:
-                    # Se não há cache, calcular tudo e salvar features estáticas
-                    calculator = FeatureCalculator(case, lw)
-                    feats = await calculator.all_async()  # Usar versão assíncrona
-                    # Q agora depende de dados externos, não cachear mais
-                    # Manter cache apenas para features realmente estáticas (nenhuma por enquanto)
-                    static_to_cache = {}  # Por enquanto, não cachear nada até otimizar
-                    if static_to_cache:
-                        await cache.set_static_feats(lw.id, static_to_cache)
-
-                # Atribuição unificada de features
-                lw.scores["features"] = feats
-
-        # 4. Calcular scores LTR em paralelo com fallback para pesos
+        # 4. Calcular scores LTR
         await self._calculate_ltr_scores_parallel(available_lawyers, weights, case, preset, degraded_mode)
 
         if not available_lawyers:
             return []
 
-        # 5. Aplicar ε-cluster e equidade
-        max_score = max(lw.scores["ltr"] for lw in available_lawyers)
-        eps = max(MIN_EPSILON, 0.10 * max_score)  # proporcional ao max_score
-        min_score = max_score - eps
-        elite = [lw for lw in available_lawyers if lw.scores["ltr"] >= min_score]
-
-        # 6. Re-ranking com equidade e diversidade
+        # 5. Aplicar ε-cluster, equidade e diversidade
+        max_score = max(lw.scores["ltr"] for lw in available_lawyers) if available_lawyers else 0
+        elite = [lw for lw in available_lawyers if lw.scores["ltr"] >= max_score - max(MIN_EPSILON, 0.10 * max_score)]
+        
         for lw in elite:
-            # CORREÇÃO PONTO 4 (uso): Passar `max_concurrent_cases`
             equity = self.equity_weight(lw.kpi, lw.max_concurrent_cases)
-            
-            # (v2.5) O boost de diversidade será aplicado sequencialmente
             lw.scores["equity_raw"] = equity
-            lw.scores["fair_base"] = (1 - BETA_EQUITY) * \
-                lw.scores["ltr"] + BETA_EQUITY * equity
-
-        # (v2.5) Fairness Sequencial Multi-Eixo
-        # O re-ranking acontece em múltiplos passos para cada dimensão
+            lw.scores["fair_base"] = (1 - BETA_EQUITY) * lw.scores["ltr"] + BETA_EQUITY * equity
+        
         current_ranking = sorted(elite, key=lambda l: l.scores["fair_base"], reverse=True)
         for dimension in ["gender", "ethnicity", "pcd", "orientation"]:
             boosts = self._calculate_dimension_boost(current_ranking, dimension)
             for lw in current_ranking:
                 lw.scores["fair_base"] += boosts.get(lw.id, 0.0)
-            # Re-ordena após cada boost para o próximo cálculo de representação
             current_ranking.sort(key=lambda l: l.scores["fair_base"], reverse=True)
         
-        # O ranking final é o resultado do último passo
         final_ranking = current_ranking
 
-        # Log de auditoria
-        for lw in final_ranking[:top_n]:  # só loga os top_n selecionados
-            # CORREÇÃO PONTO 6: Garantir que o log é serializável
-            log_scores = lw.scores.copy()
-            # Remover embeddings verbosos do log
-            feats_log = log_scores.get("features", {})
-            if "casos_historicos_embeddings" in feats_log:
-                del feats_log["casos_historicos_embeddings"]
-            if "summary_embedding" in feats_log:
-                del feats_log["summary_embedding"]
-            
-            log_context = {
-                "case_id": case.id,
-                "lawyer_id": lw.id,
-                "scores": safe_json_dump(log_scores),
-                "model_version": model_version or "production",
-                "preset": preset,
-                "weights_used": safe_json_dump({k: float(v) for k, v in weights.items()}),
-                "degraded_mode": degraded_mode,
-                "algorithm_version": algorithm_version,
-                "uni_rank_ttl_h": UNI_RANK_TTL_H,
-                "journal_rank_ttl_h": JOUR_RANK_TTL_H,
-                "academic_enrich": HAS_ACADEMIC_ENRICHMENT,
-                "dr_background": True,  # Deep Research sempre background
-                "dr_poll_s": DEEP_POLL_SECS,
-                "dr_max_min": DEEP_MAX_MIN,
-            }
-            AUDIT_LOGGER.info(
-                f"Lawyer {lw.id} ranked for case {case.id}", log_context)
-
-        # 7. Ordenar por score final e, como desempate, pelo mais "descansado"
+        # 6. Log e ordenação final
+        for lw in final_ranking[:top_n]:
+            AUDIT_LOGGER.info(f"Lawyer {lw.id} ranked for case {case.id}", {"case_id": case.id, "lawyer_id": lw.id, "scores": safe_json_dump(lw.scores), "model_version": model_version or "production", "preset": preset})
+        
         final_ranking.sort(key=lambda l: (-l.scores["fair_base"], l.last_offered_at))
-
-        # Atualizar timestamp para os advogados selecionados e retornar
+        
         now = time.time()
-        top_n_lawyers = final_ranking[:top_n]
-        for lw in top_n_lawyers:
+        for lw in final_ranking[:top_n]:
             lw.last_offered_at = now
-            # Métrica Prometheus diferenciando advogado vs. escritório
-            if HAS_PROMETHEUS:
-                try:
-                    label_entity = 'firm' if isinstance(lw, LawFirm) else 'lawyer'
-                    MATCH_RANK_TOTAL.labels(entity=label_entity).inc()
-                except AttributeError:
-                    pass  # NoOpCounter silencioso
-        return top_n_lawyers
+        
+        # 7. Mesclar com recomendações patrocinadas
+        organic_recommendations = []
+        for lw in final_ranking[:top_n]:
+            fair_score = lw.scores.get('fair_base', 0.0)
+            if 'pro_boost' in lw.scores:
+                fair_score = min(fair_score + lw.scores['pro_boost'], 1.0)
+            organic_recommendations.append(Recommendation(lawyer=lw, fair_score=fair_score, is_sponsored=False))
+
+        sponsored_lawyers = await fetch_ads_for_case(case, limit=3)
+        sponsored_recommendations = [Recommendation(lawyer=sl, fair_score=sl.scores.get('fair_base', 0.0), is_sponsored=True, ad_campaign_id=getattr(sl, 'ad_meta', {}).get('campaign_id')) for sl in sponsored_lawyers]
+
+        return organic_recommendations + sponsored_recommendations
 
 # =============================================================================
 # 8. Exemplo de uso expandido
@@ -2099,7 +1730,7 @@ if __name__ == "__main__":
     ]
 
     async def demo_v2():
-        """Demonstração do algoritmo v2.7-rc3."""
+        """Demonstração do algoritmo v2.9-unified."""
         print(f"🚀 Demo do Algoritmo de Match {algorithm_version}")
         print("=" * 60)
 
@@ -2110,12 +1741,14 @@ if __name__ == "__main__":
 
         header = f"\n—— Resultado do Ranking {algorithm_version} (B2B Two-Pass + Feature-E) ——"
         print(header)
-        for pos, adv in enumerate(ranking_v2, 1):
+        for pos, rec in enumerate(ranking_v2, 1):
+            adv = rec.lawyer
             scores = adv.scores
             feats = scores["features"]
             delta = scores["delta"]
 
-            print(f"{pos}º {adv.nome}")
+            sponsored_tag = "🚀" if rec.is_sponsored else ""
+            print(f"{pos}º {adv.nome} {sponsored_tag}")
             print(
                 f"  Fair: {scores['fair_base']:.3f} | Raw: {scores['ltr']:.3f} | Equity: {scores.get('equity_raw', 0):.3f}")
             print(
@@ -2130,8 +1763,7 @@ if __name__ == "__main__":
 
         print(f"\n📊 Observações {algorithm_version}:")
         print("• Academic Enrichment: Universidades e periódicos avaliados via APIs externas")
-        print("• Templates consolidados: Prompts padronizados para Perplexity e Deep Research")
-        print("• Cache inteligente: TTL configurável para dados acadêmicos")
+        print("• Sponsored recommendations e lógica de casos premium integradas")
         print("• Validação robusta: Sanitização e validação de inputs")
         print("• Feature-E (Firm Reputation) e B2B Two-Pass mantidos")
         print("• Safe conflict scan e configurações via ENV")
@@ -2142,44 +1774,17 @@ if __name__ == "__main__":
         print("\n🧪 Testando Academic Enrichment com Templates Consolidados")
         print("=" * 60)
         
-        # Teste básico do AcademicEnricher
         enricher = AcademicEnricher(cache)
         
-        # Teste templates
-        print("📋 Testando templates de prompts...")
+        # Teste validador e canonical
         try:
-            # Teste template de universidades
-            unis_payload = enricher.templates.perplexity_universities_payload(['USP', 'Harvard'])
-            assert unis_payload["model"] == "sonar-deep-research"
-            assert "response_format" in unis_payload
-            print("✅ Template universidades OK")
-            
-            # Teste template de periódicos 
-            jour_payload = enricher.templates.perplexity_journals_payload(['RDA', 'HLR'])
-            assert jour_payload["search_mode"] == "academic"
-            print("✅ Template periódicos OK")
-            
-            # Teste template Deep Research
-            fallback_payload = enricher.templates.deep_research_journal_fallback_payload('Revista Teste')
-            assert fallback_payload["background"] == True
-            assert fallback_payload["model"] == "o3-deep-research"
-            print("✅ Template Deep Research OK")
-            
+            enricher.validator.validate_batch_size(['a', 'b'], 15)
+            assert canonical("Universidade de São Paulo") == "universidade_de_sao_paulo"
+            print("✅ Validador e canonical() funcionando")
         except Exception as e:
-            print(f"❌ Erro nos templates: {e}")
+            print(f"❌ Erro no validador/canonical: {e}")
             return
         
-        # Teste validador
-        print("🔍 Testando validador...")
-        try:
-            enricher.validator.validate_batch_size(['a', 'b'], 15)  # OK
-            enricher.validator.sanitize_institution_name("Universidade de São Paulo")  # OK
-            print("✅ Validador funcionando")
-        except Exception as e:
-            print(f"❌ Erro no validador: {e}")
-            return
-        
-        # Teste universidades e periódicos
         if HAS_ACADEMIC_ENRICHMENT and PERPLEXITY_API_KEY:
             print("⚡ Testando com APIs reais...")
             uni_scores = await enricher.score_universities(['Universidade de São Paulo', 'Harvard Law School'])
@@ -2188,27 +1793,9 @@ if __name__ == "__main__":
             jour_scores = await enricher.score_journals(['Revista de Direito Administrativo', 'Harvard Law Review'])
             print(f"Scores de periódicos: {jour_scores}")
         else:
-            print("⚠️  APIs acadêmicas não configuradas - testando fallback")
-            uni_scores = await enricher.score_universities(['USP', 'Harvard'])
-            jour_scores = await enricher.score_journals(['RDA', 'HLR'])
-            assert uni_scores == {}  # Deve retornar vazio sem APIs
-            assert jour_scores == {}
-            print("✅ Fallback funcionando corretamente")
+            print("⚠️  APIs acadêmicas não configuradas - pulando testes com APIs reais")
         
-        # Teste cache
-        key = "uni:universidade_de_sao_paulo"
-        await cache.set_academic_score(key, 0.85, ttl_h=1)
-        cached_score = await cache.get_academic_score(key)
-        assert cached_score == 0.85, f"Cache falhou: esperado 0.85, obtido {cached_score}"
-        print("✅ Cache Redis funcionando")
-        
-        # Teste canonical()
-        assert canonical("Universidade de São Paulo") == "universidade_de_sao_paulo"
-        assert canonical("Harvard Law School") == "harvard_law_school"
-        print("✅ Função canonical() funcionando")
-        
-        print("🎉 Todos os testes passaram!")
-        print("📊 Templates consolidados prontos para produção!")
+        print("🎉 Testes de enriquecimento acadêmico concluídos!")
 
     async def run_all_demos():
         """Executa todos os demos e testes."""

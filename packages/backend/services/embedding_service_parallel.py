@@ -13,7 +13,7 @@ from typing import List
 import httpx
 from dotenv import load_dotenv
 
-from backend.metrics import external_api_duration, fallback_usage_total
+from metrics import external_api_duration, fallback_usage_total
 
 load_dotenv()
 

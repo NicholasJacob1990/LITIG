@@ -4,7 +4,7 @@ import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv, find_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
@@ -14,7 +14,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from main_routes import router as api_router
-# from backend.routes import (
+# from routes import (
 #     auth, cases, users, contracts, matching,
 #     support, admin, ab_testing, ocr, payments,
 #     notifications, reviews, video, reports
@@ -41,6 +41,9 @@ from routes.unipile_v2 import router as unipile_v2_router
 from routes.providers import router as providers_router
 from routes.users import router as users_router
 from routes.auto_context import router as auto_context_router
+from routes.enriched_profiles import router as enriched_profiles_router
+from routes.enriched_firms import router as enriched_firms_router
+from routes.data_quality_dashboard import router as data_quality_router
 from middleware.auto_context_middleware import AutoContextMiddleware
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
@@ -60,6 +63,15 @@ from packages.backend.routes import (
     outlook
 )
 from routes.lawyer_routes import router as lawyer_routes
+from .routes import privacy_cases
+from .routes import supabase_cases
+# from . import models  # Removido - não existe database.py
+# from .database import engine  # Removido - não existe 
+from .api import (
+    auth, users, cases, lawyers, documents, chat, admin_premium
+)
+
+# models.Base.metadata.create_all(bind=engine)  # Removido - usa Supabase
 
 # Carrega as variáveis de ambiente do arquivo .env
 # find_dotenv() sobe a árvore de diretórios para encontrar o .env
@@ -174,9 +186,17 @@ app.include_router(instagram.router)
 app.include_router(facebook.router)
 app.include_router(outlook.router)
 app.include_router(social.router)
+app.include_router(admin_premium.router)
+app.include_router(privacy_cases.router, prefix="/api/v1/privacy-cases", tags=["Privacy Cases"])
+app.include_router(supabase_cases.router)
 
 # Rotas de Advogados
 app.include_router(lawyer_routes.router, prefix="/api/v1/lawyers", tags=["lawyers"])
+
+# Novas rotas de dados enriquecidos
+app.include_router(enriched_profiles_router, tags=["Enriched Profiles"])
+app.include_router(enriched_firms_router, tags=["Enriched Firms"])
+app.include_router(data_quality_router, tags=["Data Quality"])
 
 # CORREÇÃO: Rate limiter aplicado individualmente nas rotas em routes.py
 # Removido limiter.limit("60/minute")(api_router) que causava erro nos testes
@@ -203,6 +223,14 @@ async def get_metrics():
 
 # Configuração de Logging
 # if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# Configuração de Logging
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 #     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 

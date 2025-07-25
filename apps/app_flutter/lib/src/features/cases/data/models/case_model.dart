@@ -14,6 +14,9 @@ class CaseModel extends Case {
     super.firmMatchScore,
     super.caseType,
     super.allocationType,
+    super.isPremium,
+    super.isEnterprise,
+    super.clientPlan,
   });
 
   factory CaseModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +32,9 @@ class CaseModel extends Case {
       firmMatchScore: json['firm_match_score']?.toDouble(),
       caseType: json['case_type'] as String?,
       allocationType: json['allocation_type'] as String?,
+      isPremium: json['is_premium'] as bool? ?? false,
+      isEnterprise: json['is_enterprise'] as bool? ?? false,
+      clientPlan: json['client_plan'] as String?,
     );
   }
 
@@ -40,6 +46,12 @@ class CaseModel extends Case {
       'lawyer_name': lawyerName,
       'lawyer_id': lawyerId,
       'created_at': createdAt.toIso8601String(),
+      'firm_match_score': firmMatchScore,
+      'case_type': caseType,
+      'allocation_type': allocationType,
+      'is_premium': isPremium,
+      'is_enterprise': isEnterprise,
+      'client_plan': clientPlan,
     };
   }
 } 

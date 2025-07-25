@@ -16,6 +16,7 @@ class MatchedLawyer extends Equatable {
   final List<String> awards;
   final String? professionalSummary;
   final List<String> specializations;
+  final String plan; // NOVO: Plano do advogado
 
   const MatchedLawyer({
     required this.id,
@@ -33,7 +34,14 @@ class MatchedLawyer extends Equatable {
     this.awards = const [],
     this.professionalSummary,
     this.specializations = const [],
+    this.plan = 'FREE', // NOVO: Padrão FREE
   });
+
+  /// Verifica se o advogado tem plano PRO
+  bool get isPro => plan.toUpperCase() == 'PRO';
+
+  /// Verifica se o advogado tem plano FREE
+  bool get isFree => plan.toUpperCase() == 'FREE';
 
   factory MatchedLawyer.fromJson(Map<String, dynamic> json) {
     return MatchedLawyer(
@@ -52,6 +60,7 @@ class MatchedLawyer extends Equatable {
       awards: List<String>.from(json['awards'] ?? []),
       professionalSummary: json['professional_summary'] ?? json['bio'],
       specializations: List<String>.from(json['specializations'] ?? []),
+      plan: json['plan'] as String? ?? 'FREE', // NOVO: Consumir plano do backend
     );
   }
 
@@ -79,22 +88,10 @@ class MatchedLawyer extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        nome,
-        primaryArea,
-        reviewCount,
-        distanceKm,
-        isAvailable,
-        avatarUrl,
-        rating,
-        fair,
-        equity,
-        features,
-        experienceYears,
-        awards,
-        professionalSummary,
-        specializations,
-      ];
+    id, nome, primaryArea, reviewCount, distanceKm, isAvailable, avatarUrl,
+    rating, fair, equity, features, experienceYears, awards, 
+    professionalSummary, specializations, plan, // NOVO
+  ];
 }
 
 class LawyerFeatures extends Equatable {

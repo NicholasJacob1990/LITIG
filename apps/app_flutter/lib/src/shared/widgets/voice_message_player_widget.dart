@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/core/theme/app_colors.dart';
@@ -119,13 +118,13 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: widget.isSentByMe 
-            ? AppColors.primaryBlue.withOpacity(0.1)
+            ? AppColors.primaryBlue.withValues(alpha: 0.1)
             : Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: widget.isSentByMe 
-              ? AppColors.primaryBlue.withOpacity(0.2)
-              : Colors.grey.withOpacity(0.2),
+              ? AppColors.primaryBlue.withValues(alpha: 0.2)
+              : Colors.grey.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -163,7 +162,7 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: _isCurrentlyPlaying ? primaryColor : primaryColor.withOpacity(0.1),
+          color: _isCurrentlyPlaying ? primaryColor : primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
           border: Border.all(
             color: primaryColor,
@@ -210,7 +209,7 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
                     decoration: BoxDecoration(
                       color: isActive 
                           ? primaryColor
-                          : primaryColor.withOpacity(0.3),
+                          : primaryColor.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(1),
                     ),
                   );
@@ -225,7 +224,7 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
           value: _audioDuration != null && _audioDuration! > Duration.zero
               ? _playbackState.position.inMilliseconds / _audioDuration!.inMilliseconds
               : 0.0,
-          backgroundColor: primaryColor.withOpacity(0.2),
+          backgroundColor: primaryColor.withValues(alpha: 0.2),
           valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
           minHeight: 2,
         ),
@@ -253,7 +252,7 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
           Text(
             '/ ${_formatDuration(_audioDuration!)}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: primaryColor.withOpacity(0.7),
+              color: primaryColor.withValues(alpha: 0.7),
               fontSize: 10,
             ),
           ),
@@ -296,9 +295,9 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: primaryColor.withOpacity(0.3)),
+              border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
             ),
             child: Text(
               '${_playbackState.speed}x',
@@ -318,7 +317,7 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
                 : 0.0,
             onChanged: _onSeekChanged,
             activeColor: primaryColor,
-            inactiveColor: primaryColor.withOpacity(0.3),
+            inactiveColor: primaryColor.withValues(alpha: 0.3),
             thumbColor: primaryColor,
           ),
         ),
@@ -329,9 +328,9 @@ class _VoiceMessagePlayerWidgetState extends State<VoiceMessagePlayerWidget>
           child: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.red.withOpacity(0.3)),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
             ),
             child: const Icon(
               LucideIcons.square,

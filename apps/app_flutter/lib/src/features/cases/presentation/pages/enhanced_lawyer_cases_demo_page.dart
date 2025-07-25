@@ -109,7 +109,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
         color: AppColors.primaryBlue.withValues(alpha: 0.1),
         border: Border(
           bottom: BorderSide(
-            color: AppColors.primaryBlue.withOpacity(0.2),
+            color: AppColors.primaryBlue.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -162,10 +162,10 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AppColors.success.withOpacity(0.3),
+          color: AppColors.success.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -219,27 +219,27 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
       revenueModel: 'success_fee',
       expectedHours: 120.0,
       hourlyRateRecommended: 450.0,
-      estimatedDuration: const Duration(days: 180),
-      criticalDeadlines: const ['Audiência em 30 dias', 'Perícia em 60 dias'],
+      estimatedDuration: Duration(days: 180),
+      criticalDeadlines: ['Audiência em 30 dias', 'Perícia em 60 dias'],
       complexityScore: 65.0,
-      complexityFactors: const ['Múltiplas testemunhas', 'Documentação extensa'],
+      complexityFactors: ['Múltiplas testemunhas', 'Documentação extensa'],
       difficultyLevel: 'medium',
-      requiredSkills: const ['Direito trabalhista', 'Negociação'],
+      requiredSkills: ['Direito trabalhista', 'Negociação'],
       marketSegment: 'Trabalhista',
       marketDemand: 75.0,
-      marketTrends: const ['Aumento de casos de assédio', 'Foco em compliance'],
+      marketTrends: ['Aumento de casos de assédio', 'Foco em compliance'],
       competitivePosition: 'Referência regional',
-      upsellOpportunities: const ['Consultoria preventiva', 'Compliance trabalhista'],
+      upsellOpportunities: ['Consultoria preventiva', 'Compliance trabalhista'],
       expansionPotential: 80.0,
-      referralOpportunities: const ['Outros colaboradores da empresa'],
+      referralOpportunities: ['Outros colaboradores da empresa'],
       strategicValue: 'Cliente com potencial recorrente',
-      competition: const CompetitiveAnalysis(
+      competition: CompetitiveAnalysis(
         competitorCount: 3,
         competitorProfiles: ['Especialista trabalhista', 'Escritório tradicional'],
         differentiation: 'Atendimento personalizado e agilidade',
         winProbability: 85.0,
       ),
-      riskProfile: const RiskProfile(
+      riskProfile: RiskProfile(
         legalRisk: 25.0,
         financialRisk: 20.0,
         reputationalRisk: 15.0,
@@ -420,7 +420,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.1),
+                color: AppColors.info.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(

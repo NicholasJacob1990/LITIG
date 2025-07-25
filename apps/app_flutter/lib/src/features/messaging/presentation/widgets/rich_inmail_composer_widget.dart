@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:meu_app/src/core/theme/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/rich_text_editor_widget.dart';
 import 'package:meu_app/src/features/messaging/presentation/bloc/unified_messaging_bloc.dart';
 
@@ -118,9 +117,9 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0077B5).withOpacity(0.1),
+        color: const Color(0xFF0077B5).withValues(alpha: 0.1),
         border: Border(
-          bottom: BorderSide(color: const Color(0xFF0077B5).withOpacity(0.2)),
+          bottom: BorderSide(color: const Color(0xFF0077B5).withValues(alpha: 0.2)),
         ),
       ),
       child: Row(
@@ -128,7 +127,7 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0077B5).withOpacity(0.2),
+              color: const Color(0xFF0077B5).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -152,7 +151,7 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
                 Text(
                   'Mensagem profissional do LinkedIn',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF0077B5).withOpacity(0.8),
+                    color: const Color(0xFF0077B5).withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -200,7 +199,7 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
                 hintText: 'ID ou nome do perfil LinkedIn (ex: john-doe-123456)',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: const Color(0xFF0077B5).withOpacity(0.3)),
+                  borderSide: BorderSide(color: const Color(0xFF0077B5).withValues(alpha: 0.3)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -244,7 +243,7 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
                 hintText: 'Assunto profissional do InMail',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: const Color(0xFF0077B5).withOpacity(0.3)),
+                  borderSide: BorderSide(color: const Color(0xFF0077B5).withValues(alpha: 0.3)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -312,9 +311,9 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0077B5).withOpacity(0.05),
+        color: const Color(0xFF0077B5).withValues(alpha: 0.05),
         border: Border(
-          top: BorderSide(color: const Color(0xFF0077B5).withOpacity(0.2)),
+          top: BorderSide(color: const Color(0xFF0077B5).withValues(alpha: 0.2)),
         ),
       ),
       child: Column(
@@ -324,9 +323,9 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0077B5).withOpacity(0.1),
+              color: const Color(0xFF0077B5).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF0077B5).withOpacity(0.2)),
+              border: Border.all(color: const Color(0xFF0077B5).withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -496,7 +495,7 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
   Widget _buildTemplateOption(String title, String description, VoidCallback onTap) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: const Color(0xFF0077B5).withOpacity(0.1),
+        backgroundColor: const Color(0xFF0077B5).withValues(alpha: 0.1),
         child: const Icon(LucideIcons.fileText, color: Color(0xFF0077B5), size: 20),
       ),
       title: Text(title),

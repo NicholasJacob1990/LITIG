@@ -1,0 +1,121 @@
+version: "3.9"
+
+services:
+  # Banco de dados PostgreSQL para testes
+  test_db:
+    image: supabase/postgres:15.1.1.69
+    environment:
+      POSTGRES_DB: litig_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - test_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis para cache e jobs em testes
+  test_redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - test_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Supabase local stack (opcional, para testes E2E completos)
+  test_supabase:
+    image: supabase/postgrest:v12.2.3
+    environment:
+      PGRST_DB_URI: postgresql://postgres:postgres@test_db:5432/litig_test
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+    ports:
+      - "3001:3000"
+    depends_on:
+      test_db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Serviço para executar testes
+  test_runner:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.test
+    environment:
+      - TEST_DATABASE_URL=postgresql+asyncpg://postgres:postgres@test_db:5432/litig_test
+      - REDIS_URL=redis://test_redis:6379/0
+      - ENVIRONMENT=test
+      - SUPABASE_URL=http://test_supabase:3000
+      - SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.key
+      - PYTHONPATH=/app
+    volumes:
+      - ./packages/backend:/app
+      - ./packages/backend/tests:/app/tests
+      - test_coverage:/app/coverage
+    depends_on:
+      test_db:
+        condition: service_healthy
+      test_redis:
+        condition: service_healthy
+    command: "sh -c 'echo Aguardando serviços... && sleep 10 && echo Instalando dependências... && pip install -r requirements.txt && echo Executando migrações de teste... && alembic upgrade head && echo Executando testes... && pytest -n auto --cov=packages/backend --cov-report=html:/app/coverage --cov-report=xml:/app/coverage/coverage.xml --cov-report=term-missing -v'"
+
+  # Serviço para testes unitários rápidos (sem dependências externas)
+  unit_tests:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.test
+    environment:
+      - TEST_DATABASE_URL=sqlite+aiosqlite:///:memory:
+      - ENVIRONMENT=test
+      - PYTHONPATH=/app
+    volumes:
+      - ./packages/backend:/app
+      - ./packages/backend/tests:/app/tests
+    command: "sh -c 'pip install -r requirements.txt && pytest tests/unit/ -v --cov=packages/backend --cov-report=term-missing'"
+
+  # Serviço para testes de integração (com DB e Redis)
+  integration_tests:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.test
+    environment:
+      - TEST_DATABASE_URL=postgresql+asyncpg://postgres:postgres@test_db:5432/litig_test
+      - REDIS_URL=redis://test_redis:6379/0
+      - ENVIRONMENT=test
+      - PYTHONPATH=/app
+    volumes:
+      - ./packages/backend:/app
+      - ./packages/backend/tests:/app/tests
+    depends_on:
+      test_db:
+        condition: service_healthy
+      test_redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        pip install -r requirements.txt &&
+        alembic upgrade head &&
+        pytest tests/integration/ -v --cov=packages/backend --cov-report=term-missing
+      "
+
+volumes:
+  test_db_data:
+  test_redis_data:
+  test_coverage:
+
+# Scripts para facilitar o uso:
+# docker-compose -f docker-compose.test.yml up unit_tests          # Testes unitários rápidos
+# docker-compose -f docker-compose.test.yml up integration_tests  # Testes de integração
+# docker-compose -f docker-compose.test.yml up test_runner        # Suite completa 

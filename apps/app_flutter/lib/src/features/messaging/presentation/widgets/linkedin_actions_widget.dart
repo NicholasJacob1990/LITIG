@@ -23,7 +23,7 @@ class LinkedInActionsWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outline.withOpacity(0.2)),
+        border: Border.all(color: AppColors.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +44,7 @@ class LinkedInActionsWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF0077B5).withOpacity(0.1), // LinkedIn blue
+            color: const Color(0xFF0077B5).withValues(alpha: 0.1), // LinkedIn blue
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
@@ -67,7 +67,7 @@ class LinkedInActionsWidget extends StatelessWidget {
               Text(
                 'Networking profissional e comunicação',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.onSurface.withOpacity(0.6),
+                  color: AppColors.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -85,7 +85,7 @@ class LinkedInActionsWidget extends StatelessWidget {
           'Ações Rápidas',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w500,
-            color: AppColors.onSurface.withOpacity(0.8),
+            color: AppColors.onSurface.withValues(alpha: 0.8),
           ),
         ),
         const SizedBox(height: 12),
@@ -126,7 +126,7 @@ class LinkedInActionsWidget extends StatelessWidget {
           'Networking Avançado',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w500,
-            color: AppColors.onSurface.withOpacity(0.8),
+            color: AppColors.onSurface.withValues(alpha: 0.8),
           ),
         ),
         const SizedBox(height: 12),
@@ -178,16 +178,16 @@ class LinkedInActionsWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -204,7 +204,7 @@ class LinkedInActionsWidget extends StatelessWidget {
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.onSurface.withOpacity(0.6),
+                color: AppColors.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -235,7 +235,7 @@ class LinkedInActionsWidget extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: const Color(0xFF0077B5).withOpacity(0.1),
+      backgroundColor: const Color(0xFF0077B5).withValues(alpha: 0.1),
       side: const BorderSide(
         color: Color(0xFF0077B5),
         width: 0.5,

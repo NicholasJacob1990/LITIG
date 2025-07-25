@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../domain/entities/law_firm.dart';
 import '../../domain/entities/firm_kpi.dart';
 import 'firm_card_helpers.dart';
+import 'firm_match_explanation_dialog.dart';
 
 /// Widget reutilizável para exibir informações de um escritório de advocacia
 /// 
@@ -280,33 +283,128 @@ class FirmCard extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
+        // Primeira linha: Ver Perfil (destaque)
+        SizedBox(
+          width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: onTap,
-            icon: const Icon(Icons.visibility, size: 16),
-            label: const Text('Ver Detalhes'),
+            onPressed: () => _navigateToFirmProfile(context),
+            icon: const Icon(LucideIcons.building),
+            label: const Text('Ver Perfil do Escritório'),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              side: BorderSide(color: Theme.of(context).colorScheme.primary),
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: onHire,
-            icon: const Icon(Icons.handshake, size: 16),
-            label: const Text('Contratar'),
-            key: Key('hire_firm_button_${firm.id}'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
+        const SizedBox(height: 8),
+        
+        // Segunda linha: Ações rápidas
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: onTap,
+                icon: const Icon(Icons.visibility, size: 16),
+                label: const Text('Detalhes'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () => _showFirmMatchExplanation(context),
+              icon: const Icon(LucideIcons.helpCircle),
+              tooltip: 'Por que foi recomendado?',
+              style: IconButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: onHire,
+                icon: const Icon(Icons.handshake, size: 16),
+                label: const Text('Contratar'),
+                key: Key('hire_firm_button_${firm.id}'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  void _navigateToFirmProfile(BuildContext context) {
+    context.push('/firm/${firm.id}/profile');
+  }
+
+  void _showFirmMatchExplanation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => FirmMatchExplanationDialog(
+        firm: firm,
+        onViewFullProfile: () {
+          Navigator.of(context).pop();
+          _navigateToFirmProfile(context);
+        },
+      ),
+    );
+  }
+} 
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () => _showFirmMatchExplanation(context),
+              icon: const Icon(LucideIcons.helpCircle),
+              tooltip: 'Por que foi recomendado?',
+              style: IconButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: onHire,
+                icon: const Icon(Icons.handshake, size: 16),
+                label: const Text('Contratar'),
+                key: Key('hire_firm_button_${firm.id}'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _navigateToFirmProfile(BuildContext context) {
+    context.push('/firm/${firm.id}/profile');
+  }
+
+  void _showFirmMatchExplanation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => FirmMatchExplanationDialog(
+        firm: firm,
+        onViewFullProfile: () {
+          Navigator.of(context).pop();
+          _navigateToFirmProfile(context);
+        },
+      ),
     );
   }
 } 

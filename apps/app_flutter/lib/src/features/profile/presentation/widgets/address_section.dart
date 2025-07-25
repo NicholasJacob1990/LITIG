@@ -256,7 +256,7 @@ class AddressCard extends StatelessWidget {
                 if (isPrimary)
                   Chip(
                     label: const Text('Principal'),
-                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                    backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     labelStyle: TextStyle(
                       color: Theme.of(context).primaryColor,
                       fontSize: 12,

@@ -8,8 +8,8 @@ from typing import List
 from uuid import UUID
 from pydantic import BaseModel
 
-from backend.services.payments_service import payments_service
-from backend.auth import get_current_user
+from services.payments_service import payments_service
+from auth import get_current_user
 
 router = APIRouter(
     prefix="/payments",

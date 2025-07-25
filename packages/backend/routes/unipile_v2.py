@@ -20,17 +20,17 @@ from datetime import datetime
 import logging
 
 # Camada de compatibilidade
-from backend.services.unipile_compatibility_layer import (
+from services.unipile_compatibility_layer import (
     get_unipile_service, 
     ServiceType,
     UnipileCompatibilityLayer
 )
 
 # App Service com métodos novos
-from backend.services.unipile_app_service import get_unipile_app_service
+from services.unipile_app_service import get_unipile_app_service
 
 # Autenticação
-from backend.auth import get_current_user
+from auth import get_current_user
 
 router = APIRouter(prefix="/api/v2/unipile", tags=["unipile-v2"])
 logger = logging.getLogger(__name__)

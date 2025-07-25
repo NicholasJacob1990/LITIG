@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/features/cases/data/models/case_model.dart';
-import 'package:meu_app/src/core/utils/logger.dart';
+import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 
 abstract class CasesRemoteDataSource {
   Future<List<Case>> getMyCases();
@@ -21,15 +21,15 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       // O endpoint /cases/my-cases está retornando 404 no backend.
       // Para destravar o fluxo, vamos chamar um caso específico e retorná-lo
       // dentro de uma lista, simulando o comportamento esperado.
-      AppLogger.warning("USANDO SOLUÇÃO TEMPORÁRIA: Chamando um caso mock em vez de /my-cases");
-      return _getMockCases(); // Usando a função de mock já existente
+              // USANDO SOLUÇÃO TEMPORÁRIA: Chamando um caso mock em vez de /my-cases
+        return _getMockCases(); // Usando a função de mock já existente
       // ##########################################
     } on DioException catch (e) {
       // Se há erro de conectividade, usar dados mock como fallback
       if (e.type == DioExceptionType.connectionError || 
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        AppLogger.warning('API não disponível, usando dados mock como fallback');
+                 // API não disponível, usando dados mock como fallback
         return _getMockCases();
       }
       
@@ -41,7 +41,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       }
     } catch (e) {
       // Fallback para qualquer outro erro não previsto
-      AppLogger.error('Erro inesperado na API, usando dados mock', error: e);
+              // Erro inesperado na API, usando dados mock
       return _getMockCases();
     }
   }
@@ -61,7 +61,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       if (e.type == DioExceptionType.connectionError || 
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        AppLogger.warning('API não disponível, usando caso mock como fallback');
+                 // API não disponível, usando caso mock como fallback
         return _getMockCaseById(caseId);
       }
       
@@ -78,14 +78,13 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
       }
     } catch (e) {
       // Fallback para qualquer outro erro não previsto
-      AppLogger.error('Erro inesperado na API, usando caso mock', error: e);
+              // Erro inesperado na API, usando caso mock
       return _getMockCaseById(caseId);
     }
   }
 
   // Dados mock para fallback quando a API não está disponível
   List<Case> _getMockCases() {
-    AppLogger.info('Retornando dados mock dos casos');
     final mockCases = [
       CaseModel(
         id: 'mock-case-1',
@@ -96,6 +95,8 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
         lawyerId: 'mock-lawyer-1',
         caseType: 'litigation',
         allocationType: 'direct',
+        isPremium: true, // NOVO: Caso premium para testar badge
+        clientPlan: null, // Cliente PF (sem plano corporativo)
         lawyer: const LawyerInfo(
           avatarUrl: 'https://ui-avatars.com/api/?name=Joao+Silva&background=3B82F6&color=fff',
           name: 'Dr. João Silva',
@@ -103,6 +104,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
           unreadMessages: 2,
           createdDate: '2024-12-15',
           pendingDocsText: '1 documento pendente',
+          plan: 'PRO', // NOVO: Advogado PRO para testar badge
         ),
       ),
       CaseModel(
@@ -114,6 +116,8 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
         lawyerId: 'mock-lawyer-2',
         caseType: 'consultancy',
         allocationType: 'direct',
+        isPremium: false, // NOVO: Caso regular para comparação
+        clientPlan: 'VIP', // NOVO: Cliente PJ VIP
         lawyer: const LawyerInfo(
           avatarUrl: 'https://ui-avatars.com/api/?name=Maria+Santos&background=10B981&color=fff',
           name: 'Dra. Maria Santos',
@@ -121,6 +125,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
           unreadMessages: 0,
           createdDate: '2024-12-22',
           pendingDocsText: 'Nenhum documento pendente',
+          plan: 'FREE', // NOVO: Advogado FREE para comparação
         ),
       ),
       CaseModel(
@@ -130,6 +135,9 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
         createdAt: DateTime.now().subtract(const Duration(days: 30)),
         lawyerName: 'Dr. Carlos Oliveira',
         lawyerId: 'mock-lawyer-3',
+        isPremium: true, // NOVO: Outro caso premium
+        isEnterprise: false, // NOVO: Caso premium mas não enterprise
+        clientPlan: 'FREE', // NOVO: Cliente PJ FREE
         lawyer: const LawyerInfo(
           avatarUrl: 'https://ui-avatars.com/api/?name=Carlos+Oliveira&background=F59E0B&color=fff',
           name: 'Dr. Carlos Oliveira',
@@ -137,22 +145,40 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
           unreadMessages: 0,
           createdDate: '2024-12-01',
           pendingDocsText: 'Caso finalizado',
+          plan: 'PRO', // NOVO: Outro advogado PRO
         ),
       ),
+      // NOVO: Caso Enterprise para teste
       CaseModel(
         id: 'mock-case-4',
-        title: 'Pensão Alimentícia - Revisão de Valor',
+        title: 'Due Diligence - Aquisição Corporativa',
         status: 'Em Andamento',
-        createdAt: DateTime.now().subtract(const Duration(days: 45)),
-        lawyerName: 'Dra. Ana Costa',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+        lawyerName: 'Dra. Ana Souza',
         lawyerId: 'mock-lawyer-4',
+        caseType: 'CORPORATE',
+        allocationType: 'partnership',
+        isPremium: true, // Enterprise cases são sempre premium
+        isEnterprise: true, // NOVO: Caso Enterprise B2B
+        clientPlan: 'ENTERPRISE', // NOVO: Cliente PJ Enterprise
+        recommendedFirm: const LawFirm(
+          id: 'firm-001',
+          name: 'Oliveira & Associados',
+          teamSize: 25,
+          specializations: ['M&A', 'Corporate Law', 'Tax'],
+          rating: 4.8,
+          plan: 'PRO', // NOVO: Escritório PRO
+          partnerTier: 'GOLD', // NOVO: Tier GOLD
+        ),
+        firmMatchScore: 0.92,
         lawyer: const LawyerInfo(
-          avatarUrl: 'https://ui-avatars.com/api/?name=Ana+Costa&background=EC4899&color=fff',
-          name: 'Dra. Ana Costa',
-          specialty: 'Família e Sucessões',
-          unreadMessages: 5,
-          createdDate: '2024-11-15',
-          pendingDocsText: '3 documentos pendentes',
+          avatarUrl: 'https://ui-avatars.com/api/?name=Ana+Souza&background=6366F1&color=fff',
+          name: 'Dra. Ana Souza',
+          specialty: 'M&A e Corporate',
+          unreadMessages: 3,
+          createdDate: '2024-12-25',
+          pendingDocsText: '2 documentos pendentes',
+          plan: 'PRO', // NOVO: Advogado PRO para casos Enterprise
         ),
       ),
       CaseModel(
@@ -171,11 +197,30 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
           pendingDocsText: 'Aguardando CNH',
         ),
       ),
+      // NOVO: Caso com cliente PF VIP para demonstrar que pessoas físicas também podem ter plano VIP
+      CaseModel(
+        id: 'mock-case-6',
+        title: 'Ação de Indenização - Danos Morais Bancários',
+        status: 'Em Andamento',
+        createdAt: DateTime.now().subtract(const Duration(days: 12)),
+        lawyerName: 'Dra. Luciana Costa',
+        lawyerId: 'mock-lawyer-6',
+        caseType: 'litigation',
+        allocationType: 'direct',
+        isPremium: false, // Caso regular
+        isEnterprise: false,
+        clientPlan: 'VIP', // Cliente PF VIP
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Luciana+Costa&background=8B5CF6&color=fff',
+          name: 'Dra. Luciana Costa',
+          specialty: 'Bancário e Consumidor',
+          unreadMessages: 0,
+          createdDate: '2025-01-15',
+          pendingDocsText: 'Documentos completos',
+          plan: 'PRO', // Advogado PRO atendendo cliente VIP
+        ),
+      ),
     ];
-    AppLogger.info('Retornando ${mockCases.length} casos mock');
-    for (final caso in mockCases) {
-      AppLogger.info('Caso: ${caso.title} - Status: ${caso.status}');
-    }
     return mockCases;
   }
 

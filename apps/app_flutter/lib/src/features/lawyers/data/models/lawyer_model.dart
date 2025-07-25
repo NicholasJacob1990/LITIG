@@ -17,6 +17,7 @@ class LawyerModel {
   final double estimatedSuccessRate;
   final double specializationScore;
   final String activityLevel;
+  final String plan; // NOVO: Plano do advogado
 
   const LawyerModel({
     required this.id,
@@ -35,6 +36,7 @@ class LawyerModel {
     required this.estimatedSuccessRate,
     required this.specializationScore,
     required this.activityLevel,
+    this.plan = 'FREE', // NOVO: Padrão FREE
   });
 
   factory LawyerModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class LawyerModel {
       estimatedSuccessRate: (json['estimated_success_rate'] as num? ?? 0.0).toDouble(),
       specializationScore: (json['specialization_score'] as num? ?? 0.0).toDouble(),
       activityLevel: json['activity_level'] as String? ?? 'unknown',
+      plan: json['plan'] as String? ?? 'FREE', // NOVO: Consumir do backend
     );
   }
 
@@ -68,6 +71,7 @@ class LawyerModel {
       rating: rating,
       isAvailable: isAvailable,
       distanceKm: distanceKm,
+      plan: plan, // NOVO: Incluir no mapeamento
     );
   }
 } 

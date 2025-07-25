@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any, List
 
-from backend.auth import get_current_user
-from backend.models.user import User
+from auth import get_current_user
+from models.user import User
 # Simulação do wrapper e funções de banco de dados
-from backend.services.unipile_app_service import get_unipile_app_service
+from services.unipile_app_service import get_unipile_app_service
 
 router = APIRouter(prefix="/api/v1/social", tags=["social"])
 

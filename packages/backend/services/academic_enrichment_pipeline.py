@@ -467,8 +467,8 @@ class LawyerEnrichmentPipeline:
         self, 
         lawyer: Lawyer, 
         area_caso: str,
-        use_openai: bool = True,
-        use_perplexity: bool = True
+        use_perplexity: bool = True,
+        use_openai: bool = True
     ) -> EnrichmentResult:
         """Enriquece um único advogado com dados de todas as features."""
         
@@ -486,16 +486,7 @@ class LawyerEnrichmentPipeline:
                 processing_time_sec=0.0
             )
         
-        # Tentar OpenAI Deep Research primeiro
-        if use_openai:
-            try:
-                result = await self._enrich_via_openai(lawyer, area_caso)
-                if result.success:
-                    return result
-            except Exception as e:
-                ENRICHMENT_LOGGER.warning(f"OpenAI enriquecimento falhou para {lawyer.id}: {e}")
-        
-        # Fallback para Perplexity
+        # Tentar Perplexity API primeiro (PRIMÁRIA)
         if use_perplexity:
             try:
                 result = await self._enrich_via_perplexity(lawyer, area_caso)
@@ -503,6 +494,15 @@ class LawyerEnrichmentPipeline:
                     return result
             except Exception as e:
                 ENRICHMENT_LOGGER.warning(f"Perplexity enriquecimento falhou para {lawyer.id}: {e}")
+        
+        # Fallback para OpenAI Deep Research
+        if use_openai:
+            try:
+                result = await self._enrich_via_openai(lawyer, area_caso)
+                if result.success:
+                    return result
+            except Exception as e:
+                ENRICHMENT_LOGGER.warning(f"OpenAI Deep Research enriquecimento falhou para {lawyer.id}: {e}")
         
         # Se ambos falharam
         processing_time = (datetime.now() - start_time).total_seconds()
@@ -700,8 +700,8 @@ class LawyerEnrichmentPipeline:
         lawyers: List[Lawyer], 
         area_caso: str,
         max_concurrent: int = 3,
-        use_openai: bool = True,
-        use_perplexity: bool = True
+        use_perplexity: bool = True,
+        use_openai: bool = True
     ) -> List[EnrichmentResult]:
         """Enriquece um lote de advogados com controle de concorrência."""
         
@@ -710,7 +710,7 @@ class LawyerEnrichmentPipeline:
         async def enrich_with_semaphore(lawyer):
             async with semaphore:
                 return await self.enrich_single_lawyer(
-                    lawyer, area_caso, use_openai, use_perplexity
+                    lawyer, area_caso, use_perplexity, use_openai
                 )
         
         tasks = [enrich_with_semaphore(lawyer) for lawyer in lawyers]
@@ -739,8 +739,8 @@ async def preprocess_lawyers_for_ranking(
     lawyers: List[Lawyer],
     area_caso: str,
     max_concurrent: int = 3,
-    use_openai: bool = True,
-    use_perplexity: bool = True
+    use_perplexity: bool = True,
+    use_openai: bool = True
 ) -> Tuple[List[Lawyer], List[EnrichmentResult]]:
     """
     Função principal: enriquece advogados antes do ranqueamento.
@@ -749,8 +749,8 @@ async def preprocess_lawyers_for_ranking(
         lawyers: Lista de advogados a serem enriquecidos
         area_caso: Área jurídica do caso para contexto
         max_concurrent: Máximo de chamadas simultâneas
-        use_openai: Se deve usar OpenAI Deep Research
-        use_perplexity: Se deve usar Perplexity como fallback
+        use_perplexity: Se deve usar Perplexity API como primária
+        use_openai: Se deve usar OpenAI Deep Research como fallback
     
     Returns:
         Tuple com (advogados_enriquecidos, resultados_enriquecimento)
@@ -763,7 +763,7 @@ async def preprocess_lawyers_for_ranking(
     
     # Executar enriquecimento em lote
     results = await pipeline.enrich_lawyer_batch(
-        lawyers, area_caso, max_concurrent, use_openai, use_perplexity
+        lawyers, area_caso, max_concurrent, use_perplexity, use_openai
     )
     
     # Log de estatísticas

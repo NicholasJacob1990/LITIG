@@ -12,21 +12,14 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # Cria a instância do Celery
 celery_app = Celery(
-    "tasks",
-    broker=REDIS_URL,
-    backend=REDIS_URL,
+    "worker",
+    broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
+    backend=os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0"),
     include=[
-        "backend.tasks",
-        "backend.jobs.expire_offers",
-        "backend.jobs.jusbrasil_sync",
-        "backend.jobs.update_review_kpi",
-        "backend.jobs.ltr_weekly",
-        "backend.jobs.calculate_equity",
-        "backend.jobs.train_pca_embeddings",
-        "backend.jobs.sentiment_reviews",
-        "backend.jobs.automated_reports",
-        "backend.jobs.provider_notifications",
-    ]  # Aponta para os módulos onde as tarefas estão definidas
+        "packages.backend.tasks.triage_tasks",
+        "packages.backend.tasks.jusbrasil_tasks",
+        "packages.backend.tasks.firm_tasks"
+    ]
 )
 
 # Configurações opcionais

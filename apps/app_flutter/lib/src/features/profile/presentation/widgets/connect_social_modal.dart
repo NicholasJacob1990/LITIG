@@ -5,6 +5,43 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/services/social_auth_service.dart';
 
+/// Resultado da conexão com rede social
+class SocialConnectionResult {
+  final bool success;
+  final String provider;
+  final String? message;
+  final Map<String, dynamic>? data;
+  
+  const SocialConnectionResult({
+    required this.success,
+    required this.provider,
+    this.message,
+    this.data,
+  });
+  
+  factory SocialConnectionResult.success({
+    required String provider,
+    Map<String, dynamic>? data,
+  }) {
+    return SocialConnectionResult(
+      success: true,
+      provider: provider,
+      data: data,
+    );
+  }
+  
+  factory SocialConnectionResult.error({
+    required String provider,
+    required String message,
+  }) {
+    return SocialConnectionResult(
+      success: false,
+      provider: provider,
+      message: message,
+    );
+  }
+}
+
 /// Modal para conectar uma conta de rede social
 /// 
 /// Permite ao usuário inserir credenciais e conectar sua conta

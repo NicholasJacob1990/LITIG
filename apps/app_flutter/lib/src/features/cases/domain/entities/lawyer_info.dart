@@ -7,6 +7,7 @@ class LawyerInfo extends Equatable {
   final int unreadMessages;
   final String createdDate;
   final String pendingDocsText;
+  final String plan; // NOVO: Plano do advogado
 
   const LawyerInfo({
     required this.avatarUrl,
@@ -15,7 +16,14 @@ class LawyerInfo extends Equatable {
     required this.unreadMessages,
     required this.createdDate,
     required this.pendingDocsText,
+    this.plan = 'FREE', // NOVO: Padrão FREE
   });
+
+  /// Verifica se o advogado tem plano PRO
+  bool get isPro => plan.toUpperCase() == 'PRO';
+
+  /// Verifica se o advogado tem plano FREE
+  bool get isFree => plan.toUpperCase() == 'FREE';
 
   factory LawyerInfo.fromJson(Map<String, dynamic> json) {
     return LawyerInfo(
@@ -25,9 +33,10 @@ class LawyerInfo extends Equatable {
       unreadMessages: int.tryParse(json['unread_messages']?.toString() ?? '0') ?? 0,
       createdDate: json['created_date'] ?? '',
       pendingDocsText: json['pending_docs_text'] ?? '',
+      plan: json['plan'] as String? ?? 'FREE', // NOVO: Consumir do backend
     );
   }
 
   @override
-  List<Object?> get props => [avatarUrl, name, specialty, unreadMessages, createdDate, pendingDocsText];
+  List<Object?> get props => [avatarUrl, name, specialty, unreadMessages, createdDate, pendingDocsText, plan]; // NOVO
 } 

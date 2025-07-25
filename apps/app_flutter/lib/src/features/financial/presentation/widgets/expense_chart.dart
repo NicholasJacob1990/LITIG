@@ -62,7 +62,7 @@ class ExpenseChart extends StatelessWidget {
                 width: 30,
                 height: height,
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.7),
+                  color: Colors.red.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Tooltip(

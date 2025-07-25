@@ -3,24 +3,16 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:equatable/equatable.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Imports do sistema de perfil
 import 'domain/entities/client_profile.dart';
-import 'domain/repositories/profile_repository.dart';
 import 'data/repositories/profile_repository_impl.dart';
 import 'data/datasources/profile_remote_data_source.dart';
 import 'data/datasources/profile_local_data_source.dart';
 import 'presentation/bloc/profile_bloc.dart';
 import 'presentation/bloc/profile_event.dart';
 import 'presentation/bloc/profile_state.dart';
-import 'presentation/screens/personal_data_screen.dart';
 import 'presentation/widgets/address_section.dart';
 import '../../shared/utils/validators.dart';
 
@@ -411,9 +403,9 @@ class _ProfileSystemTestViewState extends State<ProfileSystemTestView> {
     super.dispose();
   }
 }
-    _cpfController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    super.dispose();
+    void _cpfController.dispose();
+    void _emailController.dispose();
+    void _phoneController.dispose();
+    void super.dispose();
   }
 }

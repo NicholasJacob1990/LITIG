@@ -18,11 +18,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
 from pydantic import BaseModel, Field
 
-from backend.database import get_async_session
-from backend.models.lawyer import Lawyer
-from backend.models.law_firm import LawFirm
-from backend.services.hybrid_legal_data_service import HybridLegalDataService, DataTransparency
-from backend.jobs.jusbrasil_sync_hybrid import sync_single_lawyer_task, get_sync_status
+from database import get_async_session
+from models.lawyer import Lawyer
+from models.law_firm import LawFirm
+from services.hybrid_legal_data_service import HybridLegalDataService, DataTransparency
+from jobs.jusbrasil_sync_hybrid import sync_single_lawyer_task, get_sync_status
 
 
 router = APIRouter(prefix="/api/v1/hybrid", tags=["Hybrid Data"])
@@ -243,7 +243,7 @@ async def trigger_sync(
             }
         else:
             # Sincronizar todos os advogados
-            from backend.jobs.jusbrasil_sync_hybrid import sync_lawyers_task
+            from jobs.jusbrasil_sync_hybrid import sync_lawyers_task
             task = sync_lawyers_task.delay(force_refresh)
             return {
                 "message": "Sincronização completa iniciada",

@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 
-from backend.services.unipile_app_service import get_unipile_app_service
-from backend.auth import get_current_user
-from backend.models.user import User
+from services.unipile_app_service import get_unipile_app_service
+from auth import get_current_user
+from models.user import User
 # Funções de banco de dados que precisam ser criadas:
-# from backend.database import save_user_social_account, get_user_social_account
+# from database import save_user_social_account, get_user_social_account
 
 router = APIRouter(prefix="/api/v1/instagram", tags=["instagram"])
 

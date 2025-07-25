@@ -13,12 +13,20 @@ class SearchRepositoryImpl implements SearchRepository {
   @override
   Future<Either<Failure, List<dynamic>>> performSearch(SearchParams params) async {
     try {
-      final result = await remoteDataSource.performSearch(params);
-      return Right(result);
+      final results = await remoteDataSource.performSearch(params);
+      return Right(results);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
-    } on Exception {
-      return const Left(ServerFailure(message: 'Erro inesperado na busca'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<dynamic>>> performSemanticFirmSearch(SearchParams params) async {
+    try {
+      final results = await remoteDataSource.performSemanticFirmSearch(params);
+      return Right(results);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
     }
   }
 } 

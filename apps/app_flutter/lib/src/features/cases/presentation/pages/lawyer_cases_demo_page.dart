@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../shared/utils/app_colors.dart';
-import '../../../../shared/widgets/atoms/initials_avatar.dart';
 import '../../domain/entities/lawyer_metrics.dart';
 import '../../data/datasources/lawyer_cases_enhanced_data_source.dart';
 import '../widgets/lawyer_case_card_enhanced.dart';
 import '../widgets/sections/client_profile_section.dart';
-import '../widgets/sections/business_context_section.dart';
-import '../widgets/sections/lawyer_match_analysis_section.dart';
 
 /// Página de demonstração para testar os componentes de casos dos advogados
 class LawyerCasesDemoPage extends StatefulWidget {
@@ -242,8 +238,8 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
                   feature,
                   style: const TextStyle(fontSize: 12),
                 ),
-                backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
-                side: BorderSide(color: AppColors.primaryBlue.withOpacity(0.3)),
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+                side: BorderSide(color: AppColors.primaryBlue.withValues(alpha: 0.3)),
               ))
           .toList(),
     );

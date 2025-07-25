@@ -35,7 +35,6 @@ import 'package:meu_app/src/features/cases/presentation/screens/case_documents_s
 import 'package:meu_app/src/features/sla_management/presentation/screens/sla_settings_screen.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
-import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
 import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
@@ -47,17 +46,22 @@ import 'package:meu_app/src/features/admin/presentation/screens/admin_reports_sc
 import 'package:meu_app/src/features/admin/presentation/screens/admin_settings_screen.dart';
 import 'package:meu_app/src/features/admin/presentation/bloc/admin_bloc.dart';
 import 'package:meu_app/src/features/admin/domain/services/admin_auth_service.dart';
+import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_detail_bloc.dart';
+import 'package:meu_app/src/features/lawyers/presentation/screens/lawyer_detail_screen.dart';
+import 'package:meu_app/src/features/firms/presentation/bloc/firm_profile_bloc.dart';
+import 'package:meu_app/src/features/firms/presentation/screens/firm_profile_screen.dart';
 import 'package:meu_app/injection_container.dart';
+// Importação correta das novas telas
+import 'package:meu_app/src/features/admin/presentation/screens/premium_criteria_list.dart';
 import 'package:meu_app/src/features/cases/presentation/pages/lawyer_cases_demo_page.dart';
 import 'package:meu_app/src/features/cases/presentation/pages/enhanced_lawyer_cases_demo_page.dart';
-import 'package:meu_app/src/features/messaging/presentation/screens/unified_messaging_screen.dart';
 import 'package:meu_app/src/features/messaging/presentation/screens/unified_chat_screen.dart';
 import 'package:meu_app/src/features/messaging/presentation/screens/connect_accounts_screen.dart';
 import 'package:meu_app/src/features/messaging/presentation/screens/internal_chat_screen.dart';
 import 'package:meu_app/src/features/contracts/presentation/screens/contracts_screen.dart';
 import 'package:meu_app/src/features/financial/presentation/screens/financial_dashboard_screen.dart';
-import 'package:meu_app/src/features/calendar/presentation/screens/unified_calendar_screen.dart';
 import 'package:meu_app/src/features/messaging/presentation/screens/unified_chats_screen.dart';
+// import 'package:meu_app/pages/admin/premium_criteria_form.dart';
 
 // Definição da rota de perfil reutilizável com sub-rotas
 final profileGoRoute = GoRoute(
@@ -600,7 +604,49 @@ GoRouter appRouter(AuthBloc authBloc) {
           );
         },
       ),
-      
+
+      // ✅ Rota para Critérios Premium
+      GoRoute(
+        path: '/admin/premium-criteria',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final authState = authBloc.state;
+          if (authState is auth_states.Authenticated) {
+            final userRole = authState.user.role;
+            if (!AdminAuthService.canAccessRoute(userRole ?? '', '/admin/premium-criteria')) {
+              return _buildAccessDeniedScreen(context);
+            }
+          }
+          return const PremiumCriteriaListPage();
+        },
+      ),
+
+      // ✅ Rota para Perfil Detalhado do Advogado
+      GoRoute(
+        path: '/lawyer/:lawyerId/profile',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final lawyerId = state.pathParameters['lawyerId']!;
+          return BlocProvider(
+            create: (context) => getIt<LawyerDetailBloc>(),
+            child: LawyerDetailScreen(lawyerId: lawyerId),
+          );
+        },
+      ),
+
+      // ✅ Rota para Perfil Detalhado do Escritório
+      GoRoute(
+        path: '/firm/:firmId/profile',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final firmId = state.pathParameters['firmId']!;
+          return BlocProvider(
+            create: (context) => getIt<FirmProfileBloc>(),
+            child: FirmProfileScreen(firmId: firmId),
+          );
+        },
+      ),
+
       // Rotas de perfil independentes (fallback)
       GoRoute(
         path: '/profile-details',

@@ -15,9 +15,9 @@ import pandas as pd
 
 from config import get_settings
 from metrics import (
-    data_drift_gauge,
+    model_drift_gauge,
     model_performance_gauge,
-    prediction_latency_histogram,
+    # prediction_latency_histogram,  # Não encontrado
 )
 from supabase import create_client
 
@@ -218,13 +218,13 @@ class ModelMonitoringService:
             drift_detected = overall_drift_score > self.thresholds["drift_score"]
 
             # Atualizar métricas
-            data_drift_gauge.labels(
+            model_drift_gauge.labels(
                 model_type=model_name,
                 feature="overall"
             ).set(overall_drift_score)
 
             for feature, drift_score in feature_drifts.items():
-                data_drift_gauge.labels(
+                model_drift_gauge.labels(
                     model_type=model_name,
                     feature=feature
                 ).set(drift_score)

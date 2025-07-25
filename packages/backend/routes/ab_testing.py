@@ -11,14 +11,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from auth import get_current_user
 from jobs.auto_retrain import auto_retrain_task
 from services.ab_testing import (
-    ABTest,
     ABTestConfig,
-    ABTestVariant,
     TestStatus,
     ab_testing_service,
 )
-from models import ABTestVariantUpdate, ABTestStatusUpdate
-from backend.services.model_monitoring import model_monitoring_service
+# from models import ABTestVariantUpdate, ABTestStatusUpdate  # Classes não encontradas
+from services.model_monitoring import model_monitoring_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ab-testing", tags=["A/B Testing"])

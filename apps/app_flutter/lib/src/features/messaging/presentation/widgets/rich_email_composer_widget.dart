@@ -321,7 +321,7 @@ class _RichEmailComposerWidgetState extends State<RichEmailComposerWidget> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.outline.withOpacity(0.2)),
+          top: BorderSide(color: AppColors.outline.withValues(alpha: 0.2)),
         ),
       ),
       child: Row(

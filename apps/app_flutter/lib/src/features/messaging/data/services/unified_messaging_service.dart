@@ -12,6 +12,21 @@ class UnifiedMessagingService {
   WebSocketChannel? _wsChannel;
   StreamSubscription? _wsSubscription;
   
+  // HTTP client e configurações
+  final Dio _httpClient = DioService.instance.dio;
+  
+  String get _baseUrl {
+    if (kIsWeb) {
+      return 'http://127.0.0.1:8080';
+    }
+    return 'http://localhost:8080';
+  }
+  
+  Map<String, String> get _headers => {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${_getAuthToken()}',
+  };
+  
   // Usar a mesma lógica de detecção de plataforma do DioService
   String get _wsUrl {
     if (kIsWeb) {
@@ -139,12 +154,12 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/connect'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/unified-messaging/connect',
+        options: Options(headers: _headers),
+        data: {
           'provider': provider,
           'credentials': credentials,
-        }),
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -160,12 +175,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> disconnectAccount(String provider) async {
     try {
       final response = await _httpClient.delete(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/accounts/$provider'),
-        headers: _headers,
+        '$_baseUrl/api/v1/unified-messaging/accounts/$provider',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao desconectar conta: ${response.statusCode}');
       }
@@ -181,16 +196,16 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> startOAuthFlow(String provider) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/oauth/start'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/unified-messaging/oauth/start',
+        options: Options(headers: _headers),
+        data: {
           'provider': provider,
           'redirect_uri': 'https://litig.app/oauth/callback',
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao iniciar OAuth: ${response.statusCode}');
       }
@@ -206,17 +221,17 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/oauth/complete'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/unified-messaging/oauth/complete',
+        options: Options(headers: _headers),
+        data: {
           'provider': provider,
           'auth_code': authCode,
           'state': state,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao completar OAuth: ${response.statusCode}');
       }
@@ -232,12 +247,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> getAllChats() async {
     try {
       final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/chats'),
-        headers: _headers,
+        '$_baseUrl/api/v1/unified-messaging/chats',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao carregar chats: ${response.statusCode}');
       }
@@ -258,13 +273,14 @@ class UnifiedMessagingService {
         if (cursor != null) 'cursor': cursor,
       };
       
-      final uri = Uri.parse('$_baseUrl/api/v1/unified-messaging/chats/$chatId/messages')
-          .replace(queryParameters: queryParams);
-
-      final response = await _httpClient.get(uri, headers: _headers);
+      final response = await _httpClient.get(
+        '$_baseUrl/api/v1/unified-messaging/chats/$chatId/messages',
+        queryParameters: queryParams,
+        options: Options(headers: _headers),
+      );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao carregar mensagens: ${response.statusCode}');
       }
@@ -282,14 +298,14 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/chats/$chatId/messages'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/unified-messaging/chats/$chatId/messages',
+        options: Options(headers: _headers),
+        data: {
           'provider': provider,
           'content': content,
           'message_type': messageType,
           if (attachments != null) 'attachments': attachments,
-        }),
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -321,12 +337,12 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.patch(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/messages/$messageId/read'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/unified-messaging/messages/$messageId/read',
+        options: Options(headers: _headers),
+        data: {
           'chat_id': chatId,
           'provider': provider,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
@@ -367,12 +383,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> syncAllMessages() async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/sync'),
-        headers: _headers,
+        '$_baseUrl/api/v1/unified-messaging/sync',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha na sincronização: ${response.statusCode}');
       }
@@ -384,12 +400,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> syncProvider(String provider) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/sync/$provider'),
-        headers: _headers,
+        '$_baseUrl/api/v1/unified-messaging/sync/$provider',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha na sincronização do $provider: ${response.statusCode}');
       }
@@ -405,12 +421,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> getNotificationPreferences() async {
     try {
       final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/preferences/notifications'),
-        headers: _headers,
+        '$_baseUrl/api/v1/unified-messaging/preferences/notifications',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao carregar preferências: ${response.statusCode}');
       }
@@ -424,13 +440,13 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.patch(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/preferences/notifications'),
-        headers: _headers,
-        body: jsonEncode({'preferences': preferences}),
+        '$_baseUrl/api/v1/unified-messaging/preferences/notifications',
+        options: Options(headers: _headers),
+        data: {'preferences': preferences},
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao atualizar preferências: ${response.statusCode}');
       }
@@ -445,12 +461,12 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/push-tokens'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/unified-messaging/push-tokens',
+        options: Options(headers: _headers),
+        data: {
           'token': token,
           'device_type': deviceType,
-        }),
+        },
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -468,12 +484,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> getInternalChats() async {
     try {
       final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/api/v1/chat/internal'),
-        headers: _headers,
+        '$_baseUrl/api/v1/chat/internal',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Falha ao carregar chats internos: ${response.statusCode}');
       }
@@ -490,14 +506,14 @@ class UnifiedMessagingService {
   }) async {
     try {
       final response = await _httpClient.post(
-        Uri.parse('$_baseUrl/api/v1/chat/internal/messages'),
-        headers: _headers,
-        body: jsonEncode({
+        '$_baseUrl/api/v1/chat/internal/messages',
+        options: Options(headers: _headers),
+        data: {
           'recipient_id': recipientId,
           'content': content,
           'message_type': messageType,
           if (attachments != null) 'attachments': attachments,
-        }),
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -528,12 +544,12 @@ class UnifiedMessagingService {
   Future<Map<String, dynamic>> healthCheck() async {
     try {
       final response = await _httpClient.get(
-        Uri.parse('$_baseUrl/api/v1/unified-messaging/health'),
-        headers: _headers,
+        '$_baseUrl/api/v1/unified-messaging/health',
+        options: Options(headers: _headers),
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return response.data;
       } else {
         throw Exception('Health check falhou: ${response.statusCode}');
       }
@@ -550,6 +566,6 @@ class UnifiedMessagingService {
     disconnectWebSocket();
     _messageStreamController.close();
     _notificationStreamController.close();
-    _httpClient.close();
+    // Dio não precisa ser fechado manualmente
   }
 }

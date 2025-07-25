@@ -1,10 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:meu_app/src/core/services/dio_service.dart';
+import 'package:meu_app/src/core/services/unipile_service.dart';
+import 'package:meu_app/src/core/utils/app_logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Serviço para autenticação e interação com APIs de redes sociais
 /// através do nosso backend.
 class SocialAuthService {
   static const String _baseUrl = '/api/v1';
+  
+  final UnipileService _unipileService;
+  final SupabaseClient _supabase;
+  
+  SocialAuthService({
+    UnipileService? unipileService,
+    SupabaseClient? supabase,
+  }) : _unipileService = unipileService ?? UnipileService(),
+       _supabase = supabase ?? Supabase.instance.client;
 
   /// Conecta uma conta do Instagram.
   ///
@@ -98,16 +110,45 @@ class SocialAuthService {
       final errorMsg = e.response?.data?['detail'] ?? 'Erro desconhecido';
       throw Exception('Falha ao buscar perfis sociais: $errorMsg');
     } catch (e) {
-      throw Exception('Ocorreu um erro inesperado: $e');
-    }
-  }
-}       throw Exception(result['error'] ?? 'Falha na conexão');
-    } catch (e) {
-      Logger.error('Erro ao conectar Instagram', {'error': e.toString()});
+      AppLogger.error('Erro ao conectar Instagram', {'error': e.toString()});
       return {
         'success': false,
         'error': e.toString(),
       };
+    }
+  }
+
+  /// Obtém todas as contas conectadas do usuário
+  Future<List<Map<String, dynamic>>> getConnectedAccounts() async {
+    try {
+      AppLogger.info('Buscando contas conectadas via Unipile V2');
+      
+      final accounts = await _unipileService.getAccounts();
+      return accounts.map((account) => account.toJson()).toList();
+    } catch (e) {
+      AppLogger.error('Erro ao buscar contas conectadas', {'error': e.toString()});
+      return [];
+    }
+  }
+
+  /// Desconecta uma conta específica
+  Future<bool> disconnectAccount(String accountId) async {
+    try {
+      AppLogger.info('Desconectando conta', {'account_id': accountId});
+      
+      await _unipileService.deleteAccount(accountId);
+      
+      // Remove do Supabase também
+      await _supabase
+          .from('user_social_accounts')
+          .delete()
+          .eq('external_account_id', accountId);
+      
+      AppLogger.info('Conta desconectada com sucesso');
+      return true;
+    } catch (e) {
+      AppLogger.error('Erro ao desconectar conta', {'error': e.toString()});
+      return false;
     }
   }
 
@@ -117,87 +158,39 @@ class SocialAuthService {
     required String provider, // 'gmail' ou 'outlook'
   }) async {
     try {
-      Logger.info('Conectando email via Unipile V2', {
+      AppLogger.info('Conectando email via Unipile V2', {
         'email': email,
         'provider': provider,
       });
 
-      late Map<String, dynamic> result;
+      late UnipileAccount account;
       
       if (provider == 'gmail') {
-        result = await _unipileService.connectGmail(email: email);
+        account = await _unipileService.connectGmail();
       } else if (provider == 'outlook') {
-        result = await _unipileService.connectOutlook(email: email);
+        account = await _unipileService.connectOutlook();
       } else {
         throw Exception('Provider não suportado: $provider');
       }
 
-      if (result['success'] == true) {
-        await _saveUserSocialAccount(
-          platform: provider,
-          accountData: result['data'],
-        );
+      await _saveUserSocialAccount(
+        platform: provider,
+        accountData: account.toJson(),
+      );
 
-        Logger.info('Email conectado com sucesso');
-        return {
-          'success': true,
-          'account_id': result['data']?['account_id'],
-          'platform': provider,
-          'email': email,
-        };
-      }
-
-      throw Exception(result['error'] ?? 'Falha na conexão');
+      AppLogger.info('Email conectado com sucesso');
+      return {
+        'success': true,
+        'account_id': account.id,
+        'platform': provider,
+        'email': account.email,
+      };
     } catch (e) {
-      Logger.error('Erro ao conectar email', {'error': e.toString()});
+      AppLogger.error('Erro ao conectar email', {'error': e.toString()});
       return {
         'success': false,
         'error': e.toString(),
       };
-    }
-  }
-
-  /// Lista todas as contas sociais conectadas
-  Future<List<Map<String, dynamic>>> getConnectedAccounts() async {
-    try {
-      Logger.info('Buscando contas conectadas via Unipile V2');
-
-      final result = await _unipileService.getAccounts();
-      
-      if (result['success'] == true) {
-        final accounts = result['data'] as List<dynamic>? ?? [];
-        return accounts.cast<Map<String, dynamic>>();
-      }
-
-      return [];
-    } catch (e) {
-      Logger.error('Erro ao buscar contas conectadas', {'error': e.toString()});
-      return [];
-    }
-  }
-
-  /// Desconecta uma conta social
-  Future<bool> disconnectAccount(String accountId) async {
-    try {
-      Logger.info('Desconectando conta', {'account_id': accountId});
-
-      final result = await _unipileService.deleteAccount(accountId);
-      
-      if (result['success'] == true) {
-        // Remover do Supabase também
-        await _supabase
-            .from('user_social_accounts')
-            .delete()
-            .eq('account_id', accountId);
-
-        Logger.info('Conta desconectada com sucesso');
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      Logger.error('Erro ao desconectar conta', {'error': e.toString()});
-      return false;
     }
   }
 
@@ -221,12 +214,12 @@ class SocialAuthService {
         'is_active': true,
       });
 
-      Logger.info('Conta social salva no Supabase', {
+      AppLogger.info('Conta social salva no Supabase', {
         'platform': platform,
         'account_id': accountData['account_id'],
       });
     } catch (e) {
-      Logger.error('Erro ao salvar conta social', {'error': e.toString()});
+      AppLogger.error('Erro ao salvar conta social', {'error': e.toString()});
       // Não propagar o erro para não quebrar o fluxo principal
     }
   }

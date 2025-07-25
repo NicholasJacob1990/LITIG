@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List
 import time
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -171,6 +171,7 @@ async def get_case_details(
            description="Retorna explicação detalhada de por que um advogado foi recomendado para um caso específico.")
 @limiter.limit("10/minute")  # Rate limiting: 10 requests por minuto por IP
 async def get_match_explanation(
+    request: Request,
     case_id: str,
     lawyer_id: str,
     current_user: dict = Depends(get_current_user),

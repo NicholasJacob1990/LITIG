@@ -118,7 +118,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: SvgPicture.asset(
@@ -194,7 +194,7 @@ class _UnifiedChatScreenState extends State<UnifiedChatScreen> {
                 child: Text(
                   _formatTimestamp(message.sentAt),
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),

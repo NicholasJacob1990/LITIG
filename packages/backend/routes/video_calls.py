@@ -10,7 +10,7 @@ from config import get_settings
 
 # Configurações
 settings = get_settings()
-supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
 router = APIRouter(prefix="/api/video-calls", tags=["video-calls"])
 

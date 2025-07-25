@@ -1,10 +1,28 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/official_social_icons.dart';
 
-import '../../../../core/services/social_auth_service.dart';
 import '../../../../shared/utils/app_colors.dart';
 import '../../../../shared/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_button.dart';
+
+/// Classe que representa uma conta social conectada
+class SocialAccount {
+  final String id;
+  final String provider;
+  final String username;
+  final String? profileUrl;
+  final String? avatarUrl;
+  final DateTime connectedAt;
+  
+  const SocialAccount({
+    required this.id,
+    required this.provider,
+    required this.username,
+    this.profileUrl,
+    this.avatarUrl,
+    required this.connectedAt,
+  });
+}
 
 /// Widget de card para exibir informações de uma plataforma social
 /// 

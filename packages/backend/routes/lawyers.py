@@ -4,10 +4,10 @@ from typing import Optional
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from backend.auth import get_current_user
-from backend.services.availability_service import AvailabilityService
-from backend.database import get_database
-from backend.services.notification_service import NotificationService
+from auth import get_current_user
+from services.availability_service import AvailabilityService
+from database import get_database
+from services.notification_service import NotificationService
 import logging
 
 logger = logging.getLogger(__name__)

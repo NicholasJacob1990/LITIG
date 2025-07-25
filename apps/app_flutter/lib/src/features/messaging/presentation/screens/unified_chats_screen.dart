@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/core/theme/app_colors.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
@@ -8,7 +10,7 @@ import 'package:meu_app/src/features/messaging/presentation/bloc/unified_messagi
 import 'package:meu_app/src/features/messaging/presentation/widgets/calendar_integration_widget.dart';
 import 'package:meu_app/src/features/messaging/presentation/widgets/email_actions_widget.dart';
 import 'package:meu_app/src/features/messaging/presentation/widgets/linkedin_actions_widget.dart';
-import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart';
+import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart' as calendar;
 import 'package:timeago/timeago.dart' as timeago;
 
 class UnifiedChatsScreen extends StatefulWidget {
@@ -46,8 +48,8 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
       providers: [
         BlocProvider.value(value: _messagingBloc),
         BlocProvider(
-          create: (context) => CalendarBloc()
-            ..add(LoadCalendarEvents(
+          create: (context) => calendar.CalendarBloc()
+            ..add(calendar.LoadCalendarEvents(
               startDate: DateTime.now(),
               endDate: DateTime.now().add(const Duration(days: 30)),
             )),
@@ -293,9 +295,9 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: AppColors.primaryBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,8 +354,8 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         account.provider.toUpperCase(),
         style: const TextStyle(fontSize: 12),
       ),
-      backgroundColor: color.withOpacity(0.1),
-      side: BorderSide(color: color.withOpacity(0.3)),
+      backgroundColor: color.withValues(alpha: 0.1),
+      side: BorderSide(color: color.withValues(alpha: 0.3)),
     );
   }
 
@@ -362,7 +364,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
       margin: const EdgeInsets.only(bottom: 12),
         child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+          backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
           child: Icon(
             LucideIcons.messageCircle,
             color: AppColors.primaryBlue,
@@ -384,7 +386,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
             const SizedBox(height: 4),
             Text(
               message.timestamp != null 
-                  ? timeago.format(message.timestamp!, locale: 'pt_BR')
+                  ? timeago.format(message.timestamp, locale: 'pt_BR')
                   : 'Horário desconhecido',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey[600],
@@ -438,8 +440,8 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         child: ListTile(
           leading: CircleAvatar(
             backgroundColor: email.isRead 
-                ? Colors.grey.withOpacity(0.1)
-                : AppColors.primaryBlue.withOpacity(0.1),
+                ? Colors.grey.withValues(alpha: 0.1)
+                : AppColors.primaryBlue.withValues(alpha: 0.1),
             child: Icon(
               email.isRead ? LucideIcons.mailOpen : LucideIcons.mail,
               color: email.isRead ? Colors.grey : AppColors.primaryBlue,
@@ -472,7 +474,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
               const SizedBox(height: 4),
               Text(
                 email.receivedAt != null 
-                    ? timeago.format(email.receivedAt!, locale: 'pt_BR')
+                    ? timeago.format(email.receivedAt, locale: 'pt_BR')
                     : 'Data desconhecida',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[600],
@@ -515,10 +517,10 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isToday 
-              ? Colors.orange.withOpacity(0.1)
+              ? Colors.orange.withValues(alpha: 0.1)
               : isPast 
-                  ? Colors.grey.withOpacity(0.1)
-                  : AppColors.primaryBlue.withOpacity(0.1),
+                  ? Colors.grey.withValues(alpha: 0.1)
+                  : AppColors.primaryBlue.withValues(alpha: 0.1),
           child: Icon(
             LucideIcons.calendar,
             color: isToday 
@@ -539,9 +541,9 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (event.description?.isNotEmpty == true) ...[
+            if (event.description.isNotEmpty == true) ...[
               Text(
-                event.description!,
+                event.description,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 13, color: Colors.grey[700]),
@@ -558,7 +560,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
                 ),
               ],
             ),
-            if (event.location?.isNotEmpty == true) ...[
+            if (event.location.isNotEmpty == true) ...[
               const SizedBox(height: 2),
               Row(
                 children: [
@@ -566,7 +568,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      event.location!,
+                      event.location,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1119,7 +1121,7 @@ class _ConversationsViewState extends State<ConversationsView> with TickerProvid
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.infoLight, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.info.withOpacity(0.3))),
+      decoration: BoxDecoration(color: AppColors.infoLight, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.info.withValues(alpha: 0.3))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           const Icon(LucideIcons.link, size: 16, color: AppColors.info),
@@ -1138,7 +1140,7 @@ class _ConversationsViewState extends State<ConversationsView> with TickerProvid
     final config = _getProviderConfig(account.provider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: config.color.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: config.color.withOpacity(0.3))),
+      decoration: BoxDecoration(color: config.color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: config.color.withValues(alpha: 0.3))),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         SvgPicture.asset(config.svgAsset, width: 12, height: 12, colorFilter: ColorFilter.mode(config.color, BlendMode.srcIn)),
         const SizedBox(width: 4),
@@ -1158,12 +1160,12 @@ class _ConversationsViewState extends State<ConversationsView> with TickerProvid
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Stack(children: [
-            CircleAvatar(radius: 24, backgroundColor: providerConfig.color.withOpacity(0.1), child: chat.avatarUrl != null ? ClipRRect(borderRadius: BorderRadius.circular(24), child: Image.network(chat.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover)) : Icon(LucideIcons.user, color: providerConfig.color, size: 20)),
+            CircleAvatar(radius: 24, backgroundColor: providerConfig.color.withValues(alpha: 0.1), child: chat.avatarUrl != null ? ClipRRect(borderRadius: BorderRadius.circular(24), child: Image.network(chat.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover)) : Icon(LucideIcons.user, color: providerConfig.color, size: 20)),
             Positioned(bottom: 0, right: 0, child: Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)), child: SvgPicture.asset(providerConfig.svgAsset, width: 12, height: 12, colorFilter: ColorFilter.mode(providerConfig.color, BlendMode.srcIn)))),
           ]),
           title: Text(chat.chatName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: chat.unreadCount > 0 ? FontWeight.bold : FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (chat.lastMessage != null) ...[const SizedBox(height: 4), Text(chat.lastMessage!, style: theme.textTheme.bodySmall?.copyWith(color: chat.unreadCount > 0 ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withOpacity(0.7), fontWeight: chat.unreadCount > 0 ? FontWeight.w500 : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis)],
+            if (chat.lastMessage != null) ...[const SizedBox(height: 4), Text(chat.lastMessage!, style: theme.textTheme.bodySmall?.copyWith(color: chat.unreadCount > 0 ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.7), fontWeight: chat.unreadCount > 0 ? FontWeight.w500 : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis)],
             if (showTimeAgo && chat.lastMessageAt != null) ...[const SizedBox(height: 4), Text(_formatTimeAgo(chat.lastMessageAt!), style: theme.textTheme.labelSmall?.copyWith(color: AppColors.info, fontWeight: FontWeight.w500))],
           ]),
           trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [

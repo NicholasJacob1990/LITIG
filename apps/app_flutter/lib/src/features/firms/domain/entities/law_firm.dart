@@ -39,6 +39,12 @@ class LawFirm extends Equatable {
   /// Indica se é um escritório boutique (especializado)
   final bool isBoutique;
 
+  /// Plano do escritório (FREE, PRO, PARTNER)
+  final String plan;
+
+  /// Tier de parceria (STANDARD, SILVER, GOLD, PLATINUM)
+  final String partnerTier;
+
   const LawFirm({
     required this.id,
     required this.name,
@@ -52,6 +58,8 @@ class LawFirm extends Equatable {
     this.specializations = const [],
     this.rating = 0.0,
     this.isBoutique = false,
+    this.plan = 'FREE', // NOVO: Padrão FREE
+    this.partnerTier = 'STANDARD', // NOVO: Padrão STANDARD
   });
 
   /// Verifica se o escritório possui localização definida
@@ -65,6 +73,20 @@ class LawFirm extends Equatable {
 
   /// Ano de fundação baseado na data de criação (retorna null se não informado)
   int? get foundedYear => createdAt?.year;
+
+  /// Verifica se o escritório tem plano PRO
+  bool get isPro => plan.toUpperCase() == 'PRO';
+
+  /// Verifica se o escritório tem plano FREE
+  bool get isFree => plan.toUpperCase() == 'FREE';
+
+  /// Verifica se é parceiro (tier acima de STANDARD)
+  bool get isPartner => partnerTier.toUpperCase() != 'STANDARD';
+
+  /// Verifica se é parceiro premium (GOLD ou PLATINUM)
+  bool get isPremiumPartner => 
+    partnerTier.toUpperCase() == 'GOLD' || 
+    partnerTier.toUpperCase() == 'PLATINUM';
 
   @override
   List<Object?> get props => [
@@ -80,6 +102,8 @@ class LawFirm extends Equatable {
         specializations,
         rating,
         isBoutique,
+        plan, // NOVO
+        partnerTier, // NOVO
       ];
 
   @override

@@ -15,12 +15,12 @@ from typing import Any, Dict, List, Optional
 
 from celery import Task
 
-from backend.celery_app import celery_app
-from backend.services.celery_task_service import TaskStatus, celery_task_service
-from backend.services.intelligent_triage_orchestrator import (
+from celery_app import celery_app
+from services.celery_task_service import TaskStatus, celery_task_service
+from services.intelligent_triage_orchestrator import (
     intelligent_triage_orchestrator,
 )
-from backend.services.redis_service import redis_service
+from services.redis_service import redis_service
 
 logger = logging.getLogger(__name__)
 
@@ -266,7 +266,7 @@ def generate_embeddings_async(
         logger.info(f"Gerando embeddings para caso {case_id}")
 
         # Importar serviço de embeddings
-        from backend.services.embedding_service import embedding_service
+        from services.embedding_service import embedding_service
 
         # Gerar embeddings
         embeddings = asyncio.run(

@@ -482,7 +482,7 @@ class CompetitorAnalysisSection extends BaseInfoSection {
         color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: color.withOpacity(isMainCompetitor || isYou ? 0.4 : 0.2),
+          color: color.withValues(alpha: isMainCompetitor || isYou ? 0.4 : 0.2),
           width: isMainCompetitor || isYou ? 2 : 1,
         ),
       ),

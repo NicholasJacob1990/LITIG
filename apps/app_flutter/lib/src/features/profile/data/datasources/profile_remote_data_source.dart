@@ -85,11 +85,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         availability: ClientAvailability(
           timezone: 'America/Sao_Paulo',
           weeklySchedule: {
-            WeekDay.monday: const [TimeSlot(startTime: '09:00', endTime: '18:00')],
-            WeekDay.tuesday: const [TimeSlot(startTime: '09:00', endTime: '18:00')],
-            WeekDay.wednesday: const [TimeSlot(startTime: '09:00', endTime: '18:00')],
-            WeekDay.thursday: const [TimeSlot(startTime: '09:00', endTime: '18:00')],
-            WeekDay.friday: const [TimeSlot(startTime: '09:00', endTime: '18:00')],
+            WeekDay.monday: [TimeSlot(startTime: '09:00', endTime: '18:00')],
+            WeekDay.tuesday: [TimeSlot(startTime: '09:00', endTime: '18:00')],
+            WeekDay.wednesday: [TimeSlot(startTime: '09:00', endTime: '18:00')],
+            WeekDay.thursday: [TimeSlot(startTime: '09:00', endTime: '18:00')],
+            WeekDay.friday: [TimeSlot(startTime: '09:00', endTime: '18:00')],
           },
           acceptHolidays: false,
           acceptEmergencyOutsideHours: true,

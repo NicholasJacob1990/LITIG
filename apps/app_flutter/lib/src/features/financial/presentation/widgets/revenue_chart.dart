@@ -62,7 +62,7 @@ class RevenueChart extends StatelessWidget {
                 width: 30,
                 height: height,
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.7),
+                  color: Colors.green.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Tooltip(

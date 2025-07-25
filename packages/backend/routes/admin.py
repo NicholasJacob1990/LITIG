@@ -383,7 +383,7 @@ async def force_lawyer_sync(
             raise HTTPException(status_code=404, detail="Advogado não encontrado")
         
         # Disparar sincronização
-        from backend.jobs.sync_lawyer_data import sync_single_lawyer_task
+        from jobs.sync_lawyer_data import sync_single_lawyer_task
         task = sync_single_lawyer_task.delay(lawyer_id, force_refresh=True)
         
         # Log da ação administrativa
@@ -411,7 +411,7 @@ async def force_global_sync(
     Força sincronização global do sistema.
     """
     try:
-        from backend.jobs.sync_lawyer_data import sync_all_lawyers_task
+        from jobs.sync_lawyer_data import sync_all_lawyers_task
         
         task = sync_all_lawyers_task.delay(
             priority_only=priority_only,

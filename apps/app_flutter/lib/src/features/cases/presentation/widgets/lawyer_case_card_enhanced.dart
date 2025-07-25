@@ -50,12 +50,12 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -121,7 +121,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
               Text(
                 'ID: $caseId',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -144,7 +144,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -156,7 +156,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: theme.colorScheme.outline.withOpacity(0.2),
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -199,13 +199,13 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
                     Icon(
                       clientInfo.isCorporate ? LucideIcons.building2 : LucideIcons.user,
                       size: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       clientInfo.isCorporate ? 'Pessoa Jurídica' : 'Pessoa Física',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const Spacer(),
@@ -218,7 +218,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
                     Text(
                       clientInfo.averageRating.toStringAsFixed(1),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.8),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -238,10 +238,10 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: AppColors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.success.withOpacity(0.3),
+          color: AppColors.success.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -267,7 +267,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: business.isProfitable ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+                  color: business.isProfitable ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -323,7 +323,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
           Icon(
             icon,
             size: 12,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           const SizedBox(width: 4),
           Expanded(
@@ -333,7 +333,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
                 Text(
                   label,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 Text(
@@ -356,10 +356,10 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: match.matchColor.withOpacity(0.1),
+        color: match.matchColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: match.matchColor.withOpacity(0.3),
+          color: match.matchColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -369,7 +369,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: match.matchColor.withOpacity(0.2),
+              color: match.matchColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Center(
@@ -399,7 +399,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
                 Text(
                   match.matchReason,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -418,7 +418,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -495,7 +495,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+          Icon(icon, size: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
           const SizedBox(height: 4),
           Text(
             value,
@@ -506,7 +506,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -554,10 +554,10 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor().withOpacity(0.1),
+        color: _getStatusColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getStatusColor().withOpacity(0.3),
+          color: _getStatusColor().withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -576,10 +576,10 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: _getCaseTypeColor().withOpacity(0.1),
+        color: _getCaseTypeColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getCaseTypeColor().withOpacity(0.3),
+          color: _getCaseTypeColor().withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -610,7 +610,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

@@ -8,8 +8,8 @@ from typing import List, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel
 
-from backend.services.timeline_service import timeline_service
-from backend.auth import get_current_user
+from services.timeline_service import timeline_service
+from auth import get_current_user
 
 router = APIRouter(
     prefix="/cases/{case_id}/timeline",

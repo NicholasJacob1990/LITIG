@@ -16,12 +16,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from auth import get_current_user
-from services.celery_task_service import (
-    get_task_status,
-    get_task_result,
-    cleanup_task_data,
-)
-from models import TaskStatusResponse, TaskResultResponse, TaskCleanupResponse
+from services.celery_task_service import celery_task_service
+# from models import TaskStatusResponse, TaskResultResponse, TaskCleanupResponse  # Classes não encontradas
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
@@ -107,7 +103,7 @@ async def get_task_status(
     """
     Obtém o status detalhado de uma tarefa específica.
     """
-    task_data = await celery_task_service.get_task_status(task_id)
+    task_data = await celery_task_service.celery_task_service.get_task_status(task_id)
 
     if not task_data:
         raise HTTPException(
@@ -196,7 +192,7 @@ async def retry_task(
     Reexecuta uma tarefa falhada.
     """
     # Verificar se a tarefa existe e pertence ao usuário
-    task_data = await celery_task_service.get_task_status(task_id)
+    task_data = await celery_task_service.celery_task_service.get_task_status(task_id)
 
     if not task_data:
         raise HTTPException(
@@ -250,7 +246,7 @@ async def cancel_task(
     Cancela uma tarefa em execução ou na fila.
     """
     # Verificar se a tarefa existe e pertence ao usuário
-    task_data = await celery_task_service.get_task_status(task_id)
+    task_data = await celery_task_service.celery_task_service.get_task_status(task_id)
 
     if not task_data:
         raise HTTPException(

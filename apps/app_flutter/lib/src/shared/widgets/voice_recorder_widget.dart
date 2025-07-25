@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/core/theme/app_colors.dart';
@@ -42,7 +41,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
     duration: Duration.zero,
   );
   
-  List<double> _waveformData = [];
+  final List<double> _waveformData = [];
   final int _maxWaveformBars = 50;
 
   @override
@@ -105,7 +104,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -162,9 +161,9 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.red.withOpacity(0.3)),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -213,7 +212,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
             decoration: BoxDecoration(
               color: _recordingState.isRecording && !_recordingState.isPaused
                   ? primaryColor
-                  : primaryColor.withOpacity(0.3),
+                  : primaryColor.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(1),
             ),
           );
@@ -226,7 +225,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.1),
+        color: primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -281,7 +280,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
                       BoxShadow(
                         color: (_recordingState.isRecording && !_recordingState.isPaused
                             ? Colors.red
-                            : primaryColor).withOpacity(0.3),
+                            : primaryColor).withValues(alpha: 0.3),
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),
@@ -327,9 +326,9 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.3)),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
           child: Icon(
             icon,

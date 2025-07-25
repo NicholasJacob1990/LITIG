@@ -144,7 +144,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             counterText: widget.showCounter ? null : "",
             labelStyle: widget.labelStyle,
             hintStyle: widget.hintStyle ?? theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
           ),
           style: widget.style ?? theme.textTheme.bodyLarge,
@@ -177,7 +177,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         widget.prefixIcon,
         color: _hasFocus 
           ? Theme.of(context).colorScheme.primary 
-          : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+          : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
       );
     }
     
@@ -197,7 +197,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         IconButton(
           icon: Icon(
             _obscureText ? Icons.visibility : Icons.visibility_off,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
           onPressed: () {
             setState(() {
@@ -216,7 +216,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             widget.suffixIconData,
             color: _hasFocus 
               ? Theme.of(context).colorScheme.primary 
-              : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+              : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
           onPressed: widget.onSuffixIconTap,
         ),
@@ -237,21 +237,21 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
 
   Color _getFillColor(ColorScheme colorScheme) {
     if (!widget.enabled) {
-      return colorScheme.surfaceContainerHighest.withOpacity(0.5);
+      return colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     }
     
     if (_hasFocus) {
-      return colorScheme.surfaceContainerHighest.withOpacity(0.3);
+      return colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
     }
     
-    return colorScheme.surfaceContainerHighest.withOpacity(0.1);
+    return colorScheme.surfaceContainerHighest.withValues(alpha: 0.1);
   }
 
   OutlineInputBorder _getBorder(ColorScheme colorScheme) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
       borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.5),
+        color: colorScheme.outline.withValues(alpha: 0.5),
         width: 1,
       ),
     );
@@ -261,7 +261,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
       borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.5),
+        color: colorScheme.outline.withValues(alpha: 0.5),
         width: 1,
       ),
     );
@@ -301,7 +301,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
       borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.3),
+        color: colorScheme.outline.withValues(alpha: 0.3),
         width: 1,
       ),
     );

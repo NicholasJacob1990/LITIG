@@ -1,0 +1,1036 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/client_profile.dart';
+import '../bloc/profile_bloc.dart';
+import '../bloc/profile_event.dart';
+import '../bloc/profile_state.dart';
+
+class CommunicationPreferencesScreen extends StatefulWidget {
+  const CommunicationPreferencesScreen({super.key});
+
+  @override
+  State<CommunicationPreferencesScreen> createState() => _CommunicationPreferencesScreenState();
+}
+
+class _CommunicationPreferencesScreenState extends State<CommunicationPreferencesScreen> {
+  late CommunicationPreferences _preferences;
+  bool _hasUnsavedChanges = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProfileBloc>().add(const LoadProfile('current_user'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Preferências de Comunicação'),
+        actions: [
+          if (_hasUnsavedChanges)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _savePreferences,
+            ),
+        ],
+      ),
+      body: BlocConsumer<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state is ProfileUpdated) {
+            setState(() {
+              _hasUnsavedChanges = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Preferências salvas com sucesso!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is ProfileLoading) {
+            return const CommunicationSkeletonLoader();
+          }
+          
+          if (state is ProfileLoaded) {
+            _preferences = state.profile.communicationPreferences;
+            
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const CommunicationHeaderCard(),
+                  
+                  const SizedBox(height: 24),
+                  
+                  PreferredChannelsSection(
+                    preferences: _preferences,
+                    onChanged: _updatePreferences,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  AvailabilitySection(
+                    availability: _preferences.availability,
+                    onChanged: _updateAvailability,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  NotificationSettingsSection(
+                    settings: _preferences.notificationSettings,
+                    onChanged: _updateNotificationSettings,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  AuthorizationsSection(
+                    authorizations: _preferences.authorizations,
+                    onChanged: _updateAuthorizations,
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  CommunicationActions(
+                    hasUnsavedChanges: _hasUnsavedChanges,
+                    onSave: _savePreferences,
+                    onReset: _resetPreferences,
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          return const CommunicationErrorWidget();
+        },
+      ),
+    );
+  }
+
+  void _updatePreferences(CommunicationPreferences preferences) {
+    setState(() {
+      _preferences = preferences;
+      _hasUnsavedChanges = true;
+    });
+  }
+
+  void _updateAvailability(ClientAvailability availability) {
+    setState(() {
+      _preferences = CommunicationPreferences(
+        preferredChannels: _preferences.preferredChannels,
+        availability: availability,
+        notificationSettings: _preferences.notificationSettings,
+        authorizations: _preferences.authorizations,
+      );
+      _hasUnsavedChanges = true;
+    });
+  }
+
+  void _updateNotificationSettings(Map<String, bool> settings) {
+    setState(() {
+      _preferences = CommunicationPreferences(
+        preferredChannels: _preferences.preferredChannels,
+        availability: _preferences.availability,
+        notificationSettings: settings,
+        authorizations: _preferences.authorizations,
+      );
+      _hasUnsavedChanges = true;
+    });
+  }
+
+  void _updateAuthorizations(Map<String, bool> authorizations) {
+    setState(() {
+      _preferences = CommunicationPreferences(
+        preferredChannels: _preferences.preferredChannels,
+        availability: _preferences.availability,
+        notificationSettings: _preferences.notificationSettings,
+        authorizations: authorizations,
+      );
+      _hasUnsavedChanges = true;
+    });
+  }
+
+  void _savePreferences() {
+    final profileState = context.read<ProfileBloc>().state;
+    if (profileState is ProfileLoaded) {
+      final updatedProfile = ClientProfile(
+        id: profileState.profile.id,
+        type: profileState.profile.type,
+        personalData: profileState.profile.personalData,
+        contactData: profileState.profile.contactData,
+        addresses: profileState.profile.addresses,
+        documents: profileState.profile.documents,
+        communicationPreferences: _preferences,
+        privacySettings: profileState.profile.privacySettings,
+        createdAt: profileState.profile.createdAt,
+        updatedAt: DateTime.now(),
+      );
+      
+      context.read<ProfileBloc>().add(UpdateProfile(updatedProfile));
+    }
+  }
+
+  void _resetPreferences() {
+    context.read<ProfileBloc>().add(const LoadProfile('current_user'));
+    setState(() {
+      _hasUnsavedChanges = false;
+    });
+  }
+}
+
+class CommunicationHeaderCard extends StatelessWidget {
+  const CommunicationHeaderCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.blue[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Icon(
+              Icons.forum,
+              size: 48,
+              color: Colors.blue[700],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Preferências de Comunicação',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.blue[700],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Configure como e quando deseja ser contatado pelos advogados. '
+              'Você pode definir canais preferenciais, horários de disponibilidade e tipos de notificação.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.blue[800]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PreferredChannelsSection extends StatelessWidget {
+  final CommunicationPreferences preferences;
+  final ValueChanged<CommunicationPreferences> onChanged;
+  
+  const PreferredChannelsSection({
+    super.key,
+    required this.preferences,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Canais Preferenciais', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            
+            Text(
+              'Selecione e ordene seus canais de comunicação por preferência:',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: preferences.preferredChannels.length,
+              onReorder: _reorderChannels,
+              itemBuilder: (context, index) {
+                final channel = preferences.preferredChannels[index];
+                return PreferredChannelItem(
+                  key: ValueKey(channel.type),
+                  channel: channel,
+                  position: index + 1,
+                  onToggle: (enabled) => _toggleChannel(channel.type, enabled),
+                  onConfigureDetails: () => _configureChannelDetails(channel.type),
+                );
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
+            OutlinedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Adicionar Canal'),
+              onPressed: _showAddChannelDialog,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _reorderChannels(int oldIndex, int newIndex) {
+    final channels = List<PreferredChannel>.from(preferences.preferredChannels);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = channels.removeAt(oldIndex);
+    channels.insert(newIndex, item);
+    
+    final updatedPreferences = CommunicationPreferences(
+      preferredChannels: channels,
+      availability: preferences.availability,
+      notificationSettings: preferences.notificationSettings,
+      authorizations: preferences.authorizations,
+    );
+    
+    onChanged(updatedPreferences);
+  }
+
+  void _toggleChannel(ChannelType type, bool enabled) {
+    final channels = preferences.preferredChannels.map((c) {
+      if (c.type == type) {
+        return PreferredChannel(
+          type: c.type,
+          isEnabled: enabled,
+          priority: c.priority,
+          configuration: c.configuration,
+        );
+      }
+      return c;
+    }).toList();
+    
+    final updatedPreferences = CommunicationPreferences(
+      preferredChannels: channels,
+      availability: preferences.availability,
+      notificationSettings: preferences.notificationSettings,
+      authorizations: preferences.authorizations,
+    );
+    
+    onChanged(updatedPreferences);
+  }
+
+  void _configureChannelDetails(ChannelType type) {
+    // TODO: Implementar configuração de detalhes do canal
+  }
+
+  void _showAddChannelDialog() {
+    // TODO: Implementar diálogo para adicionar canal
+  }
+}
+
+class PreferredChannelItem extends StatelessWidget {
+  final PreferredChannel channel;
+  final int position;
+  final ValueChanged<bool> onToggle;
+  final VoidCallback onConfigureDetails;
+  
+  const PreferredChannelItem({
+    super.key,
+    required this.channel,
+    required this.position,
+    required this.onToggle,
+    required this.onConfigureDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 12,
+              backgroundColor: channel.isEnabled ? Theme.of(context).primaryColor : Colors.grey,
+              child: Text(
+                '$position',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(_getChannelIcon(channel.type)),
+          ],
+        ),
+        title: Text(_getChannelName(channel.type)),
+        subtitle: Text(_getChannelDescription(channel)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Switch(
+              value: channel.isEnabled,
+              onChanged: onToggle,
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: channel.isEnabled ? onConfigureDetails : null,
+            ),
+            const Icon(Icons.drag_handle),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getChannelIcon(ChannelType type) {
+    switch (type) {
+      case ChannelType.email:
+        return Icons.email;
+      case ChannelType.whatsapp:
+        return Icons.chat;
+      case ChannelType.sms:
+        return Icons.message;
+      case ChannelType.phone:
+        return Icons.phone;
+      case ChannelType.inAppNotification:
+        return Icons.notifications;
+      case ChannelType.pushNotification:
+        return Icons.notification_important;
+    }
+  }
+
+  String _getChannelName(ChannelType type) {
+    switch (type) {
+      case ChannelType.email:
+        return 'E-mail';
+      case ChannelType.whatsapp:
+        return 'WhatsApp';
+      case ChannelType.sms:
+        return 'SMS';
+      case ChannelType.phone:
+        return 'Telefone';
+      case ChannelType.inAppNotification:
+        return 'Notificação no App';
+      case ChannelType.pushNotification:
+        return 'Push Notification';
+    }
+  }
+
+  String _getChannelDescription(PreferredChannel channel) {
+    final baseDescription = _getChannelBaseDescription(channel.type);
+    return channel.isEnabled ? baseDescription : '$baseDescription (Desabilitado)';
+  }
+
+  String _getChannelBaseDescription(ChannelType type) {
+    switch (type) {
+      case ChannelType.email:
+        return 'Receber atualizações por e-mail';
+      case ChannelType.whatsapp:
+        return 'Mensagens via WhatsApp';
+      case ChannelType.sms:
+        return 'Mensagens de texto SMS';
+      case ChannelType.phone:
+        return 'Ligações telefônicas';
+      case ChannelType.inAppNotification:
+        return 'Notificações dentro do app';
+      case ChannelType.pushNotification:
+        return 'Notificações push no dispositivo';
+    }
+  }
+}
+
+class AvailabilitySection extends StatelessWidget {
+  final ClientAvailability availability;
+  final ValueChanged<ClientAvailability> onChanged;
+  
+  const AvailabilitySection({
+    super.key,
+    required this.availability,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Horários de Disponibilidade', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Fuso Horário',
+                border: OutlineInputBorder(),
+              ),
+              value: availability.timezone,
+              items: [
+                'America/Sao_Paulo',
+                'America/Manaus',
+                'America/Fortaleza',
+                'America/Rio_Branco',
+              ].map((tz) => DropdownMenuItem(
+                value: tz,
+                child: Text(_getTimezoneName(tz)),
+              )).toList(),
+              onChanged: (tz) => _updateTimezone(tz),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            ...WeekDay.values.map((day) => AvailabilityDayItem(
+              day: day,
+              timeSlots: availability.getTimeSlotsForDay(day),
+              onChanged: (slots) => _updateDayAvailability(day, slots),
+            )),
+            
+            const SizedBox(height: 16),
+            
+            SwitchListTile(
+              title: const Text('Aceitar contatos em feriados'),
+              subtitle: const Text('Permite contato durante feriados nacionais'),
+              value: availability.acceptHolidays,
+              onChanged: (value) => _updateAcceptHolidays(value),
+            ),
+            
+            SwitchListTile(
+              title: const Text('Aceitar contatos de emergência fora do horário'),
+              subtitle: const Text('Permite contato urgente fora dos horários definidos'),
+              value: availability.acceptEmergencyOutsideHours,
+              onChanged: (value) => _updateAcceptEmergency(value),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getTimezoneName(String timezone) {
+    switch (timezone) {
+      case 'America/Sao_Paulo':
+        return 'Brasília (GMT-3)';
+      case 'America/Manaus':
+        return 'Manaus (GMT-4)';
+      case 'America/Fortaleza':
+        return 'Fortaleza (GMT-3)';
+      case 'America/Rio_Branco':
+        return 'Rio Branco (GMT-5)';
+      default:
+        return timezone;
+    }
+  }
+
+  void _updateTimezone(String? timezone) {
+    if (timezone != null) {
+      onChanged(ClientAvailability(
+        timezone: timezone,
+        weeklySchedule: availability.weeklySchedule,
+        acceptHolidays: availability.acceptHolidays,
+        acceptEmergencyOutsideHours: availability.acceptEmergencyOutsideHours,
+      ));
+    }
+  }
+
+  void _updateDayAvailability(WeekDay day, List<TimeSlot> slots) {
+    final updatedSchedule = Map<WeekDay, List<TimeSlot>>.from(availability.weeklySchedule);
+    updatedSchedule[day] = slots;
+    
+    onChanged(ClientAvailability(
+      timezone: availability.timezone,
+      weeklySchedule: updatedSchedule,
+      acceptHolidays: availability.acceptHolidays,
+      acceptEmergencyOutsideHours: availability.acceptEmergencyOutsideHours,
+    ));
+  }
+
+  void _updateAcceptHolidays(bool value) {
+    onChanged(ClientAvailability(
+      timezone: availability.timezone,
+      weeklySchedule: availability.weeklySchedule,
+      acceptHolidays: value,
+      acceptEmergencyOutsideHours: availability.acceptEmergencyOutsideHours,
+    ));
+  }
+
+  void _updateAcceptEmergency(bool value) {
+    onChanged(ClientAvailability(
+      timezone: availability.timezone,
+      weeklySchedule: availability.weeklySchedule,
+      acceptHolidays: availability.acceptHolidays,
+      acceptEmergencyOutsideHours: value,
+    ));
+  }
+}
+
+class AvailabilityDayItem extends StatelessWidget {
+  final WeekDay day;
+  final List<TimeSlot> timeSlots;
+  final ValueChanged<List<TimeSlot>> onChanged;
+  
+  const AvailabilityDayItem({
+    super.key,
+    required this.day,
+    required this.timeSlots,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _getWeekDayName(day),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                TextButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Adicionar'),
+                  onPressed: () => _showAddTimeSlotDialog(context),
+                ),
+              ],
+            ),
+            
+            if (timeSlots.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.schedule_outlined, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Não disponível'),
+                  ],
+                ),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                children: timeSlots.map((slot) => TimeSlotChip(
+                  timeSlot: slot,
+                  onDelete: () => _removeTimeSlot(slot),
+                )).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getWeekDayName(WeekDay day) {
+    switch (day) {
+      case WeekDay.monday:
+        return 'Segunda-feira';
+      case WeekDay.tuesday:
+        return 'Terça-feira';
+      case WeekDay.wednesday:
+        return 'Quarta-feira';
+      case WeekDay.thursday:
+        return 'Quinta-feira';
+      case WeekDay.friday:
+        return 'Sexta-feira';
+      case WeekDay.saturday:
+        return 'Sábado';
+      case WeekDay.sunday:
+        return 'Domingo';
+    }
+  }
+
+  void _showAddTimeSlotDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AddTimeSlotDialog(
+        onAdd: (slot) => _addTimeSlot(slot),
+      ),
+    );
+  }
+
+  void _addTimeSlot(TimeSlot slot) {
+    final updatedSlots = List<TimeSlot>.from(timeSlots)..add(slot);
+    onChanged(updatedSlots);
+  }
+
+  void _removeTimeSlot(TimeSlot slot) {
+    final updatedSlots = List<TimeSlot>.from(timeSlots)..remove(slot);
+    onChanged(updatedSlots);
+  }
+}
+
+class TimeSlotChip extends StatelessWidget {
+  final TimeSlot timeSlot;
+  final VoidCallback onDelete;
+  
+  const TimeSlotChip({
+    super.key,
+    required this.timeSlot,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      label: Text('${timeSlot.startTime} - ${timeSlot.endTime}'),
+      deleteIcon: const Icon(Icons.close, size: 18),
+      onDeleted: onDelete,
+    );
+  }
+}
+
+class NotificationSettingsSection extends StatelessWidget {
+  final Map<String, bool> settings;
+  final ValueChanged<Map<String, bool>> onChanged;
+  
+  const NotificationSettingsSection({
+    super.key,
+    required this.settings,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Configurações de Notificação', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            
+            _buildNotificationToggle(
+              'case_updates',
+              'Atualizações do Caso',
+              'Receber notificações sobre mudanças no status do caso',
+              Icons.gavel,
+            ),
+            
+            _buildNotificationToggle(
+              'appointment_reminders',
+              'Lembretes de Consulta',
+              'Receber lembretes antes das consultas agendadas',
+              Icons.schedule,
+            ),
+            
+            _buildNotificationToggle(
+              'document_requests',
+              'Solicitações de Documento',
+              'Ser notificado quando documentos forem solicitados',
+              Icons.description,
+            ),
+            
+            _buildNotificationToggle(
+              'payment_reminders',
+              'Lembretes de Pagamento',
+              'Receber notificações sobre pagamentos pendentes',
+              Icons.payment,
+            ),
+            
+            _buildNotificationToggle(
+              'news_updates',
+              'Novidades e Atualizações',
+              'Receber informações sobre novos recursos e melhorias',
+              Icons.new_releases,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationToggle(String key, String title, String description, IconData icon) {
+    return SwitchListTile(
+      secondary: Icon(icon),
+      title: Text(title),
+      subtitle: Text(description),
+      value: settings[key] ?? false,
+      onChanged: (value) => _updateSetting(key, value),
+    );
+  }
+
+  void _updateSetting(String key, bool value) {
+    final updatedSettings = Map<String, bool>.from(settings);
+    updatedSettings[key] = value;
+    onChanged(updatedSettings);
+  }
+}
+
+class AuthorizationsSection extends StatelessWidget {
+  final Map<String, bool> authorizations;
+  final ValueChanged<Map<String, bool>> onChanged;
+  
+  const AuthorizationsSection({
+    super.key,
+    required this.authorizations,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Autorizações Especiais', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            
+            _buildAuthorizationToggle(
+              'emergency_contact',
+              'Contato de Emergência',
+              'Permitir contato fora do horário comercial em casos urgentes',
+              Icons.emergency,
+              Colors.orange,
+            ),
+            
+            _buildAuthorizationToggle(
+              'third_party_contact',
+              'Contato por Terceiros',
+              'Autorizar secretários/assistentes a entrar em contato',
+              Icons.people,
+              Colors.blue,
+            ),
+            
+            _buildAuthorizationToggle(
+              'marketing_contact',
+              'Contato Comercial',
+              'Receber informações sobre novos serviços e promoções',
+              Icons.campaign,
+              Colors.green,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAuthorizationToggle(
+    String key, 
+    String title, 
+    String description, 
+    IconData icon, 
+    Color color,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        secondary: Icon(icon, color: color),
+        title: Text(title),
+        subtitle: Text(description),
+        value: authorizations[key] ?? false,
+        onChanged: (value) => _updateAuthorization(key, value),
+      ),
+    );
+  }
+
+  void _updateAuthorization(String key, bool value) {
+    final updatedAuthorizations = Map<String, bool>.from(authorizations);
+    updatedAuthorizations[key] = value;
+    onChanged(updatedAuthorizations);
+  }
+}
+
+class CommunicationActions extends StatelessWidget {
+  final bool hasUnsavedChanges;
+  final VoidCallback onSave;
+  final VoidCallback onReset;
+
+  const CommunicationActions({
+    super.key,
+    required this.hasUnsavedChanges,
+    required this.onSave,
+    required this.onReset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        if (hasUnsavedChanges) ...[
+          OutlinedButton(
+            onPressed: onReset,
+            child: const Text('Cancelar'),
+          ),
+          const SizedBox(width: 16),
+        ],
+        ElevatedButton.icon(
+          onPressed: hasUnsavedChanges ? onSave : null,
+          icon: const Icon(Icons.save),
+          label: const Text('Salvar Preferências'),
+        ),
+      ],
+    );
+  }
+}
+
+class CommunicationSkeletonLoader extends StatelessWidget {
+  const CommunicationSkeletonLoader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Skeleton cards would go here
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  SizedBox(height: 150), // Placeholder for content
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CommunicationErrorWidget extends StatelessWidget {
+  const CommunicationErrorWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Erro ao carregar preferências',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          const Text('Por favor, tente novamente mais tarde.'),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              context.read<ProfileBloc>().add(const LoadProfile('current_user'));
+            },
+            child: const Text('Tentar Novamente'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AddTimeSlotDialog extends StatefulWidget {
+  final Function(TimeSlot) onAdd;
+  
+  const AddTimeSlotDialog({
+    super.key,
+    required this.onAdd,
+  });
+  
+  @override
+  State<AddTimeSlotDialog> createState() => _AddTimeSlotDialogState();
+}
+
+class _AddTimeSlotDialogState extends State<AddTimeSlotDialog> {
+  TimeOfDay? _startTime;
+  TimeOfDay? _endTime;
+  
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Adicionar Horário'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: const Text('Início'),
+                  subtitle: Text(_startTime?.format(context) ?? 'Selecionar'),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: _startTime ?? TimeOfDay.now(),
+                    );
+                    if (time != null) {
+                      setState(() => _startTime = time);
+                    }
+                  },
+                ),
+              ),
+              Expanded(
+                child: ListTile(
+                  title: const Text('Fim'),
+                  subtitle: Text(_endTime?.format(context) ?? 'Selecionar'),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: _endTime ?? TimeOfDay.now(),
+                    );
+                    if (time != null) {
+                      setState(() => _endTime = time);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _startTime != null && _endTime != null
+              ? () {
+                  widget.onAdd(TimeSlot(
+                    startTime: _startTime!.format(context),
+                    endTime: _endTime!.format(context),
+                  ));
+                  Navigator.of(context).pop();
+                }
+              : null,
+          child: const Text('Adicionar'),
+        ),
+      ],
+    );
+  }
+}

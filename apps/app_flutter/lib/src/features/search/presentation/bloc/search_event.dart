@@ -17,6 +17,15 @@ class SearchRequested extends SearchEvent {
   List<Object?> get props => [params];
 }
 
+class SemanticFirmSearchRequested extends SearchEvent {
+  final SearchParams params;
+
+  const SemanticFirmSearchRequested(this.params);
+
+  @override
+  List<Object?> get props => [params];
+}
+
 class SearchCleared extends SearchEvent {
   const SearchCleared();
 } 

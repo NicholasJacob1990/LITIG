@@ -8,7 +8,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from pydantic import BaseModel, Field
@@ -91,6 +91,8 @@ class PerformanceInsights(BaseModel):
 @router.get("/performance-insights", response_model=PerformanceInsights)
 @limiter.limit("10/minute")
 async def get_performance_insights(
+   request: Request,
+     request: Request,
     current_user: dict = Depends(get_current_user),
     supabase=Depends(get_supabase_client),
     period_days: int = Query(90, ge=30, le=365, description="Período de análise em dias"),
@@ -149,6 +151,7 @@ async def get_performance_insights(
 @router.get("/performance-summary", response_model=Dict[str, Any])
 @limiter.limit("30/minute")
 async def get_performance_summary(
+    request: Request,
     current_user: dict = Depends(get_current_user),
     supabase=Depends(get_supabase_client)
 ):
@@ -192,6 +195,7 @@ async def get_performance_summary(
 @router.get("/market-benchmarks", response_model=List[Benchmark])
 @limiter.limit("20/minute")
 async def get_market_benchmarks(
+    request: Request,
     current_user: dict = Depends(get_current_user),
     supabase=Depends(get_supabase_client),
     area: Optional[str] = Query(None, description="Área de atuação específica"),

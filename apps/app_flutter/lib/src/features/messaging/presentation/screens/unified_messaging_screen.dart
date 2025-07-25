@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/core/services/unipile_service.dart';
-import 'package:meu_app/src/features/messaging/presentation/bloc/unified_messaging_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:meu_app/src/features/messaging/presentation/widgets/calendar_integration_widget.dart';
 import 'dart:async';
 
 class UnifiedMessagingScreen extends StatefulWidget {
@@ -85,7 +85,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _loadChats();
     _searchController.addListener(_onSearchChanged);
     _startRealTimeUpdates();
@@ -132,14 +132,8 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
     
     try {
       // Carregar chats reais usando o serviço instanciado
-      final chatsResult = await _unipileService.getAllChats();
-      if (chatsResult['success'] == true) {
-        final chatsData = chatsResult['chats'] as List<dynamic>? ?? [];
-        _allChats = chatsData.map((chatData) => _mapChatFromUnipile(chatData)).toList();
-      } else {
-        // Fallback para dados de exemplo se a API falhar
-        _allChats = _getFallbackChats();
-      }
+      final chatsData = await _unipileService.getAllChats();
+      _allChats = chatsData.map((chatData) => _mapChatFromUnipile(chatData)).toList();
     } catch (e) {
       // Em caso de erro, usar dados de exemplo
       _allChats = _getFallbackChats();
@@ -273,7 +267,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withOpacity(0.1),
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(LucideIcons.settings, size: 20, color: AppColors.primaryBlue),
@@ -285,7 +279,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(LucideIcons.userPlus, size: 20, color: Colors.green),
@@ -330,6 +324,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                   Tab(text: 'E-mail'),
                   Tab(text: 'Redes Sociais'),
                   Tab(text: 'Interno'),
+                  Tab(icon: Icon(LucideIcons.calendar), text: 'Calendário'),
                 ],
               ),
             ],
@@ -361,6 +356,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                       _buildEmailChatsTab(),
                       _buildSocialNetworksTab(),
                       _buildInternalChatTab(),
+                      _buildCalendarTab(),
                     ],
                   ),
           ),
@@ -370,13 +366,13 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
-            colors: [AppColors.primaryBlue, AppColors.primaryBlue.withOpacity(0.8)],
+            colors: [AppColors.primaryBlue, AppColors.primaryBlue.withValues(alpha: 0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryBlue.withOpacity(0.3),
+              color: AppColors.primaryBlue.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -451,6 +447,8 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                 _buildProviderChip('LinkedIn', 'assets/icons/linkedin.svg', const Color(0xFF0077B5), false),
                 _buildProviderChip('Instagram', 'assets/icons/instagram.svg', const Color(0xFFE4405F), false),
                 _buildProviderChip('Gmail', 'assets/icons/gmail.svg', const Color(0xFFEA4335), false),
+                _buildProviderChip('Google Calendar', 'assets/icons/google_calendar.svg', const Color(0xFF4285F4), false),
+                _buildProviderChip('Outlook Calendar', 'assets/icons/outlook_calendar.svg', const Color(0xFF0078D4), true),
               ],
             ),
           ),
@@ -470,21 +468,31 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: isConnected ? color.withOpacity(0.1) : Colors.grey.shade100,
+                color: isConnected ? color.withValues(alpha: 0.1) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: isConnected ? color.withOpacity(0.3) : Colors.grey.shade300,
+                  color: isConnected ? color.withValues(alpha: 0.3) : Colors.grey.shade300,
                   width: 1.5,
                 ),
               ),
               child: Stack(
                 children: [
                   Center(
-                    child: Icon(
-                      _getProviderIcon(name),
-                      size: 20,
-                      color: isConnected ? color : Colors.grey.shade400,
-                    ),
+                    child: iconPath.endsWith('.svg')
+                        ? SvgPicture.asset(
+                            iconPath,
+                            width: 20,
+                            height: 20,
+                            colorFilter: ColorFilter.mode(
+                              isConnected ? color : Colors.grey.shade400,
+                              BlendMode.srcIn,
+                            ),
+                          )
+                        : Icon(
+                            _getProviderIcon(name),
+                            size: 20,
+                            color: isConnected ? color : Colors.grey.shade400,
+                          ),
                   ),
                   if (isConnected)
                     Positioned(
@@ -526,6 +534,8 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
       case 'linkedin': return LucideIcons.linkedin;
       case 'instagram': return LucideIcons.instagram;
       case 'gmail': return LucideIcons.mail;
+      case 'google calendar': return LucideIcons.calendar;
+      case 'outlook calendar': return LucideIcons.calendar;
       default: return LucideIcons.messageSquare;
     }
   }
@@ -804,7 +814,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isUnread ? providerColor.withOpacity(0.2) : Colors.grey.shade200,
+          color: isUnread ? providerColor.withValues(alpha: 0.2) : Colors.grey.shade200,
           width: isUnread ? 1.5 : 1,
         ),
         boxShadow: [
@@ -835,14 +845,14 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                         borderRadius: BorderRadius.circular(24),
                         gradient: LinearGradient(
                           colors: [
-                            providerColor.withOpacity(0.1),
-                            providerColor.withOpacity(0.05),
+                            providerColor.withValues(alpha: 0.1),
+                            providerColor.withValues(alpha: 0.05),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         border: Border.all(
-                          color: providerColor.withOpacity(0.2),
+                          color: providerColor.withValues(alpha: 0.2),
                           width: 2,
                         ),
                       ),
@@ -976,7 +986,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: providerColor.withOpacity(0.3),
+                              color: providerColor.withValues(alpha: 0.3),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -1047,7 +1057,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _getProviderColor(provider).withOpacity(0.1),
+                color: _getProviderColor(provider).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -1130,7 +1140,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _getProviderColor(provider).withOpacity(0.1),
+                color: _getProviderColor(provider).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: Icon(
@@ -1192,7 +1202,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
@@ -1218,7 +1228,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                       'Suas mensagens serão sincronizadas automaticamente',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -1274,7 +1284,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: _getProviderColor(chat.provider).withOpacity(0.1),
+                  backgroundColor: _getProviderColor(chat.provider).withValues(alpha: 0.1),
                   child: Text(
                     chat.name.substring(0, 1).toUpperCase(),
                     style: TextStyle(
@@ -1421,7 +1431,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.1),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -1513,7 +1523,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, size: 20, color: color),
@@ -1734,6 +1744,28 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
         content: Text('Conversa deletada'),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+  
+  Widget _buildCalendarTab() {
+    return const SingleChildScrollView(
+      child: CalendarIntegrationWidget(),
+    );
+  }
+
+  void _showWhatsAppMessageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Iniciar conversa WhatsApp'),
+        content: const Text('Esta funcionalidade será implementada em breve.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }

@@ -71,6 +71,23 @@ class AppColors {
   static const Color urgent = Color(0xFFEF4444);
   static const Color pending = Color(0xFFF59E0B);
   static const Color completed = Color(0xFF10B981);
+  
+  // Cores de status de casos
+  static const Color caseActive = Color(0xFF10B981);
+  static const Color casePending = Color(0xFFF59E0B);
+  static const Color caseClosed = Color(0xFF64748B);
+  static const Color caseUrgent = Color(0xFFEF4444);
+  
+  // Cores light para diferentes estados
+  static const Color warningLight = Color(0xFFFEF3C7);
+  static const Color infoLight = Color(0xFFDBEAFE);
+  
+  // Gradiente primário
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [primaryBlue, primaryLight],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   // Cores para providers sociais
   static const Color linkedInBlue = Color(0xFF0077B5);

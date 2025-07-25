@@ -13,8 +13,8 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
 
-from backend.services.unipile_app_service import get_unipile_app_service
-from backend.auth import get_current_user
+from services.unipile_app_service import get_unipile_app_service
+from auth import get_current_user
 
 router = APIRouter(prefix="/api/v1/unipile", tags=["unipile"])
 logger = logging.getLogger(__name__)
@@ -225,7 +225,7 @@ async def sync_lawyer_data(
     Sincroniza dados de um advogado específico com Unipile.
     """
     try:
-        from backend.services.hybrid_legal_data_service import HybridLegalDataService
+        from services.hybrid_legal_data_service import HybridLegalDataService
         
         hybrid_service = HybridLegalDataService()
         

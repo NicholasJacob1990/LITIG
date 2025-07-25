@@ -7,7 +7,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from backend.services.cache_service_simple import simple_cache_service
+from services.cache_service_simple import simple_cache_service
 from supabase import Client
 
 logger = logging.getLogger(__name__)

@@ -48,7 +48,8 @@ CREATE TYPE public.area_juridica AS ENUM (
     -- Direitos Emergentes
     'Digital',
     'Desportivo',
-    'Médico'
+    'Médico',
+    'Startups'
 );
 
 -- Add comment to document the enum
@@ -66,7 +67,7 @@ BEGIN
         'Saúde', 'Educacional', 'Propriedade Intelectual', 'Concorrencial',
         'Societário', 'Recuperação Judicial', 'Internacional', 'Regulatório',
         'Telecomunicações', 'Energia', 'Militar', 'Agrário', 'Marítimo',
-        'Aeronáutico', 'Digital', 'Desportivo', 'Médico'
+        'Aeronáutico', 'Digital', 'Desportivo', 'Médico', 'Startups'
     );
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
@@ -112,6 +113,11 @@ INSERT INTO public.area_subareas (area, subarea, description) VALUES
 ('Civil', 'Obrigações', 'Direito das obrigações'),
 ('Civil', 'Sucessões', 'Inventário e partilha'),
 ('Civil', 'Direitos Reais', 'Propriedade e posse'),
+-- NOVO: MARCS em Direito Civil
+('Civil', 'Arbitragem Cível e Contratual', 'Resolução de disputas cíveis via arbitragem'),
+('Civil', 'Mediação e Conciliação Cível', 'Métodos consensuais para resolução de conflitos cíveis'),
+('Civil', 'Execução de Sentença Arbitral', 'Procedimentos para executar uma decisão arbitral no judiciário'),
+('Civil', 'Dispute Boards em Contratos', 'Conselhos de resolução de disputas em contratos de longa duração'),
 
 -- Família
 ('Família', 'Divórcio', 'Divórcio judicial e extrajudicial'),
@@ -122,10 +128,12 @@ INSERT INTO public.area_subareas (area, subarea, description) VALUES
 
 -- Administrativo
 ('Administrativo', 'Servidor Público', 'Direitos dos servidores'),
-('Administrativo', 'Licitações', 'Processos licitatórios'),
-('Administrativo', 'Concurso Público', 'Questões de concursos'),
-('Administrativo', 'Improbidade', 'Atos de improbidade administrativa'),
-('Administrativo', 'Desapropriação', 'Processos expropriatórios'),
+('Administrativo', 'Licitações e Contratos Públicos', 'Processos licitatórios e contratos com o governo'),
+('Administrativo', 'Improbidade Administrativa', 'Ações de improbidade'),
+-- NOVO: MARCS em Direito Administrativo
+('Administrativo', 'Arbitragem com a Administração Pública', 'Resolução de disputas em contratos públicos via arbitragem'),
+('Administrativo', 'Mediação em Conflitos Públicos', 'Mediação envolvendo entes públicos e concessionárias'),
+('Administrativo', 'Câmaras de Resolução de Conflitos', 'Atuação em câmaras de prevenção e resolução de litígios'),
 
 -- Imobiliário
 ('Imobiliário', 'Locação', 'Contratos de aluguel e despejo'),
@@ -135,11 +143,13 @@ INSERT INTO public.area_subareas (area, subarea, description) VALUES
 ('Imobiliário', 'Registro', 'Registro de imóveis'),
 
 -- Tributário
-('Tributário', 'Impostos Federais', 'IR, IPI, IOF'),
-('Tributário', 'Impostos Estaduais', 'ICMS, IPVA'),
-('Tributário', 'Impostos Municipais', 'ISS, IPTU'),
-('Tributário', 'Planejamento Tributário', 'Elisão fiscal'),
-('Tributário', 'Execução Fiscal', 'Cobranças fiscais'),
+('Tributário', 'Planejamento Tributário', 'Estruturação para otimização da carga fiscal'),
+('Tributário', 'Contencioso Fiscal', 'Defesas em execuções fiscais e autos de infração'),
+('Tributário', 'Tributos em Espécie', 'ICMS, ISS, IRPJ, PIS, COFINS'),
+-- NOVO: MARCS em Direito Tributário
+('Tributário', 'Transação Tributária', 'Negociação de débitos fiscais com a Fazenda Pública'),
+('Tributário', 'Arbitragem Tributária', 'Resolução de conflitos tributários via arbitragem (tendência)'),
+('Tributário', 'Mediação Fiscal', 'Mediação de disputas com o fisco'),
 
 -- Bancário
 ('Bancário', 'Juros Abusivos', 'Revisão de juros'),
@@ -153,6 +163,25 @@ INSERT INTO public.area_subareas (area, subarea, description) VALUES
 ('Digital', 'E-commerce', 'Comércio eletrônico'),
 ('Digital', 'Redes Sociais', 'Questões em redes sociais'),
 ('Digital', 'Propriedade Digital', 'Domínios, conteúdo digital');
+
+-- Empresarial
+('Empresarial', 'Societário', 'Constituição, M&A, acordos de sócios'),
+('Empresarial', 'Contratos Comerciais', 'Contratos de fornecimento, distribuição, etc.'),
+('Empresarial', 'Títulos de Crédito', 'Cheques, notas promissórias, duplicatas'),
+('Empresarial', 'Falência e Recuperação', 'Processos de recuperação judicial e falência'),
+-- NOVO: MARCS em Direito Empresarial
+('Empresarial', 'Arbitragem Societária e M&A', 'Disputas sobre acordos de sócios, M&A e apuração de haveres'),
+('Empresarial', 'Mediação Empresarial', 'Mediação para conflitos entre sócios, empresas e fornecedores'),
+('Empresarial', 'Comitês de Resolução de Disputas', 'Dispute boards em projetos de infraestrutura e construção'),
+
+-- Regulatório
+('Regulatório', 'Setor Elétrico', 'Regulação da ANEEL'),
+('Regulatório', 'Telecomunicações', 'Regulação da ANATEL'),
+('Regulatório', 'Saúde Suplementar', 'Regulação da ANS'),
+-- NOVO: MARCS em Direito Regulatório
+('Regulatório', 'Arbitragem Setorial', 'Arbitragem em setores regulados (energia, telecom, portos, etc.)'),
+('Regulatório', 'Painéis de Resolução de Disputas', 'Dispute boards em projetos de infraestrutura e regulação'),
+('Regulatório', 'Mediação com Agências Reguladoras', 'Mediação de conflitos com agências reguladoras');
 
 -- Add index for subarea searches
 CREATE INDEX idx_area_subareas_area ON public.area_subareas(area);

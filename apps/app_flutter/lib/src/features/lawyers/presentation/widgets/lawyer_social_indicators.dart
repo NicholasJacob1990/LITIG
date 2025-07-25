@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../../core/services/social_auth_service.dart';
+
+/// Classe para dados sociais do advogado
+class LawyerSocialData {
+  final Map<String, bool> connectedNetworks;
+  final double socialScore;
+  final int followersCount;
+  final int connectionsCount;
+  
+  const LawyerSocialData({
+    required this.connectedNetworks,
+    required this.socialScore,
+    required this.followersCount,
+    required this.connectionsCount,
+  });
+}
 
 /// Widget que mostra indicadores de redes sociais nos cards de advogados
 /// 

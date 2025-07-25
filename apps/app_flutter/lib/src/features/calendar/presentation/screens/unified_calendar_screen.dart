@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
-import 'package:meu_app/src/features/calendar/domain/entities/calendar_event.dart';
+import 'package:meu_app/src/features/calendar/domain/entities/calendar_event.dart' as entities;
 import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart';
 import 'package:meu_app/injection_container.dart'; // Para getIt
 
@@ -31,7 +31,7 @@ class UnifiedCalendarView extends StatefulWidget {
 }
 
 class _UnifiedCalendarViewState extends State<UnifiedCalendarView> {
-  late final ValueNotifier<List<CalendarEvent>> _selectedEvents;
+  late final ValueNotifier<List<entities.CalendarEvent>> _selectedEvents;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -49,7 +49,7 @@ class _UnifiedCalendarViewState extends State<UnifiedCalendarView> {
     super.dispose();
   }
 
-  List<CalendarEvent> _getEventsForDay(DateTime day) {
+  List<entities.CalendarEvent> _getEventsForDay(DateTime day) {
     final state = context.read<CalendarBloc>().state;
     if (state is CalendarLoaded) {
       return state.events.where((event) {
@@ -99,7 +99,7 @@ class _UnifiedCalendarViewState extends State<UnifiedCalendarView> {
           if (state is CalendarLoaded) {
             return Column(
               children: [
-                TableCalendar<CalendarEvent>(
+                TableCalendar<entities.CalendarEvent>(
                   firstDay: DateTime.utc(2020, 1, 1),
                   lastDay: DateTime.utc(2030, 12, 31),
                   focusedDay: _focusedDay,
@@ -124,7 +124,7 @@ class _UnifiedCalendarViewState extends State<UnifiedCalendarView> {
                   },
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     selectedDecoration: BoxDecoration(
@@ -135,7 +135,7 @@ class _UnifiedCalendarViewState extends State<UnifiedCalendarView> {
                 ),
                 const SizedBox(height: 8.0),
                 Expanded(
-                  child: ValueListenableBuilder<List<CalendarEvent>>(
+                  child: ValueListenableBuilder<List<entities.CalendarEvent>>(
                     valueListenable: _selectedEvents,
                     builder: (context, value, _) {
                       return ListView.builder(

@@ -29,12 +29,12 @@ import redis.asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
 
-from backend.database import get_async_session
-from backend.models.lawyer import Lawyer
-from backend.models.law_firm import LawFirm
+from database import get_async_session
+from models.lawyer import Lawyer
+from models.law_firm import LawFirm
 
 # Import atualizado para usar UnipileAppService
-from backend.services.unipile_app_service import get_unipile_app_service
+from services.unipile_app_service import get_unipile_app_service
 
 
 class DataSource(Enum):

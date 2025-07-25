@@ -15,10 +15,10 @@ class SocialConnectionsScreen extends StatefulWidget {
 class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
   final _socialAuthService = SocialAuthService();
 
-  bool _isLinkedInConnected = false;
+  final bool _isLinkedInConnected = false;
   bool _isInstagramConnected = false;
   bool _isFacebookConnected = false;
-  bool _isOutlookConnected = false; // Novo estado para Outlook
+  final bool _isOutlookConnected = false; // Novo estado para Outlook
   bool _isConnecting = false;
 
   @override
@@ -133,7 +133,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: SvgPicture.asset( // Usar SvgPicture
@@ -173,7 +173,7 @@ class _SocialConnectionsScreenState extends State<SocialConnectionsScreen> {
   Widget _buildBenefitsCard() {
     final theme = Theme.of(context);
     return Card(
-      color: theme.colorScheme.primaryContainer.withOpacity(0.2),
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

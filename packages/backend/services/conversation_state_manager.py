@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from redis_service import redis_service
+from services.redis_service import redis_service
 
 logger = logging.getLogger(__name__)
 

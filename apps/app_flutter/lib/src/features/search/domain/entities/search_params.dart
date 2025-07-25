@@ -1,7 +1,10 @@
 import 'package:equatable/equatable.dart';
 
+enum SearchType { keyword, semantic }
+
 class SearchParams extends Equatable {
   final String? query;
+  final SearchType searchType;
   final String preset;
   final double? latitude;
   final double? longitude;
@@ -23,6 +26,7 @@ class SearchParams extends Equatable {
 
   const SearchParams({
     this.query,
+    this.searchType = SearchType.keyword,
     this.preset = 'balanced',
     this.latitude,
     this.longitude,
@@ -58,6 +62,7 @@ class SearchParams extends Equatable {
   @override
   List<Object?> get props => [
         query,
+        searchType,
         preset,
         latitude,
         longitude,

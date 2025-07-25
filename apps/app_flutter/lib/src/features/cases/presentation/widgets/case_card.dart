@@ -9,6 +9,11 @@ import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case_extensions.dart';
 import 'package:meu_app/src/shared/constants/case_type_constants.dart';
+import 'package:meu_app/src/shared/widgets/badges/universal_badge.dart';
+import 'package:meu_app/src/shared/utils/badge_visibility_helper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 
 class CaseCard extends StatelessWidget {
   final String caseId;
@@ -50,6 +55,24 @@ class CaseCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(context),
+              const SizedBox(height: 8),
+              // NOVO: Badge Cliente VIP/Enterprise (apenas para advogados)
+              BlocBuilder<AuthBloc, auth_states.AuthState>(
+                builder: (context, authState) {
+                  if (authState is auth_states.Authenticated) {
+                    final clientBadgeContext = BadgeVisibilityHelper.getVipClientContext(
+                      authState.user.role,
+                      caseData?.clientPlan,
+                    );
+                    
+                    return UniversalBadge(
+                      context: clientBadgeContext,
+                      fontSize: 10,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               const SizedBox(height: 8),
               Text(
                 subtitle, 
@@ -146,6 +169,24 @@ class CaseCard extends StatelessWidget {
                   color: theme.colorScheme.onSurface
                 )
               ),
+            ),
+            // NOVO: Badges universais B2B (casos Premium/Enterprise)
+            BlocBuilder<AuthBloc, auth_states.AuthState>(
+              builder: (context, authState) {
+                if (authState is auth_states.Authenticated) {
+                  final badgeContext = BadgeVisibilityHelper.getPremiumCaseContext(
+                    authState.user.role,
+                    caseData?.isPremium ?? false,
+                    caseData?.isEnterprise ?? false,
+                  );
+                  
+                  return UniversalBadge(
+                    context: badgeContext,
+                    fontSize: 11,
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ],
         ),
@@ -539,6 +580,25 @@ class CaseCard extends StatelessWidget {
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
                       )
                     ),
+                    const SizedBox(width: 8),
+                    // NOVO: Badge PRO universal (apenas para clientes)
+                    BlocBuilder<AuthBloc, auth_states.AuthState>(
+                      builder: (context, authState) {
+                        if (authState is auth_states.Authenticated) {
+                          final badgeContext = BadgeVisibilityHelper.getProLawyerContext(
+                            authState.user.role,
+                            lawyer!.plan,
+                            caseData?.isPremium ?? false,
+                          );
+                          
+                          return UniversalBadge(
+                            context: badgeContext,
+                            fontSize: 10,
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                     const Spacer(),
                     // Ícones das redes sociais
                     LawyerSocialLinks(
@@ -782,5 +842,20 @@ class CaseCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _isLawyer(String role) {
+    return role == 'lawyer_associated' ||
+           role == 'lawyer_individual' ||
+           role == 'lawyer_office' ||
+           role == 'lawyer_platform_associate' ||
+           role == 'lawyer';
+  }
+
+  bool _isClient(String role) {
+    return role == 'client_associated' ||
+           role == 'client_individual' ||
+           role == 'client_platform_associate' ||
+           role == 'client';
   }
 } 

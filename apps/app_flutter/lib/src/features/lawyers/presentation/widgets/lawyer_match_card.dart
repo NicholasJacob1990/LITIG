@@ -1,10 +1,15 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_hiring_modal.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
+import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
+import 'package:meu_app/src/shared/widgets/badges/universal_badge.dart';
+import 'package:meu_app/src/shared/utils/badge_visibility_helper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 
 class LawyerMatchCard extends StatefulWidget {
   final MatchedLawyer lawyer;
@@ -98,10 +103,10 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
   Widget _buildAvatar(ThemeData theme) {
     return Stack(
       children: [
-        CircleAvatar(
+        InitialsAvatar(
+          text: widget.lawyer.nome,
           radius: 32,
-          backgroundImage: CachedNetworkImageProvider(widget.lawyer.avatarUrl),
-          backgroundColor: theme.colorScheme.surface,
+          avatarUrl: widget.lawyer.avatarUrl.isNotEmpty ? widget.lawyer.avatarUrl : null,
         ),
         if (widget.lawyer.isAvailable)
           Positioned(
@@ -126,7 +131,31 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.lawyer.nome, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              Expanded(
+                child: Text(widget.lawyer.nome, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              ),
+              // NOVO: Badge PRO universal para recomendações
+              BlocBuilder<AuthBloc, auth_states.AuthState>(
+                builder: (context, authState) {
+                  if (authState is auth_states.Authenticated) {
+                    final badgeContext = BadgeVisibilityHelper.getProLawyerContext(
+                      authState.user.role,
+                      widget.lawyer.plan,
+                      false, // Recomendações não têm contexto de caso premium específico
+                    );
+                    
+                    return UniversalBadge(
+                      context: badgeContext,
+                      fontSize: 10,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 4),
           Row(
             children: [
@@ -411,33 +440,575 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
   }
   
   Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: _handleHireLawyer,
-            icon: const Icon(LucideIcons.fileSignature),
-            label: const Text('Contratar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        // Primeira linha: Ver Perfil (destaque)
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _navigateToLawyerProfile(context),
+            icon: const Icon(LucideIcons.user),
+            label: const Text('Ver Perfil Completo'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              side: BorderSide(color: Theme.of(context).colorScheme.primary),
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        IconButton(
-          onPressed: () { /* TODO: Implementar chat */ },
-          icon: const Icon(LucideIcons.messageSquare),
-          tooltip: 'Chat',
-        ),
-        IconButton(
-          onPressed: () => _handleVideoCall(context),
-          icon: const Icon(LucideIcons.video),
-          tooltip: 'Vídeo Chamada',
+        const SizedBox(height: 8),
+        
+        // Segunda linha: Ações rápidas
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _handleHireLawyer,
+                icon: const Icon(LucideIcons.fileSignature),
+                label: const Text('Contratar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () => _showMatchExplanation(context),
+              icon: const Icon(LucideIcons.helpCircle),
+              tooltip: 'Por que foi recomendado?',
+              style: IconButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              ),
+            ),
+            IconButton(
+              onPressed: () { /* TODO: Implementar chat */ },
+              icon: const Icon(LucideIcons.messageSquare),
+              tooltip: 'Chat',
+            ),
+            IconButton(
+              onPressed: () => _handleVideoCall(context),
+              icon: const Icon(LucideIcons.video),
+              tooltip: 'Vídeo Chamada',
+            ),
+          ],
         ),
       ],
     );
+  }
+
+  void _navigateToLawyerProfile(BuildContext context) {
+    context.push('/lawyer/${widget.lawyer.id}/profile');
+  }
+
+  void _showMatchExplanation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => _buildMatchExplanationDialog(context),
+    );
+  }
+
+  Widget _buildMatchExplanationDialog(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDialogHeader(context),
+            const SizedBox(height: 20),
+            _buildCompatibilityScore(),
+            const SizedBox(height: 20),
+            _buildExplanationFactors(),
+            const SizedBox(height: 24),
+            _buildDialogActionButtons(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogHeader(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 24,
+          backgroundImage: NetworkImage(widget.lawyer.avatarUrl),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Por que ${widget.lawyer.nome} foi recomendado?',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Análise detalhada da compatibilidade',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(LucideIcons.x),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompatibilityScore() {
+    final percentage = (widget.lawyer.fair * 100).toInt();
+    final scoreColor = _getScoreColor(widget.lawyer.fair);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            scoreColor.withValues(alpha: 0.1),
+            scoreColor.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scoreColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: scoreColor,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Center(
+              child: Text(
+                '$percentage%',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Compatibilidade',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  _getCompatibilityText(widget.lawyer.fair),
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExplanationFactors() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Fatores de Compatibilidade',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 12),
+        _buildFactor(
+          'Taxa de Sucesso',
+          widget.lawyer.features.successRate,
+          LucideIcons.trendingUp,
+          'Histórico de vitórias em casos similares',
+        ),
+        _buildFactor(
+          'Tempo de Resposta',
+          _normalizeResponseTime(widget.lawyer.features.responseTime),
+          LucideIcons.clock,
+          'Velocidade para responder demandas',
+        ),
+        _buildFactor(
+          'Soft Skills',
+          widget.lawyer.features.softSkills,
+          LucideIcons.users,
+          'Habilidades de comunicação e relacionamento',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFactor(String title, double score, IconData icon, String description) {
+    final scoreColor = _getScoreColor(score);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: scoreColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: scoreColor, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
+                    Text('${(score * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Text(description, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDialogActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _navigateToLawyerProfile(context);
+            },
+            icon: const Icon(LucideIcons.user),
+            label: const Text('Ver Perfil Completo'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _handleHireLawyer();
+            },
+            icon: const Icon(LucideIcons.fileSignature),
+            label: const Text('Contratar'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getScoreColor(double score) {
+    if (score >= 0.8) return Colors.green;
+    if (score >= 0.6) return Colors.orange;
+    return Colors.red;
+  }
+
+  String _getCompatibilityText(double score) {
+    if (score >= 0.8) return 'Altamente compatível com seu caso';
+    if (score >= 0.6) return 'Boa compatibilidade com seu caso';
+    return 'Compatibilidade moderada';
+  }
+
+  double _normalizeResponseTime(int responseTimeHours) {
+    // Normaliza o tempo de resposta para uma escala de 0-1
+    // Menor tempo = melhor score
+    if (responseTimeHours <= 2) return 1.0;
+    if (responseTimeHours <= 6) return 0.8;
+    if (responseTimeHours <= 12) return 0.6;
+    if (responseTimeHours <= 24) return 0.4;
+    return 0.2;
+  }
+
+  void _handleHireLawyer() {
+    // Verifica se caseId e clientId foram fornecidos
+    if (widget.caseId == null || widget.clientId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro: Dados do caso não disponíveis. Por favor, selecione um caso primeiro.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Abre o LawyerHiringModal
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => LawyerHiringModal(
+        lawyer: widget.lawyer,
+        caseId: widget.caseId!,
+        clientId: widget.clientId!,
+      ),
+    );
+  }
+
+  Widget _buildSocialSection() {
+    // TODO: Implementar campos de redes sociais no modelo MatchedLawyer
+    return const LawyerSocialLinks(
+      linkedinUrl: 'https://linkedin.com/in/advogado',
+      instagramUrl: 'https://instagram.com/advogado',
+      facebookUrl: 'https://facebook.com/advogado',
+    );
+  }
+
+
+  void _handleVideoCall(BuildContext context) {
+    // Verificar se caseId e clientId foram fornecidos
+    if (widget.caseId == null || widget.clientId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro: Dados do caso não disponíveis para videochamada.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Gerar nome único para a sala
+    final roomName = 'call_${widget.caseId}_${widget.lawyer.id}_${DateTime.now().millisecondsSinceEpoch}';
+    
+    // Navegar para a tela de videochamada
+    context.push('/video-call/$roomName', extra: {
+      'roomUrl': 'https://litig.daily.co/$roomName',
+      'userId': widget.clientId,
+      'otherPartyName': widget.lawyer.nome,
+    });
+  }
+
+} 
+      ),
+    );
+  }
+
+  Widget _buildDialogHeader(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 24,
+          backgroundImage: NetworkImage(widget.lawyer.avatarUrl),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Por que ${widget.lawyer.nome} foi recomendado?',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Análise detalhada da compatibilidade',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(LucideIcons.x),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompatibilityScore() {
+    final percentage = (widget.lawyer.fair * 100).toInt();
+    final scoreColor = _getScoreColor(widget.lawyer.fair);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            scoreColor.withValues(alpha: 0.1),
+            scoreColor.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scoreColor.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: scoreColor,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Center(
+              child: Text(
+                '$percentage%',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Compatibilidade',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  _getCompatibilityText(widget.lawyer.fair),
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExplanationFactors() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Fatores de Compatibilidade',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 12),
+        _buildFactor(
+          'Taxa de Sucesso',
+          widget.lawyer.features.successRate,
+          LucideIcons.trendingUp,
+          'Histórico de vitórias em casos similares',
+        ),
+        _buildFactor(
+          'Tempo de Resposta',
+          _normalizeResponseTime(widget.lawyer.features.responseTime),
+          LucideIcons.clock,
+          'Velocidade para responder demandas',
+        ),
+        _buildFactor(
+          'Soft Skills',
+          widget.lawyer.features.softSkills,
+          LucideIcons.users,
+          'Habilidades de comunicação e relacionamento',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFactor(String title, double score, IconData icon, String description) {
+    final scoreColor = _getScoreColor(score);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: scoreColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: scoreColor, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
+                    Text('${(score * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Text(description, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDialogActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _navigateToLawyerProfile(context);
+            },
+            icon: const Icon(LucideIcons.user),
+            label: const Text('Ver Perfil Completo'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _handleHireLawyer();
+            },
+            icon: const Icon(LucideIcons.fileSignature),
+            label: const Text('Contratar'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getScoreColor(double score) {
+    if (score >= 0.8) return Colors.green;
+    if (score >= 0.6) return Colors.orange;
+    return Colors.red;
+  }
+
+  String _getCompatibilityText(double score) {
+    if (score >= 0.8) return 'Altamente compatível com seu caso';
+    if (score >= 0.6) return 'Boa compatibilidade com seu caso';
+    return 'Compatibilidade moderada';
+  }
+
+  double _normalizeResponseTime(int responseTimeHours) {
+    // Normaliza o tempo de resposta para uma escala de 0-1
+    // Menor tempo = melhor score
+    if (responseTimeHours <= 2) return 1.0;
+    if (responseTimeHours <= 6) return 0.8;
+    if (responseTimeHours <= 12) return 0.6;
+    if (responseTimeHours <= 24) return 0.4;
+    return 0.2;
   }
 
   void _handleHireLawyer() {

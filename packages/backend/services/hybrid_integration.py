@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 # Imports locais dos serviços de integração
-from escavador_integration import EscavadorClient, OutcomeClassifier
+from services.escavador_integration import EscavadorClient, OutcomeClassifier
 from jusbrasil_integration_realistic import (
     JusbrasilRealisticAPI,
     JusbrasilRealisticService,

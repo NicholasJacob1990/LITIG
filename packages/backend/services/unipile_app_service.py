@@ -23,7 +23,7 @@ from functools import lru_cache
 
 # Configurações da aplicação
 try:
-    from backend.config import (
+    from config import (
         UNIPILE_PREFERRED_SERVICE,
         UNIPILE_API_TOKEN,
         UNIFIED_API_KEY,
@@ -55,7 +55,7 @@ except ImportError:
 
 # Camada de compatibilidade
 try:
-    from backend.services.unipile_compatibility_layer import (
+    from services.unipile_compatibility_layer import (
         get_unipile_service,
         ServiceType,
         UnipileCompatibilityLayer

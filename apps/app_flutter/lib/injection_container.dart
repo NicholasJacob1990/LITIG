@@ -41,6 +41,9 @@ import 'package:meu_app/src/features/cases/presentation/bloc/contextual_case_blo
 // Calendar
 import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart';
 
+// VIP
+import 'src/features/vip/presentation/bloc/vip_status_bloc.dart';
+
 // Documents
 import 'package:meu_app/src/features/cases/data/datasources/documents_remote_data_source.dart';
 import 'package:meu_app/src/features/cases/data/repositories/documents_repository_impl.dart';
@@ -91,6 +94,20 @@ import 'package:meu_app/src/features/lawyers/data/repositories/lawyers_repositor
 import 'package:meu_app/src/features/lawyers/domain/usecases/find_matches_usecase.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
+import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_detail_bloc.dart';
+
+// Lawyer Detail - Enriched Data
+import 'package:meu_app/src/features/lawyers/data/datasources/enriched_lawyer_data_source.dart';
+import 'package:meu_app/src/features/lawyers/data/repositories/enriched_lawyer_repository_impl.dart';
+import 'package:meu_app/src/features/lawyers/domain/repositories/enriched_lawyer_repository.dart';
+import 'package:meu_app/src/features/lawyers/domain/usecases/get_enriched_lawyer.dart';
+
+// Firm Profile - Enriched Data
+import 'package:meu_app/src/features/firms/data/datasources/enriched_firm_data_source.dart';
+import 'package:meu_app/src/features/firms/data/repositories/enriched_firm_repository_impl.dart';
+import 'package:meu_app/src/features/firms/domain/repositories/enriched_firm_repository.dart';
+import 'package:meu_app/src/features/firms/domain/usecases/get_enriched_firm.dart';
+import 'package:meu_app/src/features/firms/presentation/bloc/firm_profile_bloc.dart';
 
 // Partnerships
 import 'package:meu_app/src/features/partnerships/data/datasources/partnership_remote_data_source.dart';
@@ -129,6 +146,7 @@ import 'package:meu_app/src/features/financial/presentation/bloc/financial_bloc.
 import 'package:meu_app/src/features/search/data/repositories/search_repository_impl.dart';
 import 'package:meu_app/src/features/search/domain/repositories/search_repository.dart';
 import 'package:meu_app/src/features/search/domain/usecases/perform_search.dart';
+import 'package:meu_app/src/features/search/domain/usecases/perform_semantic_firm_search.dart';
 import 'package:meu_app/src/features/search/presentation/bloc/search_bloc.dart';
 
 // Offers
@@ -282,6 +300,7 @@ Future<void> configureDependencies() async {
 
   // Blocs
   getIt.registerFactory(() => CalendarBloc());
+  getIt.registerFactory(() => VipStatusBloc());
 
   // Documents
   // Datasources
@@ -384,14 +403,20 @@ Future<void> configureDependencies() async {
   // Search
   // Datasources
   getIt.registerLazySingleton<SearchRemoteDataSource>(
-      () => SearchRemoteDataSourceImpl());
+      () => SearchRemoteDataSourceImpl(dio: getIt()));
   // Repositories
   getIt.registerLazySingleton<SearchRepository>(
       () => SearchRepositoryImpl(remoteDataSource: getIt()));
   
+  // Use Cases
   getIt.registerLazySingleton(() => PerformSearch(getIt()));
+  getIt.registerLazySingleton(() => PerformSemanticFirmSearch(getIt()));
+  
   // Blocs
-  getIt.registerFactory(() => SearchBloc(performSearch: getIt()));
+  getIt.registerFactory(() => SearchBloc(
+    performSearch: getIt(),
+    performSemanticFirmSearch: getIt(),
+  ));
 
   // Offers
   // Datasources
@@ -683,4 +708,132 @@ Future<void> configureDependencies() async {
   //   generateExecutiveReport: getIt(),
   //   forceGlobalSync: getIt(),
   // ));
+
+  // Lawyer Detail - Data Sources
+  getIt.registerLazySingleton<EnrichedLawyerDataSource>(() => 
+    EnrichedLawyerRemoteDataSource(
+      client: getIt(),
+      baseUrl: 'http://localhost:8000', // TODO: Mover para configuração
+    )
+  );
+  
+  // Lawyer Detail - Repositories
+  getIt.registerLazySingleton<EnrichedLawyerRepository>(() => 
+    EnrichedLawyerRepositoryImpl(dataSource: getIt())
+  );
+  
+  // Lawyer Detail - Use Cases
+  getIt.registerLazySingleton<GetEnrichedLawyerUseCase>(() => 
+    GetEnrichedLawyerUseCase(repository: getIt())
+  );
+  
+  getIt.registerLazySingleton<RefreshEnrichedLawyerUseCase>(() => 
+    RefreshEnrichedLawyerUseCase(repository: getIt())
+  );
+  
+  // Lawyer Detail - BLoC
+  getIt.registerFactory(() => LawyerDetailBloc(
+    getEnrichedLawyer: getIt(),
+    refreshEnrichedLawyer: getIt(),
+  ));
+
+  // ✅ Firm Profile Dependencies
+  // Firm Profile - Data Source
+  getIt.registerLazySingleton<EnrichedFirmDataSource>(() => 
+    EnrichedFirmDataSourceImpl(
+      client: getIt(),
+      baseUrl: 'http://localhost:8000',
+    )
+  );
+  
+  // Firm Profile - Repository
+  getIt.registerLazySingleton<EnrichedFirmRepository>(() => 
+    EnrichedFirmRepositoryImpl(dataSource: getIt())
+  );
+  
+  // Firm Profile - Use Cases
+  getIt.registerLazySingleton<GetEnrichedFirmUseCase>(() => 
+    GetEnrichedFirmUseCase(repository: getIt())
+  );
+  
+  getIt.registerLazySingleton<RefreshEnrichedFirmUseCase>(() => 
+    RefreshEnrichedFirmUseCase(repository: getIt())
+  );
+  
+  // Firm Profile - BLoC
+  getIt.registerFactory(() => FirmProfileBloc(
+    getEnrichedFirm: getIt(),
+    refreshEnrichedFirm: getIt(),
+  ));
+}
+  // getIt.registerLazySingleton(() => GetAdminMetrics(getIt()));
+  // getIt.registerLazySingleton(() => GetAdminAuditLogs(getIt()));
+  // getIt.registerLazySingleton(() => GenerateExecutiveReport(getIt()));
+  // getIt.registerLazySingleton(() => ForceGlobalSync(getIt()));
+  
+  // BLoC - Comentado temporariamente até implementação das use cases
+  // getIt.registerFactory(() => AdminBloc(
+  //   getAdminDashboard: getIt(),
+  //   getAdminMetrics: getIt(),
+  //   getAdminAuditLogs: getIt(),
+  //   generateExecutiveReport: getIt(),
+  //   forceGlobalSync: getIt(),
+  // ));
+
+  // Lawyer Detail - Data Sources
+  getIt.registerLazySingleton<EnrichedLawyerDataSource>(() => 
+    EnrichedLawyerRemoteDataSource(
+      client: getIt(),
+      baseUrl: 'http://localhost:8000', // TODO: Mover para configuração
+    )
+  );
+  
+  // Lawyer Detail - Repositories
+  getIt.registerLazySingleton<EnrichedLawyerRepository>(() => 
+    EnrichedLawyerRepositoryImpl(dataSource: getIt())
+  );
+  
+  // Lawyer Detail - Use Cases
+  getIt.registerLazySingleton<GetEnrichedLawyerUseCase>(() => 
+    GetEnrichedLawyerUseCase(repository: getIt())
+  );
+  
+  getIt.registerLazySingleton<RefreshEnrichedLawyerUseCase>(() => 
+    RefreshEnrichedLawyerUseCase(repository: getIt())
+  );
+  
+  // Lawyer Detail - BLoC
+  getIt.registerFactory(() => LawyerDetailBloc(
+    getEnrichedLawyer: getIt(),
+    refreshEnrichedLawyer: getIt(),
+  ));
+
+  // ✅ Firm Profile Dependencies
+  // Firm Profile - Data Source
+  getIt.registerLazySingleton<EnrichedFirmDataSource>(() => 
+    EnrichedFirmDataSourceImpl(
+      client: getIt(),
+      baseUrl: 'http://localhost:8000',
+    )
+  );
+  
+  // Firm Profile - Repository
+  getIt.registerLazySingleton<EnrichedFirmRepository>(() => 
+    EnrichedFirmRepositoryImpl(dataSource: getIt())
+  );
+  
+  // Firm Profile - Use Cases
+  getIt.registerLazySingleton<GetEnrichedFirmUseCase>(() => 
+    GetEnrichedFirmUseCase(repository: getIt())
+  );
+  
+  getIt.registerLazySingleton<RefreshEnrichedFirmUseCase>(() => 
+    RefreshEnrichedFirmUseCase(repository: getIt())
+  );
+  
+  // Firm Profile - BLoC
+  getIt.registerFactory(() => FirmProfileBloc(
+    getEnrichedFirm: getIt(),
+    refreshEnrichedFirm: getIt(),
+  ));
 }

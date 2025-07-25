@@ -14,6 +14,9 @@ class Case extends Equatable {
   final double? firmMatchScore; // Score do match com o escritório
   final String? caseType; // Tipo do caso (CORPORATE, PERSONAL, etc.)
   final String? allocationType; // NOVO: Tipo de alocação (direct, partnership, etc.)
+  final bool isPremium; // NOVO: Indica se o caso é premium
+  final bool isEnterprise; // NOVO: Indica se o caso é corporativo/enterprise
+  final String? clientPlan; // NOVO: Plano do cliente PJ (FREE, VIP, ENTERPRISE)
 
   const Case({
     required this.id,
@@ -27,6 +30,9 @@ class Case extends Equatable {
     this.firmMatchScore,
     this.caseType,
     this.allocationType, // NOVO
+    this.isPremium = false, // NOVO: Padrão false para compatibilidade
+    this.isEnterprise = false, // NOVO: Padrão false para compatibilidade
+    this.clientPlan, // NOVO: Plano do cliente (pode ser null para PF)
   });
 
   factory Case.fromJson(Map<String, dynamic> json) {
@@ -43,6 +49,9 @@ class Case extends Equatable {
       firmMatchScore: json['firm_match_score']?.toDouble(),
       caseType: json['case_type'],
       allocationType: json['allocation_type'], // NOVO
+      isPremium: json['is_premium'] as bool? ?? false, // NOVO: Consumir do backend
+      isEnterprise: json['is_enterprise'] as bool? ?? false, // NOVO: Consumir do backend
+      clientPlan: json['client_plan'], // NOVO: Consumir do backend
     );
   }
 
@@ -64,6 +73,9 @@ class Case extends Equatable {
       firmMatchScore: matchScore,
       caseType: originalCase.caseType,
       allocationType: originalCase.allocationType, // NOVO
+      isPremium: originalCase.isPremium, // NOVO: Preservar status premium
+      isEnterprise: originalCase.isEnterprise, // NOVO: Preservar status enterprise
+      clientPlan: originalCase.clientPlan, // NOVO: Preservar status clientPlan
     );
   }
 
@@ -83,6 +95,6 @@ class Case extends Equatable {
   @override
   List<Object?> get props => [
     id, title, status, lawyerName, lawyerId, createdAt, lawyer, 
-    recommendedFirm, firmMatchScore, caseType, allocationType // NOVO e corrigido
+    recommendedFirm, firmMatchScore, caseType, allocationType, isPremium, isEnterprise, clientPlan // NOVO
   ];
 } 

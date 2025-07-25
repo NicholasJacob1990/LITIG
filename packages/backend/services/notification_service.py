@@ -17,6 +17,13 @@ import os
 import aiohttp
 from dataclasses import dataclass, field
 
+import sendgrid
+from sendgrid.helpers.mail import Mail, Email, To, Content
+from twilio.rest import Client as TwilioClient
+from jinja2 import Environment, BaseLoader
+
+from config import get_supabase_client
+
 logger = logging.getLogger(__name__)
 
 
@@ -652,3 +659,361 @@ class NotificationService:
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             }
+
+"""
+Notification Service for Billing Events
+Serviço de notificações para eventos de billing (upgrade/downgrade)
+"""
+import os
+import logging
+from typing import Dict, Any, Optional
+from datetime import datetime
+import asyncio
+from dataclasses import dataclass
+
+import sendgrid
+from sendgrid.helpers.mail import Mail, Email, To, Content
+from twilio.rest import Client as TwilioClient
+from jinja2 import Environment, BaseLoader
+
+from config import get_supabase_client
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class NotificationData:
+    """Dados para notificação."""
+    user_id: str
+    user_name: str
+    user_email: str
+    user_phone: Optional[str]
+    entity_type: str
+    entity_id: str
+    old_plan: str
+    new_plan: str
+    action: str  # 'upgrade', 'downgrade', 'cancellation'
+    amount_cents: Optional[int] = None
+    billing_date: Optional[datetime] = None
+
+
+class NotificationService:
+    """Serviço para envio de notificações de billing."""
+    
+    def __init__(self):
+        self.supabase = get_supabase_client()
+        
+        # Configuração SendGrid
+        self.sendgrid_client = sendgrid.SendGridAPIClient(
+            api_key=os.getenv("SENDGRID_API_KEY")
+        )
+        self.from_email = os.getenv("FROM_EMAIL", "billing@litig.com.br")
+        
+        # Configuração Twilio
+        self.twilio_client = TwilioClient(
+            os.getenv("TWILIO_ACCOUNT_SID"),
+            os.getenv("TWILIO_AUTH_TOKEN")
+        )
+        self.twilio_phone = os.getenv("TWILIO_PHONE_NUMBER", "+5511999999999")
+        
+        # Templates de email
+        self.jinja_env = Environment(loader=BaseLoader())
+    
+    async def send_plan_change_notification(self, notification_data: NotificationData) -> bool:
+        """Envia notificação completa (email + SMS) para mudança de plano."""
+        try:
+            # Enviar email e SMS em paralelo
+            email_task = self._send_email_notification(notification_data)
+            sms_task = self._send_sms_notification(notification_data)
+            
+            # Analytics tracking
+            analytics_task = self._track_billing_event(notification_data)
+            
+            # Executar todas as tarefas
+            results = await asyncio.gather(
+                email_task, 
+                sms_task, 
+                analytics_task,
+                return_exceptions=True
+            )
+            
+            # Log resultados
+            email_success, sms_success, analytics_success = results
+            
+            logger.info(f"Notification sent for {notification_data.user_id}: "
+                       f"email={email_success}, sms={sms_success}, analytics={analytics_success}")
+            
+            return email_success or sms_success  # Sucesso se pelo menos um foi enviado
+            
+        except Exception as e:
+            logger.error(f"Error sending plan change notification: {e}")
+            return False
+    
+    async def _send_email_notification(self, data: NotificationData) -> bool:
+        """Envia notificação por email."""
+        try:
+            # Selecionar template baseado na ação
+            template_data = self._get_email_template_data(data)
+            
+            # Renderizar template
+            html_content = self._render_email_template(template_data)
+            
+            # Criar email
+            from_email = Email(self.from_email, "LITIG - Plataforma Jurídica")
+            to_email = To(data.user_email, data.user_name)
+            subject = template_data["subject"]
+            content = Content("text/html", html_content)
+            
+            mail = Mail(from_email, to_email, subject, content)
+            
+            # Enviar via SendGrid
+            response = self.sendgrid_client.send(message=mail)
+            
+            if response.status_code in [200, 202]:
+                logger.info(f"Email sent successfully to {data.user_email}")
+                return True
+            else:
+                logger.error(f"Failed to send email: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending email notification: {e}")
+            return False
+    
+    async def _send_sms_notification(self, data: NotificationData) -> bool:
+        """Envia notificação por SMS."""
+        try:
+            if not data.user_phone:
+                logger.info(f"No phone number for user {data.user_id}, skipping SMS")
+                return True  # Não é erro se não tem telefone
+            
+            # Gerar mensagem SMS
+            sms_message = self._generate_sms_message(data)
+            
+            # Enviar via Twilio
+            message = self.twilio_client.messages.create(
+                body=sms_message,
+                from_=self.twilio_phone,
+                to=data.user_phone
+            )
+            
+            if message.status in ['queued', 'sent', 'delivered']:
+                logger.info(f"SMS sent successfully to {data.user_phone}")
+                return True
+            else:
+                logger.error(f"Failed to send SMS: {message.status}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending SMS notification: {e}")
+            return False
+    
+    async def _track_billing_event(self, data: NotificationData) -> bool:
+        """Registra evento de billing para analytics."""
+        try:
+            # Registrar no banco para analytics
+            analytics_data = {
+                "user_id": data.user_id,
+                "event_type": "plan_change",
+                "event_action": data.action,
+                "entity_type": data.entity_type,
+                "entity_id": data.entity_id,
+                "old_plan": data.old_plan,
+                "new_plan": data.new_plan,
+                "amount_cents": data.amount_cents,
+                "timestamp": datetime.now().isoformat(),
+                "metadata": {
+                    "notification_sent": True,
+                    "billing_date": data.billing_date.isoformat() if data.billing_date else None
+                }
+            }
+            
+            # Salvar no Supabase
+            self.supabase.table("billing_analytics").insert(analytics_data).execute()
+            
+            logger.info(f"Analytics event tracked for {data.user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error tracking analytics: {e}")
+            return False
+    
+    def _get_email_template_data(self, data: NotificationData) -> Dict[str, Any]:
+        """Gera dados do template de email baseado na ação."""
+        entity_name = self._get_entity_display_name(data.entity_type)
+        
+        if data.action == 'upgrade':
+            return {
+                "subject": f"🎉 Upgrade realizado com sucesso - Plano {data.new_plan}",
+                "title": "Parabéns pelo seu upgrade!",
+                "message": f"Seu {entity_name} foi upgradeado para o plano {data.new_plan}.",
+                "features": self._get_plan_features(data.entity_type, data.new_plan),
+                "action_color": "#10B981",  # Green
+                "action_icon": "🚀",
+                "cta_text": "Explorar novos recursos",
+                "cta_url": self._get_dashboard_url(data.entity_type, data.entity_id)
+            }
+        elif data.action == 'downgrade':
+            return {
+                "subject": f"Plano alterado para {data.new_plan}",
+                "title": "Plano alterado",
+                "message": f"Seu {entity_name} foi alterado para o plano {data.new_plan}.",
+                "features": self._get_plan_features(data.entity_type, data.new_plan),
+                "action_color": "#F59E0B",  # Amber
+                "action_icon": "📋",
+                "cta_text": "Ver plano atual",
+                "cta_url": self._get_billing_url(data.entity_type, data.entity_id)
+            }
+        else:  # cancellation
+            return {
+                "subject": f"Plano cancelado - {data.old_plan}",
+                "title": "Plano cancelado",
+                "message": f"Seu plano {data.old_plan} foi cancelado. Você ainda tem acesso até o final do período de cobrança.",
+                "features": ["Acesso mantido até o fim do período", "Dados preservados", "Reativação disponível"],
+                "action_color": "#EF4444",  # Red
+                "action_icon": "⏸️",
+                "cta_text": "Reativar plano",
+                "cta_url": self._get_billing_url(data.entity_type, data.entity_id)
+            }
+    
+    def _render_email_template(self, template_data: Dict[str, Any]) -> str:
+        """Renderiza template de email HTML."""
+        template_html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{{ title }}</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; background: #f8fafc; }
+                .container { max-width: 600px; margin: 0 auto; background: white; }
+                .header { background: {{ action_color }}; color: white; padding: 32px; text-align: center; }
+                .content { padding: 32px; }
+                .features { margin: 24px 0; }
+                .feature { padding: 8px 0; border-left: 3px solid {{ action_color }}; padding-left: 16px; margin: 8px 0; }
+                .cta { text-align: center; margin: 32px 0; }
+                .button { display: inline-block; background: {{ action_color }}; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; }
+                .footer { background: #f1f5f9; padding: 24px; text-align: center; font-size: 14px; color: #64748b; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>{{ action_icon }} {{ title }}</h1>
+                </div>
+                <div class="content">
+                    <p>{{ message }}</p>
+                    
+                    <div class="features">
+                        <h3>Recursos inclusos:</h3>
+                        {% for feature in features %}
+                        <div class="feature">{{ feature }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="cta">
+                        <a href="{{ cta_url }}" class="button">{{ cta_text }}</a>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>LITIG - Plataforma Jurídica<br>
+                    Dúvidas? Entre em contato: suporte@litig.com.br</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        template = self.jinja_env.from_string(template_html)
+        return template.render(**template_data)
+    
+    def _generate_sms_message(self, data: NotificationData) -> str:
+        """Gera mensagem SMS concisa."""
+        if data.action == 'upgrade':
+            return f"🎉 LITIG: Upgrade realizado! Seu plano {data.new_plan} está ativo. Acesse: litig.com.br"
+        elif data.action == 'downgrade':
+            return f"📋 LITIG: Plano alterado para {data.new_plan}. Acesse sua conta: litig.com.br"
+        else:
+            return f"⏸️ LITIG: Plano {data.old_plan} cancelado. Acesso mantido até fim do período. litig.com.br"
+    
+    def _get_entity_display_name(self, entity_type: str) -> str:
+        """Retorna nome amigável para tipo de entidade."""
+        names = {
+            "client": "perfil",
+            "lawyer": "perfil profissional", 
+            "firm": "escritório"
+        }
+        return names.get(entity_type, "conta")
+    
+    def _get_plan_features(self, entity_type: str, plan: str) -> list:
+        """Retorna features do plano para exibição."""
+        # Importar do billing service para manter consistência
+        from services.stripe_billing_service import StripeBillingService
+        billing_service = StripeBillingService()
+        return billing_service.get_plan_features(plan, entity_type)
+    
+    def _get_dashboard_url(self, entity_type: str, entity_id: str) -> str:
+        """Retorna URL do dashboard apropriado."""
+        base_url = os.getenv("FRONTEND_URL", "https://app.litig.com.br")
+        if entity_type == "client":
+            return f"{base_url}/client-home"
+        elif entity_type == "lawyer":
+            return f"{base_url}/dashboard"
+        elif entity_type == "firm":
+            return f"{base_url}/firm-dashboard"
+        return f"{base_url}/dashboard"
+    
+    def _get_billing_url(self, entity_type: str, entity_id: str) -> str:
+        """Retorna URL da página de billing."""
+        base_url = os.getenv("FRONTEND_URL", "https://app.litig.com.br")
+        return f"{base_url}/billing/plans"
+
+
+# Helper function para uso nos webhooks
+async def send_plan_change_notification(
+    user_id: str,
+    entity_type: str,
+    entity_id: str,
+    old_plan: str,
+    new_plan: str,
+    action: str,
+    amount_cents: Optional[int] = None
+) -> bool:
+    """
+    Função helper para enviar notificação de mudança de plano.
+    Usada pelos webhooks do Stripe.
+    """
+    try:
+        # Buscar dados do usuário
+        supabase = get_supabase_client()
+        user_data = supabase.table("profiles").select("*").eq("user_id", user_id).single().execute()
+        
+        if not user_data.data:
+            logger.error(f"User {user_id} not found")
+            return False
+        
+        user = user_data.data
+        
+        # Criar dados de notificação
+        notification_data = NotificationData(
+            user_id=user_id,
+            user_name=user.get("full_name", "Usuário"),
+            user_email=user.get("email", ""),
+            user_phone=user.get("phone"),
+            entity_type=entity_type,
+            entity_id=entity_id,
+            old_plan=old_plan,
+            new_plan=new_plan,
+            action=action,
+            amount_cents=amount_cents,
+            billing_date=datetime.now()
+        )
+        
+        # Enviar notificação
+        notification_service = NotificationService()
+        return await notification_service.send_plan_change_notification(notification_data)
+        
+    except Exception as e:
+        logger.error(f"Error in send_plan_change_notification: {e}")
+        return False

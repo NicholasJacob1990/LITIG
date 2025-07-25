@@ -27,7 +27,7 @@ class EmailActionsWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        border: Border.all(color: AppColors.outline.withOpacity(0.2)),
+        border: Border.all(color: AppColors.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -49,7 +49,7 @@ class EmailActionsWidget extends StatelessWidget {
       width: 40,
       height: 4,
       decoration: BoxDecoration(
-        color: AppColors.outline.withOpacity(0.3),
+        color: AppColors.outline.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(2),
       ),
     );
@@ -60,7 +60,7 @@ class EmailActionsWidget extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 20,
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Icon(
             email.isRead ? LucideIcons.mailOpen : LucideIcons.mail,
             color: AppColors.primary,
@@ -84,7 +84,7 @@ class EmailActionsWidget extends StatelessWidget {
               Text(
                 'De: ${email.from}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.onSurface.withOpacity(0.7),
+                  color: AppColors.onSurface.withValues(alpha: 0.7),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -221,12 +221,12 @@ class EmailActionsWidget extends StatelessWidget {
         ),
       ),
       backgroundColor: isDestructive
-          ? AppColors.error.withOpacity(0.1)
-          : AppColors.primary.withOpacity(0.1),
+          ? AppColors.error.withValues(alpha: 0.1)
+          : AppColors.primary.withValues(alpha: 0.1),
       side: BorderSide(
         color: isDestructive
-            ? AppColors.error.withOpacity(0.3)
-            : AppColors.primary.withOpacity(0.3),
+            ? AppColors.error.withValues(alpha: 0.3)
+            : AppColors.primary.withValues(alpha: 0.3),
       ),
     );
   }
@@ -255,7 +255,7 @@ class EmailActionsWidget extends StatelessWidget {
   }
 
   String _generateReplyQuote() {
-    final date = email.receivedAt?.toString() ?? 'Data desconhecida';
+    final date = email.receivedAt.toString() ?? 'Data desconhecida';
     return '''
 <br><br>
 <div style="border-left: 2px solid #ccc; padding-left: 10px; margin: 10px 0;">

@@ -49,6 +49,7 @@ class UnipileEmail {
   final String from;
   final String to;
   final DateTime sentAt;
+  final DateTime receivedAt;
   final bool isRead;
   
   UnipileEmail({
@@ -58,6 +59,7 @@ class UnipileEmail {
     required this.from,
     required this.to,
     required this.sentAt,
+    required this.receivedAt,
     required this.isRead,
   });
   
@@ -69,6 +71,7 @@ class UnipileEmail {
       from: json['from'] ?? '',
       to: json['to'] ?? '',
       sentAt: DateTime.tryParse(json['sent_at'] ?? '') ?? DateTime.now(),
+      receivedAt: DateTime.tryParse(json['received_at'] ?? json['sent_at'] ?? '') ?? DateTime.now(),
       isRead: json['is_read'] ?? false,
     );
   }
@@ -81,6 +84,10 @@ class UnipileMessage {
   final String senderId;
   final DateTime sentAt;
   final String type;
+  
+  // Aliases para compatibilidade
+  String get sender => senderId;
+  DateTime get timestamp => sentAt;
   
   UnipileMessage({
     required this.id,
@@ -96,8 +103,8 @@ class UnipileMessage {
       id: json['id'] ?? '',
       chatId: json['chat_id'] ?? '',
       content: json['content'] ?? '',
-      senderId: json['sender_id'] ?? '',
-      sentAt: DateTime.tryParse(json['sent_at'] ?? '') ?? DateTime.now(),
+      senderId: json['sender_id'] ?? json['sender'] ?? '',
+      sentAt: DateTime.tryParse(json['sent_at'] ?? json['timestamp'] ?? '') ?? DateTime.now(),
       type: json['type'] ?? 'text',
     );
   }
@@ -534,6 +541,96 @@ class UnipileService {
     });
     
     return response;
+  }
+
+  /// Obter mensagens de chat
+  Future<List<UnipileMessage>> getMessages({
+    String? connectionId,
+    int? limit,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return [
+      UnipileMessage(
+        id: 'msg_1',
+        chatId: 'chat_1',
+        content: 'Mensagem de exemplo',
+        senderId: 'sender_1',
+        sentAt: DateTime.now(),
+        type: 'text',
+      ),
+    ];
+  }
+
+  /// Obter eventos de calendário com parâmetros adicionais (versão estendida)
+  Future<Map<String, dynamic>> getCalendarEventsExtended({
+    String? connectionId,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? limit,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return {
+      'success': true,
+      'data': [
+        {
+          'id': 'event_1',
+          'title': 'Reunião exemplo',
+          'start_time': (startDate ?? DateTime.now()).toIso8601String(),
+          'end_time': (endDate ?? DateTime.now().add(const Duration(hours: 1))).toIso8601String(),
+        }
+      ]
+    };
+  }
+
+  /// Criar evento de calendário com parâmetros adicionais (versão estendida)
+  Future<Map<String, dynamic>> createCalendarEventExtended({
+    required String title,
+    required String description,
+    required DateTime startTime,
+    required DateTime endTime,
+    List<String>? attendees,
+    String? location,
+    String? accountId,
+    String? connectionId,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return {
+      'success': true,
+      'data': {
+        'id': 'event_${DateTime.now().millisecondsSinceEpoch}',
+        'title': title,
+        'description': description,
+        'start_time': startTime.toIso8601String(),
+        'end_time': endTime.toIso8601String(),
+        'attendees': attendees ?? [],
+        'location': location,
+      }
+    };
+  }
+
+  /// Atualizar evento de calendário
+  Future<Map<String, dynamic>> updateCalendarEvent({
+    required String eventId,
+    required String title,
+    required String description,
+    required DateTime startTime,
+    required DateTime endTime,
+    List<String>? attendees,
+    String? location,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return {
+      'success': true,
+      'data': {
+        'id': eventId,
+        'title': title,
+        'description': description,
+        'start_time': startTime.toIso8601String(),
+        'end_time': endTime.toIso8601String(),
+        'attendees': attendees ?? [],
+        'location': location,
+      }
+    };
   }
 
   // ===== CONNECTED ACCOUNTS =====

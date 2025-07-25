@@ -4,11 +4,11 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import json
 
-from backend.services.unipile_app_service import get_unipile_app_service
+from services.unipile_app_service import get_unipile_app_service
 # Supondo que você tenha um helper para obter o usuário e a conta principal
-from backend.auth import get_current_user 
-from backend.models.user import User
-from backend.database import get_user_primary_social_account # Esta função precisa ser criada
+from auth import get_current_user 
+from models.user import User
+from database import get_user_primary_social_account # Esta função precisa ser criada
 
 router = APIRouter(prefix="/api/v1/calendar", tags=["calendar"])
 
