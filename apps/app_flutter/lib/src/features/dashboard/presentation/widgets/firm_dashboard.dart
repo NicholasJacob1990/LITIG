@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../widgets/stat_card.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/widgets/expandable_clusters_widget.dart';
 
 /// Dashboard específico para sócios de escritórios
 /// 
@@ -38,6 +39,10 @@ class FirmDashboard extends StatelessWidget {
             
             // Performance da equipe
             _buildTeamPerformance(context),
+            const SizedBox(height: 24),
+            
+            // Insights estratégicos de mercado
+            const ExpandableClustersWidget(),
             const SizedBox(height: 24),
             
             // Advogados da equipe
@@ -491,43 +496,58 @@ class FirmDashboard extends StatelessWidget {
   }
 
   Widget _buildManagementActions(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.5,
-      children: [
-        _buildActionCard(
-          context,
-          'Gerenciar Equipe',
-          LucideIcons.users,
-          '/firm/team-management',
-          Colors.blue,
-        ),
-        _buildActionCard(
-          context,
-          'Relatórios',
-          LucideIcons.barChart3,
-          '/firm/reports',
-          Colors.green,
-        ),
-        _buildActionCard(
-          context,
-          'Configurações SLA',
-          LucideIcons.clock,
-          '/sla-settings',
-          Colors.orange,
-        ),
-        _buildActionCard(
-          context,
-          'Clientes',
-          LucideIcons.briefcase,
-          '/firm/clients',
-          Colors.purple,
-        ),
-      ],
+    final actions = [
+      {
+        'title': 'Gerenciar Equipe',
+        'icon': LucideIcons.users,
+        'route': '/firm/team-management',
+        'color': Colors.blue,
+      },
+      {
+        'title': 'Relatórios',
+        'icon': LucideIcons.barChart3,
+        'route': '/firm/reports',
+        'color': Colors.green,
+      },
+      {
+        'title': 'Configurações SLA',
+        'icon': LucideIcons.clock,
+        'route': '/sla-settings',
+        'color': Colors.orange,
+      },
+      {
+        'title': 'Clientes',
+        'icon': LucideIcons.briefcase,
+        'route': '/firm/clients',
+        'color': Colors.purple,
+      },
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 200).floor().clamp(2, 4);
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.5,
+          ),
+          itemCount: actions.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final action = actions[index];
+            return _buildActionCard(
+              context,
+              action['title'] as String,
+              action['icon'] as IconData,
+              action['route'] as String,
+              action['color'] as Color,
+            );
+          },
+        );
+      },
     );
   }
 

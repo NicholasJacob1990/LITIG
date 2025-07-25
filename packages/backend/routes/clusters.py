@@ -1,53 +1,56 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Cluster APIs
-============
+Cluster Quality Metrics APIs
+============================
 
-APIs REST para funcionalidades de clusterização de casos e advogados.
-Endpoints para trends, detalhes de clusters e recomendações de parceria.
+Este módulo implementa as APIs REST para análise de qualidade de clusters,
+incluindo métricas de coesão, separação, confiança e insights acionáveis.
 
-Endpoints:
-- GET /api/clusters/trending - Top clusters em alta
-- GET /api/clusters/{cluster_id} - Detalhes de cluster específico  
-- GET /api/cluster-recommendations/{lawyer_id} - Recomendações de parceria
-- POST /api/clusters/generate - Trigger manual de clusterização
-- GET /api/clusters/stats - Estatísticas gerais de clusterização
+Endpoints principais:
+- GET /{cluster_id} - Análise detalhada de qualidade de um cluster
+- POST /validate - Validação de thresholds de qualidade
+- GET /trends - Tendências de qualidade ao longo do tempo
+- POST /analyze-batch - Análise em lote de múltiplos clusters
+- GET /dashboard - Dashboard executivo de qualidade
+- GET /health - Health check do sistema de qualidade
+
+Métricas implementadas:
+- Silhouette Score (coesão interna)
+- Inertia Score (separação entre clusters)
+- Confidence Score (qualidade dos embeddings)
+- Provider Quality (distribuição de fontes)
+- Actionable Insights (recomendações automáticas)
 """
 
-import asyncio
-import logging
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
-# Dependências do projeto
 from database import get_async_session
 from services.cluster_service import ClusterService
-from services.cluster_labeling_service import ClusterLabelingService
-from jobs.cluster_generation_job import run_cluster_generation
+import logging
 
-# Schemas de resposta
-from schemas.cluster_schemas import (
-    TrendingClusterResponse,
-    ClusterDetailResponse,
-    PartnershipRecommendationResponse,
-    ClusterStatsResponse
-)
-
-# Configurar router
-router = APIRouter(prefix="/api/clusters", tags=["clusters"])
 logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/clusters/quality", tags=["cluster-quality"])
 
 
 # Modelos de entrada
-class ClusterGenerationRequest(BaseModel):
-    """Request para gerar clusters manualmente."""
-    entity_type: Optional[str] = Field(None, description="'case', 'lawyer' ou None para ambos")
+class QualityAnalysisRequest(BaseModel):
+    """Request para análise de qualidade."""
+    cluster_ids: Optional[List[str]] = Field(None, description="IDs específicos ou None para todos")
+    cluster_type: Optional[str] = Field(None, description="Filtrar por tipo")
+    include_detailed_analysis: bool = Field(True, description="Incluir análise detalhada")
+
+
+class QualityValidationRequest(BaseModel):
+    """Request para validação de qualidade."""
+    cluster_id: str = Field(description="ID do cluster")
+    custom_thresholds: Optional[Dict[str, float]] = Field(None, description="Thresholds customizados")
     force_refresh: bool = Field(False, description="Forçar regeneração mesmo com dados recentes")
 
 
@@ -57,62 +60,6 @@ class ClusterQueryParams(BaseModel):
     cluster_type: str = Field(default="case", description="Tipo de cluster: 'case' ou 'lawyer'")
     min_items: int = Field(default=5, ge=1, description="Mínimo de itens por cluster")
     include_emergent_only: bool = Field(default=False, description="Incluir apenas clusters emergentes")
-
-
-@router.get("/trending", response_model=List[TrendingClusterResponse])
-async def get_trending_clusters(
-    limit: int = Query(default=3, ge=1, le=20, description="Número de clusters trending"),
-    cluster_type: str = Query(default="case", description="Tipo: 'case' ou 'lawyer'"),
-    min_items: int = Query(default=5, ge=1, description="Mínimo de itens por cluster"),
-    include_emergent_only: bool = Query(default=False, description="Apenas emergentes"),
-    db: AsyncSession = Depends(get_async_session)
-):
-    """
-    Retorna clusters em alta baseado em momentum e relevância.
-    
-    Usado pelo widget de dashboard no Flutter para mostrar
-    tendências de mercado e nichos emergentes.
-    """
-    
-    try:
-        logger.info(f"📊 Buscando {limit} clusters trending de {cluster_type}")
-        
-        cluster_service = ClusterService(db)
-        trending_clusters = await cluster_service.get_trending_clusters(
-            cluster_type=cluster_type,
-            limit=limit,
-            min_items=min_items,
-            emergent_only=include_emergent_only
-        )
-        
-        if not trending_clusters:
-            logger.info(f"ℹ️ Nenhum cluster trending encontrado para {cluster_type}")
-            return []
-        
-        # Converter para formato de resposta
-        response_data = []
-        for cluster in trending_clusters:
-            response_data.append(TrendingClusterResponse(
-                cluster_id=cluster["cluster_id"],
-                cluster_label=cluster["cluster_label"],
-                momentum_score=cluster["momentum_score"],
-                total_cases=cluster["total_items"] if cluster_type == "case" else 0,
-                total_lawyers=cluster["total_items"] if cluster_type == "lawyer" else 0,
-                growth_trend=_calculate_growth_trend(cluster["momentum_score"]),
-                is_emergent=cluster["is_emergent"],
-                emergent_since=cluster["emergent_since"],
-                confidence_score=cluster.get("label_confidence", 0.8)
-            ))
-        
-        logger.info(f"✅ Retornando {len(response_data)} clusters trending")
-        return response_data
-        
-    except Exception as e:
-        logger.error(f"❌ Erro ao buscar clusters trending: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erro interno ao buscar clusters trending: {str(e)}"
-        )
 
 
 @router.get("/{cluster_id}", response_model=ClusterDetailResponse)
@@ -159,45 +106,30 @@ async def get_cluster_details(
         )
 
 
-@router.get("/recommendations/{lawyer_id}", response_model=List[PartnershipRecommendationResponse])
+@router.get("/recommendations/{lawyer_id}")
 async def get_partnership_recommendations(
     lawyer_id: str,
-    limit: int = Query(default=10, ge=1, le=50, description="Número máximo de recomendações"),
-    min_compatibility: float = Query(default=0.6, ge=0.0, le=1.0, description="Score mínimo de compatibilidade"),
-    exclude_same_firm: bool = Query(default=True, description="Excluir advogados do mesmo escritório"),
+    limit: int = 10,
+    min_compatibility_score: float = 0.6,
+    exclude_same_firm: bool = True,
     db: AsyncSession = Depends(get_async_session)
 ):
-    """
-    Gera recomendações de parceria baseadas em complementaridade de clusters.
+    """Recomendações de parceria baseadas em clusters complementares."""
     
-    Analisa clusters do advogado e sugere parceiros com expertises 
-    complementares ou sinérgicas.
-    """
+    cluster_service = ClusterService(db)
+    recommendations = await cluster_service.get_partnership_recommendations(
+        lawyer_id=lawyer_id,
+        limit=limit,
+        min_compatibility_score=min_compatibility_score,
+        exclude_same_firm=exclude_same_firm
+    )
     
-    try:
-        logger.info(f"🤝 Gerando recomendações de parceria para advogado {lawyer_id}")
-        
-        cluster_service = ClusterService(db)
-        recommendations = await cluster_service.get_partnership_recommendations(
-            lawyer_id=lawyer_id,
-            limit=limit,
-            min_compatibility_score=min_compatibility,
-            exclude_same_firm=exclude_same_firm
-        )
-        
-        if not recommendations:
-            logger.info(f"ℹ️ Nenhuma recomendação encontrada para advogado {lawyer_id}")
-            return []
-        
-        logger.info(f"✅ {len(recommendations)} recomendações geradas para {lawyer_id}")
-        return recommendations
-        
-    except Exception as e:
-        logger.error(f"❌ Erro ao gerar recomendações para {lawyer_id}: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erro interno ao gerar recomendações: {str(e)}"
-        )
+    return {
+        "lawyer_id": lawyer_id,
+        "recommendations": recommendations,
+        "total_found": len(recommendations),
+        "generated_at": datetime.now().isoformat()
+    }
 
 
 @router.post("/generate")

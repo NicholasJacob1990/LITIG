@@ -413,6 +413,9 @@ class ClusterGenerationJob:
         # 6. Validação e métricas de qualidade
         await self._validate_clustering_quality(cluster_results, hq_embeddings, cluster_labels)
         
+        # 7. Análise de qualidade detalhada dos clusters gerados
+        await self._analyze_generated_clusters_quality(cluster_results, entity_type)
+        
         self.logger.info(f"✅ Clusterização híbrida concluída: {len(cluster_results)} entidades atribuídas")
         
         return cluster_results
@@ -443,6 +446,66 @@ class ClusterGenerationJob:
             
         except Exception as e:
             self.logger.error(f"❌ Erro na validação de qualidade: {e}")
+    
+    async def _analyze_generated_clusters_quality(self, cluster_results: List[ClusterResult], entity_type: ClusterDataType):
+        """Análise de qualidade dos clusters gerados."""
+        
+        try:
+            from services.cluster_quality_metrics_service import create_quality_metrics_service
+            
+            # Agrupar por cluster
+            cluster_groups = {}
+            for result in cluster_results:
+                cluster_id = result.cluster_id
+                if cluster_id not in cluster_groups:
+                    cluster_groups[cluster_id] = []
+                cluster_groups[cluster_id].append(result)
+            
+            self.logger.info(f"🔍 Analisando qualidade de {len(cluster_groups)} clusters gerados")
+            
+            # Analisar qualidade dos clusters com mais de 5 membros
+            quality_analyzed = 0
+            async with get_async_session() as db:
+                quality_service = create_quality_metrics_service(db)
+                
+                for cluster_id, members in cluster_groups.items():
+                    if cluster_id.endswith('_-1'):  # Ignorar outliers
+                        continue
+                    
+                    if len(members) >= 5:  # Só analisar clusters com tamanho mínimo
+                        try:
+                            quality_report = await quality_service.analyze_cluster_quality(
+                                cluster_id, include_detailed_analysis=False
+                            )
+                            
+                            if quality_report:
+                                quality_analyzed += 1
+                                
+                                # Log da qualidade
+                                self.logger.info(
+                                    f"📊 Cluster {cluster_id}: "
+                                    f"Qualidade={quality_report.overall_quality_score:.3f} "
+                                    f"({quality_report.quality_level.name}), "
+                                    f"Silhouette={quality_report.silhouette_analysis.silhouette_avg:.3f}"
+                                )
+                                
+                                # Alertar sobre clusters de baixa qualidade
+                                if quality_report.overall_quality_score < 0.4:
+                                    self.logger.warning(
+                                        f"⚠️ Cluster {cluster_id} tem baixa qualidade: "
+                                        f"{quality_report.overall_quality_score:.3f}. "
+                                        f"Recomendações: {'; '.join(quality_report.actionable_insights[:2])}"
+                                    )
+                                
+                        except Exception as e:
+                            self.logger.error(f"❌ Erro na análise de qualidade do cluster {cluster_id}: {e}")
+                            continue
+            
+            self.logger.info(f"✅ Análise de qualidade concluída: {quality_analyzed} clusters analisados")
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro na análise de qualidade dos clusters gerados: {e}")
+            # Não falhar o pipeline por causa deste erro
     
     async def _save_cluster_results(self, cluster_results: List[ClusterResult], entity_type: ClusterDataType):
         """Salva resultados da clusterização no banco."""

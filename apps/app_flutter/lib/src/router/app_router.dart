@@ -50,6 +50,8 @@ import 'package:meu_app/src/features/lawyers/presentation/bloc/lawyer_detail_blo
 import 'package:meu_app/src/features/lawyers/presentation/screens/lawyer_detail_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_profile_bloc.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_profile_screen.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/screens/cluster_insights_screen.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/screens/cluster_detail_screen.dart';
 import 'package:meu_app/injection_container.dart';
 // Importação correta das novas telas
 import 'package:meu_app/src/features/admin/presentation/screens/premium_criteria_list.dart';
@@ -439,6 +441,21 @@ GoRouter appRouter(AuthBloc authBloc) {
         path: '/triage',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ChatTriageScreen(),
+      ),
+
+      // Cluster Insights Routes
+      GoRoute(
+        path: '/cluster-insights',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ClusterInsightsScreen(),
+      ),
+      GoRoute(
+        path: '/cluster-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final clusterId = state.uri.queryParameters['clusterId'] ?? '';
+          return ClusterDetailScreen(clusterId: clusterId);
+        },
       ),
 
       GoRoute(

@@ -11,6 +11,7 @@ import 'package:meu_app/src/features/dashboard/presentation/bloc/dashboard_bloc.
 import 'package:meu_app/src/features/dashboard/presentation/widgets/stat_card.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_firm_info_card.dart';
 import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_bloc.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/widgets/expandable_clusters_widget.dart';
 import 'package:meu_app/injection_container.dart';
 
 class LawyerDashboard extends StatelessWidget {
@@ -55,6 +56,9 @@ class LawyerDashboard extends StatelessWidget {
               _buildStatsSection(),
               const SizedBox(height: 24),
               _buildFirmInfoSection(context),
+              const SizedBox(height: 24),
+              // Widget de Insights de Cluster
+              const ExpandableClustersWidget(),
               const SizedBox(height: 24),
               Text('Ações Rápidas', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
@@ -172,19 +176,37 @@ class LawyerDashboard extends StatelessWidget {
   }
 
   Widget _buildActionsGrid(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.5,
-      children: [
-        _buildActionCard(context, 'Meus Casos', lucide.LucideIcons.briefcase, '/cases'),
-        _buildActionCard(context, 'Mensagens', lucide.LucideIcons.messageCircle, '/messages'),
-        _buildActionCard(context, 'Agenda', lucide.LucideIcons.calendar, '/schedule'),
-        _buildActionCard(context, 'Parcerias', lucide.LucideIcons.users, '/partnerships'),
-      ],
+    final actions = [
+      {'title': 'Meus Casos', 'icon': lucide.LucideIcons.briefcase, 'route': '/cases'},
+      {'title': 'Mensagens', 'icon': lucide.LucideIcons.messageCircle, 'route': '/messages'},
+      {'title': 'Agenda', 'icon': lucide.LucideIcons.calendar, 'route': '/schedule'},
+      {'title': 'Parcerias', 'icon': lucide.LucideIcons.users, 'route': '/partnerships'},
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 180).floor().clamp(2, 4);
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.5,
+          ),
+          itemCount: actions.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final action = actions[index];
+            return _buildActionCard(
+              context,
+              action['title'] as String,
+              action['icon'] as IconData,
+              action['route'] as String,
+            );
+          },
+        );
+      },
     );
   }
   

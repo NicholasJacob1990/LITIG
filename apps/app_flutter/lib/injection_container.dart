@@ -109,6 +109,13 @@ import 'package:meu_app/src/features/firms/domain/repositories/enriched_firm_rep
 import 'package:meu_app/src/features/firms/domain/usecases/get_enriched_firm.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_profile_bloc.dart';
 
+// Cluster Insights
+import 'package:meu_app/src/features/cluster_insights/data/datasources/cluster_remote_datasource.dart';
+import 'package:meu_app/src/features/cluster_insights/data/repositories/cluster_repository_impl.dart';
+import 'package:meu_app/src/features/cluster_insights/domain/repositories/cluster_repository.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/bloc/trending_clusters_bloc.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/bloc/partnership_recommendations_bloc.dart';
+
 // Partnerships
 import 'package:meu_app/src/features/partnerships/data/datasources/partnership_remote_data_source.dart';
 import 'package:meu_app/src/features/partnerships/data/datasources/partnership_remote_data_source_impl.dart';
@@ -765,75 +772,19 @@ Future<void> configureDependencies() async {
     getEnrichedFirm: getIt(),
     refreshEnrichedFirm: getIt(),
   ));
-}
-  // getIt.registerLazySingleton(() => GetAdminMetrics(getIt()));
-  // getIt.registerLazySingleton(() => GetAdminAuditLogs(getIt()));
-  // getIt.registerLazySingleton(() => GenerateExecutiveReport(getIt()));
-  // getIt.registerLazySingleton(() => ForceGlobalSync(getIt()));
-  
-  // BLoC - Comentado temporariamente até implementação das use cases
-  // getIt.registerFactory(() => AdminBloc(
-  //   getAdminDashboard: getIt(),
-  //   getAdminMetrics: getIt(),
-  //   getAdminAuditLogs: getIt(),
-  //   generateExecutiveReport: getIt(),
-  //   forceGlobalSync: getIt(),
-  // ));
 
-  // Lawyer Detail - Data Sources
-  getIt.registerLazySingleton<EnrichedLawyerDataSource>(() => 
-    EnrichedLawyerRemoteDataSource(
-      client: getIt(),
-      baseUrl: 'http://localhost:8000', // TODO: Mover para configuração
-    )
+  // Cluster Insights Feature
+  // Data Sources
+  getIt.registerLazySingleton<ClusterRemoteDataSource>(
+    () => ClusterRemoteDataSourceImpl(client: getIt()),
   );
-  
-  // Lawyer Detail - Repositories
-  getIt.registerLazySingleton<EnrichedLawyerRepository>(() => 
-    EnrichedLawyerRepositoryImpl(dataSource: getIt())
-  );
-  
-  // Lawyer Detail - Use Cases
-  getIt.registerLazySingleton<GetEnrichedLawyerUseCase>(() => 
-    GetEnrichedLawyerUseCase(repository: getIt())
-  );
-  
-  getIt.registerLazySingleton<RefreshEnrichedLawyerUseCase>(() => 
-    RefreshEnrichedLawyerUseCase(repository: getIt())
-  );
-  
-  // Lawyer Detail - BLoC
-  getIt.registerFactory(() => LawyerDetailBloc(
-    getEnrichedLawyer: getIt(),
-    refreshEnrichedLawyer: getIt(),
-  ));
 
-  // ✅ Firm Profile Dependencies
-  // Firm Profile - Data Source
-  getIt.registerLazySingleton<EnrichedFirmDataSource>(() => 
-    EnrichedFirmDataSourceImpl(
-      client: getIt(),
-      baseUrl: 'http://localhost:8000',
-    )
+  // Repositories
+  getIt.registerLazySingleton<ClusterRepository>(
+    () => ClusterRepositoryImpl(remoteDataSource: getIt()),
   );
-  
-  // Firm Profile - Repository
-  getIt.registerLazySingleton<EnrichedFirmRepository>(() => 
-    EnrichedFirmRepositoryImpl(dataSource: getIt())
-  );
-  
-  // Firm Profile - Use Cases
-  getIt.registerLazySingleton<GetEnrichedFirmUseCase>(() => 
-    GetEnrichedFirmUseCase(repository: getIt())
-  );
-  
-  getIt.registerLazySingleton<RefreshEnrichedFirmUseCase>(() => 
-    RefreshEnrichedFirmUseCase(repository: getIt())
-  );
-  
-  // Firm Profile - BLoC
-  getIt.registerFactory(() => FirmProfileBloc(
-    getEnrichedFirm: getIt(),
-    refreshEnrichedFirm: getIt(),
-  ));
+
+  // BLoCs
+  getIt.registerFactory(() => TrendingClustersBloc(repository: getIt()));
+  getIt.registerFactory(() => PartnershipRecommendationsBloc(repository: getIt()));
 }

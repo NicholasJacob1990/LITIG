@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../widgets/stat_card.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/widgets/expandable_clusters_widget.dart';
 
 /// Dashboard específico para advogados contratantes
 /// 
@@ -57,6 +58,10 @@ class ContractorDashboard extends StatelessWidget {
             
             // Parcerias ativas
             _buildActivePartnerships(context),
+            const SizedBox(height: 24),
+            
+            // Insights de cluster e oportunidades de parceria
+            const ExpandableClustersWidget(),
             const SizedBox(height: 24),
             
             // Pipeline de clientes
@@ -450,20 +455,31 @@ class ContractorDashboard extends StatelessWidget {
         ? _getSuperAssociateActions() 
         : _getIndividualLawyerActions();
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.5,
-      children: actions.map((action) => _buildActionCard(
-        context,
-        action['title']!,
-        action['icon'] as IconData,
-        action['route']!,
-        action['color'] as Color,
-      )).toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 200).floor().clamp(2, 4);
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.5,
+          ),
+          itemCount: actions.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final action = actions[index];
+            return _buildActionCard(
+              context,
+              action['title']!,
+              action['icon'] as IconData,
+              action['route']!,
+              action['color'] as Color,
+            );
+          },
+        );
+      },
     );
   }
 

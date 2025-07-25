@@ -35,6 +35,17 @@ from schemas.cluster_schemas import (
     ClusterMemberInfo
 )
 
+# Importar serviço de métricas de qualidade
+try:
+    from services.cluster_quality_metrics_service import (
+        ClusterQualityMetricsService,
+        create_quality_metrics_service
+    )
+    QUALITY_METRICS_AVAILABLE = True
+except ImportError:
+    QUALITY_METRICS_AVAILABLE = False
+    logging.warning("⚠️ Serviço de métricas de qualidade não disponível")
+
 
 @dataclass
 class ClusterAnalytics:
@@ -56,6 +67,12 @@ class ClusterService:
     def __init__(self, db: AsyncSession):
         self.db = db
         self.logger = logging.getLogger(__name__)
+        
+        # Inicializar serviço de métricas de qualidade se disponível
+        if QUALITY_METRICS_AVAILABLE:
+            self.quality_metrics_service = create_quality_metrics_service(db)
+        else:
+            self.quality_metrics_service = None
     
     async def get_trending_clusters(
         self, 
@@ -258,149 +275,38 @@ class ClusterService:
     ) -> List[PartnershipRecommendationResponse]:
         """
         Gera recomendações de parceria baseadas em complementaridade de clusters.
-        
-        Args:
-            lawyer_id: ID do advogado
-            limit: Número máximo de recomendações  
-            min_compatibility_score: Score mínimo de compatibilidade
-            exclude_same_firm: Excluir advogados do mesmo escritório
-            
-        Returns:
-            Lista de recomendações de parceria
+        Usa algoritmo avançado do `PartnershipRecommendationService`.
         """
-        
         try:
-            self.logger.info(f"🤝 Gerando recomendações para advogado {lawyer_id}")
-            
-            # 1. Encontrar clusters do advogado
-            lawyer_clusters_query = text("""
-                SELECT lc.cluster_id, lc.confidence_score, cm.cluster_label
-                FROM lawyer_clusters lc
-                JOIN cluster_metadata cm ON lc.cluster_id = cm.cluster_id
-                WHERE lc.lawyer_id = :lawyer_id 
-                    AND lc.confidence_score > 0.3
-                ORDER BY lc.confidence_score DESC
-            """)
-            
-            lawyer_clusters_result = await self.db.execute(
-                lawyer_clusters_query, 
-                {"lawyer_id": lawyer_id}
+            from services.partnership_recommendation_service import PartnershipRecommendationService
+
+            recommender = PartnershipRecommendationService(self.db)
+            raw_recs = await recommender.get_recommendations(
+                lawyer_id,
+                limit=limit,
+                min_confidence=min_compatibility_score,
+                exclude_same_firm=exclude_same_firm,
             )
-            lawyer_clusters = lawyer_clusters_result.fetchall()
-            
-            if not lawyer_clusters:
-                self.logger.info(f"ℹ️ Advogado {lawyer_id} não possui clusters atribuídos")
-                return []
-            
-            lawyer_cluster_ids = [row.cluster_id for row in lawyer_clusters]
-            
-            # 2. Buscar advogados em clusters complementares
-            exclude_firm_condition = ""
-            if exclude_same_firm:
-                exclude_firm_condition = """
-                    AND NOT EXISTS (
-                        SELECT 1 FROM lawyers l1, lawyers l2 
-                        WHERE l1.id = :lawyer_id 
-                            AND l2.id = lc.lawyer_id 
-                            AND l1.law_firm_id = l2.law_firm_id
-                            AND l1.law_firm_id IS NOT NULL
+
+            responses: List[PartnershipRecommendationResponse] = []
+            for r in raw_recs:
+                responses.append(
+                    PartnershipRecommendationResponse(
+                        recommended_lawyer_id=r.lawyer_id,
+                        lawyer_name=r.lawyer_name,
+                        firm_name=r.firm_name,
+                        cluster_expertise=', '.join(r.compatibility_clusters[:3]),
+                        compatibility_score=round(r.final_score, 3),
+                        confidence_in_expertise=round(r.complementarity_score, 3),
+                        complementarity_score=round(r.complementarity_score, 3),
+                        recommendation_reason=r.recommendation_reason,
+                        potential_synergies=[
+                            f"Expertise complementar em {c}" for c in r.compatibility_clusters[:3]
+                        ] + ([f"Sinergia entre escritórios: {r.firm_synergy_reason}"] if r.firm_synergy_reason else []),
                     )
-                """
-            
-            recommendations_query = text(f"""
-                WITH lawyer_expertise AS (
-                    SELECT 
-                        l.id as lawyer_id,
-                        l.name,
-                        l.oab_number,
-                        lf.name as firm_name,
-                        lc.cluster_id,
-                        cm.cluster_label,
-                        lc.confidence_score,
-                        -- Calcular complementaridade (clusters não sobrepostos)
-                        CASE 
-                            WHEN lc.cluster_id = ANY(:lawyer_clusters::text[]) THEN 0.0
-                            ELSE lc.confidence_score 
-                        END as complementarity_score
-                    FROM lawyer_clusters lc
-                    JOIN lawyers l ON lc.lawyer_id = l.id
-                    LEFT JOIN law_firms lf ON l.law_firm_id = lf.id
-                    JOIN cluster_metadata cm ON lc.cluster_id = cm.cluster_id
-                    WHERE lc.lawyer_id != :lawyer_id
-                        AND lc.confidence_score > :min_compatibility
-                        AND cm.total_items >= 5
-                        {exclude_firm_condition}
-                ),
-                recommendations AS (
-                    SELECT 
-                        lawyer_id,
-                        name,
-                        firm_name,
-                        cluster_id,
-                        cluster_label,
-                        confidence_score,
-                        complementarity_score,
-                        -- Score final baseado em complementaridade e força no cluster
-                        (complementarity_score * 0.7 + confidence_score * 0.3) as final_score,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY lawyer_id 
-                            ORDER BY complementarity_score DESC
-                        ) as expertise_rank
-                    FROM lawyer_expertise
-                    WHERE complementarity_score > 0
                 )
-                SELECT 
-                    lawyer_id,
-                    name,
-                    firm_name,
-                    cluster_id,
-                    cluster_label,
-                    confidence_score,
-                    complementarity_score,
-                    final_score
-                FROM recommendations
-                WHERE expertise_rank <= 2  -- Top 2 especialidades por advogado
-                ORDER BY final_score DESC
-                LIMIT :limit
-            """)
-            
-            recommendations_result = await self.db.execute(recommendations_query, {
-                "lawyer_id": lawyer_id,
-                "lawyer_clusters": lawyer_cluster_ids,
-                "min_compatibility": min_compatibility_score,
-                "limit": limit
-            })
-            
-            # 3. Construir recomendações
-            recommendations = []
-            for row in recommendations_result.fetchall():
-                # Gerar razão da recomendação
-                recommendation_reason = self._generate_partnership_reason(
-                    row.cluster_label,
-                    row.confidence_score,
-                    row.complementarity_score
-                )
-                
-                recommendation = PartnershipRecommendationResponse(
-                    recommended_lawyer_id=row.lawyer_id,
-                    lawyer_name=row.name,
-                    firm_name=row.firm_name,
-                    cluster_expertise=row.cluster_label,
-                    compatibility_score=float(row.final_score),
-                    confidence_in_expertise=float(row.confidence_score),
-                    complementarity_score=float(row.complementarity_score),
-                    recommendation_reason=recommendation_reason,
-                    potential_synergies=[
-                        f"Expertise complementar em {row.cluster_label}",
-                        "Ampliação de portfólio de serviços",
-                        "Acesso a novos mercados"
-                    ]
-                )
-                recommendations.append(recommendation)
-            
-            self.logger.info(f"✅ {len(recommendations)} recomendações geradas para {lawyer_id}")
-            return recommendations
-            
+
+            return responses
         except Exception as e:
             self.logger.error(f"❌ Erro ao gerar recomendações: {e}")
             return []
@@ -498,6 +404,142 @@ class ClusterService:
                 system_health={"clustering_pipeline_status": "error"},
                 generated_at=datetime.now()
             )
+    
+    async def analyze_cluster_quality(
+        self, 
+        cluster_id: str,
+        include_detailed_analysis: bool = True
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Análise completa de qualidade de um cluster específico.
+        
+        Args:
+            cluster_id: ID do cluster a analisar
+            include_detailed_analysis: Se incluir análises detalhadas
+            
+        Returns:
+            Relatório de qualidade ou None se não disponível
+        """
+        
+        if not self.quality_metrics_service:
+            self.logger.warning("❌ Serviço de métricas de qualidade não disponível")
+            return None
+        
+        try:
+            self.logger.info(f"🔍 Analisando qualidade do cluster {cluster_id}")
+            
+            quality_report = await self.quality_metrics_service.analyze_cluster_quality(
+                cluster_id, include_detailed_analysis
+            )
+            
+            if quality_report:
+                # Converter para formato de resposta da API
+                return {
+                    "cluster_id": quality_report.cluster_id,
+                    "cluster_type": quality_report.cluster_type,
+                    "overall_quality_score": quality_report.overall_quality_score,
+                    "quality_level": quality_report.quality_level.name,
+                    "silhouette_score": quality_report.silhouette_analysis.silhouette_avg,
+                    "cohesion_score": quality_report.consistency_metrics.cohesion_score,
+                    "separation_score": quality_report.consistency_metrics.separation_score,
+                    "semantic_coherence": quality_report.consistency_metrics.semantic_coherence,
+                    "provider_quality": {
+                        eq.provider_name: {
+                            "total_embeddings": eq.total_embeddings,
+                            "quality_score": eq.quality_score,
+                            "outlier_rate": eq.outlier_rate
+                        }
+                        for eq in quality_report.embedding_quality
+                    },
+                    "outliers_detected": len(quality_report.silhouette_analysis.outlier_indices),
+                    "actionable_insights": quality_report.actionable_insights,
+                    "generated_at": quality_report.generated_at.isoformat()
+                }
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro na análise de qualidade do cluster {cluster_id}: {e}")
+            return None
+    
+    async def validate_cluster_quality_thresholds(
+        self, 
+        cluster_id: str,
+        custom_thresholds: Dict[str, float] = None
+    ) -> Dict[str, Any]:
+        """
+        Valida se um cluster atende aos thresholds de qualidade.
+        
+        Args:
+            cluster_id: ID do cluster
+            custom_thresholds: Thresholds customizados (opcional)
+            
+        Returns:
+            Resultado da validação
+        """
+        
+        if not self.quality_metrics_service:
+            return {"valid": False, "error": "Serviço de métricas não disponível"}
+        
+        try:
+            return await self.quality_metrics_service.validate_cluster_quality_thresholds(
+                cluster_id, custom_thresholds
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro na validação de qualidade: {e}")
+            return {"valid": False, "error": str(e)}
+    
+    async def get_quality_trends_report(self, days_back: int = 30) -> Dict[str, Any]:
+        """
+        Gera relatório de tendências de qualidade ao longo do tempo.
+        
+        Args:
+            days_back: Número de dias para análise histórica
+            
+        Returns:
+            Relatório de tendências
+        """
+        
+        if not self.quality_metrics_service:
+            return {"error": "Serviço de métricas não disponível"}
+        
+        try:
+            return await self.quality_metrics_service.generate_quality_trends_report(days_back)
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro ao gerar relatório de tendências: {e}")
+            return {"error": str(e)}
+    
+    async def analyze_all_clusters_quality(
+        self, 
+        cluster_type: str = None,
+        batch_size: int = 10
+    ) -> Dict[str, Any]:
+        """
+        Análise de qualidade em lote para todos os clusters.
+        
+        Args:
+            cluster_type: Filtrar por tipo ou None para todos
+            batch_size: Tamanho do batch
+            
+        Returns:
+            Relatório consolidado
+        """
+        
+        if not self.quality_metrics_service:
+            return {"error": "Serviço de métricas não disponível"}
+        
+        try:
+            self.logger.info(f"📊 Iniciando análise de qualidade em lote (tipo: {cluster_type})")
+            
+            return await self.quality_metrics_service.analyze_all_clusters_quality(
+                cluster_type, batch_size
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro na análise em lote: {e}")
+            return {"error": str(e)}
     
     # Métodos auxiliares privados
     

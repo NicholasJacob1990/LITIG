@@ -1,19 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../domain/entities/enriched_firm.dart';
+import '../../../firms/domain/entities/case_info.dart';
 
 class FirmCasesHistoryView extends StatefulWidget {
   final String firmId;
 
-  const FirmCasesHistoryView({super.key, required this.firmId});
+  const FirmCasesHistoryView({
+    super.key,
+    required this.firmId,
+  });
 
   @override
   State<FirmCasesHistoryView> createState() => _FirmCasesHistoryViewState();
 }
 
 class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
-  String _selectedPeriod = 'all';
+  String _selectedFilter = 'all';
   String _selectedArea = 'all';
+  List<CaseInfo> _filteredCases = [];
+  final List<CaseInfo> _allCases = _getMockCases();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredCases = _allCases;
+  }
+
+  void _applyFilters() {
+    setState(() {
+      _filteredCases = _allCases.where((caseInfo) {
+        bool statusMatch = _selectedFilter == 'all' || 
+                          (_selectedFilter == 'active' && caseInfo.status == CaseStatus.active) ||
+                          (_selectedFilter == 'closed' && caseInfo.status == CaseStatus.closed) ||
+                          (_selectedFilter == 'won' && caseInfo.status == CaseStatus.won) ||
+                          (_selectedFilter == 'lost' && caseInfo.status == CaseStatus.lost);
+        
+        bool areaMatch = _selectedArea == 'all' || 
+                        caseInfo.area.name == _selectedArea;
+        
+        return statusMatch && areaMatch;
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,25 +50,23 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildCasesOverview(context),
+          _buildStatisticsSection(),
           const SizedBox(height: 24),
-          _buildFilters(context),
+          _buildFiltersSection(),
           const SizedBox(height: 24),
-          _buildSuccessRateChart(context),
-          const SizedBox(height: 24),
-          _buildCasesByArea(context),
-          const SizedBox(height: 24),
-          _buildRecentHighlights(context),
-          const SizedBox(height: 24),
-          _buildPerformanceMetrics(context),
+          _buildCasesListSection(),
         ],
       ),
     );
   }
 
-  Widget _buildCasesOverview(BuildContext context) {
+  Widget _buildStatisticsSection() {
+    final totalCases = _allCases.length;
+    final activeCases = _allCases.where((c) => c.status == CaseStatus.active).length;
+    final wonCases = _allCases.where((c) => c.status == CaseStatus.won).length;
+    final successRate = totalCases > 0 ? (wonCases / totalCases * 100) : 0.0;
+
     return Card(
-      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -48,14 +74,10 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
           children: [
             Row(
               children: [
-                Icon(
-                  LucideIcons.briefcase,
-                  size: 24,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                Icon(LucideIcons.briefcase, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Histórico de Casos',
+                  'Estatísticas de Casos',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -63,37 +85,33 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
               ],
             ),
             const SizedBox(height: 20),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 2.5,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+            Row(
               children: [
-                _buildOverviewCard(
-                  'Total de Casos',
-                  '2,850',
-                  LucideIcons.fileText,
-                  Colors.blue,
+                Expanded(
+                  child: _buildStatisticCard(
+                    'Total de Casos',
+                    totalCases.toString(),
+                    LucideIcons.fileText,
+                    Colors.blue,
+                  ),
                 ),
-                _buildOverviewCard(
-                  'Casos Ativos',
-                  '320',
-                  LucideIcons.clock,
-                  Colors.orange,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatisticCard(
+                    'Casos Ativos',
+                    activeCases.toString(),
+                    LucideIcons.clock,
+                    Colors.orange,
+                  ),
                 ),
-                _buildOverviewCard(
-                  'Casos Vencidos',
-                  '2,450',
-                  LucideIcons.checkCircle,
-                  Colors.green,
-                ),
-                _buildOverviewCard(
-                  'Taxa de Sucesso',
-                  '86%',
-                  LucideIcons.trendingUp,
-                  Colors.purple,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildStatisticCard(
+                    'Taxa de Sucesso',
+                    '${successRate.toStringAsFixed(1)}%',
+                    LucideIcons.trendingUp,
+                    Colors.green,
+                  ),
                 ),
               ],
             ),
@@ -103,7 +121,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
     );
   }
 
-  Widget _buildOverviewCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatisticCard(String title, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -112,34 +130,29 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
+              const Spacer(),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: color,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -147,7 +160,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
     );
   }
 
-  Widget _buildFilters(BuildContext context) {
+  Widget _buildFiltersSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -167,27 +180,27 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Período',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      Text('Status', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        value: _selectedPeriod,
-                        isExpanded: true,
+                      DropdownButtonFormField<String>(
+                        value: _selectedFilter,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'all', child: Text('Todos')),
+                          DropdownMenuItem(value: 'active', child: Text('Ativos')),
+                          DropdownMenuItem(value: 'closed', child: Text('Encerrados')),
+                          DropdownMenuItem(value: 'won', child: Text('Ganhos')),
+                          DropdownMenuItem(value: 'lost', child: Text('Perdidos')),
+                        ],
                         onChanged: (value) {
                           setState(() {
-                            _selectedPeriod = value!;
+                            _selectedFilter = value!;
                           });
+                          _applyFilters();
                         },
-                        items: const [
-                          DropdownMenuItem(value: 'all', child: Text('Todos os tempos')),
-                          DropdownMenuItem(value: '2023', child: Text('2023')),
-                          DropdownMenuItem(value: '2022', child: Text('2022')),
-                          DropdownMenuItem(value: '2021', child: Text('2021')),
-                        ],
                       ),
                     ],
                   ),
@@ -197,56 +210,37 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Área do Direito',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      Text('Área', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
-                      DropdownButton<String>(
+                      DropdownButtonFormField<String>(
                         value: _selectedArea,
-                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        items: [
+                          const DropdownMenuItem(value: 'all', child: Text('Todas as áreas')),
+                          ...CaseArea.values.map((area) => DropdownMenuItem(
+                            value: area.name,
+                            child: Text(area.displayName),
+                          )),
+                        ],
                         onChanged: (value) {
                           setState(() {
                             _selectedArea = value!;
                           });
+                          _applyFilters();
                         },
-                        items: const [
-                          DropdownMenuItem(value: 'all', child: Text('Todas as áreas')),
-                          DropdownMenuItem(value: 'empresarial', child: Text('Direito Empresarial')),
-                          DropdownMenuItem(value: 'tributario', child: Text('Direito Tributário')),
-                          DropdownMenuItem(value: 'ma', child: Text('Fusões e Aquisições')),
-                        ],
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSuccessRateChart(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+            const SizedBox(height: 12),
             Text(
-              'Taxa de Sucesso por Ano',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              height: 200,
-              child: _buildSimpleChart(),
+              'Mostrando ${_filteredCases.length} de ${_allCases.length} casos',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],
         ),
@@ -254,986 +248,270 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
     );
   }
 
-  Widget _buildSimpleChart() {
-    final years = ['2019', '2020', '2021', '2022', '2023'];
-    final rates = [0.82, 0.84, 0.87, 0.85, 0.86];
-    
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: years.asMap().entries.map((entry) {
-        final index = entry.key;
-        final year = entry.value;
-        final rate = rates[index];
-        final height = rate * 150; // Max height 150
-        
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              '${(rate * 100).toInt()}%',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Container(
-              width: 30,
-              height: height,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              year,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ],
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildCasesByArea(BuildContext context) {
-    final areas = [
-      {'name': 'Direito Empresarial', 'cases': 1200, 'success': 0.87, 'color': Colors.blue},
-      {'name': 'Direito Tributário', 'cases': 850, 'success': 0.89, 'color': Colors.green},
-      {'name': 'Fusões e Aquisições', 'cases': 450, 'success': 0.91, 'color': Colors.purple},
-      {'name': 'Compliance', 'cases': 350, 'success': 0.84, 'color': Colors.orange},
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Casos por Área de Especialização',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...areas.map((area) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: area['color'] as Color,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          area['name'] as String,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      Text(
-                        '${area['cases']} casos',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: (area['color'] as Color).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${((area['success'] as double) * 100).toInt()}%',
-                          style: TextStyle(
-                            color: area['color'] as Color,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: (area['cases'] as int) / 1200, // Normalize against max
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(area['color'] as Color),
-                    minHeight: 6,
-                  ),
-                ],
-              ),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentHighlights(BuildContext context) {
-    final highlights = [
-      {
-        'title': 'Aquisição Estratégica no Setor Financeiro',
-        'description': 'Assessoria jurídica completa em operação de M&A de R\$ 2.5 bilhões',
-        'area': 'Fusões e Aquisições',
-        'date': '2023-11-15',
-        'outcome': 'Sucesso',
-      },
-      {
-        'title': 'Defesa Tributária Complexa',
-        'description': 'Vitória em contencioso tributário envolvendo ICMS-ST',
-        'area': 'Direito Tributário',
-        'date': '2023-10-20',
-        'outcome': 'Sucesso',
-      },
-      {
-        'title': 'Implementação de Programa de Compliance',
-        'description': 'Estruturação completa de programa de integridade corporativa',
-        'area': 'Compliance',
-        'date': '2023-09-30',
-        'outcome': 'Sucesso',
-      },
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+  Widget _buildCasesListSection() {
+    if (_filteredCases.isEmpty) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Center(
+            child: Column(
               children: [
+                Icon(LucideIcons.search, size: 48, color: Colors.grey[400]),
+                const SizedBox(height: 16),
                 Text(
-                  'Casos de Destaque Recentes',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  'Nenhum caso encontrado',
+                  style: TextStyle(color: Colors.grey[600]),
                 ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    // TODO: Navigate to full case history
-                  },
-                  child: const Text('Ver Todos'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...highlights.map((highlight) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            highlight['title']!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            highlight['outcome']!,
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      highlight['description']!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(
-                          LucideIcons.tag,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          highlight['area']!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(
-                          LucideIcons.calendar,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          highlight['date']!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPerformanceMetrics(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Métricas de Performance',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricItem(
-                    'Tempo Médio de Resolução',
-                    '8.5 meses',
-                    LucideIcons.clock,
-                    Colors.blue,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMetricItem(
-                    'Satisfação do Cliente',
-                    '4.8/5.0',
-                    LucideIcons.star,
-                    Colors.amber,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricItem(
-                    'Taxa de Recurso',
-                    '12%',
-                    LucideIcons.repeat,
-                    Colors.purple,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMetricItem(
-                    'Valor Médio por Caso',
-                    'R\$ 145k',
-                    LucideIcons.dollarSign,
-                    Colors.green,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMetricItem(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-} 
-import 'package:lucide_icons/lucide_icons.dart';
-import '../../domain/entities/enriched_firm.dart';
-
-class FirmCasesHistoryView extends StatefulWidget {
-  final String firmId;
-
-  const FirmCasesHistoryView({super.key, required this.firmId});
-
-  @override
-  State<FirmCasesHistoryView> createState() => _FirmCasesHistoryViewState();
-}
-
-class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
-  String _selectedPeriod = 'all';
-  String _selectedArea = 'all';
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCasesOverview(context),
-          const SizedBox(height: 24),
-          _buildFilters(context),
-          const SizedBox(height: 24),
-          _buildSuccessRateChart(context),
-          const SizedBox(height: 24),
-          _buildCasesByArea(context),
-          const SizedBox(height: 24),
-          _buildRecentHighlights(context),
-          const SizedBox(height: 24),
-          _buildPerformanceMetrics(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCasesOverview(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  LucideIcons.briefcase,
-                  size: 24,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Histórico de Casos',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  'Tente ajustar os filtros para ver mais resultados',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 2.5,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                _buildOverviewCard(
-                  'Total de Casos',
-                  '2,850',
-                  LucideIcons.fileText,
-                  Colors.blue,
-                ),
-                _buildOverviewCard(
-                  'Casos Ativos',
-                  '320',
-                  LucideIcons.clock,
-                  Colors.orange,
-                ),
-                _buildOverviewCard(
-                  'Casos Vencidos',
-                  '2,450',
-                  LucideIcons.checkCircle,
-                  Colors.green,
-                ),
-                _buildOverviewCard(
-                  'Taxa de Sucesso',
-                  '86%',
-                  LucideIcons.trendingUp,
-                  Colors.purple,
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Histórico de Casos',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ..._filteredCases.map((caseInfo) => _buildCaseCard(caseInfo)),
+      ],
     );
   }
 
-  Widget _buildOverviewCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilters(BuildContext context) {
+  Widget _buildCaseCard(CaseInfo caseInfo) {
     return Card(
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Filtros',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Text(
+                            caseInfo.caseNumber,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildStatusChip(caseInfo.status),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
                       Text(
-                        'Período',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        caseInfo.title,
+                        style: TextStyle(
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        value: _selectedPeriod,
-                        isExpanded: true,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPeriod = value!;
-                          });
-                        },
-                        items: const [
-                          DropdownMenuItem(value: 'all', child: Text('Todos os tempos')),
-                          DropdownMenuItem(value: '2023', child: Text('2023')),
-                          DropdownMenuItem(value: '2022', child: Text('2022')),
-                          DropdownMenuItem(value: '2021', child: Text('2021')),
-                        ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Área do Direito',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        value: _selectedArea,
-                        isExpanded: true,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedArea = value!;
-                          });
-                        },
-                        items: const [
-                          DropdownMenuItem(value: 'all', child: Text('Todas as áreas')),
-                          DropdownMenuItem(value: 'empresarial', child: Text('Direito Empresarial')),
-                          DropdownMenuItem(value: 'tributario', child: Text('Direito Tributário')),
-                          DropdownMenuItem(value: 'ma', child: Text('Fusões e Aquisições')),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                _buildAreaChip(caseInfo.area),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSuccessRateChart(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+            const SizedBox(height: 12),
             Text(
-              'Taxa de Sucesso por Ano',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              height: 200,
-              child: _buildSimpleChart(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSimpleChart() {
-    final years = ['2019', '2020', '2021', '2022', '2023'];
-    final rates = [0.82, 0.84, 0.87, 0.85, 0.86];
-    
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: years.asMap().entries.map((entry) {
-        final index = entry.key;
-        final year = entry.value;
-        final rate = rates[index];
-        final height = rate * 150; // Max height 150
-        
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              '${(rate * 100).toInt()}%',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Container(
-              width: 30,
-              height: height,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              year,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ],
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildCasesByArea(BuildContext context) {
-    final areas = [
-      {'name': 'Direito Empresarial', 'cases': 1200, 'success': 0.87, 'color': Colors.blue},
-      {'name': 'Direito Tributário', 'cases': 850, 'success': 0.89, 'color': Colors.green},
-      {'name': 'Fusões e Aquisições', 'cases': 450, 'success': 0.91, 'color': Colors.purple},
-      {'name': 'Compliance', 'cases': 350, 'success': 0.84, 'color': Colors.orange},
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Casos por Área de Especialização',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              caseInfo.summary,
+              style: TextStyle(color: Colors.grey[600]),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 16),
-            ...areas.map((area) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: area['color'] as Color,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          area['name'] as String,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      Text(
-                        '${area['cases']} casos',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: (area['color'] as Color).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${((area['success'] as double) * 100).toInt()}%',
-                          style: TextStyle(
-                            color: area['color'] as Color,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: (area['cases'] as int) / 1200, // Normalize against max
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(area['color'] as Color),
-                    minHeight: 6,
-                  ),
-                ],
-              ),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentHighlights(BuildContext context) {
-    final highlights = [
-      {
-        'title': 'Aquisição Estratégica no Setor Financeiro',
-        'description': 'Assessoria jurídica completa em operação de M&A de R\$ 2.5 bilhões',
-        'area': 'Fusões e Aquisições',
-        'date': '2023-11-15',
-        'outcome': 'Sucesso',
-      },
-      {
-        'title': 'Defesa Tributária Complexa',
-        'description': 'Vitória em contencioso tributário envolvendo ICMS-ST',
-        'area': 'Direito Tributário',
-        'date': '2023-10-20',
-        'outcome': 'Sucesso',
-      },
-      {
-        'title': 'Implementação de Programa de Compliance',
-        'description': 'Estruturação completa de programa de integridade corporativa',
-        'area': 'Compliance',
-        'date': '2023-09-30',
-        'outcome': 'Sucesso',
-      },
-    ];
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
             Row(
               children: [
+                Icon(LucideIcons.user, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
                 Text(
-                  'Casos de Destaque Recentes',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  caseInfo.clientName,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    // TODO: Navigate to full case history
-                  },
-                  child: const Text('Ver Todos'),
+                Icon(LucideIcons.calendar, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '${caseInfo.startDate.day}/${caseInfo.startDate.month}/${caseInfo.startDate.year}',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
+                const SizedBox(width: 16),
+                Icon(LucideIcons.dollarSign, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  'R\$ ${(caseInfo.caseValue / 1000).toStringAsFixed(0)}k',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            ...highlights.map((highlight) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.withValues(alpha: 0.2),
+            if (caseInfo.tags.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: caseInfo.tags.map((tag) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            highlight['title']!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            highlight['outcome']!,
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      highlight['description']!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(
-                          LucideIcons.tag,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          highlight['area']!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(
-                          LucideIcons.calendar,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          highlight['date']!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  child: Text(
+                    tag,
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                )).toList(),
               ),
-            )),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPerformanceMetrics(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Métricas de Performance',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricItem(
-                    'Tempo Médio de Resolução',
-                    '8.5 meses',
-                    LucideIcons.clock,
-                    Colors.blue,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMetricItem(
-                    'Satisfação do Cliente',
-                    '4.8/5.0',
-                    LucideIcons.star,
-                    Colors.amber,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricItem(
-                    'Taxa de Recurso',
-                    '12%',
-                    LucideIcons.repeat,
-                    Colors.purple,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMetricItem(
-                    'Valor Médio por Caso',
-                    'R\$ 145k',
-                    LucideIcons.dollarSign,
-                    Colors.green,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildStatusChip(CaseStatus status) {
+    Color color;
+    switch (status) {
+      case CaseStatus.active:
+        color = Colors.blue;
+        break;
+      case CaseStatus.won:
+        color = Colors.green;
+        break;
+      case CaseStatus.lost:
+        color = Colors.red;
+        break;
+      case CaseStatus.closed:
+        color = Colors.grey;
+        break;
+      case CaseStatus.pending:
+        color = Colors.orange;
+        break;
+    }
 
-  Widget _buildMetricItem(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+      child: Text(
+        status.displayName,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
+  }
+
+  Widget _buildAreaChip(CaseArea area) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        area.displayName,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  static List<CaseInfo> _getMockCases() {
+    return [
+      CaseInfo(
+        id: '1',
+        caseNumber: '0001234-56.2024.8.26.0100',
+        title: 'Ação de Indenização por Danos Morais e Materiais',
+        area: CaseArea.civil,
+        status: CaseStatus.active,
+        startDate: DateTime(2024, 1, 15),
+        summary: 'Cliente busca indenização por danos causados em acidente de trânsito. Valor da causa estimado em R\$ 250.000.',
+        successProbability: 0.85,
+        clientName: 'João Silva Santos',
+        caseValue: 250000,
+        tags: ['Acidente', 'Trânsito', 'Indenização'],
+      ),
+      CaseInfo(
+        id: '2',
+        caseNumber: '0002345-67.2023.8.26.0001',
+        title: 'Rescisão Indireta de Contrato de Trabalho',
+        area: CaseArea.labor,
+        status: CaseStatus.won,
+        startDate: DateTime(2023, 8, 20),
+        endDate: DateTime(2024, 2, 10),
+        summary: 'Funcionário comprova descumprimento das obrigações patronais. Caso encerrado com acordo favorável.',
+        successProbability: 0.92,
+        clientName: 'Maria Oliveira Costa',
+        caseValue: 180000,
+        tags: ['Rescisão', 'Acordo', 'Trabalhista'],
+      ),
+      CaseInfo(
+        id: '3',
+        caseNumber: '0003456-78.2024.8.26.0224',
+        title: 'Constituição de Sociedade Empresária',
+        area: CaseArea.corporate,
+        status: CaseStatus.closed,
+        startDate: DateTime(2024, 3, 5),
+        endDate: DateTime(2024, 4, 12),
+        summary: 'Assessoria jurídica para constituição de startup no setor de tecnologia. Documentação finalizada.',
+        successProbability: 0.98,
+        clientName: 'TechStart Ltda.',
+        caseValue: 50000,
+        tags: ['Startup', 'Constituição', 'Tecnologia'],
+      ),
+      CaseInfo(
+        id: '4',
+        caseNumber: '0004567-89.2024.8.26.0063',
+        title: 'Defesa em Ação Penal - Crime Tributário',
+        area: CaseArea.criminal,
+        status: CaseStatus.active,
+        startDate: DateTime(2024, 2, 28),
+        summary: 'Defesa de empresário acusado de sonegação fiscal. Processo em fase de instrução.',
+        successProbability: 0.75,
+        clientName: 'Carlos Eduardo Nunes',
+        caseValue: 500000,
+        tags: ['Crime Tributário', 'Defesa', 'Sonegação'],
+      ),
+      CaseInfo(
+        id: '5',
+        caseNumber: '0005678-90.2023.8.26.0114',
+        title: 'Divórcio Consensual com Partilha de Bens',
+        area: CaseArea.family,
+        status: CaseStatus.closed,
+        startDate: DateTime(2023, 11, 10),
+        endDate: DateTime(2024, 1, 25),
+        summary: 'Divórcio amigável com definição de guarda compartilhada e partilha equitativa dos bens.',
+        successProbability: 0.95,
+        clientName: 'Ana e Roberto Lima',
+        caseValue: 120000,
+        tags: ['Divórcio', 'Consensual', 'Guarda'],
+      ),
+    ];
   }
 } 
