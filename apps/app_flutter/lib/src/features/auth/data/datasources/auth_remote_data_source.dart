@@ -169,8 +169,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Determinar o role correto baseado no isPlatformAssociate
       String finalRole = userType;
-      if (userType == 'lawyer_associated' && isPlatformAssociate) {
-        finalRole = 'lawyer_platform_associate'; // Super Associado
+      if (userType == 'lawyer_firm_member' && isPlatformAssociate) {  // Atualizado
+        finalRole = 'super_associate';  // Atualizado
       }
 
       final metadata = {

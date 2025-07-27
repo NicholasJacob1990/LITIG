@@ -5,6 +5,7 @@ import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart
 import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
 import 'package:meu_app/src/features/search/presentation/widgets/lawyer_search_form.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_card.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
 import 'package:meu_app/injection_container.dart';
 
 class LawyersScreen extends StatefulWidget {
@@ -240,40 +241,16 @@ class _MatchesTab extends StatelessWidget {
         }
         
         if (state is HybridMatchLoaded) {
-          if (state.matches.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    LucideIcons.heart,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Nenhum match encontrado',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Complete seu perfil para receber matches personalizados',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
-          
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.matches.length,
-            itemBuilder: (context, index) {
-              final match = state.matches[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: LawyerMatchCard(lawyer: match),
+          // Usar HybridMatchList que suporta tanto advogados quanto escritórios
+          return HybridMatchList(
+            lawyers: state.lawyers,
+            firms: state.firms,
+            showSectionHeaders: true,
+            emptyMessage: 'Complete seu perfil para receber matches personalizados',
+            onRefresh: () {
+              // Recarregar matches
+              context.read<HybridMatchBloc>().add(
+                const RefreshHybridMatches(caseId: 'current_case_id')
               );
             },
           );

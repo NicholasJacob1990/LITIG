@@ -239,8 +239,11 @@ class DualContextService:
                 role = response.data.get("role", "")
                 user_role = response.data.get("user_role", "")
                 
-                # Verificar se é advogado individual ou escritório
-                return user_role in ["lawyer_individual", "lawyer_office"]
+                # Verificar se é advogado contratante (que pode contratar outros)
+                if user_role == "firm":  # Atualizado de lawyer_office
+                    return True
+                
+                return user_role in ["lawyer_individual", "firm"]
             
             return False
             

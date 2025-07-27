@@ -272,19 +272,19 @@ class FirmMatchExplanationDialog extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.check_circle, size: 16, color: Colors.green),
+                    const Icon(Icons.check_circle, size: 16, color: Colors.green),
                     const SizedBox(width: 8),
                     Text('Especialistas em $area'),
                   ],
                 ),
               ))
             else
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
                     Icon(Icons.check_circle, size: 16, color: Colors.green),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Text('Equipe altamente qualificada'),
                   ],
                 ),

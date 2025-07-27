@@ -35,7 +35,7 @@ abstract class MatchAnalysis {
   }
 }
 
-/// Análise para ASSOCIADOS (lawyer_associated)
+/// Análise para ASSOCIADOS (lawyer_firm_member)
 class InternalMatchAnalysis extends MatchAnalysis {
   final String delegatedBy; // Quem delegou
   final String learningObjectives; // Objetivos de aprendizado

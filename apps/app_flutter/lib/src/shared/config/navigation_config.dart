@@ -175,7 +175,7 @@ const Map<String, List<String>> tabOrderByProfile = {
     'services',
     'client_profile',
   ],
-  'lawyer_associated': [
+  'lawyer_firm_member': [  // Atualizado de lawyer_associated
     'dashboard',
     'cases',
     'agenda',
@@ -264,7 +264,7 @@ bool get useNewNavigationSystem => RemoteConfigService.instance.useNewNavigation
 /// Função para obter rota inicial baseada no perfil do usuário
 String getInitialRouteForUser(String userRole) {
   switch (userRole) {
-    case 'lawyer_associated':
+    case 'lawyer_firm_member':  // Atualizado de lawyer_associated
       return '/dashboard';
     case 'lawyer_individual':
     case 'lawyer_office':

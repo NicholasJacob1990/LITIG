@@ -1,0 +1,53 @@
+{
+  "start_time": "2025-07-25T19:33:16.710304",
+  "tests": [
+    {
+      "service": "OpenRouter Client",
+      "module_path": "services.openrouter_client",
+      "class_name": "OpenRouterClient",
+      "import_success": true,
+      "processing_time": 1.1221399307250977,
+      "details": "Classe OpenRouterClient acessível"
+    },
+    {
+      "service": "Function Tools",
+      "module_path": "services.function_tools",
+      "class_name": "LLMFunctionTools",
+      "import_success": true,
+      "processing_time": 0.00018978118896484375,
+      "details": "Classe LLMFunctionTools acessível"
+    },
+    {
+      "service": "LEX-9000 V2",
+      "module_path": "services.lex9000_integration_service_v2",
+      "class_name": "LEX9000IntegrationServiceV2",
+      "import_success": true,
+      "processing_time": 0.01702404022216797,
+      "details": "Classe LEX9000IntegrationServiceV2 acessível"
+    },
+    {
+      "service": "Lawyer Profile V2",
+      "module_path": "services.lawyer_profile_analysis_service_v2",
+      "class_name": "LawyerProfileAnalysisServiceV2",
+      "import_success": false,
+      "processing_time": 0.0007729530334472656,
+      "error": "attempted relative import beyond top-level package",
+      "error_type": "ImportError"
+    },
+    {
+      "service": "Case Context V2",
+      "module_path": "services.case_context_analysis_service_v2",
+      "class_name": "CaseContextAnalysisServiceV2",
+      "import_success": false,
+      "processing_time": 0.002372264862060547,
+      "error": "attempted relative import beyond top-level package",
+      "error_type": "ImportError"
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "successes": 3,
+    "failures": 2
+  },
+  "completion_time": "2025-07-25T19:33:17.852925"
+}

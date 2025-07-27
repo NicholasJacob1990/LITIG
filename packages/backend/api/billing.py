@@ -80,7 +80,15 @@ async def get_current_plan(
 ):
     """Get entity's current billing plan."""
     try:
-        if entity_type not in ["client", "lawyer", "firm"]:
+        # Importar validação de tipos
+        from ..schemas.user_types import normalize_entity_type, EntityType
+        
+        # Normalizar e validar tipos
+        normalized_type = normalize_entity_type(entity_type)
+        valid_types = [EntityType.CLIENT_PF, EntityType.CLIENT_PJ, 
+                      EntityType.LAWYER_INDIVIDUAL, EntityType.FIRM]
+        
+        if normalized_type not in valid_types:
             raise HTTPException(status_code=400, detail="Invalid entity type")
         
         # Get current plan from database based on entity type
@@ -138,77 +146,58 @@ async def stripe_webhook(request: Request):
 async def get_available_plans(entity_type: str):
     """Get all available billing plans for specific entity type."""
     try:
-        if entity_type not in ["client", "lawyer", "firm"]:
+        # Importar validação de tipos atualizados
+        from ..schemas.user_types import normalize_entity_type, EntityType
+        
+        # Normalizar tipo legado e validar
+        normalized_type = normalize_entity_type(entity_type)
+        valid_types = [EntityType.CLIENT_PF, EntityType.CLIENT_PJ, 
+                      EntityType.LAWYER_INDIVIDUAL, EntityType.FIRM]
+        
+        if normalized_type not in valid_types and entity_type not in ["client", "lawyer", "firm"]:
             raise HTTPException(status_code=400, detail="Invalid entity type")
         
-        plans_data = {
-            "client": [
+        # Planos disponíveis por tipo de usuário (incluindo novos tipos)
+        available_plans = {
+            "client_pf": ["FREE", "VIP", "ENTERPRISE"],  # Cliente Pessoa Física
+            "client_pj": ["FREE", "BUSINESS", "ENTERPRISE"],  # Cliente Pessoa Jurídica
+            "client": ["FREE", "VIP", "ENTERPRISE"],  # Legacy - manter compatibilidade
+            "lawyer_individual": [  # Atualizado de "lawyer"
                 {
-                    "id": "FREE",
-                    "name": "Gratuito",
-                    "price_monthly": 0,
-                    "features": billing_service.get_plan_features("FREE", "client"),
-                    "description": "Plano básico para explorar a plataforma"
+                    "plan_type": "FREE",
+                    "name": "Advogado Individual - Gratuito",
+                    "price": 0,
+                    "features": billing_service.get_plan_features("FREE", "lawyer_individual"),
                 },
                 {
-                    "id": "VIP",
-                    "name": "VIP",
-                    "price_monthly": 99.90,
-                    "features": billing_service.get_plan_features("VIP", "client"),
-                    "description": "Serviço concierge e priorização"
-                },
-                {
-                    "id": "ENTERPRISE",
-                    "name": "Enterprise",
-                    "price_monthly": 299.90,
-                    "features": billing_service.get_plan_features("ENTERPRISE", "client"),
-                    "description": "SLA corporativo e suporte dedicado"
+                    "plan_type": "PRO", 
+                    "name": "Advogado Individual - PRO",
+                    "price": 199,
+                    "features": billing_service.get_plan_features("PRO", "lawyer_individual"),
                 }
             ],
-            "lawyer": [
+            "lawyer": [  # Legacy - manter compatibilidade
                 {
-                    "id": "FREE",
-                    "name": "Gratuito",
-                    "price_monthly": 0,
-                    "features": billing_service.get_plan_features("FREE", "lawyer"),
-                    "description": "Plano básico para começar"
+                    "plan_type": "FREE",
+                    "name": "Advogado - Gratuito", 
+                    "price": 0,
+                    "features": billing_service.get_plan_features("FREE", "lawyer_individual"),
                 },
                 {
-                    "id": "PRO",
-                    "name": "PRO",
-                    "price_monthly": 149.90,
-                    "features": billing_service.get_plan_features("PRO", "lawyer"),
-                    "description": "Para advogados que querem destaque e casos premium"
+                    "plan_type": "PRO",
+                    "name": "Advogado - PRO",
+                    "price": 199,
+                    "features": billing_service.get_plan_features("PRO", "lawyer_individual"),
                 }
             ],
-            "firm": [
-                {
-                    "id": "FREE",
-                    "name": "Gratuito",
-                    "price_monthly": 0,
-                    "features": billing_service.get_plan_features("FREE", "firm"),
-                    "description": "Plano básico para escritórios pequenos"
-                },
-                {
-                    "id": "PARTNER",
-                    "name": "Partner",
-                    "price_monthly": 499.90,
-                    "features": billing_service.get_plan_features("PARTNER", "firm"),
-                    "description": "Para escritórios que buscam crescimento"
-                },
-                {
-                    "id": "PREMIUM",
-                    "name": "Premium",
-                    "price_monthly": 999.90,
-                    "features": billing_service.get_plan_features("PREMIUM", "firm"),
-                    "description": "Máxima visibilidade e recursos empresariais"
-                }
-            ]
+            "firm": ["PRO", "BUSINESS", "ENTERPRISE"],  # Escritórios sempre premium
+            "super_associate": ["PARTNER", "PREMIUM"],  # Super associados têm planos especiais
+            "lawyer_firm_member": ["FREE", "PRO"],  # Advogados associados
         }
         
         return {
             "entity_type": entity_type,
-            "plans": plans_data[entity_type]
+            "plans": available_plans[entity_type]
         }
         
     except Exception as e:
@@ -223,7 +212,15 @@ async def get_billing_history(
 ):
     """Get billing history for an entity."""
     try:
-        if entity_type not in ["client", "lawyer", "firm"]:
+        # Importar validação de tipos atualizados (reutilizar lógica)
+        from ..schemas.user_types import normalize_entity_type, EntityType
+        
+        # Validar tipos (permitir legados para compatibilidade)
+        normalized_type = normalize_entity_type(entity_type)
+        valid_types = [EntityType.CLIENT_PF, EntityType.CLIENT_PJ, 
+                      EntityType.LAWYER_INDIVIDUAL, EntityType.FIRM]
+        
+        if normalized_type not in valid_types and entity_type not in ["client", "lawyer", "firm"]:
             raise HTTPException(status_code=400, detail="Invalid entity type")
         
         # Get billing records from database

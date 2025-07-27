@@ -39,12 +39,14 @@ from backend.algoritmo_match import (
     Case,
     DiversityMeta,
     Lawyer,
+    LawFirm,
     MatchmakingAlgorithm,
     load_weights, # ⚡ Adicionar import da função load_weights
 )
 from backend.routes import (
     cases, recommendations, payments, offers, reviews_route, timeline, contracts, financials,
-    availability, directory_search, hiring_proposals, video_calls, documents_enhanced, ratings
+    availability, directory_search, hiring_proposals, video_calls, documents_enhanced, ratings,
+    client_invitations
 )
 from backend.api.schemas import (
     CaseRequestSchema,
@@ -160,6 +162,7 @@ app.include_router(availability.router, prefix="/api")
 app.include_router(directory_search.router, prefix="/api")
 app.include_router(hiring_proposals.router, prefix="/api")
 app.include_router(video_calls.router, prefix="/api")
+app.include_router(client_invitations.router, prefix="/api")
 app.include_router(documents_enhanced.router, prefix="/api")
 app.include_router(ratings.router, prefix="/api")
 
@@ -286,6 +289,47 @@ def convert_lawyer_to_schema(lawyer: Lawyer, case_coords: tuple) -> MatchedLawye
         uf=getattr(lawyer, 'uf', None),
         phone=getattr(lawyer, 'phone', None),
         email=getattr(lawyer, 'email', None)
+    )
+
+
+def convert_firm_to_schema(firm: LawFirm, case_coords: tuple) -> MatchedFirmSchema:
+    """Converte modelo de escritório para schema de resposta"""
+    from backend.api.schemas import MatchedFirmSchema
+    
+    # Calcular distância
+    def haversine(lat1, lon1, lat2, lon2):
+        from math import asin, cos, radians, sin, sqrt
+        lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        return 2 * asin(sqrt(a)) * 6371  # km
+
+    # Obter coordenadas da firm
+    firm_lat = getattr(firm, 'main_lat', getattr(firm, 'geo_latlon', [0, 0])[0])
+    firm_lon = getattr(firm, 'main_lon', getattr(firm, 'geo_latlon', [0, 0])[1])
+    
+    distance = haversine(
+        case_coords[0], case_coords[1],
+        firm_lat, firm_lon
+    )
+
+    # KPIs do escritório
+    firm_kpis = getattr(firm, 'kpis', None)
+    
+    return MatchedFirmSchema(
+        id=firm.id,
+        name=getattr(firm, 'nome', getattr(firm, 'name', 'Unknown Firm')),
+        team_size=getattr(firm, 'team_size', 1),
+        latitude=firm_lat,
+        longitude=firm_lon,
+        distance_km=round(distance, 1),
+        score=firm.scores.get('final_score', 0.0) if hasattr(firm, 'scores') and firm.scores else 0.0,
+        reputation_score=firm.scores.get('firm_reputation', 0.0) if hasattr(firm, 'scores') and firm.scores else None,
+        success_rate=firm_kpis.success_rate if firm_kpis else None,
+        specializations=getattr(firm, 'specializations', []),
+        lawyers_count=getattr(firm, 'lawyers_count', getattr(firm, 'team_size', 1)),
+        active_cases=firm_kpis.active_cases if firm_kpis else None
     )
 
 
@@ -570,8 +614,9 @@ async def match_lawyers(
             filtered_lawyers = [lawyer for lawyer in enriched_lawyers if lawyer.id != user_id_to_exclude]
 
             matcher = MatchmakingAlgorithm()
-            ranking = await matcher.rank(
-                case, filtered_lawyers, request.top_n, request.preset.value, model_version=model_version
+            ranking, firms = await matcher.rank(
+                case, filtered_lawyers, top_n=request.top_n, preset=request.preset.value, 
+                model_version=model_version, expand_search=request.expand_search, include_firms=True
             )
 
             # ---- Armazenar dados de explicabilidade ------------------
@@ -597,6 +642,12 @@ async def match_lawyers(
                 convert_lawyer_to_schema(lawyer, case_coords)
                 for lawyer in ranking
             ]
+            
+            # Converter escritórios para schema
+            matched_firms = [
+                convert_firm_to_schema(firm, case_coords)
+                for firm in firms
+            ]
 
             # Preparar resposta
             execution_time_ms = (time.time() - start_time) * 1000
@@ -606,6 +657,7 @@ async def match_lawyers(
                 case_id=case_id,
                 match_id=match_id,
                 lawyers=matched_lawyers,
+                firms=matched_firms,
                 total_lawyers_evaluated=len(lawyers),
                 algorithm_version="v3.0-hybrid",
                 preset_used=request.preset,

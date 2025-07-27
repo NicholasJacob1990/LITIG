@@ -304,7 +304,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         children: [
           Row(
             children: [
-              Icon(LucideIcons.link, color: AppColors.primaryBlue),
+              const Icon(LucideIcons.link, color: AppColors.primaryBlue),
           const SizedBox(width: 8),
               Text(
                 'Contas Conectadas',
@@ -365,7 +365,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         child: ListTile(
         leading: CircleAvatar(
           backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-          child: Icon(
+          child: const Icon(
             LucideIcons.messageCircle,
             color: AppColors.primaryBlue,
             size: 20,

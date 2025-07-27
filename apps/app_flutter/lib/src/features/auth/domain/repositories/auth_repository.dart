@@ -20,7 +20,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String name,
-    required String userType, // 'PF' ou 'PJ'
+    required String userType, // 'client_pf' ou 'client_pj'
     String? cpf,
     String? cnpj,
   });

@@ -38,6 +38,7 @@ from routes.ab_testing import router as ab_testing_router
 from routes.reports import router as reports_router
 from routes.unipile import router as unipile_router
 from routes.unipile_v2 import router as unipile_v2_router
+from routes.case_feedback_routes import router as case_feedback_router
 from routes.providers import router as providers_router
 from routes.users import router as users_router
 from routes.auto_context import router as auto_context_router
@@ -177,6 +178,7 @@ app.include_router(health_router, prefix="/api")
 app.include_router(triage_router, prefix="/api/v2", tags=["Intelligent Triage"])
 app.include_router(ab_testing_router, prefix="/api/v2.2", tags=["AB Testing"])
 app.include_router(reports_router, prefix="/api/v2.2", tags=["Reports"])
+app.include_router(case_feedback_router, tags=["Case Feedback AutoML"])
 app.include_router(unipile_router, prefix="/api/v2.2", tags=["Unipile"])
 app.include_router(unipile_v2_router, tags=["Unipile-v2"])
 app.include_router(providers_router, prefix="/api", tags=["Providers"])

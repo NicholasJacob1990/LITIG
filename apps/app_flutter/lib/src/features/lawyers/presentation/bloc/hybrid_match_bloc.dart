@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/matched_lawyer.dart';
+import '../../domain/entities/match_result.dart';
 import '../../../firms/domain/entities/law_firm.dart';
 import '../../domain/repositories/lawyers_repository.dart';
 import '../../../firms/domain/repositories/firm_repository.dart';
@@ -75,6 +76,15 @@ class RefreshHybridMatches extends HybridMatchEvent {
   List<Object?> get props => [caseId, includeFirms, preset];
 }
 
+class ToggleHybridSearch extends HybridMatchEvent {
+  final bool enableHybridSearch;
+
+  const ToggleHybridSearch({required this.enableHybridSearch});
+
+  @override
+  List<Object?> get props => [enableHybridSearch];
+}
+
 // States
 abstract class HybridMatchState extends Equatable {
   const HybridMatchState();
@@ -91,18 +101,20 @@ class HybridMatchLoaded extends HybridMatchState {
   final List<MatchedLawyer> lawyers;
   final List<LawFirm> firms;
   final bool mixedRendering;
+  final bool isHybridSearchEnabled;
 
   const HybridMatchLoaded({
     required this.lawyers,
     required this.firms,
     this.mixedRendering = false,
+    this.isHybridSearchEnabled = false,
   });
 
   // Getter para compatibilidade
   List<MatchedLawyer> get matches => lawyers;
 
   @override
-  List<Object?> get props => [lawyers, firms, mixedRendering];
+  List<Object?> get props => [lawyers, firms, mixedRendering, isHybridSearchEnabled];
 }
 
 class HybridMatchError extends HybridMatchState {
@@ -118,6 +130,7 @@ class HybridMatchError extends HybridMatchState {
 class HybridMatchBloc extends Bloc<HybridMatchEvent, HybridMatchState> {
   final LawyersRepository lawyersRepository;
   final FirmRepository firmsRepository;
+  bool _isHybridSearchEnabled = false;
 
   HybridMatchBloc({
     required this.lawyersRepository,
@@ -127,6 +140,25 @@ class HybridMatchBloc extends Bloc<HybridMatchEvent, HybridMatchState> {
     on<SearchHybridMatches>(_onSearchHybridMatches);
     on<RefreshHybridMatches>(_onRefreshHybridMatches);
     on<ApplyHybridFilters>(_onApplyHybridFilters);
+    on<ToggleHybridSearch>(_onToggleHybridSearch);
+  }
+
+  Future<void> _onToggleHybridSearch(
+    ToggleHybridSearch event,
+    Emitter<HybridMatchState> emit,
+  ) async {
+    _isHybridSearchEnabled = event.enableHybridSearch;
+    
+    // Se temos um estado carregado, atualizar com o novo status
+    if (state is HybridMatchLoaded) {
+      final currentState = state as HybridMatchLoaded;
+      emit(HybridMatchLoaded(
+        lawyers: currentState.lawyers,
+        firms: currentState.firms,
+        mixedRendering: currentState.mixedRendering,
+        isHybridSearchEnabled: _isHybridSearchEnabled,
+      ));
+    }
   }
 
   Future<void> _onFetchHybridMatches(
@@ -136,28 +168,20 @@ class HybridMatchBloc extends Bloc<HybridMatchEvent, HybridMatchState> {
     emit(HybridMatchLoading());
 
     try {
-      // Buscar advogados
-      final lawyers = await lawyersRepository.findMatches(
+      // Usar busca híbrida se habilitada
+      final matchResult = await lawyersRepository.findMatchesWithFirms(
         caseId: event.caseId,
+        expandSearch: _isHybridSearchEnabled,
       );
 
-      // Buscar escritórios se solicitado
-      List<LawFirm> firms = [];
-      if (event.includeFirms) {
-        final firmsResult = await firmsRepository.getFirms(
-          limit: 20,
-          offset: 0,
-          includeKpis: true,
-          includeLawyersCount: true,
-        );
+      // Se includeFirms for false, filtrar escritórios
+      final firms = event.includeFirms ? matchResult.firms : <LawFirm>[];
 
-        firmsResult.fold(
-          (failure) => {}, // Ignorar erro de escritórios
-          (firmsList) => firms = firmsList,
-        );
-      }
-
-      emit(HybridMatchLoaded(lawyers: lawyers, firms: firms));
+      emit(HybridMatchLoaded(
+        lawyers: matchResult.lawyers, 
+        firms: firms,
+        isHybridSearchEnabled: _isHybridSearchEnabled,
+      ));
     } catch (e) {
       emit(HybridMatchError(message: 'Erro ao buscar matches: ${e.toString()}'));
     }
@@ -197,7 +221,11 @@ class HybridMatchBloc extends Bloc<HybridMatchEvent, HybridMatchState> {
         );
       }
 
-      emit(HybridMatchLoaded(lawyers: lawyers, firms: firms));
+      emit(HybridMatchLoaded(
+        lawyers: lawyers, 
+        firms: firms,
+        isHybridSearchEnabled: _isHybridSearchEnabled,
+      ));
     } catch (e) {
       emit(HybridMatchError(message: 'Erro na busca: ${e.toString()}'));
     }
@@ -222,35 +250,32 @@ class HybridMatchBloc extends Bloc<HybridMatchEvent, HybridMatchState> {
     emit(HybridMatchLoading());
 
     try {
-      // Buscar advogados se solicitado
-      List<MatchedLawyer> lawyers = [];
       if (event.includeLawyers) {
-        lawyers = await lawyersRepository.findMatches(
+        // Usar busca híbrida se habilitada
+        final matchResult = await lawyersRepository.findMatchesWithFirms(
           caseId: event.caseId,
+          expandSearch: _isHybridSearchEnabled,
         );
+
+        // Aplicar filtros baseado nas preferências
+        final lawyers = event.includeLawyers ? matchResult.lawyers : <MatchedLawyer>[];
+        final firms = event.includeFirms ? matchResult.firms : <LawFirm>[];
+
+        emit(HybridMatchLoaded(
+          lawyers: lawyers, 
+          firms: firms,
+          mixedRendering: event.mixedRendering,
+          isHybridSearchEnabled: _isHybridSearchEnabled,
+        ));
+      } else {
+        // Se não incluir advogados, retornar listas vazias
+        emit(HybridMatchLoaded(
+          lawyers: [], 
+          firms: [],
+          mixedRendering: event.mixedRendering,
+          isHybridSearchEnabled: _isHybridSearchEnabled,
+        ));
       }
-
-      // Buscar escritórios se solicitado
-      List<LawFirm> firms = [];
-      if (event.includeFirms) {
-        final firmsResult = await firmsRepository.getFirms(
-          limit: 20,
-          offset: 0,
-          includeKpis: true,
-          includeLawyersCount: true,
-        );
-
-        firmsResult.fold(
-          (failure) => {}, // Ignorar erro de escritórios
-          (firmsList) => firms = firmsList,
-        );
-      }
-
-      emit(HybridMatchLoaded(
-        lawyers: lawyers, 
-        firms: firms,
-        mixedRendering: event.mixedRendering,
-      ));
     } catch (e) {
       emit(HybridMatchError(message: 'Erro ao aplicar filtros: ${e.toString()}'));
     }

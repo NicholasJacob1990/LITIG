@@ -48,7 +48,7 @@ class _FirmFinancialInfoViewState extends State<FirmFinancialInfoView> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(LucideIcons.calendar, size: 20),
+            const Icon(LucideIcons.calendar, size: 20),
             const SizedBox(width: 8),
             Text(
               'Período de Análise',
@@ -86,7 +86,7 @@ class _FirmFinancialInfoViewState extends State<FirmFinancialInfoView> {
           children: [
             Row(
               children: [
-                Icon(LucideIcons.dollarSign, size: 20),
+                const Icon(LucideIcons.dollarSign, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'Receita Anual',
@@ -445,7 +445,7 @@ class _FirmFinancialInfoViewState extends State<FirmFinancialInfoView> {
                           color: Colors.green.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           LucideIcons.trendingUp,
                           color: Colors.green,
                           size: 32,
@@ -531,7 +531,7 @@ class _FirmFinancialInfoViewState extends State<FirmFinancialInfoView> {
 
   Widget _buildExpenseItem(String category, double amount, double totalExpenses) {
     final percentage = (amount / totalExpenses) * 100;
-    final color = Colors.red;
+    const color = Colors.red;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

@@ -23,7 +23,7 @@ void main() {
   });
 
   final tTrendingClusters = [
-    TrendingCluster(
+    const TrendingCluster(
       clusterId: 'cluster_1',
       clusterLabel: 'Direito Digital',
       momentumScore: 0.85,
@@ -31,7 +31,7 @@ void main() {
       isEmergent: true,
       labelConfidence: 0.9,
     ),
-    TrendingCluster(
+    const TrendingCluster(
       clusterId: 'cluster_2',
       clusterLabel: 'Contratos de SaaS',
       momentumScore: 0.75,

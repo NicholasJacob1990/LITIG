@@ -206,7 +206,10 @@ class AutoContextService:
                 .single()\
                 .execute()
             
-            return profile.data.get("user_role") == "lawyer_platform_associate"
+            # Verificar se é super associado (novo nome)
+            user_role = profile.data.get("user_role", "")
+            # Suportar tanto o nome novo quanto o legado durante transição
+            return user_role in ["super_associate", "lawyer_platform_associate"]
         except:
             return False
     

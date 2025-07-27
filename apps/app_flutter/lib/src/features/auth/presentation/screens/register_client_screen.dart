@@ -51,7 +51,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
             name: _userType == UserType.pessoaFisica
                 ? _nameController.text.trim()
                 : _razaoSocialController.text.trim(),
-            userType: _userType == UserType.pessoaFisica ? 'PF' : 'PJ',
+            userType: _userType == UserType.pessoaFisica ? 'client_pf' : 'client_pj',
             cpf: _userType == UserType.pessoaFisica ? _cpfController.text : null,
             cnpj: _userType == UserType.pessoaJuridica ? _cnpjController.text : null,
           ),
@@ -229,7 +229,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
   Widget _buildDivider(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: Divider(color: AppColors.border)),
+        const Expanded(child: Divider(color: AppColors.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
@@ -239,7 +239,7 @@ class _RegisterClientScreenState extends State<RegisterClientScreen> {
             ),
           ),
         ),
-        Expanded(child: Divider(color: AppColors.border)),
+        const Expanded(child: Divider(color: AppColors.border)),
       ],
     );
   }

@@ -63,11 +63,11 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(height: 24),
                             
                             // Dashboard Contextual Resumido
-                            if (user.role == 'lawyer' || user.role == 'lawyer_associated' || user.role == 'lawyer_office')
+                            if (user.role == 'lawyer' || user.role == 'lawyer_firm_member' || user.role == 'firm')
                               _buildContextualDashboard(context, user),
                             
                             // Seção de Escritório
-                            if (user.role == 'lawyer' || user.role == 'associate_lawyer') ...[
+                            if (user.role == 'lawyer' || user.role == 'lawyer_firm_member') ...[
                               const SizedBox(height: 24),
                               const _LawyerFirmSection(),
                             ],
@@ -397,7 +397,7 @@ class ProfileScreen extends StatelessWidget {
         return _buildSuperAssociateDashboard(context);
       case 'lawyer_office':
         return _buildFirmOwnerDashboard(context);
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':
         return _buildAssociatedLawyerDashboard(context);
       case 'client':
       case 'PF':
@@ -766,7 +766,7 @@ class ProfileScreen extends StatelessWidget {
       case 'lawyer_office':
       case 'lawyer_platform_associate':
         return _buildLawyerMetrics(context);
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':
         return _buildAssociatedLawyerMetrics(context);
       case 'client':
       case 'PF':

@@ -23,6 +23,10 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # MUDANÇA: Substituindo Mistral por Llama 4 via um provedor como o Together AI
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+# NOVO: Configuração do Gemini para o juiz
+from ..config import Settings
+settings = Settings()
+GEMINI_API_KEY = settings.GEMINI_API_KEY
 
 # --- Mapeamento Estratégico de Modelos (Baseado em Custo-Benefício 2025 com Llama 4) ---
 
@@ -48,9 +52,9 @@ ENSEMBLE_MODEL_OPENAI = "gpt-4o"
 # NOVO: Modelo de failover para a estratégia de ensemble
 ENSEMBLE_FAILOVER_MODEL = "gpt-4o"
 
-JUDGE_MODEL_PROVIDER = "anthropic"
-# MUDANÇA: Usando um modelo mais rápido e econômico como Juiz primário
-JUDGE_MODEL = "claude-4.0-sonnet-20250401" # Nome hipotético para Claude Sonnet 4.0
+# MUDANÇA: Alterando o juiz para Gemini Pro 2.5
+JUDGE_MODEL_PROVIDER = "gemini"
+JUDGE_MODEL = settings.GEMINI_JUDGE_MODEL  # Gemini Pro 2.5 (modelo mais recente)
 # Failover de alta performance mantido
 JUDGE_MODEL_OPENAI_FALLBACK = "gpt-4o"
 
@@ -240,9 +244,28 @@ class TriageService:
         Sua Saída Final (apenas JSON):
         """
 
-        # Tenta o provedor primário (Anthropic)
+        # Tenta o provedor primário (Gemini)
         try:
-            if JUDGE_MODEL_PROVIDER == 'anthropic' and self.anthropic_client:
+            if JUDGE_MODEL_PROVIDER == 'gemini' and GEMINI_API_KEY:
+                import google.generativeai as genai
+                genai.configure(api_key=GEMINI_API_KEY)
+                
+                model = genai.GenerativeModel(JUDGE_MODEL)
+                response = await asyncio.wait_for(
+                    model.generate_content_async(prompt),
+                    timeout=30
+                )
+                
+                # Extrair JSON da resposta do Gemini
+                response_text = response.text
+                match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                if match:
+                    return json.loads(match.group(0))
+                else:
+                    # Se não encontrar JSON, tentar parsear a resposta completa
+                    return json.loads(response_text)
+                    
+            elif JUDGE_MODEL_PROVIDER == 'anthropic' and self.anthropic_client:
                 message = await self.anthropic_client.messages.create(
                     model=JUDGE_MODEL, max_tokens=2048,
                     messages=[{"role": "user", "content": prompt}]

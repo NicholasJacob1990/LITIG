@@ -5,7 +5,9 @@ import '../../domain/entities/matched_lawyer.dart';
 import '../../../firms/domain/entities/law_firm.dart';
 import '../../../firms/presentation/widgets/firm_card.dart';
 import '../../../recommendations/presentation/widgets/lawyer_match_card.dart';
-
+import 'public_profile_card.dart';
+import '../bloc/hybrid_match_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 /// Widget para exibir lista híbrida de advogados e escritórios
 /// 
 /// Este widget renderiza uma lista unificada contendo tanto advogados
@@ -43,6 +45,7 @@ class HybridMatchList extends StatelessWidget {
   final VoidCallback? onRefresh;
   final bool isLoading;
   final bool showMixedResults;
+  final String? caseId;
 
   const HybridMatchList({
     super.key,
@@ -53,6 +56,7 @@ class HybridMatchList extends StatelessWidget {
     this.onRefresh,
     this.isLoading = false,
     this.showMixedResults = false,
+    this.caseId,
   });
 
   @override
@@ -64,17 +68,21 @@ class HybridMatchList extends StatelessWidget {
     final hasLawyers = lawyers.isNotEmpty;
     final hasFirms = firms.isNotEmpty;
 
-    if (!hasLawyers && !hasFirms) {
-      return _buildEmptyState(context);
-    }
-
-    // Se showMixedResults for true, renderiza uma lista mista unificada
-    if (showMixedResults) {
-      return _buildMixedResultsList(context);
-    }
-
-    // Renderização por seções (comportamento padrão)
-    return _buildSectionedList(context, hasLawyers, hasFirms);
+    return Column(
+      children: [
+        // Hybrid Search Toggle
+        _buildHybridSearchToggle(),
+        
+        // Results
+        Expanded(
+          child: !hasLawyers && !hasFirms
+              ? _buildEmptyState(context)
+              : showMixedResults
+                  ? _buildMixedResultsList(context)
+                  : _buildSectionedList(context, hasLawyers, hasFirms),
+        ),
+      ],
+    );
   }
 
   Widget _buildMixedResultsList(BuildContext context) {
@@ -114,11 +122,20 @@ class HybridMatchList extends StatelessWidget {
         onLongPress: () => _showFirmNavigationOptions(context, item),
       );
     } else if (item is MatchedLawyer) {
-      return LawyerMatchCard(
-        lawyer: item,
-        onSelect: () => _navigateToLawyerDetail(context, item.id),
-        onExplain: () => _showExplanation(context, item.id),
-      );
+      // Renderização condicional baseada em isExternal
+      if (item.isExternal) {
+        return PublicProfileCard(
+          lawyer: item,
+          onRequestContact: () => _requestContactExternal(context, item),
+          onViewVerified: () => _showVerifiedLawyers(context),
+        );
+      } else {
+        return LawyerMatchCard(
+          lawyer: item,
+          onSelect: () => _navigateToLawyerDetail(context, item.id),
+          onExplain: () => _showExplanation(context, item.id),
+        );
+      }
     }
     
     // Fallback para tipos não reconhecidos
@@ -165,11 +182,17 @@ class HybridMatchList extends StatelessWidget {
                   final lawyer = lawyers[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    child: LawyerMatchCard(
-                      lawyer: lawyer,
-                      onSelect: () => _navigateToLawyerDetail(context, lawyer.id),
-                      onExplain: () => _showExplanation(context, lawyer.id),
-                    ),
+                    child: lawyer.isExternal 
+                      ? PublicProfileCard(
+                          lawyer: lawyer,
+                          onRequestContact: () => _requestContactExternal(context, lawyer),
+                          onViewVerified: () => _showVerifiedLawyers(context),
+                        )
+                      : LawyerMatchCard(
+                          lawyer: lawyer,
+                          onSelect: () => _navigateToLawyerDetail(context, lawyer.id),
+                          onExplain: () => _showExplanation(context, lawyer.id),
+                        ),
                   );
                 },
                 childCount: lawyers.length,
@@ -333,6 +356,109 @@ class HybridMatchList extends StatelessWidget {
     // TODO: Implementar modal de explicação
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Explicação para advogado $lawyerId')),
+    );
+  }
+
+  // Métodos para lidar com perfis externos
+  void _requestContactExternal(BuildContext context, MatchedLawyer lawyer) {
+    // TODO: Implementar lógica de solicitação de contato
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Solicitando contato com ${lawyer.nome}...'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showVerifiedLawyers(BuildContext context) {
+    // TODO: Implementar navegação para advogados verificados
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Redirecionando para advogados verificados...'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildHybridSearchToggle() {
+    return BlocBuilder<HybridMatchBloc, HybridMatchState>(
+      builder: (context, state) {
+        final isHybridEnabled = state is HybridMatchLoaded 
+            ? state.isHybridSearchEnabled 
+            : false;
+            
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.search,
+                  color: Colors.blue.shade700,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Busca Híbrida",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isHybridEnabled 
+                          ? "Incluir perfis públicos além dos verificados"
+                          : "Apenas advogados verificados da plataforma",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.blue.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Switch(
+                value: isHybridEnabled,
+                onChanged: (value) {
+                  context.read<HybridMatchBloc>().add(
+                    ToggleHybridSearch(enableHybridSearch: value),
+                  );
+                  
+                                     // Re-fetch matches with new setting
+                   if (caseId != null) {
+                     context.read<HybridMatchBloc>().add(
+                       FetchHybridMatches(
+                         caseId: caseId!,
+                         includeFirms: true,
+                       ),
+                     );
+                   }
+                },
+                activeColor: Colors.blue.shade600,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

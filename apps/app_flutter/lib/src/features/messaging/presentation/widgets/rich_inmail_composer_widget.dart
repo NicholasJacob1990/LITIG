@@ -273,9 +273,9 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.edit,
-                color: const Color(0xFF0077B5),
+                color: Color(0xFF0077B5),
                 size: 16,
               ),
               const SizedBox(width: 8),
@@ -329,9 +329,9 @@ class _RichInMailComposerWidgetState extends State<RichInMailComposerWidget> {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.lightbulb,
-                  color: const Color(0xFF0077B5),
+                  color: Color(0xFF0077B5),
                   size: 16,
                 ),
                 const SizedBox(width: 8),

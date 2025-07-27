@@ -107,7 +107,7 @@ class MainTabsShell extends StatelessWidget {
     print('DEBUG - Usando fallback para userRole: $userRole');
     
     switch (userRole) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return [
           const NavigationTab(
             label: 'Painel',
@@ -208,7 +208,8 @@ class MainTabsShell extends StatelessWidget {
           ),
         ];
         
-      case 'PF': // ADICIONADO: Fallback para Cliente (Pessoa Física)
+              case 'client_pf': // Cliente Pessoa Física
+        case 'PF': // LEGACY: Fallback para compatibilidade
       default:
         return [
           const NavigationTab(

@@ -195,7 +195,7 @@ class _PlansScreenState extends State<PlansScreen> {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.checkCircle,
                   color: Colors.green,
                   size: 24,
@@ -257,7 +257,7 @@ class _PlansScreenState extends State<PlansScreen> {
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 children: [
-                  Icon(LucideIcons.check, size: 16, color: Colors.green),
+                  const Icon(LucideIcons.check, size: 16, color: Colors.green),
                   const SizedBox(width: 8),
                   Expanded(child: Text(feature)),
                 ],
@@ -395,9 +395,9 @@ class _PlansScreenState extends State<PlansScreen> {
                         width: 20,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : Text(
+                    : const Text(
                         'Fazer Upgrade',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),

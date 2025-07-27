@@ -80,7 +80,7 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
         const SnackBar(content: Text('Você deve aceitar os termos para continuar.')),
       );
       // Navega para a última etapa para o aceite
-      final steps = getSteps(isOffice: widget.role == 'lawyer_office', isAssociated: widget.role == 'lawyer_associated');
+      final steps = getSteps(isOffice: widget.role == 'firm', isAssociated: widget.role == 'lawyer_firm_member');
       setState(() => _currentStep = steps.length - 1);
       return;
     }
@@ -89,8 +89,8 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
       name: _nameController.text.trim(),
-      cpf: widget.role != 'lawyer_office' ? _cpfController.text : '',
-      cnpj: widget.role == 'lawyer_office' ? _cnpjController.text : null,
+                  cpf: widget.role != 'firm' ? _cpfController.text : '',
+              cnpj: widget.role == 'firm' ? _cnpjController.text : null,
       phone: _phoneController.text,
       oab: _oabController.text.trim(),
       areas: _selectedAreas.join(','),
@@ -135,8 +135,8 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isOffice = widget.role == 'lawyer_office';
-    final isAssociated = widget.role == 'lawyer_associated';
+    final isOffice = widget.role == 'firm';
+    final isAssociated = widget.role == 'lawyer_firm_member';
 
     return Scaffold(
       appBar: AppBar(
@@ -442,9 +442,9 @@ class _RegisterLawyerScreenState extends State<RegisterLawyerScreen> {
           ),
           child: CheckboxListTile(
             title: const Text('Sou associado do escritório titular LITGO'),
-            subtitle: Text(
+            subtitle: const Text(
               'Super-Associados captam casos diretamente da plataforma e precisam assinar um contrato de associação específico.',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             value: _isPlatformAssociate,
             onChanged: (value) {

@@ -428,7 +428,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
               const Spacer(),
               TextButton(
                 onPressed: () => context.push('/connect-accounts'),
-                child: Text(
+                child: const Text(
                   'Gerenciar',
                   style: TextStyle(color: AppColors.primaryBlue, fontSize: 12),
                 ),
@@ -1205,7 +1205,7 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(
+                child: const Icon(
                   LucideIcons.check,
                   size: 16,
                   color: Colors.white,

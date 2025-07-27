@@ -13,7 +13,7 @@ class ExpandableClustersWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TrendingClustersBloc()..add(FetchTrendingClusters()),
+      create: (context) => TrendingClustersBloc()..add(const FetchTrendingClusters()),
       child: Card(
         key: const Key('expandable_clusters_card'),
         margin: const EdgeInsets.all(16),
@@ -56,7 +56,7 @@ class ExpandableClustersWidget extends StatelessWidget {
                     return ErrorDisplayWidget(
                       message: state.message,
                       onRetry: () {
-                        context.read<TrendingClustersBloc>().add(FetchTrendingClusters());
+                        context.read<TrendingClustersBloc>().add(const FetchTrendingClusters());
                       },
                     );
                   }

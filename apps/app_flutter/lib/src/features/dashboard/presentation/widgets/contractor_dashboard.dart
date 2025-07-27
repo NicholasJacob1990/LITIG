@@ -7,10 +7,8 @@ import '../../../auth/presentation/bloc/auth_event.dart';
 import '../widgets/stat_card.dart';
 import 'package:meu_app/src/features/cluster_insights/presentation/widgets/expandable_clusters_widget.dart';
 
-/// Dashboard específico para advogados contratantes
-/// 
-/// Para lawyer_individual, lawyer_platform_associate
-/// Foco em captação de clientes, gestão de parcerias e negócios
+/// Dashboard para CONTRATANTES (advogados que contratam outros)
+/// Para lawyer_individual, super_associate
 class ContractorDashboard extends StatelessWidget {
   final String userName;
   final String userRole;
@@ -451,7 +449,7 @@ class ContractorDashboard extends StatelessWidget {
   }
 
   Widget _buildCaptationActions(BuildContext context) {
-    final actions = userRole == 'lawyer_platform_associate' 
+    final actions = userRole == 'super_associate' 
         ? _getSuperAssociateActions() 
         : _getIndividualLawyerActions();
 
@@ -572,7 +570,7 @@ class ContractorDashboard extends StatelessWidget {
 
   Map<String, dynamic> _getMetricsForRole(String role) {
     switch (role) {
-      case 'lawyer_platform_associate':
+      case 'super_associate':
         return {
           'activeClients': 15,
           'newLeads': 8,
@@ -592,7 +590,7 @@ class ContractorDashboard extends StatelessWidget {
 
   String _getRoleDisplayName(String role) {
     switch (role) {
-      case 'lawyer_platform_associate':
+      case 'super_associate':
         return 'Super Associado';
       case 'lawyer_individual':
         return 'Advogado Autônomo';

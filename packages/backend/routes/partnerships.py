@@ -28,6 +28,7 @@ from api.schemas import (
 from services.partnership_service import PartnershipService
 from services.contract_service import ContractService
 from services.match_service import MatchService
+from services.partnership_recommendation_service import PartnershipRecommendationService
 
 router = APIRouter(prefix="/partnerships", tags=["Parcerias"])
 security = HTTPBearer()

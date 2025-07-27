@@ -430,14 +430,14 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
           );
 
           if (result['success'] == true) {
-            emit(UnifiedMessagingSent(successMessage: 'Email enviado com sucesso!'));
+            emit(const UnifiedMessagingSent(successMessage: 'Email enviado com sucesso!'));
             // Recarregar mensagens
             add(const LoadUnifiedMessages(refresh: true));
           } else {
-            emit(UnifiedMessagingError(message: 'Falha ao enviar email'));
+            emit(const UnifiedMessagingError(message: 'Falha ao enviar email'));
           }
         } else {
-          emit(UnifiedMessagingError(message: 'Nenhuma conta de email conectada'));
+          emit(const UnifiedMessagingError(message: 'Nenhuma conta de email conectada'));
         }
       }
     } catch (e) {
@@ -471,11 +471,11 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
         );
 
         if (result['success'] == true) {
-          emit(UnifiedMessagingSent(successMessage: 'Mensagem enviada com sucesso!'));
+          emit(const UnifiedMessagingSent(successMessage: 'Mensagem enviada com sucesso!'));
           // Recarregar mensagens
           add(const LoadUnifiedMessages(refresh: true));
         } else {
-          emit(UnifiedMessagingError(message: 'Falha ao enviar mensagem'));
+          emit(const UnifiedMessagingError(message: 'Falha ao enviar mensagem'));
         }
       }
     } catch (e) {
@@ -508,14 +508,14 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
             attendees: event.attendees,
           );
 
-          emit(UnifiedMessagingSent(successMessage: 'Evento criado com sucesso!'));
+          emit(const UnifiedMessagingSent(successMessage: 'Evento criado com sucesso!'));
           
           // Atualizar lista de eventos
           final updatedEvents = [...currentState.calendarEvents, newEvent];
           emit(currentState.copyWith(calendarEvents: updatedEvents));
           
         } else {
-          emit(UnifiedMessagingError(message: 'Nenhuma conta de calendário conectada'));
+          emit(const UnifiedMessagingError(message: 'Nenhuma conta de calendário conectada'));
         }
       }
     } catch (e) {
@@ -568,7 +568,7 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
       );
 
       if (result['success'] == true) {
-        emit(UnifiedMessagingSent(successMessage: 'InMail enviado com sucesso!'));
+        emit(const UnifiedMessagingSent(successMessage: 'InMail enviado com sucesso!'));
         add(const LoadUnifiedMessages(refresh: true));
       } else {
         emit(UnifiedMessagingError(message: result['error'] ?? 'Falha ao enviar InMail'));
@@ -593,7 +593,7 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
       );
 
       if (result['success'] == true) {
-        emit(UnifiedMessagingSent(successMessage: 'Convite LinkedIn enviado com sucesso!'));
+        emit(const UnifiedMessagingSent(successMessage: 'Convite LinkedIn enviado com sucesso!'));
       } else {
         emit(UnifiedMessagingError(message: result['error'] ?? 'Falha ao enviar convite'));
       }
@@ -620,7 +620,7 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
       );
 
       if (result['success'] == true) {
-        emit(UnifiedMessagingSent(successMessage: 'Email respondido com sucesso!'));
+        emit(const UnifiedMessagingSent(successMessage: 'Email respondido com sucesso!'));
         add(const LoadUnifiedMessages(refresh: true));
       } else {
         emit(UnifiedMessagingError(message: result['error'] ?? 'Falha ao responder email'));
@@ -670,7 +670,7 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
       );
 
       if (result['success'] == true) {
-        emit(UnifiedMessagingSent(successMessage: 'Email arquivado com sucesso!'));
+        emit(const UnifiedMessagingSent(successMessage: 'Email arquivado com sucesso!'));
         add(const LoadUnifiedMessages(refresh: true));
       } else {
         emit(UnifiedMessagingError(message: result['error'] ?? 'Falha ao arquivar email'));
@@ -697,7 +697,7 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
       );
 
       if (result['success'] == true) {
-        emit(UnifiedMessagingSent(successMessage: 'Rascunho criado com sucesso!'));
+        emit(const UnifiedMessagingSent(successMessage: 'Rascunho criado com sucesso!'));
       } else {
         emit(UnifiedMessagingError(message: result['error'] ?? 'Falha ao criar rascunho'));
       }

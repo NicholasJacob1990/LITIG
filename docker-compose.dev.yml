@@ -1,0 +1,196 @@
+# =============================================================================
+# LITIG-1 Development Environment - Opção A (Local DB + Redis)
+# =============================================================================
+# Para iniciar: docker-compose -f docker-compose.dev.yml up --build
+# Para parar: docker-compose -f docker-compose.dev.yml down
+
+services:
+  # =============================================================================
+  # Banco de Dados PostgreSQL (Substitui Supabase localmente)
+  # =============================================================================
+  database:
+    image: postgres:15-alpine
+    container_name: litigo-postgres-dev
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./packages/backend/alembic/versions:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_USER: litigo
+      POSTGRES_PASSWORD: litigo
+      POSTGRES_DB: litigo_dev
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litigo -d litigo_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # Redis (Para filas Celery e cache)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: litigo-redis-dev
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning --requirepass redispassword
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redispassword", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # API FastAPI (Backend Principal)
+  # =============================================================================
+  api:
+    container_name: litigo-api-dev
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.dev
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+    volumes:
+      - ./packages/backend:/app:cached  # Hot reload habilitado
+      - /app/__pycache__  # Evita problemas de cache
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./packages/backend/.env.dev
+    environment:
+      - DATABASE_URL=postgresql://litigo:litigo@database:5432/litigo_dev
+      - REDIS_URL=redis://:redispassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:redispassword@redis:6379/0
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - litigo-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=8000"
+
+  # =============================================================================
+  # Celery Worker (Jobs AutoML e Background)
+  # =============================================================================
+  worker:
+    container_name: litigo-worker-dev
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_app.celery_app worker -l info -Q ml-training,periodic,monitoring,enrichment,ml-quick --concurrency=2
+    volumes:
+      - ./packages/backend:/app:cached  # Hot reload para workers também
+    env_file:
+      - ./packages/backend/.env.dev
+    environment:
+      - DATABASE_URL=postgresql://litigo:litigo@database:5432/litigo_dev
+      - REDIS_URL=redis://:redispassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:redispassword@redis:6379/0
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # Celery Beat (Agendador de Jobs)
+  # =============================================================================
+  beat:
+    container_name: litigo-beat-dev
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_app.celery_app beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./packages/backend:/app:cached
+    env_file:
+      - ./packages/backend/.env.dev
+    environment:
+      - DATABASE_URL=postgresql://litigo:litigo@database:5432/litigo_dev
+      - REDIS_URL=redis://:redispassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:redispassword@redis:6379/0
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # Flower (Monitoramento Celery) - Opcional
+  # =============================================================================
+  flower:
+    container_name: litigo-flower-dev
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_app.celery_app flower --port=5555 --broker=redis://:redispassword@redis:6379/0
+    ports:
+      - "5555:5555"
+    env_file:
+      - ./packages/backend/.env.dev
+    environment:
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/0
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - litigo-network
+    profiles:
+      - monitoring
+
+  # =============================================================================
+  # Adminer (Interface Web para PostgreSQL) - Opcional
+  # =============================================================================
+  adminer:
+    image: adminer:latest
+    container_name: litigo-adminer-dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - litigo-network
+    profiles:
+      - monitoring
+
+# =============================================================================
+# Volumes Persistentes
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# =============================================================================
+# Rede Interna
+# =============================================================================
+networks:
+  litigo-network:
+    driver: bridge 

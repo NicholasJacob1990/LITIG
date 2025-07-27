@@ -105,7 +105,7 @@ class GetContextualActionsUseCase implements UseCase<List<Map<String, dynamic>>,
           },
         ];
 
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return [
           {
             'id': 'complete_assigned_task',

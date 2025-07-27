@@ -112,8 +112,13 @@ async def get_performance_insights(
     Rate limit: 10 requests/minute por usuário
     """
     try:
-        # Validar se é um prestador
-        if current_user.get("user_metadata", {}).get("user_type") != "LAWYER":
+        # Validar se é um prestador (advogado individual ou escritório)
+        from ..schemas.user_types import normalize_entity_type, is_lawyer
+        
+        user_type = current_user.get("user_metadata", {}).get("user_type", "")
+        normalized_type = normalize_entity_type(user_type)
+        
+        if not is_lawyer(normalized_type):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Acesso negado. Apenas para prestadores de serviços."
@@ -161,8 +166,13 @@ async def get_performance_summary(
     Versão simplificada do endpoint principal, otimizada para carregamento rápido.
     """
     try:
-        # Validar se é um prestador
-        if current_user.get("user_metadata", {}).get("user_type") != "LAWYER":
+        # Validar se é um prestador (advogado individual ou escritório)
+        from ..schemas.user_types import normalize_entity_type, is_lawyer
+        
+        user_type = current_user.get("user_metadata", {}).get("user_type", "")
+        normalized_type = normalize_entity_type(user_type)
+        
+        if not is_lawyer(normalized_type):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Acesso negado. Apenas para prestadores de serviços."
@@ -207,8 +217,13 @@ async def get_market_benchmarks(
     Permite filtrar por área de atuação e features específicas.
     """
     try:
-        # Validar se é um prestador
-        if current_user.get("user_metadata", {}).get("user_type") != "LAWYER":
+        # Validar se é um prestador (advogado individual ou escritório)
+        from ..schemas.user_types import normalize_entity_type, is_lawyer
+        
+        user_type = current_user.get("user_metadata", {}).get("user_type", "")
+        normalized_type = normalize_entity_type(user_type)
+        
+        if not is_lawyer(normalized_type):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Acesso negado. Apenas para prestadores de serviços."

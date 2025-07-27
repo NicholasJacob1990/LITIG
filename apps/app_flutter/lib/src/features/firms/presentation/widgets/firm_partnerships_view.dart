@@ -73,7 +73,7 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
           children: [
             Row(
               children: [
-                Icon(LucideIcons.userCheck, size: 20),
+                const Icon(LucideIcons.userCheck, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'Visão Geral das Parcerias',
@@ -188,7 +188,7 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tipo de Parceria', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Tipo de Parceria', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedTypeFilter,
@@ -218,7 +218,7 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Status', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Status', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedStatusFilter,
@@ -327,7 +327,7 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
                         children: [
                           Text(
                             partnership.partnerName,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -381,7 +381,7 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
             ),
             const SizedBox(height: 16),
             if (partnership.benefits.isNotEmpty) ...[
-              Text(
+              const Text(
                 'Benefícios da Parceria:',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -409,7 +409,7 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
               const SizedBox(height: 16),
             ],
             if (partnership.sharedAreas.isNotEmpty) ...[
-              Text(
+              const Text(
                 'Áreas de Colaboração:',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -534,8 +534,8 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
         status: PartnershipStatus.active,
         startDate: DateTime(2020, 3, 15),
         description: 'Parceria estratégica para assessoria jurídica internacional em operações cross-border e M&A globais.',
-        benefits: ['Acesso a mercados internacionais', 'Know-how em legislação estrangeira', 'Rede global de contatos'],
-        sharedAreas: ['Direito Internacional', 'M&A', 'Compliance Global'],
+        benefits: const ['Acesso a mercados internacionais', 'Know-how em legislação estrangeira', 'Rede global de contatos'],
+        sharedAreas: const ['Direito Internacional', 'M&A', 'Compliance Global'],
         contactPerson: 'James Wilson',
         contactEmail: 'j.wilson@bakermckenzie.com',
         collaborationScore: 0.92,
@@ -548,8 +548,8 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
         status: PartnershipStatus.active,
         startDate: DateTime(2022, 8, 10),
         description: 'Parceria tecnológica para desenvolvimento de soluções jurídicas inovadoras e automação de processos.',
-        benefits: ['Automação de processos', 'Inteligência artificial jurídica', 'Análise de dados avançada'],
-        sharedAreas: ['LegalTech', 'Automação', 'Análise de Dados'],
+        benefits: const ['Automação de processos', 'Inteligência artificial jurídica', 'Análise de dados avançada'],
+        sharedAreas: const ['LegalTech', 'Automação', 'Análise de Dados'],
         contactPerson: 'Dr. Ana Silva',
         contactEmail: 'ana.silva@techlawsolutions.com',
         collaborationScore: 0.88,
@@ -562,8 +562,8 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
         status: PartnershipStatus.active,
         startDate: DateTime(2019, 2, 20),
         description: 'Parceria acadêmica para pesquisa jurídica, estágios e desenvolvimento de talentos na área do Direito.',
-        benefits: ['Acesso a pesquisas jurídicas', 'Pipeline de talentos', 'Credibilidade acadêmica'],
-        sharedAreas: ['Pesquisa Jurídica', 'Formação Profissional', 'Publicações'],
+        benefits: const ['Acesso a pesquisas jurídicas', 'Pipeline de talentos', 'Credibilidade acadêmica'],
+        sharedAreas: const ['Pesquisa Jurídica', 'Formação Profissional', 'Publicações'],
         contactPerson: 'Prof. Carlos Mendes',
         contactEmail: 'carlos.mendes@usp.br',
         collaborationScore: 0.85,
@@ -576,8 +576,8 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
         status: PartnershipStatus.active,
         startDate: DateTime(2021, 11, 5),
         description: 'Parceria de referência para casos na região Nordeste, fortalecendo nossa presença nacional.',
-        benefits: ['Expansão geográfica', 'Casos regionais', 'Conhecimento local'],
-        sharedAreas: ['Direito Regional', 'Casos Trabalhistas', 'Direito Ambiental'],
+        benefits: const ['Expansão geográfica', 'Casos regionais', 'Conhecimento local'],
+        sharedAreas: const ['Direito Regional', 'Casos Trabalhistas', 'Direito Ambiental'],
         contactPerson: 'Maria Santos',
         contactEmail: 'm.santos@eanordeste.com.br',
         collaborationScore: 0.78,
@@ -590,8 +590,8 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
         status: PartnershipStatus.pending,
         startDate: DateTime(2024, 1, 10),
         description: 'Parceria estratégica em desenvolvimento para operações financeiras complexas e reestruturações corporativas.',
-        benefits: ['Expertise financeira', 'Operações complexas', 'Reestruturações'],
-        sharedAreas: ['Direito Financeiro', 'Reestruturação', 'Mercado de Capitais'],
+        benefits: const ['Expertise financeira', 'Operações complexas', 'Reestruturações'],
+        sharedAreas: const ['Direito Financeiro', 'Reestruturação', 'Mercado de Capitais'],
         contactPerson: 'Roberto Lima',
         contactEmail: 'r.lima@cfpartners.com',
         collaborationScore: 0.82,
@@ -604,8 +604,8 @@ class _FirmPartnershipsViewState extends State<FirmPartnershipsView> {
         status: PartnershipStatus.active,
         startDate: DateTime(2023, 6, 15),
         description: 'Parceria comercial focada em sustentabilidade e direito ambiental, atendendo demandas ESG.',
-        benefits: ['Expertise ESG', 'Sustentabilidade corporativa', 'Compliance ambiental'],
-        sharedAreas: ['Direito Ambiental', 'ESG', 'Sustentabilidade'],
+        benefits: const ['Expertise ESG', 'Sustentabilidade corporativa', 'Compliance ambiental'],
+        sharedAreas: const ['Direito Ambiental', 'ESG', 'Sustentabilidade'],
         contactPerson: 'Fernanda Verde',
         contactEmail: 'f.verde@greenlaw.org',
         collaborationScore: 0.90,

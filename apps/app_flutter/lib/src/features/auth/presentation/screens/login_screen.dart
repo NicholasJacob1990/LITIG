@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader(BuildContext context) {
     return Column(
       children: [
-        Icon(
+        const Icon(
           LucideIcons.shieldCheck,
           size: 64,
           color: AppColors.primaryBlue,
@@ -152,9 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () {
           // TODO: Implementar lógica de esqueci a senha
         },
-        child: Text(
+        child: const Text(
           'Esqueceu a senha?',
-          style: const TextStyle(color: AppColors.primaryBlue),
+          style: TextStyle(color: AppColors.primaryBlue),
         ),
       ),
     );
@@ -171,12 +171,12 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           onPressed: isLoading ? null : _handleLogin,
           child: isLoading
-              ? SizedBox(
+              ? const SizedBox(
                   height: 24,
                   width: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    valueColor: AlwaysStoppedAnimation<Color>(
                       Colors.white,
                     ),
                   ),
@@ -188,17 +188,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildDivider(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
-        const Expanded(child: Divider()),
+        Expanded(child: Divider()),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'ou',
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.textSecondary),
           ),
         ),
-        const Expanded(child: Divider()),
+        Expanded(child: Divider()),
       ],
     );
   }
@@ -332,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
             OutlinedButton.icon(
               icon: const Icon(LucideIcons.users),
               label: const Text('Associado'),
-              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_associated'}),
+              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_firm_member'}),
             ),
             OutlinedButton.icon(
               icon: const Icon(LucideIcons.building),
@@ -358,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.bug_report, color: AppColors.warning, size: 20),
+                  const Icon(Icons.bug_report, color: AppColors.warning, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     'Modo Debug - Teste de Usuários',
@@ -382,7 +382,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 runSpacing: 8,
                 children: [
                   _buildDebugButton(context, 'Cliente', 'PF', AppColors.info),
-                  _buildDebugButton(context, 'Advogado Associado', 'lawyer_associated', AppColors.success),
+                  _buildDebugButton(context, 'Advogado Associado', 'lawyer_firm_member', AppColors.success),
                   _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', AppColors.primaryPurple),
                   _buildDebugButton(context, 'Escritório', 'lawyer_office', AppColors.error),
                   _buildDebugButton(context, 'Super Associado', 'lawyer_platform_associate', AppColors.warning),
@@ -414,16 +414,16 @@ class _LoginScreenState extends State<LoginScreen> {
         id: 'debug-client-1',
         email: 'cliente@teste.com',
         fullName: 'João Silva (Cliente)',
-        role: 'client',
-        userRole: 'PF',
+        role: 'client_pf',
+        userRole: 'client_pf',
         permissions: ['nav.view.client_home', 'nav.view.client_cases', 'nav.view.find_lawyers', 'nav.view.client_messages', 'nav.view.services', 'nav.view.client_profile'],
       ),
-      'lawyer_associated': const User(
+      'lawyer_firm_member': const User(
         id: 'debug-lawyer-1',
         email: 'advogado@teste.com',
         fullName: 'Maria Santos (Advogada Associada)',
         role: 'lawyer',
-        userRole: 'lawyer_associated',
+        userRole: 'lawyer_firm_member',
         permissions: ['nav.view.dashboard', 'nav.view.cases', 'nav.view.schedule', 'nav.view.offers', 'nav.view.messages', 'nav.view.profile'],
       ),
       'lawyer_individual': const User(

@@ -125,7 +125,7 @@ async def get_chat_rooms(current_user = Depends(get_current_user)):
     """
     try:
         # Determinar campo de filtro baseado no tipo de usuário
-        if current_user["user_type"] in ["lawyer_individual", "lawyer_office"]:
+        if current_user["user_type"] in ["lawyer_individual", "firm"]:
             user_field = "lawyer_id"
         else:
             user_field = "client_id"

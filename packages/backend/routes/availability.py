@@ -29,7 +29,13 @@ async def update_my_availability(
     Atualiza o status de disponibilidade do advogado logado.
     """
     user_id = current_user.get("id")
-    if not user_id or current_user.get("user_metadata", {}).get("user_type") != "LAWYER":
+    # Verificar se é advogado (individual ou escritório)
+    from ..schemas.user_types import normalize_entity_type, is_lawyer
+    
+    user_type = current_user.get("user_metadata", {}).get("user_type", "")
+    normalized_type = normalize_entity_type(user_type)
+    
+    if not user_id or not is_lawyer(normalized_type):
         raise HTTPException(status_code=403, detail="Acesso negado.")
 
     try:

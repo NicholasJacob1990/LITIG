@@ -48,6 +48,10 @@ from services.cluster_data_collection_service import (
 from services.embedding_service import generate_embedding_with_provider
 from services.cluster_labeling_service import ClusterLabelingService
 
+# 🆕 Serviços para automação de recomendações e notificações
+from services.partnership_recommendation_service import PartnershipRecommendationService
+from services.notify_service import send_notifications_to_lawyers
+
 
 @dataclass
 class ClusteringConfig:
@@ -693,6 +697,10 @@ class ClusterGenerationJob:
                 
                 await db.commit()
                 self.logger.info("✅ Detecção de clusters emergentes concluída com análise de momentum")
+                
+                # 🆕 NOVA FUNCIONALIDADE: Disparar recomendações automáticas
+                if entity_type == ClusterDataType.LAWYER and (emergent_alerts or basic_emergent_clusters):
+                    await self._trigger_partnership_recommendations(emergent_alerts, basic_emergent_clusters, db)
             
         except Exception as e:
             self.logger.error(f"❌ Erro na detecção de clusters emergentes: {e}")
@@ -714,6 +722,168 @@ class ClusterGenerationJob:
                 
         except Exception as e:
             self.logger.error(f"❌ Erro na geração de rótulos: {e}")
+    
+    async def _trigger_partnership_recommendations(self, emergent_alerts: List, basic_emergent_clusters: List, db: AsyncSession):
+        """
+        🆕 Dispara recomendações de parceria automáticas baseadas em clusters emergentes de advogados.
+        """
+        
+        self.logger.info("🤝 Iniciando geração automática de recomendações de parceria")
+        
+        try:
+            # Coletar IDs de advogados dos clusters emergentes
+            affected_lawyer_ids = set()
+            cluster_contexts = {}
+            
+            # Processar alertas do momentum service
+            for alert in emergent_alerts:
+                cluster_members = await self._get_cluster_members(alert.cluster_id, db)
+                for member in cluster_members:
+                    affected_lawyer_ids.add(member['lawyer_id'])
+                    cluster_contexts[member['lawyer_id']] = {
+                        'cluster_label': alert.cluster_label,
+                        'market_opportunity': alert.market_opportunity,
+                        'momentum_score': alert.momentum_score,
+                        'growth_rate': alert.growth_rate
+                    }
+            
+            # Processar clusters emergentes básicos
+            for cluster_info in basic_emergent_clusters:
+                cluster_members = await self._get_cluster_members(cluster_info['cluster_id'], db)
+                for member in cluster_members:
+                    affected_lawyer_ids.add(member['lawyer_id'])
+                    if member['lawyer_id'] not in cluster_contexts:
+                        cluster_contexts[member['lawyer_id']] = {
+                            'cluster_label': f"Cluster {cluster_info['cluster_id'][:8]}",
+                            'market_opportunity': "Nova área de oportunidade detectada",
+                            'momentum_score': cluster_info['avg_confidence'],
+                            'growth_rate': 0.0
+                        }
+            
+            if not affected_lawyer_ids:
+                self.logger.info("Nenhum advogado encontrado nos clusters emergentes")
+                return
+            
+            self.logger.info(f"📊 Processando recomendações para {len(affected_lawyer_ids)} advogados de clusters emergentes")
+            
+            # Inicializar serviço de recomendações
+            partnership_service = PartnershipRecommendationService(db)
+            
+            # Gerar recomendações para cada advogado afetado
+            recommendations_generated = []
+            
+            for lawyer_id in affected_lawyer_ids:
+                try:
+                    # Gerar recomendações híbridas (incluindo busca externa)
+                    recommendations = await partnership_service.get_recommendations(
+                        lawyer_id=lawyer_id,
+                        limit=5,
+                        expand_search=True  # Usar busca híbrida para maximizar oportunidades
+                    )
+                    
+                    if recommendations:
+                        context = cluster_contexts.get(lawyer_id, {})
+                        recommendations_generated.append({
+                            'lawyer_id': lawyer_id,
+                            'recommendations_count': len(recommendations),
+                            'cluster_context': context
+                        })
+                        
+                        self.logger.info(
+                            f"✅ {len(recommendations)} recomendações geradas para advogado {lawyer_id} "
+                            f"(cluster: {context.get('cluster_label', 'N/A')})"
+                        )
+                    
+                except Exception as e:
+                    self.logger.error(f"❌ Erro ao gerar recomendações para advogado {lawyer_id}: {e}")
+                    continue
+            
+            # Disparar notificações para advogados com novas recomendações
+            if recommendations_generated:
+                await self._send_partnership_notifications(recommendations_generated)
+                
+                self.logger.info(
+                    f"🎉 Automação concluída: {len(recommendations_generated)} advogados receberam "
+                    f"novas recomendações de parceria baseadas em clusters emergentes"
+                )
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro na automação de recomendações de parceria: {e}")
+    
+    async def _get_cluster_members(self, cluster_id: str, db: AsyncSession) -> List[Dict[str, Any]]:
+        """Obtém membros de um cluster específico."""
+        
+        try:
+            # Query para obter advogados do cluster
+            query = text("""
+                SELECT 
+                    le.entity_id as lawyer_id,
+                    le.confidence_score,
+                    le.embedding_provider,
+                    p.full_name,
+                    p.email
+                FROM lawyer_embeddings le
+                LEFT JOIN profiles p ON p.id = le.entity_id
+                WHERE le.cluster_id = :cluster_id
+                AND le.entity_id IS NOT NULL
+                ORDER BY le.confidence_score DESC
+            """)
+            
+            result = await db.execute(query, {'cluster_id': cluster_id})
+            members = [dict(row._mapping) for row in result.fetchall()]
+            
+            return members
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro ao buscar membros do cluster {cluster_id}: {e}")
+            return []
+    
+    async def _send_partnership_notifications(self, recommendations_data: List[Dict[str, Any]]):
+        """
+        🆕 Envia notificações push sobre novas oportunidades de parceria.
+        """
+        
+        self.logger.info("📱 Enviando notificações de parceria para advogados")
+        
+        try:
+            # Preparar lista de IDs para notificação
+            lawyer_ids = [data['lawyer_id'] for data in recommendations_data]
+            
+            # Preparar payload da notificação
+            notification_payload = {
+                "headline": "🤝 Novas Oportunidades de Parceria Detectadas",
+                "summary": "Descobrimos novas oportunidades de parceria estratégica baseadas em análise de mercado emergente. Confira as recomendações personalizadas.",
+                "data": {
+                    "type": "partnership_opportunities",
+                    "action": "open_partnerships_screen",
+                    "source": "cluster_analysis",
+                    "timestamp": datetime.now().isoformat(),
+                    "stats": {
+                        "total_lawyers_notified": len(lawyer_ids),
+                        "avg_recommendations_per_lawyer": sum(d['recommendations_count'] for d in recommendations_data) / len(recommendations_data) if recommendations_data else 0
+                    }
+                }
+            }
+            
+            # Enviar notificações via serviço existente
+            await send_notifications_to_lawyers(lawyer_ids, notification_payload)
+            
+            # Log detalhado
+            for data in recommendations_data[:5]:  # Mostrar apenas os primeiros 5 para não poluir logs
+                context = data['cluster_context']
+                self.logger.info(
+                    f"📱 Notificação enviada: Advogado {data['lawyer_id']} → "
+                    f"{data['recommendations_count']} recomendações → "
+                    f"Cluster: {context.get('cluster_label', 'N/A')}"
+                )
+            
+            if len(recommendations_data) > 5:
+                self.logger.info(f"📱 ... e mais {len(recommendations_data) - 5} advogados notificados")
+            
+            self.logger.info(f"✅ Notificações enviadas para {len(lawyer_ids)} advogados sobre oportunidades de parceria")
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erro ao enviar notificações de parceria: {e}")
 
 
 # Função principal para execução via scheduler

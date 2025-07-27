@@ -490,6 +490,156 @@ class PartnershipMLService:
         self.logger.info(f"A/B test iniciado: {test_id}")
         return test_id
     
+    async def collect_training_data(self, days_back: int = 7) -> List[Dict[str, Any]]:
+        """
+        Coleta dados de treinamento dos últimos N dias.
+        
+        Args:
+            days_back: Número de dias para coletar dados históricos
+            
+        Returns:
+            Lista de samples de treinamento com features e labels
+        """
+        cutoff_date = datetime.utcnow() - timedelta(days=days_back)
+        
+        try:
+            # Query para coletar feedback com features
+            query = text("""
+                SELECT 
+                    pf.user_id,
+                    pf.lawyer_id,
+                    pf.recommended_lawyer_id,
+                    pf.feedback_type,
+                    pf.feedback_score,
+                    pf.interaction_time_seconds,
+                    pf.timestamp,
+                    -- Features calculadas (simuladas por enquanto)
+                    0.75 as complementarity_score,
+                    0.65 as momentum_score,
+                    0.80 as reputation_score,
+                    0.70 as diversity_score,
+                    0.60 as firm_synergy_score
+                FROM partnership_feedback pf
+                WHERE pf.timestamp >= :cutoff_date
+                ORDER BY pf.timestamp DESC
+            """)
+            
+            result = await self.db.execute(query, {"cutoff_date": cutoff_date})
+            rows = result.fetchall()
+            
+            training_data = []
+            for row in rows:
+                training_data.append({
+                    "user_id": row.user_id,
+                    "lawyer_id": row.lawyer_id,
+                    "recommended_lawyer_id": row.recommended_lawyer_id,
+                    "feedback_type": row.feedback_type,
+                    "feedback_score": float(row.feedback_score),
+                    "interaction_time": int(row.interaction_time_seconds or 0),
+                    "features": {
+                        "complementarity": float(row.complementarity_score),
+                        "momentum": float(row.momentum_score),
+                        "reputation": float(row.reputation_score),
+                        "diversity": float(row.diversity_score),
+                        "firm_synergy": float(row.firm_synergy_score)
+                    },
+                    "timestamp": row.timestamp
+                })
+            
+            self.logger.info(f"Coletados {len(training_data)} samples de treinamento ({days_back} dias)")
+            return training_data
+            
+        except Exception as e:
+            self.logger.error(f"Erro ao coletar dados de treinamento: {e}")
+            return []
+    
+    async def optimize_weights_from_feedback(self, min_feedback_count: int = 50) -> Dict[str, Any]:
+        """
+        Executa otimização de pesos baseada no feedback coletado.
+        
+        Args:
+            min_feedback_count: Mínimo de feedbacks necessários para otimização
+            
+        Returns:
+            Dict com resultado da otimização
+        """
+        try:
+            # Coletar dados de treinamento
+            training_data = await self.collect_training_data(days_back=30)
+            
+            if len(training_data) < min_feedback_count:
+                return {
+                    "success": False,
+                    "error": f"Dados insuficientes: {len(training_data)}/{min_feedback_count}",
+                    "training_samples": len(training_data)
+                }
+            
+            # Executar gradient descent
+            old_weights = self.weights
+            optimized_weights = await self._gradient_descent_optimization(training_data)
+            
+            # Salvar novos pesos
+            self.weights = optimized_weights
+            await self.save_optimized_weights(optimized_weights)
+            
+            # Calcular métricas de melhoria
+            performance_improvement = await self._calculate_performance_improvement(
+                old_weights, optimized_weights, training_data
+            )
+            
+            # Atualizar timestamp de última otimização
+            self.performance_metrics["last_optimization"] = datetime.utcnow()
+            
+            return {
+                "success": True,
+                "training_samples": len(training_data),
+                "epochs": 100,  # Fixo por enquanto
+                "final_loss": performance_improvement.get("final_loss", 0.0),
+                "performance_improvement": performance_improvement,
+                "old_weights": old_weights.to_dict() if old_weights else {},
+                "new_weights": optimized_weights.to_dict(),
+                "optimization_timestamp": self.performance_metrics["last_optimization"].isoformat()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Erro na otimização de pesos: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "training_samples": 0
+            }
+    
+    async def _calculate_performance_improvement(
+        self, 
+        old_weights: Optional[PartnershipWeights],
+        new_weights: PartnershipWeights,
+        training_data: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Calcula métricas de melhoria de performance."""
+        
+        if not old_weights or len(training_data) == 0:
+            return {"final_loss": 0.0, "improvement_percent": 0.0}
+        
+        # Calcular loss com pesos antigos vs. novos
+        old_loss = sum([
+            (self._calculate_predicted_score(sample, old_weights) - sample["feedback_score"]) ** 2
+            for sample in training_data
+        ]) / len(training_data)
+        
+        new_loss = sum([
+            (self._calculate_predicted_score(sample, new_weights) - sample["feedback_score"]) ** 2
+            for sample in training_data
+        ]) / len(training_data)
+        
+        improvement_percent = ((old_loss - new_loss) / old_loss * 100) if old_loss > 0 else 0.0
+        
+        return {
+            "old_loss": old_loss,
+            "final_loss": new_loss,
+            "improvement_percent": improvement_percent,
+            "samples_evaluated": len(training_data)
+        }
+
     async def close(self):
         """Fecha conexões."""
         await self.redis.close() 

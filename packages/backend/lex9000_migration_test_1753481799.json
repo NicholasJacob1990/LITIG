@@ -1,0 +1,34 @@
+{
+  "summary": {
+    "total_tests": 2,
+    "v1_successes": 0,
+    "v2_successes": 2,
+    "v1_failures": 2,
+    "v2_failures": 0,
+    "avg_v1_time": 0.3389279842376709,
+    "avg_v2_time": 0.44540154933929443,
+    "compatibility_score": 0.0
+  },
+  "test_results": [
+    {
+      "case_name": "Caso Trabalhista Simples",
+      "v1_result": null,
+      "v2_result": "LEXAnalysisResultV2(classificacao={'area_principal': 'A definir', 'assunto_principal': 'An\u00e1lise em andamento', 'natureza': 'Contencioso'}, dados_extraidos={}, analise_viabilidade={'classificacao': 'Parcialmente Vi\u00e1vel', 'probabilidade_exito': 'M\u00e9dia', 'complexidade': 'M\u00e9dia'}, urgencia={'nivel': 'M\u00e9dia', 'motivo': 'An\u00e1lise autom\u00e1tica indispon\u00edvel'}, aspectos_tecnicos={}, recomendacoes={'proximos_passos': ['An\u00e1lise manual necess\u00e1ria']}, confidence_score=0.3, processing_time_ms=514, model_used='fallback', fallback_level=999, processing_metadata={'version': 'v2_fallback_traditional', 'error': 'Todos os 4 n\u00edveis de fallback falharam: ', 'text_response': ''})",
+      "v1_error": null,
+      "v2_error": null,
+      "v1_time": 0.4695608615875244,
+      "v2_time": 0.5149838924407959,
+      "comparison": {}
+    },
+    {
+      "case_name": "Caso Civil Complexo",
+      "v1_result": null,
+      "v2_result": "LEXAnalysisResultV2(classificacao={'area_principal': 'A definir', 'assunto_principal': 'An\u00e1lise em andamento', 'natureza': 'Contencioso'}, dados_extraidos={}, analise_viabilidade={'classificacao': 'Parcialmente Vi\u00e1vel', 'probabilidade_exito': 'M\u00e9dia', 'complexidade': 'M\u00e9dia'}, urgencia={'nivel': 'M\u00e9dia', 'motivo': 'An\u00e1lise autom\u00e1tica indispon\u00edvel'}, aspectos_tecnicos={}, recomendacoes={'proximos_passos': ['An\u00e1lise manual necess\u00e1ria']}, confidence_score=0.3, processing_time_ms=375, model_used='fallback', fallback_level=999, processing_metadata={'version': 'v2_fallback_traditional', 'error': 'Todos os 4 n\u00edveis de fallback falharam: ', 'text_response': ''})",
+      "v1_error": null,
+      "v2_error": null,
+      "v1_time": 0.20829510688781738,
+      "v2_time": 0.37581920623779297,
+      "comparison": {}
+    }
+  ]
+}

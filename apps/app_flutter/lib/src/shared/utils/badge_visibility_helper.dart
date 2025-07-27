@@ -6,21 +6,22 @@
 /// - Relações B2B entre todos os tipos
 class BadgeVisibilityHelper {
   
-  /// Tipos de usuário advogado
-  static const Set<String> _lawyerRoles = {
-    'lawyer_associated',      // Advogado associado
-    'lawyer_platform_associate', // Super associado
-    'lawyer_office',          // Escritório
-    'lawyer_individual',      // Autônomo
-    'lawyer',                 // Genérico
-  };
+  // Advogados que veem badges 
+  static const lawyerRoles = [
+    'lawyer',              // Legacy
+    'lawyer_firm_member',  // Atualizado de lawyer_associated
+    'lawyer_individual',   // Autônomo
+    'firm',               // Atualizado de lawyer_office
+    'super_associate',    // Atualizado de lawyer_platform_associate
+  ];
 
   /// Tipos de usuário cliente
   static const Set<String> _clientRoles = {
     'client',
-    'client_individual',      // PF
-    'client_corporate',       // PJ
-    'client_enterprise',      // PJ Enterprise
+    'client_pf',              // Cliente Pessoa Física
+          'client_pj',              // Cliente Pessoa Jurídica
+      'client_corporate',       // PJ (compatibilidade)
+      'client_enterprise',      // PJ Enterprise
   };
 
   /// Planos VIP para clientes (tanto PF quanto PJ)
@@ -39,7 +40,7 @@ class BadgeVisibilityHelper {
   /// Verifica se o usuário é advogado (qualquer tipo)
   static bool isLawyer(String? role) {
     if (role == null) return false;
-    return _lawyerRoles.contains(role);
+    return lawyerRoles.contains(role);
   }
 
   /// Verifica se o usuário é cliente (qualquer tipo)
@@ -130,6 +131,31 @@ class BadgeVisibilityHelper {
     return false;
   }
 
+  /// BADGE BUSINESS CLIENT - Para marcar clientes PJ Business
+  static bool shouldShowBusinessClientBadge(String? viewerRole, String? clientPlan) {
+    if (clientPlan?.toUpperCase() != 'BUSINESS' && clientPlan?.toUpperCase() != 'BUSINESS_PJ') return false;
+    
+    // Apenas advogados e escritórios veem clientes Business (para priorização B2B)
+    return isLawyer(viewerRole);
+  }
+
+  /// BADGE FIRM PLAN - Para marcar planos de escritórios
+  static bool shouldShowFirmPlanBadge(String? viewerRole, String? firmPlan) {
+    final supportedPlans = ['PARTNER_FIRM', 'PREMIUM_FIRM', 'ENTERPRISE_FIRM', 'PARTNER', 'PREMIUM', 'ENTERPRISE'];
+    if (!supportedPlans.contains(firmPlan?.toUpperCase())) return false;
+    
+    // Clientes veem badges de escritórios para identificar qualidade
+    return ['client_pf', 'client_pj', 'lawyer_individual', 'lawyer_firm_member', 'admin'].contains(viewerRole);
+  }
+
+  /// BADGE SUPER ASSOCIATE - Para marcar Super Associates
+  static bool shouldShowSuperAssociateBadge(String? viewerRole, String? plan) {
+    if (!['PARTNER', 'PREMIUM'].contains(plan?.toUpperCase())) return false;
+    
+    // Advogados contratantes veem badges de Super Associates para identificar especialistas
+    return ['lawyer_individual', 'firm', 'lawyer_firm_member', 'admin'].contains(viewerRole);
+  }
+
   /// CONTEXTO DE CASO PREMIUM - Lógica especial para casos premium
   static BadgeContext getPremiumCaseContext(String? viewerRole, bool isPremium, bool isEnterprise) {
     if (isEnterprise) {
@@ -148,13 +174,13 @@ class BadgeVisibilityHelper {
       );
     }
     
-    return BadgeContext(showBadge: false);
+    return const BadgeContext(showBadge: false);
   }
 
   /// CONTEXTO DE CLIENTE VIP/ENTERPRISE - Função para badges de cliente (PF ou PJ)
   static BadgeContext getVipClientContext(String? viewerRole, String? clientPlan) {
     if (!isVipOrEnterprisePlan(clientPlan)) {
-      return BadgeContext(showBadge: false);
+      return const BadgeContext(showBadge: false);
     }
 
     final shouldShow = shouldShowVipClientBadge(viewerRole, clientPlan);
@@ -193,7 +219,7 @@ class BadgeVisibilityHelper {
   /// CONTEXTO DE ADVOGADO PRO - Lógica especial para advogados PRO
   static BadgeContext getProLawyerContext(String? viewerRole, String? lawyerPlan, bool isPremiumCase) {
     if (lawyerPlan?.toUpperCase() != 'PRO') {
-      return BadgeContext(showBadge: false);
+      return const BadgeContext(showBadge: false);
     }
 
     final shouldShow = shouldShowProLawyerBadge(viewerRole, lawyerPlan, isPremiumCase: isPremiumCase);
@@ -231,6 +257,92 @@ class BadgeVisibilityHelper {
     }
     
     return contexts;
+  }
+
+  /// CONTEXTO DE CLIENTE BUSINESS - Para badges de cliente PJ Business
+  static BadgeContext getBusinessClientContext(String? viewerRole, String? clientPlan) {
+    if (!shouldShowBusinessClientBadge(viewerRole, clientPlan)) {
+      return BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
+    }
+
+    return BadgeContext(
+      showBadge: true,
+      badgeText: 'Cliente Business',
+      badgeColor: BadgeColor.blue,
+      priority: 2,
+    );
+  }
+
+  /// CONTEXTO DE ESCRITÓRIO - Para badges de planos de escritório
+  static BadgeContext getFirmPlanContext(String? viewerRole, String? firmPlan) {
+    if (!shouldShowFirmPlanBadge(viewerRole, firmPlan)) {
+      return BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
+    }
+
+    String badgeText;
+    BadgeColor badgeColor;
+    int priority;
+
+    final normalizedPlan = firmPlan?.toUpperCase();
+    if (normalizedPlan?.contains('PARTNER') == true) {
+      badgeText = 'Partner';
+      badgeColor = BadgeColor.indigo;
+      priority = 2;
+    } else if (normalizedPlan?.contains('PREMIUM') == true) {
+      badgeText = 'Premium';
+      badgeColor = BadgeColor.amber;
+      priority = 1;
+    } else if (normalizedPlan?.contains('ENTERPRISE') == true) {
+      badgeText = 'Enterprise';
+      badgeColor = BadgeColor.purple;
+      priority = 1;
+    } else {
+      badgeText = 'Escritório';
+      badgeColor = BadgeColor.grey;
+      priority = 3;
+    }
+
+    return BadgeContext(
+      showBadge: true,
+      badgeText: badgeText,
+      badgeColor: badgeColor,
+      priority: priority,
+    );
+  }
+
+  /// CONTEXTO DE SUPER ASSOCIATE - Para badges de Super Associates
+  static BadgeContext getSuperAssociateContext(String? viewerRole, String? plan) {
+    if (!shouldShowSuperAssociateBadge(viewerRole, plan)) {
+      return BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
+    }
+
+    String badgeText;
+    BadgeColor badgeColor;
+    int priority;
+
+    switch (plan?.toUpperCase()) {
+      case 'PARTNER':
+        badgeText = 'Super Partner';
+        badgeColor = BadgeColor.purple;
+        priority = 1;
+        break;
+      case 'PREMIUM':
+        badgeText = 'Super Premium';
+        badgeColor = BadgeColor.amber;
+        priority = 1;
+        break;
+      default:
+        badgeText = 'Super';
+        badgeColor = BadgeColor.grey;
+        priority = 2;
+    }
+
+    return BadgeContext(
+      showBadge: true,
+      badgeText: badgeText,
+      badgeColor: badgeColor,
+      priority: priority,
+    );
   }
 
   /// Retorna a cor baseada no tier de parceria

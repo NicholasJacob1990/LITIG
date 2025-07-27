@@ -159,10 +159,10 @@ class CasesScreen extends StatelessWidget {
 
   bool _isLawyer(String? role) {
     return role != null && (
-      role == 'lawyer_associated' ||
+      role == 'lawyer_firm_member' ||  // Atualizado de lawyer_associated
       role == 'lawyer_individual' ||
-      role == 'lawyer_office' ||
-      role == 'lawyer_platform_associate'
+      role == 'firm' ||  // Atualizado de lawyer_office
+      role == 'super_associate'  // Atualizado de lawyer_platform_associate
     );
   }
 

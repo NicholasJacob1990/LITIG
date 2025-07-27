@@ -80,7 +80,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               LucideIcons.share2,
               color: AppColors.primary,
               size: 20,
@@ -168,7 +168,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.alertCircle,
             color: AppColors.error,
             size: 32,
@@ -203,7 +203,7 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-                      Icon(
+                      const Icon(
             LucideIcons.link,
             color: AppColors.textSecondary,
             size: 48,
@@ -443,12 +443,12 @@ class _SocialMediaManagementWidgetState extends State<SocialMediaManagementWidge
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: isConnected
-          ? Icon(
+          ? const Icon(
               LucideIcons.check,
               color: Colors.green,
               size: 16,
             )
-          : Icon(
+          : const Icon(
               LucideIcons.plus,
               color: AppColors.primary,
               size: 16,

@@ -469,7 +469,7 @@ class AccessibleChip extends StatelessWidget {
     
     // Cores com alto contraste
     final effectiveBackgroundColor = backgroundColor ?? 
-        (selected ? colorScheme.primaryContainer : colorScheme.surfaceVariant);
+        (selected ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest);
     final effectiveTextColor = textColor ?? 
         (selected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant);
 

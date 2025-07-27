@@ -74,7 +74,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
           children: [
             Row(
               children: [
-                Icon(LucideIcons.briefcase, size: 20),
+                const Icon(LucideIcons.briefcase, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'Estatísticas de Casos',
@@ -180,7 +180,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Status', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Status', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedFilter,
@@ -210,7 +210,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Área', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const Text('Área', style: TextStyle(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedArea,
@@ -319,7 +319,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
                       const SizedBox(height: 4),
                       Text(
                         caseInfo.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -455,7 +455,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
         successProbability: 0.85,
         clientName: 'João Silva Santos',
         caseValue: 250000,
-        tags: ['Acidente', 'Trânsito', 'Indenização'],
+        tags: const ['Acidente', 'Trânsito', 'Indenização'],
       ),
       CaseInfo(
         id: '2',
@@ -469,7 +469,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
         successProbability: 0.92,
         clientName: 'Maria Oliveira Costa',
         caseValue: 180000,
-        tags: ['Rescisão', 'Acordo', 'Trabalhista'],
+        tags: const ['Rescisão', 'Acordo', 'Trabalhista'],
       ),
       CaseInfo(
         id: '3',
@@ -483,7 +483,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
         successProbability: 0.98,
         clientName: 'TechStart Ltda.',
         caseValue: 50000,
-        tags: ['Startup', 'Constituição', 'Tecnologia'],
+        tags: const ['Startup', 'Constituição', 'Tecnologia'],
       ),
       CaseInfo(
         id: '4',
@@ -496,7 +496,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
         successProbability: 0.75,
         clientName: 'Carlos Eduardo Nunes',
         caseValue: 500000,
-        tags: ['Crime Tributário', 'Defesa', 'Sonegação'],
+        tags: const ['Crime Tributário', 'Defesa', 'Sonegação'],
       ),
       CaseInfo(
         id: '5',
@@ -510,7 +510,7 @@ class _FirmCasesHistoryViewState extends State<FirmCasesHistoryView> {
         successProbability: 0.95,
         clientName: 'Ana e Roberto Lima',
         caseValue: 120000,
-        tags: ['Divórcio', 'Consensual', 'Guarda'],
+        tags: const ['Divórcio', 'Consensual', 'Guarda'],
       ),
     ];
   }

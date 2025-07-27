@@ -199,7 +199,7 @@ PROFILE_PERMISSIONS = {
         "b2b.access",
         "firms.view"
     ],
-    "lawyer_office": [
+    "firm": [
         "nav.view.home",
         "nav.view.cases",
         "nav.view.contractor_offers",
@@ -219,11 +219,53 @@ PROFILE_PERMISSIONS = {
     "lawyer_platform_associate": [
         "nav.view.home",
         "nav.view.cases",
-        "nav.view.offers",
-        "nav.view.messages",
+        "nav.view.find_lawyers",
+        "nav.view.partnerships",
+        "nav.view.analytics",
         "nav.view.profile",
-        "offers.receive",
-        "b2b.access",
+        "nav.view.messages",
+        "nav.view.admin_panel",
+        "nav.view.auto_context",
+        "nav.view.contractor_home",
+        "nav.view.contractor_profile",
+        "cases.view",
+        "cases.create",
+        "cases.edit",
+        "cases.manage",
+        "partnerships.view",
+        "partnerships.create",
+        "partnerships.manage",
+        "analytics.view",
+        "analytics.advanced",
+        "admin.view",
+        "admin.manage_users",
+        "firms.view"
+    ],
+    
+    # Super Associado (nome atualizado)
+    "super_associate": [
+        "nav.view.home",
+        "nav.view.cases",
+        "nav.view.find_lawyers",
+        "nav.view.partnerships",
+        "nav.view.analytics",
+        "nav.view.profile",
+        "nav.view.messages",
+        "nav.view.admin_panel",
+        "nav.view.auto_context",
+        "nav.view.contractor_home",
+        "nav.view.contractor_profile",
+        "cases.view",
+        "cases.create",
+        "cases.edit",
+        "cases.manage",
+        "partnerships.view",
+        "partnerships.create",
+        "partnerships.manage",
+        "analytics.view",
+        "analytics.advanced",
+        "admin.view",
+        "admin.manage_users",
         "firms.view"
     ]
 }

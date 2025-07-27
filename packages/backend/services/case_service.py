@@ -97,9 +97,27 @@ class CaseService:
         # Buscar dados do cliente
         if case.get("client_id"):
             client_data = await self._get_profile_data(case["client_id"])
+            
+            # Determinar tipo de cliente (PF/PJ) baseado nos dados
+            from ..schemas.user_types import normalize_entity_type
+            from ..services.user_type_migration_service import UserTypeMigrationService
+            
+            raw_client_type = client_data.get("user_type", "client")
+            normalized_client_type = normalize_entity_type(raw_client_type)
+            
+            # Se for cliente genérico, tentar determinar PF/PJ
+            if raw_client_type == "client":
+                migration_service = UserTypeMigrationService(None)  # Sem DB para análise simples
+                client_type_enum = migration_service._determine_client_type(client_data)
+                if client_type_enum.value == "PF":
+                    normalized_client_type = "client_pf"
+                else:
+                    normalized_client_type = "client_pj"
+            
             enriched.update({
                 "client_name": client_data.get("full_name", ""),
-                "client_type": client_data.get("user_type", ""),
+                "client_type": normalized_client_type,  # Tipo normalizado
+                "client_type_display": "Pessoa Física" if "pf" in normalized_client_type else "Pessoa Jurídica" if "pj" in normalized_client_type else "Cliente",
                 "client_avatar": client_data.get("avatar_url", "")
             })
 

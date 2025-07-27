@@ -37,7 +37,7 @@ import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settin
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
-import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
+import 'package:meu_app/src/features/lawyers/presentation/screens/claim_profile_screen.dart';import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_team_screen.dart';
 import 'package:meu_app/src/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:meu_app/src/features/admin/presentation/screens/admin_metrics_screen.dart';
@@ -123,7 +123,7 @@ GoRouter appRouter(AuthBloc authBloc) {
         print('DEBUG: Redirect - userRole: $userRole');
         
         switch (userRole) {
-          case 'lawyer_associated':
+          case 'lawyer_firm_member':  // Atualizado de lawyer_associated
             print('DEBUG: Redirecting to /dashboard');
             return '/dashboard';
           case 'lawyer_office':
@@ -149,7 +149,13 @@ GoRouter appRouter(AuthBloc authBloc) {
         GoRoute(path: '/financial', builder: (context, state) => const FinancialDashboardScreen()),
       GoRoute(path: '/register-client', builder: (context, state) => const RegisterClientScreen()),
       GoRoute(
-        path: '/register-lawyer',
+      GoRoute(
+        path: '/claim-profile',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'] ?? 'invalid';
+          return ClaimProfileScreen(token: token);
+        },
+      ),        path: '/register-lawyer',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final role = extra?['role'] as String? ?? 'lawyer_individual';

@@ -607,7 +607,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Compatibilidade',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
@@ -627,7 +627,7 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Fatores de Compatibilidade',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
@@ -677,8 +677,8 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: TextStyle(fontWeight: FontWeight.w500)),
-                    Text('${(score * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    Text('${(score * 100).toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
                 Text(description, style: TextStyle(color: Colors.grey[600], fontSize: 12)),

@@ -3,7 +3,7 @@ import '../base_info_section.dart';
 
 /// Seção de Breakdown de Tarefas para advogados associados
 /// 
-/// **Contexto:** Advogados associados (lawyer_associated)
+/// **Contexto:** Advogados associados (lawyer_firm_member)
 /// **Substituição:** TaskBreakdownSection (placeholder anterior)
 /// **Foco:** Detalhamento das tarefas delegadas, horas orçadas e responsabilidades
 /// 

@@ -23,13 +23,20 @@ async def root():
 async def validate_role():
     return {
         "valid_roles": [
-            "client",
-            "lawyer",
-            "admin", 
-            "lawyer_individual",
-            "lawyer_office",
-            "lawyer_associated",
-            "lawyer_platform_associate"
+            # Tipos atualizados
+            "client_pf",              # Cliente Pessoa Física
+            "client_pj",              # Cliente Pessoa Jurídica
+            "lawyer_individual",      # Advogado Individual
+            "lawyer_firm_member",     # Advogado Associado a Escritório
+            "firm",                   # Escritório de Advocacia
+            "super_associate",        # Super Associado
+            "admin",                  # Administrador
+            
+            # Tipos legados (compatibilidade)
+            "client",                 # LEGACY: será migrado para client_pf/client_pj
+            "lawyer",                 # LEGACY: será migrado para lawyer_individual
+            "lawyer_associated",      # LEGACY: será migrado para lawyer_firm_member
+            "lawyer_platform_associate"  # LEGACY: vira super_associate
         ],
         "message": "Roles válidos no sistema"
     }

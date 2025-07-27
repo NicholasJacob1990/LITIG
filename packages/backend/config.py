@@ -37,6 +37,42 @@ class Settings:
     # Anthropic
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 
+    # Google Gemini
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-pro")
+    GEMINI_JUDGE_MODEL: str = os.getenv("GEMINI_JUDGE_MODEL", "gemini-2.0-flash-exp")
+    
+    # OpenRouter - Unificação de LLMs
+    USE_OPENROUTER: bool = os.getenv("USE_OPENROUTER", "false").lower() == "true"
+    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+    OPENROUTER_BASE_URL: str = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+    OPENROUTER_SITE_URL: str = os.getenv("OPENROUTER_SITE_URL", "https://litig-1.com")
+    OPENROUTER_APP_NAME: str = os.getenv("OPENROUTER_APP_NAME", "LITIG-1")
+    
+    # Modelos OpenRouter por serviço
+    OPENROUTER_LAWYER_PROFILE_MODEL: str = os.getenv("OPENROUTER_LAWYER_PROFILE_MODEL", "google/gemini-1.5-pro")
+    OPENROUTER_CASE_CONTEXT_MODEL: str = os.getenv("OPENROUTER_CASE_CONTEXT_MODEL", "anthropic/claude-sonnet-4-20250514")
+    OPENROUTER_LEX9000_MODEL: str = os.getenv("OPENROUTER_LEX9000_MODEL", "xai/grok-1")
+    OPENROUTER_CLUSTER_LABELING_MODEL: str = os.getenv("OPENROUTER_CLUSTER_LABELING_MODEL", "xai/grok-1")
+    OPENROUTER_OCR_MODEL: str = os.getenv("OPENROUTER_OCR_MODEL", "openai/gpt-4o-mini")
+    OPENROUTER_PARTNERSHIP_MODEL: str = os.getenv("OPENROUTER_PARTNERSHIP_MODEL", "google/gemini-1.5-pro")
+    
+    # Configurações de resiliência OpenRouter
+    OPENROUTER_AUTO_FALLBACK: bool = os.getenv("OPENROUTER_AUTO_FALLBACK", "true").lower() == "true"
+    OPENROUTER_TIMEOUT_SECONDS: int = int(os.getenv("OPENROUTER_TIMEOUT_SECONDS", "30"))
+    OPENROUTER_MAX_RETRIES: int = int(os.getenv("OPENROUTER_MAX_RETRIES", "2"))
+    ENABLE_DIRECT_LLM_FALLBACK: bool = os.getenv("ENABLE_DIRECT_LLM_FALLBACK", "true").lower() == "true"
+    
+    # LLM Enhanced Matching
+    ENABLE_LLM_MATCHING: bool = os.getenv("ENABLE_LLM_MATCHING", "false").lower() == "true"
+    MAX_LLM_CANDIDATES: int = int(os.getenv("MAX_LLM_CANDIDATES", "15"))
+    TRADITIONAL_WEIGHT: float = float(os.getenv("TRADITIONAL_WEIGHT", "0.6"))
+    LLM_WEIGHT: float = float(os.getenv("LLM_WEIGHT", "0.4"))
+    LLM_MATCHING_VERSION: str = os.getenv("LLM_MATCHING_VERSION", "v1.0")
+    
+    # LLM Enhanced Partnerships
+    ENABLE_PARTNERSHIP_LLM: bool = os.getenv("ENABLE_PARTNERSHIP_LLM", "false").lower() == "true"
+
     # Celery
     CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379")
     CELERY_RESULT_BACKEND: str = os.getenv(

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/trending_clusters_bloc.dart';
 import '../bloc/trending_clusters_state.dart';
+import '../bloc/all_clusters_bloc.dart';
 import '../bloc/partnership_recommendations_bloc.dart';
 import '../../domain/entities/trending_cluster.dart';
 import '../../domain/entities/partnership_recommendation.dart';
 import 'partnership_recommendation_card.dart';
+import '../../../../../injection_container.dart';
 
 class ClusterInsightsModal extends StatefulWidget {
   final String? initialTab;
@@ -93,8 +95,14 @@ class _ClusterInsightsModalState extends State<ClusterInsightsModal>
               controller: _tabController,
               children: [
                 _TrendingClustersTab(),
-                _AllClustersTab(),
-                _PartnershipRecommendationsTab(),
+                BlocProvider(
+                  create: (context) => getIt<AllClustersBloc>()..add(FetchAllClusters()),
+                  child: _AllClustersTab(),
+                ),
+                BlocProvider(
+                  create: (context) => getIt<PartnershipRecommendationsBloc>(),
+                  child: _PartnershipRecommendationsTab(),
+                ),
               ],
             ),
           ),
@@ -159,9 +167,9 @@ class _AllClustersTab extends StatelessWidget {
           const SizedBox(height: 16),
           
           // Lista completa com filtros
-          BlocBuilder<TrendingClustersBloc, TrendingClustersState>(
+          BlocBuilder<AllClustersBloc, AllClustersState>(
             builder: (context, state) {
-              if (state is TrendingClustersLoaded) {
+              if (state is AllClustersLoaded) {
                 return Column(
                   children: state.clusters.map((cluster) => 
                     _ClusterOverviewCard(cluster: cluster)

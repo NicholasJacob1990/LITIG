@@ -27,6 +27,77 @@ router = APIRouter()
             response_model=MatchResponse, tags=["Recommendations"])
 async def get_persisted_matches(
         case_id: UUID, current_user: dict = Depends(get_current_user)):
+        
+@router.get("/cases/{case_id}/enhanced-matches", 
+            tags=["Recommendations", "LLM Enhanced"])
+async def get_enhanced_matches(
+        case_id: UUID, 
+        enable_explanations: bool = True,
+        current_user: dict = Depends(get_current_user)):
+    """
+    🤖 NOVO: Endpoint para matching aprimorado com LLMs
+    
+    Combina algoritmo tradicional com análises LLM para:
+    - Análise contextual de casos
+    - Análise de perfis de advogados  
+    - Scores de compatibilidade inteligentes
+    - Explicações detalhadas dos matches
+    """
+    
+    # Verificar se LLM enhanced está habilitado
+    llm_enabled = os.getenv("ENABLE_LLM_MATCHING", "false").lower() == "true"
+    
+    if not llm_enabled:
+        # Fallback para matching tradicional
+        return await get_persisted_matches(case_id, current_user)
+    
+    try:
+        from ..services.enhanced_match_service import EnhancedMatchService
+        
+        # Carregar dados do caso
+        case_data = await load_case_data(case_id)
+        
+        if not case_data:
+            raise HTTPException(status_code=404, detail="Caso não encontrado")
+        
+        # Usar serviço aprimorado
+        enhanced_service = EnhancedMatchService()
+        enhanced_matches = await enhanced_service.find_enhanced_matches(
+            case_data=case_data,
+            top_n=10,
+            enable_explanations=enable_explanations
+        )
+        
+        # Formatar resposta
+        return {
+            "case_id": case_id,
+            "algorithm_version": "hybrid_llm_v1.0",
+            "llm_enhanced": True,
+            "total_matches": len(enhanced_matches),
+            "matches": [
+                {
+                    "lawyer_id": match.lawyer_id,
+                    "traditional_score": match.traditional_score,
+                    "llm_compatibility_score": match.llm_compatibility_score,
+                    "combined_score": match.combined_score,
+                    "match_reasoning": match.match_reasoning,
+                    "confidence_level": match.confidence_level,
+                    "insights": match.insights
+                }
+                for match in enhanced_matches
+            ],
+            "processing_info": {
+                "traditional_weight": 0.6,
+                "llm_weight": 0.4,
+                "llm_candidates_analyzed": min(len(enhanced_matches), 15)
+            }
+        }
+        
+    except Exception as e:
+        print(f"Erro no matching aprimorado: {e}")
+        # Fallback gracioso para matching tradicional
+        print("Usando fallback para matching tradicional")
+        return await get_persisted_matches(case_id, current_user)
     """
     Busca os matches de advogados que foram previamente gerados e salvos
     para um caso específico.

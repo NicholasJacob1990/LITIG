@@ -21,8 +21,13 @@ async def get_my_financial_dashboard(current_user: dict = Depends(get_current_us
     Busca o dashboard financeiro do advogado logado.
     """
     user_id = current_user.get("id")
-    # Validar se o perfil é de advogado
-    if current_user.get("user_metadata", {}).get("user_type") != "LAWYER":
+    # Validar se o perfil é de advogado (individual ou escritório)
+    from ..schemas.user_types import normalize_entity_type, is_lawyer
+    
+    user_type = current_user.get("user_metadata", {}).get("user_type", "")
+    normalized_type = normalize_entity_type(user_type)
+    
+    if not is_lawyer(normalized_type):
         raise HTTPException(status_code=403, detail="Acesso negado. Apenas para advogados.")
 
     if not user_id:

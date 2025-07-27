@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../base_info_section.dart';
 
-/// Seção de Controle de Tempo para advogados associados
-/// 
-/// **Contexto:** Advogados associados (lawyer_associated)
+/// **Contexto:** Advogados associados (lawyer_firm_member)
 /// **Substituição:** ProcessStatusSection (experiência do cliente)
 /// **Foco:** Controle de tempo, produtividade e métricas de trabalho
 /// 
@@ -857,7 +855,7 @@ class TimeTrackingSection extends BaseInfoSection {
   }
 }
 /// 
-/// **Contexto:** Advogados associados (lawyer_associated)
+/// **Contexto:** Advogados associados (lawyer_firm_member)
 /// **Substituição:** ProcessStatusSection (experiência do cliente)
 /// **Foco:** Controle de tempo, produtividade e métricas de trabalho
 /// 

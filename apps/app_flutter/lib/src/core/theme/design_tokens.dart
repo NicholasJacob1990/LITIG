@@ -308,7 +308,7 @@ class LitigChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: LitigDesignTokens.radiusFull.circularRadius,
         child: Container(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: LitigDesignTokens.spaceMd,
             vertical: LitigDesignTokens.spaceXs,
           ),

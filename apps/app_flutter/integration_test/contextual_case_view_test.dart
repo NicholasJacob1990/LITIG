@@ -264,7 +264,7 @@ Future<void> _loginAsClient(WidgetTester tester) async {
 
 Future<void> _loginAsAssociatedLawyer(WidgetTester tester) async {
   // Simular login como advogado associado
-  // TODO: Implementar simulação com role = 'lawyer_associated'
+  // TODO: Implementar simulação com role = 'lawyer_firm_member' ou 'firm'
 }
 
 Future<void> _loginAsContractingLawyer(WidgetTester tester) async {
@@ -310,7 +310,7 @@ class MockUser extends User {
     switch (role) {
       case 'client':
         return ['view_cases', 'create_cases'];
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return ['view_cases', 'manage_tasks', 'log_hours'];
       case 'lawyer_individual':
       case 'lawyer_office':

@@ -19,7 +19,8 @@ load_dotenv()
 # --- Configuração dos Clientes ---
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-JUDGE_MODEL_PROVIDER = os.getenv("JUDGE_MODEL_PROVIDER", "anthropic")
+JUDGE_MODEL_PROVIDER = os.getenv("JUDGE_MODEL_PROVIDER", "gemini")
+JUDGE_MODEL_GEMINI = os.getenv("GEMINI_JUDGE_MODEL", "gemini-2.0-flash-exp")
 JUDGE_MODEL_ANTHROPIC = "claude-3-opus-20240229"
 JUDGE_MODEL_OPENAI = "gpt-4-turbo"
 SIMPLE_MODEL_CLAUDE = "claude-3-haiku-20240307"
@@ -201,7 +202,26 @@ class EnhancedTriageService:
                 indent=2,
                 ensure_ascii=False)}\n\nSua Saída Final (apenas JSON):"
 
-        if JUDGE_MODEL_PROVIDER == 'openai' and self.openai_client:
+        if JUDGE_MODEL_PROVIDER == 'gemini' and os.getenv("GEMINI_API_KEY"):
+            import google.generativeai as genai
+            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+            
+            model = genai.GenerativeModel(JUDGE_MODEL_GEMINI)
+            response = await asyncio.wait_for(
+                model.generate_content_async(prompt),
+                timeout=30
+            )
+            
+            # Extrair JSON da resposta do Gemini
+            response_text = response.text
+            match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if match:
+                return json.loads(match.group(0))
+            else:
+                # Se não encontrar JSON, tentar parsear a resposta completa
+                return json.loads(response_text)
+                
+        elif JUDGE_MODEL_PROVIDER == 'openai' and self.openai_client:
             response = await self.openai_client.chat.completions.create(
                 model=JUDGE_MODEL_OPENAI, response_format={"type": "json_object"},
                 messages=[{"role": "user", "content": prompt}]

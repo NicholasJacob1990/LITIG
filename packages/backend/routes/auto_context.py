@@ -61,11 +61,12 @@ async def detect_context(
     Solução 3: Detecção automática sem intervenção manual
     """
     try:
-        # Verificar se usuário é super associado
-        if current_user.get("role") != "lawyer_platform_associate":
+        # Verificar se é Super Associado (suportar nome novo e legado)
+        user_role = current_user.get("role", "")
+        if user_role not in ["super_associate", "lawyer_platform_associate"]:
             raise HTTPException(
                 status_code=403,
-                detail="Auto context detection is only available for platform associates"
+                detail="Acesso restrito a Super Associados"
             )
         
         auto_context_service = AutoContextService(supabase)
@@ -210,19 +211,19 @@ async def get_context_stats(
     try:
         auto_context_service = AutoContextService(supabase)
         
-        # Se não for admin, só pode ver suas próprias stats
-        user_id = current_user["id"]
-        if current_user.get("role") not in ["admin", "lawyer_platform_associate"]:
+        # Verificar se é Super Associado (suportar nome novo e legado)
+        user_role = current_user.get("role", "")
+        if user_role not in ["super_associate", "lawyer_platform_associate"]:
             raise HTTPException(
                 status_code=403,
-                detail="Context statistics access denied"
+                detail="Acesso restrito a Super Associados"
             )
         
         # Calcular período
         since = datetime.utcnow() - timedelta(days=days)
         
         stats = await auto_context_service.get_context_statistics(
-            user_id=user_id,
+            user_id=current_user["id"],
             since=since
         )
         

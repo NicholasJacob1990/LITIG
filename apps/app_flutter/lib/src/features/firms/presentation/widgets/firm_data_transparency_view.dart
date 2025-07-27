@@ -323,7 +323,7 @@ class FirmDataTransparencyView extends StatelessWidget {
                 if (sourceInfo.hasError) ...[
                   Row(
                     children: [
-                      Icon(LucideIcons.alertTriangle, size: 12, color: Colors.red),
+                      const Icon(LucideIcons.alertTriangle, size: 12, color: Colors.red),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(

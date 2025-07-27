@@ -64,7 +64,7 @@ class AutoContextMiddleware(BaseHTTPMiddleware):
             # Tentar obter usuário atual
             current_user = await self._get_current_user_safe(request)
             
-            if not current_user or not self._is_super_associate(current_user):
+            if not current_user or not self._is_platform_associate(current_user):
                 # Não é super associado, prosseguir normalmente
                 return await call_next(request)
             
@@ -115,11 +115,10 @@ class AutoContextMiddleware(BaseHTTPMiddleware):
         except Exception:
             return None
 
-    def _is_super_associate(self, user: Dict[str, Any]) -> bool:
-        """
-        Verifica se o usuário é super associado
-        """
-        return user.get("role") == "lawyer_platform_associate"
+    def _is_platform_associate(self, user: Dict[str, Any]) -> bool:
+        """Verifica se é Super Associado (suportar nome novo e legado)"""
+        user_role = user.get("role", "")
+        return user_role in ["super_associate", "lawyer_platform_associate"]
 
     async def _detect_context_from_request(self, request: Request, user: Dict[str, Any]) -> Dict[str, Any]:
         """

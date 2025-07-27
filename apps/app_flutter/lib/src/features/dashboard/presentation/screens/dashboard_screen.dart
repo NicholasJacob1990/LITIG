@@ -23,25 +23,27 @@ class DashboardScreen extends StatelessWidget {
           
           // Determinar o dashboard baseado no tipo específico de usuário
           switch (user.role) {
-            case 'lawyer_office':
+            case 'firm':  // Atualizado de lawyer_office
               // Sócios de escritório recebem dashboard específico da firma
               return FirmDashboard(userName: user.fullName ?? 'Sócio');
             case 'lawyer_individual':
-            case 'lawyer_platform_associate':
+            case 'super_associate':  // Atualizado de lawyer_platform_associate
               // Advogados contratantes recebem dashboard de captação
               return ContractorDashboard(
                 userName: user.fullName ?? 'Advogado',
                 userRole: user.role ?? 'lawyer_individual',
               );
-            case 'lawyer_associated':
+            case 'lawyer_firm_member':  // Atualizado de lawyer_associated
             case 'lawyer':
             case 'LAWYER':
             case 'advogado':
             case 'Lawyer':
               // Advogados associados recebem dashboard pessoal
               return LawyerDashboard(userName: user.fullName ?? 'Advogado');
-            case 'client':
-            case 'PF':
+            case 'client_pf':  // Atualizado
+            case 'client_pj':  // Atualizado
+            case 'client':     // Legacy
+            case 'PF':         // Legacy
             default:
               // Clientes recebem dashboard azul de triagem
               return ClientDashboard(userName: user.fullName ?? 'Cliente');

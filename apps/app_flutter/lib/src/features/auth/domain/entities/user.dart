@@ -72,7 +72,7 @@ class User extends Equatable {
   bool get isClient => effectiveUserRole == 'client';
 
   /// Verifica se o usuário é advogado associado
-  bool get isAssociatedLawyer => effectiveUserRole == 'lawyer_associated';
+  bool get isAssociatedLawyer => effectiveUserRole == 'lawyer_firm_member';  // Atualizado
 
   /// Verifica se o usuário é advogado individual
   bool get isIndividualLawyer => effectiveUserRole == 'lawyer_individual';

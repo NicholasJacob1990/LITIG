@@ -77,7 +77,7 @@ async def create_hiring_proposal(
         lawyer_result = supabase.table("users") \
             .select("id, name, user_type") \
             .eq("id", request.lawyer_id) \
-            .in_("user_type", ["lawyer_individual", "lawyer_office"]) \
+            .in_("user_type", ["lawyer_individual", "firm"]) \
             .execute()
         
         if not lawyer_result.data:
@@ -150,7 +150,7 @@ async def get_hiring_proposals(
     """
     try:
         # Determinar campo de filtro baseado no tipo de usuário
-        if current_user["user_type"] in ["lawyer_individual", "lawyer_office"]:
+        if current_user["user_type"] in ["lawyer_individual", "firm"]:
             user_field = "lawyer_id"
         else:
             user_field = "client_id"
@@ -207,7 +207,7 @@ async def accept_proposal(
     Aceita uma proposta de contratação (apenas advogados)
     """
     try:
-        if current_user["user_type"] not in ["lawyer_individual", "lawyer_office"]:
+        if current_user["user_type"] not in ["lawyer_individual", "firm"]:
             raise HTTPException(
                 status_code=403,
                 detail="Apenas advogados podem aceitar propostas"
@@ -283,7 +283,7 @@ async def reject_proposal(
     Rejeita uma proposta de contratação (apenas advogados)
     """
     try:
-        if current_user["user_type"] not in ["lawyer_individual", "lawyer_office"]:
+        if current_user["user_type"] not in ["lawyer_individual", "firm"]:
             raise HTTPException(
                 status_code=403,
                 detail="Apenas advogados podem rejeitar propostas"

@@ -1,0 +1,35 @@
+{
+  "start_time": "2025-07-25T19:21:53.004745",
+  "tests": [
+    {
+      "test": "openrouter_import",
+      "success": true,
+      "processing_time": 1.38008713722229,
+      "details": "OpenRouter Client funcionando"
+    },
+    {
+      "test": "function_tools_import",
+      "success": false,
+      "processing_time": 0.0002601146697998047,
+      "error": "type object 'LLMFunctionTools' has no attribute 'analyze_legal_case'"
+    },
+    {
+      "test": "services_initialization",
+      "success": false,
+      "processing_time": 0.02613520622253418,
+      "error": "attempted relative import beyond top-level package"
+    },
+    {
+      "test": "function_calling_structure",
+      "success": false,
+      "processing_time": 8.344650268554688e-06,
+      "error": "type object 'LLMFunctionTools' has no attribute 'analyze_legal_case'"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "successes": 1,
+    "failures": 3
+  },
+  "completion_time": "2025-07-25T19:21:54.411316"
+}

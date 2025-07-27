@@ -118,6 +118,14 @@ class UniversalBadge extends StatelessWidget {
         return LucideIcons.star;
       case 'ENTERPRISE':
         return LucideIcons.building;
+      case 'BUSINESS':
+        return LucideIcons.briefcase;
+      case 'PARTNER':
+        return LucideIcons.users;
+      case 'SUPER PARTNER':
+        return LucideIcons.crown;
+      case 'SUPER PREMIUM':
+        return LucideIcons.gem;
       case 'SILVER':
         return LucideIcons.award;
       case 'GOLD':

@@ -3,7 +3,7 @@ import '../base_info_section.dart';
 
 /// Seção de Documentos de Trabalho para advogados associados
 /// 
-/// **Contexto:** Advogados associados (lawyer_associated)
+/// **Contexto:** Advogados associados (lawyer_firm_member)
 /// **Substituição:** DocumentsSection (experiência do cliente)
 /// **Foco:** Documentos de trabalho, templates, versioning e colaboração
 /// 

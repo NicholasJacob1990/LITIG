@@ -159,7 +159,7 @@ class _OptimizedListViewState<T> extends State<OptimizedListView<T>> {
     final visibleStart = (currentOffset / widget.itemExtent).floor();
     final visibleEnd = ((currentOffset + viewportHeight) / widget.itemExtent).ceil();
     
-    final cacheBuffer = 20; // Mantém 20 itens antes e depois da área visível
+    const cacheBuffer = 20; // Mantém 20 itens antes e depois da área visível
     final cacheStart = (visibleStart - cacheBuffer).clamp(0, _items.length);
     final cacheEnd = (visibleEnd + cacheBuffer).clamp(0, _items.length);
 

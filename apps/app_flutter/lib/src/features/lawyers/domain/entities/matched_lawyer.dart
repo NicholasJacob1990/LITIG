@@ -17,6 +17,7 @@ class MatchedLawyer extends Equatable {
   final String? professionalSummary;
   final List<String> specializations;
   final String plan; // NOVO: Plano do advogado
+  final bool isExternal; // NOVO: Indica se é um perfil externo (busca híbrida)
 
   const MatchedLawyer({
     required this.id,
@@ -35,6 +36,7 @@ class MatchedLawyer extends Equatable {
     this.professionalSummary,
     this.specializations = const [],
     this.plan = 'FREE', // NOVO: Padrão FREE
+    this.isExternal = false, // NOVO: Padrão para perfis internos
   });
 
   /// Verifica se o advogado tem plano PRO
@@ -42,6 +44,12 @@ class MatchedLawyer extends Equatable {
 
   /// Verifica se o advogado tem plano FREE
   bool get isFree => plan.toUpperCase() == 'FREE';
+
+  /// Verifica se é um perfil verificado da plataforma
+  bool get isVerified => !isExternal;
+
+  /// Verifica se é um perfil público sugerido
+  bool get isPublicSuggestion => isExternal;
 
   factory MatchedLawyer.fromJson(Map<String, dynamic> json) {
     return MatchedLawyer(
@@ -61,6 +69,7 @@ class MatchedLawyer extends Equatable {
       professionalSummary: json['professional_summary'] ?? json['bio'],
       specializations: List<String>.from(json['specializations'] ?? []),
       plan: json['plan'] as String? ?? 'FREE', // NOVO: Consumir plano do backend
+      isExternal: json['is_external'] as bool? ?? false, // NOVO: Busca híbrida
     );
   }
 
@@ -83,6 +92,7 @@ class MatchedLawyer extends Equatable {
         'U': features.responseTime,
       },
       'specializations': specializations,
+      'is_external': isExternal,
     };
   }
 
@@ -90,7 +100,7 @@ class MatchedLawyer extends Equatable {
   List<Object?> get props => [
     id, nome, primaryArea, reviewCount, distanceKm, isAvailable, avatarUrl,
     rating, fair, equity, features, experienceYears, awards, 
-    professionalSummary, specializations, plan, // NOVO
+    professionalSummary, specializations, plan, isExternal, // NOVO
   ];
 }
 

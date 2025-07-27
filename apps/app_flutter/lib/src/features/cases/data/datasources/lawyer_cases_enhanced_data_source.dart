@@ -32,7 +32,7 @@ class LawyerCasesEnhancedDataSource {
     AppLogger.info('Loading enhanced cases for lawyer $lawyerId with role $lawyerRole');
 
     switch (lawyerRole) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':
         return _getAssociateCases(lawyerId);
       case 'lawyer_platform_associate':
         return _getSuperAssociateCases(lawyerId);
@@ -224,7 +224,7 @@ class LawyerCasesEnhancedDataSource {
     if (metrics == null) return 'Informações não disponíveis';
 
     switch (userRole) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':
         return 'Caso delegado internamente pelo supervisor para desenvolvimento de habilidades específicas';
       
       case 'lawyer_platform_associate':

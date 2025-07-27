@@ -481,7 +481,7 @@ class ContextualCaseDetailSectionFactory {
             PhaseDocument(name: 'Peticao_Inicial_v1.pdf', url: ''),
           ],
         ),
-        ProcessPhase(
+        const ProcessPhase(
           name: 'Coleta de Provas',
           description: 'Reunindo todas as evidências e documentos necessários.',
           isCompleted: false,
@@ -491,7 +491,7 @@ class ContextualCaseDetailSectionFactory {
             PhaseDocument(name: 'Email_Troca_Evidencias.pdf', url: ''),
           ],
         ),
-        ProcessPhase(
+        const ProcessPhase(
           name: 'Audiência de Conciliação',
           description: 'Tentativa de acordo amigável entre as partes.',
           isCompleted: false,

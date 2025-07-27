@@ -42,7 +42,7 @@ class CalendarIntegrationWidget extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               LucideIcons.calendar,
               color: AppColors.primary,
               size: 20,
@@ -132,7 +132,7 @@ class CalendarIntegrationWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.alertCircle,
             color: AppColors.error,
             size: 32,
@@ -321,7 +321,7 @@ class CalendarIntegrationWidget extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.calendar,
             color: AppColors.primary,
             size: 48,
@@ -354,7 +354,7 @@ class CalendarIntegrationWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             LucideIcons.checkCircle,
             color: AppColors.primary,
             size: 20,

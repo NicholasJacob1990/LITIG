@@ -1,0 +1,65 @@
+{
+  "timestamp": 1753480597.501866,
+  "availability_results": [
+    {
+      "model_key": "gemini_25_pro",
+      "model_id": "google/gemini-2.5-pro",
+      "service": "Lawyer Profile Analysis + Partnership Enhancement",
+      "available": false,
+      "response_time_ms": 0,
+      "error": "Cliente OpenRouter n\u00e3o inicializado",
+      "test_response": null
+    },
+    {
+      "model_key": "claude_sonnet_4",
+      "model_id": "anthropic/claude-sonnet-4-20250514",
+      "service": "Case Context Analysis",
+      "available": false,
+      "response_time_ms": 0,
+      "error": "Cliente OpenRouter n\u00e3o inicializado",
+      "test_response": null
+    },
+    {
+      "model_key": "grok_4",
+      "model_id": "x-ai/grok-4",
+      "service": "LEX-9000 + Cluster Labeling",
+      "available": false,
+      "response_time_ms": 0,
+      "error": "Cliente OpenRouter n\u00e3o inicializado",
+      "test_response": null
+    },
+    {
+      "model_key": "gpt_41_mini",
+      "model_id": "openai/gpt-4.1-mini",
+      "service": "OCR Validation",
+      "available": false,
+      "response_time_ms": 0,
+      "error": "Cliente OpenRouter n\u00e3o inicializado",
+      "test_response": null
+    },
+    {
+      "model_key": "openrouter_auto",
+      "model_id": "openrouter/auto",
+      "service": "Fallback Autom\u00e1tico (N\u00edvel 2)",
+      "available": false,
+      "response_time_ms": 0,
+      "error": "Cliente OpenRouter n\u00e3o inicializado",
+      "test_response": null
+    }
+  ],
+  "function_calling_results": [],
+  "summary": {
+    "availability": {
+      "total": 5,
+      "available": 0,
+      "percentage": 0.0
+    },
+    "function_calling": {
+      "total": 0,
+      "working": 0,
+      "percentage": 0
+    },
+    "overall_health_score": 0.0,
+    "status": "needs_attention"
+  }
+}

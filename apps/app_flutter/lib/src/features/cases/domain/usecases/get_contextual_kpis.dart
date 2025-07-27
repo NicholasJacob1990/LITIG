@@ -23,7 +23,7 @@ class GetContextualKpisUseCase implements UseCase<List<Map<String, dynamic>>, Ge
         return _getLawyerIndividualKpis(timeframe);
       case 'lawyer_office':
         return _getLawyerOfficeKpis(timeframe);
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return _getLawyerAssociatedKpis(timeframe);
       case 'client':
         return _getClientKpis(timeframe);

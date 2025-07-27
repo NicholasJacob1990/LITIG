@@ -109,13 +109,6 @@ import 'package:meu_app/src/features/firms/domain/repositories/enriched_firm_rep
 import 'package:meu_app/src/features/firms/domain/usecases/get_enriched_firm.dart';
 import 'package:meu_app/src/features/firms/presentation/bloc/firm_profile_bloc.dart';
 
-// Cluster Insights
-import 'package:meu_app/src/features/cluster_insights/data/datasources/cluster_remote_datasource.dart';
-import 'package:meu_app/src/features/cluster_insights/data/repositories/cluster_repository_impl.dart';
-import 'package:meu_app/src/features/cluster_insights/domain/repositories/cluster_repository.dart';
-import 'package:meu_app/src/features/cluster_insights/presentation/bloc/trending_clusters_bloc.dart';
-import 'package:meu_app/src/features/cluster_insights/presentation/bloc/partnership_recommendations_bloc.dart';
-
 // Partnerships
 import 'package:meu_app/src/features/partnerships/data/datasources/partnership_remote_data_source.dart';
 import 'package:meu_app/src/features/partnerships/data/datasources/partnership_remote_data_source_impl.dart';
@@ -205,6 +198,14 @@ import 'package:meu_app/src/features/ratings/domain/usecases/submit_rating_useca
 import 'package:meu_app/src/features/ratings/domain/usecases/get_lawyer_ratings_usecase.dart';
 import 'package:meu_app/src/features/ratings/domain/usecases/check_can_rate_usecase.dart';
 import 'package:meu_app/src/features/ratings/presentation/bloc/rating_bloc.dart';
+
+// Cluster Insights
+import 'package:meu_app/src/features/cluster_insights/data/datasources/cluster_remote_datasource.dart';
+import 'package:meu_app/src/features/cluster_insights/data/repositories/cluster_repository_impl.dart';
+import 'package:meu_app/src/features/cluster_insights/domain/repositories/cluster_repository.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/bloc/trending_clusters_bloc.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/bloc/all_clusters_bloc.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/bloc/partnership_recommendations_bloc.dart';
 
 // Removed duplicate SLA Settings imports - using sla_management structure
 
@@ -786,5 +787,8 @@ Future<void> configureDependencies() async {
 
   // BLoCs
   getIt.registerFactory(() => TrendingClustersBloc(repository: getIt()));
+  
+  // 💡 ADICIONADOS: Registro dos novos BLoCs para as abas do modal
+  getIt.registerFactory(() => AllClustersBloc(repository: getIt()));
   getIt.registerFactory(() => PartnershipRecommendationsBloc(repository: getIt()));
 }

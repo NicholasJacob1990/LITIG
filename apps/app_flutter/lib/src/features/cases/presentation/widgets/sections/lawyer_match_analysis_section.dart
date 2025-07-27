@@ -105,7 +105,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
 
   String _getSubtitle() {
     switch (lawyerRole) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':
         return 'Por que foi delegado para você';
       case 'lawyer_platform_associate':
         return 'Algoritmo de match da plataforma';
@@ -365,7 +365,7 @@ class LawyerMatchAnalysisSection extends StatelessWidget {
 
   Widget _buildSpecificAnalysis(ThemeData theme) {
     switch (lawyerRole) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':
         return _buildInternalAnalysis(theme);
       case 'lawyer_platform_associate':
         return _buildAlgorithmAnalysis(theme);

@@ -1,0 +1,35 @@
+{
+  "start_time": "2025-07-25T19:22:58.744354",
+  "tests": [
+    {
+      "test": "openrouter_import",
+      "success": true,
+      "processing_time": 0.987933874130249,
+      "details": "OpenRouter Client funcionando"
+    },
+    {
+      "test": "function_tools_import",
+      "success": true,
+      "processing_time": 0.00020503997802734375,
+      "details": "Tools disponíveis: 3"
+    },
+    {
+      "test": "services_initialization",
+      "success": false,
+      "processing_time": 0.021243810653686523,
+      "error": "attempted relative import beyond top-level package"
+    },
+    {
+      "test": "function_calling_structure",
+      "success": true,
+      "processing_time": 3.3855438232421875e-05,
+      "details": "Tools válidas: lex9000, lawyer_profile, case_context, partnership, cluster_labeling, ocr_extraction"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "successes": 3,
+    "failures": 1
+  },
+  "completion_time": "2025-07-25T19:22:59.753841"
+}

@@ -141,7 +141,7 @@ class FirmTeamView extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.crown,
                   size: 20,
                   color: Colors.amber,
@@ -222,7 +222,7 @@ class FirmTeamView extends StatelessWidget {
             radius: 24,
             onBackgroundImageError: (exception, stackTrace) {},
             child: lawyer.avatarUrl.isEmpty
-                ? Icon(LucideIcons.user, size: 20)
+                ? const Icon(LucideIcons.user, size: 20)
                 : null,
           ),
           if (isPartner)
@@ -375,7 +375,7 @@ class FirmTeamView extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   LucideIcons.trophy,
                   size: 20,
                   color: Colors.amber,

@@ -40,9 +40,9 @@ class _EnhancedFirmProfileScreenState extends State<EnhancedFirmProfileScreen>
   
   // Filtros para otimização
   String _caseStatusFilter = 'all';
-  String _caseAreaFilter = 'all';
+  final String _caseAreaFilter = 'all';
   String _partnershipTypeFilter = 'all';
-  String _partnershipStatusFilter = 'all';
+  final String _partnershipStatusFilter = 'all';
   
   @override
   void initState() {

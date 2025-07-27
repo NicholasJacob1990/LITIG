@@ -26,10 +26,10 @@ class EnhancedLawyerCasesDemoPage extends StatefulWidget {
 class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  String _selectedRole = 'lawyer_associated';
+  String _selectedRole = 'lawyer_firm_member';  // Atualizado de lawyer_associated
 
-  final List<Map<String, String>> _lawyerRoles = [
-    {'key': 'lawyer_associated', 'name': 'Associado', 'description': 'Casos delegados pelo supervisor'},
+  final List<Map<String, String>> _roles = [
+    {'key': 'lawyer_firm_member', 'name': 'Associado', 'description': 'Casos delegados pelo supervisor'},  // Atualizado
     {'key': 'lawyer_platform_associate', 'name': 'Super Associado', 'description': 'Casos via algoritmo da plataforma'},
     {'key': 'lawyer_individual', 'name': 'Autônomo', 'description': 'Casos algorítmicos + captação direta'},
     {'key': 'lawyer_office', 'name': 'Escritório', 'description': 'Casos algorítmicos + captação direta'},
@@ -38,13 +38,13 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _lawyerRoles.length, vsync: this);
+    _tabController = TabController(length: _roles.length, vsync: this);
     _loadMockData();
     
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         setState(() {
-          _selectedRole = _lawyerRoles[_tabController.index]['key']!;
+          _selectedRole = _roles[_tabController.index]['key']!;
           _loadMockData();
         });
       }
@@ -75,7 +75,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           isScrollable: true,
-          tabs: _lawyerRoles.map((role) => Tab(
+          tabs: _roles.map((role) => Tab(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -92,7 +92,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: _lawyerRoles.map((role) => _buildRoleContent(role['key']!)).toList(),
+              children: _roles.map((role) => _buildRoleContent(role['key']!)).toList(),
             ),
           ),
         ],
@@ -101,7 +101,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
   }
 
   Widget _buildInfoHeader() {
-    final currentRole = _lawyerRoles.firstWhere((role) => role['key'] == _selectedRole);
+    final currentRole = _roles.firstWhere((role) => role['key'] == _selectedRole);
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -182,7 +182,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
 
   String _getRoleDescription(String role) {
     switch (role) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return 'Visualização para advogados associados que recebem casos delegados. Inclui contexto de delegação, objetivos de aprendizado e orientações do supervisor.';
       case 'lawyer_platform_associate':
         return 'Visualização para super associados que recebem casos via algoritmo. Inclui score algorítmico, análise de competição e expectativas do cliente.';
@@ -252,7 +252,7 @@ class _EnhancedLawyerCasesDemoPageState extends State<EnhancedLawyerCasesDemoPag
     // Criar MatchAnalysis baseado no role
     MatchAnalysis matchAnalysis;
     switch (role) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         matchAnalysis = const InternalMatchAnalysis(
           matchScore: 85.0,
           matchReason: 'Delegação do supervisor',

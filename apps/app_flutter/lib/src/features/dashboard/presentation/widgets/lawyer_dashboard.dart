@@ -11,7 +11,7 @@ import 'package:meu_app/src/features/dashboard/presentation/bloc/dashboard_bloc.
 import 'package:meu_app/src/features/dashboard/presentation/widgets/stat_card.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_firm_info_card.dart';
 import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_bloc.dart';
-import 'package:meu_app/src/features/cluster_insights/presentation/widgets/expandable_clusters_widget.dart';
+import 'package:meu_app/src/features/cluster_insights/presentation/widgets/hybrid_partnerships_widget.dart';
 import 'package:meu_app/injection_container.dart';
 
 class LawyerDashboard extends StatelessWidget {
@@ -57,8 +57,11 @@ class LawyerDashboard extends StatelessWidget {
               const SizedBox(height: 24),
               _buildFirmInfoSection(context),
               const SizedBox(height: 24),
-              // Widget de Insights de Cluster
-              const ExpandableClustersWidget(),
+              // Widget de Parcerias Híbridas
+              const HybridPartnershipsWidget(
+                currentLawyerId: 'demo_lawyer_001', // TODO: Obter do contexto de autenticação
+                showExpandOption: true,
+              ),
               const SizedBox(height: 24),
               Text('Ações Rápidas', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),

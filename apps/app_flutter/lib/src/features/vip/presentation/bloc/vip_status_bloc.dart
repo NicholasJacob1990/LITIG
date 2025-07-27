@@ -99,11 +99,11 @@ class VipStatusBloc extends Bloc<VipStatusEvent, VipStatusState> {
         userId: event.userId,
         currentPlan: 'VIP',
         isVip: true,
-        benefits: ['Atendimento prioritário', 'Suporte 24/7'],
+        benefits: const ['Atendimento prioritário', 'Suporte 24/7'],
         lastUpdated: DateTime.now(),
       ));
     } catch (e) {
-      emit(VipStatusError(message: 'Erro ao verificar status VIP'));
+      emit(const VipStatusError(message: 'Erro ao verificar status VIP'));
     }
   }
 
@@ -116,7 +116,7 @@ class VipStatusBloc extends Bloc<VipStatusEvent, VipStatusState> {
       await Future.delayed(const Duration(milliseconds: 300));
       add(CheckVipStatus(userId: event.userId, userType: 'client'));
     } catch (e) {
-      emit(VipStatusError(message: 'Erro ao atualizar plano VIP'));
+      emit(const VipStatusError(message: 'Erro ao atualizar plano VIP'));
     }
   }
 }

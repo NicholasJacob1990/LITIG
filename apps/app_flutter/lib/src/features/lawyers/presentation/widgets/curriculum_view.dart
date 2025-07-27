@@ -72,7 +72,7 @@ class CurriculumView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
@@ -80,7 +80,7 @@ class CurriculumView extends StatelessWidget {
                         size: 16,
                         color: Colors.green,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(
                         'Verificado',
                         style: TextStyle(
@@ -217,7 +217,7 @@ class CurriculumView extends StatelessWidget {
                               CircleAvatar(
                                 radius: 30,
                                 backgroundColor: Theme.of(context).colorScheme.primary,
-                                child: Icon(
+                                child: const Icon(
                                   LucideIcons.user,
                                   color: Colors.white,
                                   size: 24,

@@ -1,0 +1,127 @@
+# =============================================================================
+# LITIG-1 Development Environment - Opção B (Supabase + Upstash)
+# =============================================================================
+# Para iniciar: docker-compose -f docker-compose.supabase.yml up --build
+# Para parar: docker-compose -f docker-compose.supabase.yml down
+#
+# IMPORTANTE: Antes de usar, configure:
+# 1. Crie um projeto no Supabase
+# 2. Configure um Redis no Upstash
+# 3. Copie .env.supabase.example para .env.supabase e preencha as credenciais
+
+services:
+  # =============================================================================
+  # API FastAPI (Backend Principal)
+  # =============================================================================
+  api:
+    container_name: litigo-api-supabase
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.dev
+    command: uvicorn main_simple:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+    volumes:
+      - ./packages/backend:/app:cached  # Hot reload habilitado
+      - /app/__pycache__  # Evita problemas de cache
+    ports:
+      - "8002:8000"  # Porta diferente para evitar conflito
+    env_file:
+      - ./packages/backend/.env.supabase  # Configuração Supabase
+    restart: unless-stopped
+    networks:
+      - litigo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=8000"
+
+  # =============================================================================
+  # Celery Worker (Background Jobs)
+  # =============================================================================
+  worker:
+    container_name: litigo-worker-supabase
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_app.celery_app worker -l info -Q ml-training,periodic,monitoring,enrichment,ml-quick --concurrency=2
+    volumes:
+      - ./packages/backend:/app:cached
+    env_file:
+      - ./packages/backend/.env.supabase
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # Celery Beat (Scheduler)
+  # =============================================================================
+  beat:
+    container_name: litigo-beat-supabase
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_app.celery_app beat -l info
+    volumes:
+      - ./packages/backend:/app:cached
+    env_file:
+      - ./packages/backend/.env.supabase
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # Flower (Monitoramento Celery)
+  # =============================================================================
+  flower:
+    container_name: litigo-flower-supabase
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_app.celery_app flower --port=5555
+    ports:
+      - "5556:5555"  # Porta diferente para evitar conflito
+    env_file:
+      - ./packages/backend/.env.supabase
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - litigo-network
+
+  # =============================================================================
+  # Redis Backup (OPCIONAL - para desenvolvimento offline)
+  # =============================================================================
+  redis-backup:
+    container_name: litigo-redis-backup
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_backup_data:/data
+    ports:
+      - "6380:6379"  # Porta alternativa
+    restart: unless-stopped
+    networks:
+      - litigo-network
+    profiles:
+      - backup  # Use com: docker-compose --profile backup up
+
+# =============================================================================
+# Networks & Volumes
+# =============================================================================
+networks:
+  litigo-network:
+    driver: bridge
+
+volumes:
+  redis_backup_data: 

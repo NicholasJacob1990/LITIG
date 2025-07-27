@@ -256,7 +256,7 @@ class AudioService {
       _recordingTimer?.cancel();
       _recordingDuration = Duration.zero;
       
-      _recordingStateController.add(RecordingState(
+      _recordingStateController.add(const RecordingState(
         isRecording: false,
         isPaused: false,
         duration: Duration.zero,

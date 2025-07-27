@@ -845,7 +845,7 @@ class CaseCard extends StatelessWidget {
   }
 
   bool _isLawyer(String role) {
-    return role == 'lawyer_associated' ||
+    return role == 'lawyer_firm_member' ||  // Atualizado de lawyer_associated
            role == 'lawyer_individual' ||
            role == 'lawyer_office' ||
            role == 'lawyer_platform_associate' ||

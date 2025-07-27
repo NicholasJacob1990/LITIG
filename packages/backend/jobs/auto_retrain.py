@@ -283,10 +283,10 @@ def auto_retrain_task(self, force_retrain: bool = False):
         trainer = LTRModelTrainer()
         validator = ModelValidator()
 
-        # 1. Coletar dados de treinamento
-        training_data = trainer.collect_training_data(days_back=30)
+        # 1. Coletar dados de treinamento - OTIMIZADO: 14 dias (vs. 30) para dados mais frescos
+        training_data = trainer.collect_training_data(days_back=14)
 
-        if len(training_data) < 100 and not force_retrain:
+        if len(training_data) < 200 and not force_retrain:  # OTIMIZADO: 200 samples (vs. 100) para maior robustez
             logger.warning("Dados insuficientes para retreino automático")
             return {"status": "skipped", "reason": "insufficient_data"}
 

@@ -18,8 +18,8 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   
-  final List<String> _lawyerRoles = [
-    'lawyer_associated',
+  final List<String> _roles = [
+    'lawyer_firm_member',  // Atualizado de lawyer_associated
     'lawyer_platform_associate',
     'lawyer_individual',
     'lawyer_office',
@@ -35,7 +35,7 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _lawyerRoles.length, vsync: this);
+    _tabController = TabController(length: _roles.length, vsync: this);
   }
 
   @override
@@ -66,7 +66,7 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: _lawyerRoles.map((role) => _buildRoleTab(role)).toList(),
+        children: _roles.map((role) => _buildRoleTab(role)).toList(),
       ),
     );
   }
@@ -193,7 +193,7 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
     List<String> features;
     
     switch (role) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         features = [
           'Casos delegados internamente',
           'Métricas de aprendizado',
@@ -459,7 +459,7 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
 
   String _getRoleLabel(String role) {
     switch (role) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return 'Associado';
       case 'lawyer_platform_associate':
         return 'Super Associado';
@@ -474,7 +474,7 @@ class _LawyerCasesDemoPageState extends State<LawyerCasesDemoPage>
 
   String _getRoleDescription(String role) {
     switch (role) {
-      case 'lawyer_associated':
+      case 'lawyer_firm_member':  // Atualizado de lawyer_associated
         return 'Casos delegados internamente pelo supervisor';
       case 'lawyer_platform_associate':
         return 'Casos exclusivos via algoritmo da plataforma';

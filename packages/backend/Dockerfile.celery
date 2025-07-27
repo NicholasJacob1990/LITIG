@@ -1,0 +1,27 @@
+FROM python:3.10-slim
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Criar usuário não-root para segurança
+RUN useradd --create-home --shell /bin/bash app
+
+WORKDIR /app
+
+# Copiar e instalar dependências
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copiar código da aplicação
+COPY . .
+
+# Mudar proprietário dos arquivos para o usuário app
+RUN chown -R app:app /app
+USER app
+
+# Comando padrão para Celery worker
+CMD ["celery", "-A", "celery_app.celery_app", "worker", "-l", "info", "-Q", "ml-training,periodic,monitoring,enrichment,ml-quick"] 

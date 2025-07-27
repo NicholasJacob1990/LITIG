@@ -32,12 +32,12 @@ class VipClientBadge extends StatelessWidget {
     
     // Apenas advogados e escritórios veem badges VIP (para priorização)
     if (viewerRole == null || 
-        !['lawyer', 'lawyer_associated', 'lawyer_office', 'admin'].contains(viewerRole)) {
+        !['lawyer', 'lawyer_firm_member', 'firm', 'admin'].contains(viewerRole)) {
       return false;
     }
     
     // Planos VIP suportados
-    return ['VIP', 'ENTERPRISE', 'PREMIUM'].contains(clientPlan?.toUpperCase());
+    return ['VIP', 'ENTERPRISE', 'PREMIUM', 'BUSINESS'].contains(clientPlan?.toUpperCase());
   }
 
   /// Obtém a cor do badge baseada no plano (cores validadas para contraste WCAG 2.1 AA)
@@ -49,6 +49,8 @@ class VipClientBadge extends StatelessWidget {
         return const Color(0xFF4338CA); // Índigo - Contraste 5.2:1 (WCAG AA ✓)
       case 'PREMIUM':
         return const Color(0xFFB45309); // Dourado escuro - Contraste 4.6:1 (WCAG AA ✓)
+      case 'BUSINESS':
+        return const Color(0xFF1E40AF); // Azul - Contraste 4.9:1 (WCAG AA ✓)
       default:
         return const Color(0xFF6B7280); // Cinza neutro
     }
@@ -63,6 +65,8 @@ class VipClientBadge extends StatelessWidget {
         return 'Cliente Enterprise';
       case 'PREMIUM':
         return 'Cliente Premium';
+      case 'BUSINESS':
+        return 'Cliente Business';
       default:
         return 'Cliente Premium';
     }
@@ -83,6 +87,8 @@ class VipClientBadge extends StatelessWidget {
         return 'Cliente Enterprise: Soluções corporativas, equipe dedicada e SLA garantido';
       case 'PREMIUM':
         return 'Cliente Premium: Benefícios especiais e atendimento diferenciado';
+      case 'BUSINESS':
+        return 'Cliente Business: Soluções corporativas, volume de casos e parcerias estratégicas';
       default:
         return 'Cliente com plano premium - Benefícios especiais disponíveis';
     }

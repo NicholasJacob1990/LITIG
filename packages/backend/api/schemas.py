@@ -432,6 +432,7 @@ class MatchRequestSchema(BaseModel):
         True, description="Incluir dados históricos do Jusbrasil")
     custom_coords: Optional[CoordenadaSchema] = Field(None, description="Coordenadas customizadas para busca geográfica")
     radius_km: Optional[int] = Field(None, ge=1, le=500, description="Raio de busca em km")
+    expand_search: bool = Field(False, description="Habilitar busca híbrida (interna + externa)")
 
 
 class LawyerKPISchema(BaseModel):
@@ -513,6 +514,33 @@ class MatchedLawyerSchema(BaseModel):
     # Informações adicionais
     phone: Optional[str] = Field(None, description="Telefone de contato")
     email: Optional[str] = Field(None, description="Email de contato")
+    
+    # Busca híbrida
+    is_external: bool = Field(False, description="Indica se é um perfil externo (não verificado)")
+
+
+class MatchedFirmSchema(BaseModel):
+    """Schema para escritório no resultado do matching"""
+    id: str = Field(..., description="ID único do escritório")
+    name: str = Field(..., description="Nome do escritório")
+    team_size: int = Field(..., ge=1, description="Tamanho da equipe")
+    
+    # Localização
+    latitude: Optional[float] = Field(None, description="Latitude da localização")
+    longitude: Optional[float] = Field(None, description="Longitude da localização")
+    distance_km: Optional[float] = Field(None, ge=0, description="Distância em km do cliente")
+    
+    # Scores e métricas
+    score: float = Field(..., ge=0, le=1, description="Score do algoritmo (0-1)")
+    reputation_score: Optional[float] = Field(None, ge=0, le=1, description="Score de reputação")
+    success_rate: Optional[float] = Field(None, ge=0, le=1, description="Taxa de sucesso estimada")
+    
+    # Especialidades
+    specializations: List[str] = Field(default_factory=list, description="Áreas de especialização")
+    
+    # Informações básicas
+    lawyers_count: Optional[int] = Field(None, ge=0, description="Número de advogados")
+    active_cases: Optional[int] = Field(None, ge=0, description="Casos ativos")
 
 
 class MatchResponseSchema(BaseModel):
@@ -521,6 +549,7 @@ class MatchResponseSchema(BaseModel):
     case_id: str = Field(..., description="ID único do caso gerado")
     match_id: str = Field(..., description="ID único do matching para explicabilidade")
     lawyers: List[MatchedLawyerSchema] = Field(..., description="Advogados rankeados")
+    firms: List[MatchedFirmSchema] = Field(default_factory=list, description="Escritórios rankeados")
 
     # Metadados do matching
     total_lawyers_evaluated: int = Field(..., ge=0,
@@ -559,6 +588,22 @@ class MatchResponseSchema(BaseModel):
                         "score": 0.89,
                         "total_cases": 150,
                         "estimated_success_rate": 0.85
+                    }
+                ],
+                "firms": [
+                    {
+                        "id": "firm_001",
+                        "name": "Silva & Associados",
+                        "team_size": 25,
+                        "latitude": -23.5505,
+                        "longitude": -46.6333,
+                        "distance_km": 1.2,
+                        "score": 0.92,
+                        "reputation_score": 0.88,
+                        "success_rate": 0.87,
+                        "specializations": ["Trabalhista", "Empresarial"],
+                        "lawyers_count": 25,
+                        "active_cases": 120
                     }
                 ],
                 "total_lawyers_evaluated": 147,

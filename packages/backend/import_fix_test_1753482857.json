@@ -1,0 +1,57 @@
+{
+  "start_time": "2025-07-25T19:34:15.696472",
+  "tests": [
+    {
+      "service": "OpenRouter Client",
+      "module_path": "services.openrouter_client",
+      "class_name": "OpenRouterClient",
+      "import_success": true,
+      "processing_time": 1.5954959392547607,
+      "details": "Classe OpenRouterClient acessível"
+    },
+    {
+      "service": "Function Tools",
+      "module_path": "services.function_tools",
+      "class_name": "LLMFunctionTools",
+      "import_success": true,
+      "processing_time": 0.0001628398895263672,
+      "details": "Classe LLMFunctionTools acessível"
+    },
+    {
+      "service": "LEX-9000 V2",
+      "module_path": "services.lex9000_integration_service_v2",
+      "class_name": "LEX9000IntegrationServiceV2",
+      "import_success": true,
+      "processing_time": 0.01919388771057129,
+      "details": "Classe LEX9000IntegrationServiceV2 acessível"
+    },
+    {
+      "service": "Lawyer Profile V2",
+      "module_path": "services.lawyer_profile_analysis_service_v2",
+      "class_name": "LawyerProfileAnalysisServiceV2",
+      "import_success": true,
+      "processing_time": 0.0026221275329589844,
+      "details": "Classe LawyerProfileAnalysisServiceV2 acessível"
+    },
+    {
+      "service": "Case Context V2",
+      "module_path": "services.case_context_analysis_service_v2",
+      "class_name": "CaseContextAnalysisServiceV2",
+      "import_success": true,
+      "processing_time": 0.002351999282836914,
+      "details": "Classe CaseContextAnalysisServiceV2 acessível"
+    },
+    {
+      "service": "Instanciação Serviços V2",
+      "instantiation_success": true,
+      "processing_time": 2.86102294921875e-06,
+      "details": "LEX-9000, Lawyer Profile, Case Context V2 instanciados"
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "successes": 6,
+    "failures": 0
+  },
+  "completion_time": "2025-07-25T19:34:17.316432"
+}

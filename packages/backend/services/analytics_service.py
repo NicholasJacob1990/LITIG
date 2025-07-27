@@ -328,13 +328,18 @@ class BillingAnalyticsService:
     
     def _is_upgrade(self, current_plan: str, new_plan: str, entity_type: str) -> bool:
         """Determina se uma mudança de plano é um upgrade."""
-        plan_hierarchy = {
-            "client": ["FREE", "VIP", "ENTERPRISE"],
-            "lawyer": ["FREE", "PRO"],
-            "firm": ["FREE", "PARTNER", "PREMIUM"]
+        # Planos disponíveis por tipo de usuário (atualizado)
+        available_plans = {
+            "client_pf": ["FREE", "VIP", "ENTERPRISE"],      # Cliente Pessoa Física
+            "client_pj": ["FREE", "BUSINESS", "ENTERPRISE"],  # Cliente Pessoa Jurídica
+            "client": ["FREE", "VIP", "ENTERPRISE"],          # Legacy - manter compatibilidade
+            "lawyer_individual": ["FREE", "PRO"],
+            "firm": ["PRO", "BUSINESS", "ENTERPRISE"],
+            "super_associate": ["PARTNER", "PREMIUM"],
+            "lawyer_firm_member": ["FREE", "PRO"]
         }
         
-        hierarchy = plan_hierarchy.get(entity_type, [])
+        hierarchy = available_plans.get(entity_type, [])
         if current_plan in hierarchy and new_plan in hierarchy:
             return hierarchy.index(new_plan) > hierarchy.index(current_plan)
         return False

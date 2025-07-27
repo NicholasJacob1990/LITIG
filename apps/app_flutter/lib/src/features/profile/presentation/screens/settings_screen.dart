@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
         builder: (context, authState) {
           final showSlaSettings = authState is Authenticated && 
               (authState.user.role == 'lawyer_office' || 
-               authState.user.role == 'lawyer_associated');
+               authState.user.role == 'lawyer_firm_member');
 
           return ListView(
             children: [
