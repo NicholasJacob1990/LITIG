@@ -20,7 +20,7 @@ WITH (lists = 100);
 
 -- 4. Adiciona metadados sobre o embedding
 ALTER TABLE public.lawyers
-ADD COLUMN IF NOT EXISTS cv_embedding_v2_model VARCHAR(50) DEFAULT 'openai-3-large',
+ADD COLUMN IF NOT EXISTS cv_embedding_v2_model VARCHAR(50) DEFAULT 'openai-3-small',
 ADD COLUMN IF NOT EXISTS cv_embedding_v2_generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN IF NOT EXISTS cv_embedding_v2_dimensions INTEGER DEFAULT 1024;
 
@@ -29,7 +29,7 @@ COMMENT ON COLUMN public.lawyers.cv_embedding_v2 IS
 'Embedding vetorial V2 do currículo (1024D) - ESTRATÉGIA ORIGINAL: OpenAI 3-large → Voyage Law-2 → Arctic Embed L';
 
 COMMENT ON COLUMN public.lawyers.cv_embedding_v2_model IS 
-'Modelo usado para gerar o embedding V2 (openai-3-large, voyage-law-2, arctic-embed-l, etc.)';
+'Modelo usado para gerar o embedding V2 (openai-3-small, voyage-law-2, arctic-embed-l, etc.)';
 
 COMMENT ON INDEX idx_lawyers_cv_embedding_v2_1024d IS 
 'Índice IVFFlat para busca por similaridade cosseno em embeddings 1024D - estratégia original otimizada';

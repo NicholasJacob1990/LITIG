@@ -43,7 +43,7 @@ SIMPLE_TRIAGE_MODEL_CLAUDE_FALLBACK = "claude-3-haiku-20240307"
 DEFAULT_TRIAGE_PRIMARY_PROVIDER = "together"
 DEFAULT_TRIAGE_MODEL_LLAMA = "meta-llama/Llama-4-Scout" # Imbatível em custo e pronto para multimodal
 DEFAULT_TRIAGE_SECONDARY_PROVIDER = "openai"
-DEFAULT_TRIAGE_MODEL_OPENAI_FALLBACK = "gpt-4.1-turbo" # Ótimo backup
+DEFAULT_TRIAGE_MODEL_OPENAI_FALLBACK = "gpt-4o" # Ótimo backup
 
 # 4. Ensemble e Juiz (Foco: Máxima Qualidade para Casos Complexos)
 # MUDANÇA: Usando Sonnet no ensemble para melhor custo-benefício e velocidade

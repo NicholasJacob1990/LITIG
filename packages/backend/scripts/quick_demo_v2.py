@@ -29,7 +29,7 @@ def print_banner():
 ======================================================================
 
 📋 Estratégia Original Implementada:
-   1. OpenAI text-embedding-3-large (primário) - Máxima qualidade
+   1. OpenAI text-embedding-3-small (primário) - Máxima qualidade
    2. Voyage Law-2 (especializado legal) - NDCG@10: 0.847  
    3. Arctic Embed L (fallback local) - 1024D nativo
 

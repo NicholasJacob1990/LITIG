@@ -14,7 +14,7 @@ WITH (lists = 100);
 
 -- 3. Adiciona metadados sobre o embedding enriquecido
 ALTER TABLE public.lawyers
-ADD COLUMN IF NOT EXISTS cv_embedding_v2_enriched_model VARCHAR(50) DEFAULT 'openai-3-large',
+ADD COLUMN IF NOT EXISTS cv_embedding_v2_enriched_model VARCHAR(50) DEFAULT 'openai-3-small',
 ADD COLUMN IF NOT EXISTS cv_embedding_v2_enriched_generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN IF NOT EXISTS cv_embedding_v2_enriched_version VARCHAR(10) DEFAULT 'v1.0';
 
@@ -27,7 +27,7 @@ COMMENT ON COLUMN public.lawyers.cv_embedding_v2_enriched IS
 'Embedding enriquecido (1024D) que combina CV + KPIs + performance para matching holístico';
 
 COMMENT ON COLUMN public.lawyers.cv_embedding_v2_enriched_model IS 
-'Modelo usado para gerar o embedding enriquecido (openai-3-large, voyage-law-2, etc.)';
+'Modelo usado para gerar o embedding enriquecido (openai-3-small, voyage-law-2, etc.)';
 
 COMMENT ON COLUMN public.lawyers.cv_embedding_v2_enriched_version IS 
 'Versão do algoritmo de enriquecimento usado (v1.0, v1.1, etc.)';

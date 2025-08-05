@@ -2,12 +2,12 @@
 Serviço de Embeddings V2: ESTRATÉGIA ORIGINAL - Máxima Qualidade Legal (1024D)
 
 Cascata de fallback otimizada - ESTRATÉGIA ORIGINAL:
-1. OpenAI text-embedding-3-large (primário) - 3072D → 1024D, máxima qualidade
+1. OpenAI text-embedding-3-small (primário) - 1536D → 1024D, máxima qualidade
 2. Voyage Law-2 (especializado legal) - 1024D nativo, NDCG@10: 0.847
 3. Snowflake Arctic Embed L (fallback) - 1024D nativo
 
 Justificativa da estratégia original:
-- OpenAI 3-large: Melhor qualidade geral + contexto de 8K tokens
+- OpenAI 3-small: Melhor qualidade geral + contexto de 8K tokens
 - Voyage Law-2: Especialização jurídica quando disponível
 - Arctic Embed L: Fallback robusto e rápido
 - +35-40% melhoria na precisão para casos jurídicos
@@ -143,7 +143,7 @@ class LegalEmbeddingServiceV2:
         
         # ESTRATÉGIA ORIGINAL - cascata otimizada para máxima qualidade legal
         providers_strategy = [
-            ("openai", self._generate_openai_large_truncated),  # PRIMÁRIO: Máxima qualidade
+            ("openai", self._generate_openai_small_truncated),  # PRIMÁRIO: Máxima qualidade
             ("voyage", self._generate_voyage_legal),            # SECUNDÁRIO: Especialização legal
             ("arctic", self._generate_arctic_embed_l),          # FALLBACK: Robusto e rápido
             ("bertimbau", self._generate_bertimbau_large)       # FALLBACK LOCAL: Português especializado
@@ -204,7 +204,7 @@ class LegalEmbeddingServiceV2:
         
         provider_map = {
             "voyage": self._generate_voyage_legal,
-            "openai": self._generate_openai_large_truncated,
+            "openai": self._generate_openai_small_truncated,
             "arctic": self._generate_arctic_embed_l,
             "bertimbau": self._generate_bertimbau_large
         }
@@ -274,19 +274,19 @@ class LegalEmbeddingServiceV2:
 
     @track_time(external_api_duration if METRICS_AVAILABLE else None,
                 service="openai", operation="legal_embeddings_v2")
-    async def _generate_openai_large_truncated(self, text: str, context_type: str) -> List[float]:
+    async def _generate_openai_small_truncated(self, text: str, context_type: str) -> List[float]:
         """
-        Gera embedding usando OpenAI text-embedding-3-large truncado para 1024D.
+        Gera embedding usando OpenAI text-embedding-3-small truncado para 1024D.
         
-        OpenAI 3-large características:
-        - 3072D nativo → truncado para 1024D
+        OpenAI 3-small características:
+        - 1536D nativo → truncado para 1024D
         - 8191 tokens context
         - Alta qualidade geral
         """
         try:
             response = await asyncio.wait_for(
                 openai_client.embeddings.create(
-                    model="text-embedding-3-large",
+                    model="text-embedding-3-small",
                     input=text,
                     dimensions=self.embedding_dim  # OpenAI suporta dimensão customizada
                 ),

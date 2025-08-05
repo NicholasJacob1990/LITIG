@@ -34,7 +34,7 @@ async def test_llm_connectivity():
         try:
             import google.generativeai as genai
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-pro")
+            model = genai.GenerativeModel("gemini-2.0-flash-exp")
             
             response = await asyncio.wait_for(
                 model.generate_content_async("Responda apenas 'OK'"),
