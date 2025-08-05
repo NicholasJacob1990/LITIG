@@ -19,11 +19,11 @@ class ContactRequestModal extends StatefulWidget {
   final Function(ContactRequestResult) onResult;
 
   const ContactRequestModal({
-    Key? key,
+    super.key,
     required this.lawyer,
     required this.caseId,
     required this.onResult,
-  }) : super(key: key);
+  });
 
   @override
   State<ContactRequestModal> createState() => _ContactRequestModalState();
@@ -294,9 +294,9 @@ class _ContactRequestModalState extends State<ContactRequestModal> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Solicitar Contato",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 Text(
                   widget.lawyer.nome,

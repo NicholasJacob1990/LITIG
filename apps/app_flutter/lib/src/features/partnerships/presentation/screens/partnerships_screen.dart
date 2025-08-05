@@ -7,6 +7,7 @@ import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partn
 import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_state.dart';
 import 'package:meu_app/src/features/partnerships/presentation/widgets/hybrid_partnerships_list.dart';
 import 'package:meu_app/src/shared/widgets/molecules/empty_state_widget.dart';
+import '../../../../shared/services/analytics_service.dart';
 
 class PartnershipsScreen extends StatefulWidget {
   const PartnershipsScreen({super.key});
@@ -21,14 +22,68 @@ class _PartnershipsScreenState extends State<PartnershipsScreen>
   final TextEditingController _searchController = TextEditingController();
   String _currentFilter = 'all';
   Timer? _debounce;
+  late AnalyticsService _analytics;
+  DateTime? _screenEnterTime;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _initializeAnalytics();
+    _setupTabTracking();
+    _screenEnterTime = DateTime.now();
     
     // Carregar parcerias híbridas ao inicializar
     context.read<HybridPartnershipsBloc>().add(const LoadHybridPartnerships());
+  }
+
+  Future<void> _initializeAnalytics() async {
+    _analytics = await AnalyticsService.getInstance();
+    _trackScreenView();
+  }
+
+  void _setupTabTracking() {
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _trackTabChange(_tabController.index);
+      }
+    });
+  }
+
+  void _trackScreenView() {
+    _analytics.trackUserClick(
+      'screen_view',
+      'partnerships_screen',
+      additionalData: {
+        'screen_type': 'partnerships_management',
+        'has_tab_navigation': true,
+        'tab_count': 3,
+        'initial_tab': 'active',
+      },
+    );
+  }
+
+  void _trackTabChange(int tabIndex) {
+    final tabNames = ['active', 'pending', 'history'];
+    final tabName = tabIndex < tabNames.length ? tabNames[tabIndex] : 'unknown';
+    
+    _analytics.trackUserClick(
+      'tab_navigation',
+      'partnerships_screen',
+      additionalData: {
+        'from_tab': _tabController.previousIndex,
+        'to_tab': tabIndex,
+        'tab_name': tabName,
+        'time_on_previous_tab': _getTimeOnCurrentTab(),
+        'current_filter': _currentFilter,
+      },
+    );
+  }
+
+  Duration _getTimeOnCurrentTab() {
+    return _screenEnterTime != null 
+        ? DateTime.now().difference(_screenEnterTime!)
+        : Duration.zero;
   }
 
   @override

@@ -7,8 +7,11 @@ Este wrapper permite que o backend Python se comunique com o serviço Node.js
 que utiliza o SDK oficial da Unipile, garantindo melhor compatibilidade e
 funcionalidades mais robustas.
 
+VERSÃO 4.1 - Integração com REST API oficial para listAccounts ✅
+
 Baseado na documentação oficial:
 - https://developer.unipile.com/reference/accountscontroller_listaccounts
+- Endpoint REST: GET /api/v1/accounts (implementado)
 - SDK: npm install unipile-node-sdk
 """
 

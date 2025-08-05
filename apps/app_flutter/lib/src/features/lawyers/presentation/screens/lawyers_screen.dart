@@ -8,6 +8,8 @@ import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_c
 import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
 import 'package:meu_app/injection_container.dart';
 
+import '../../../../shared/services/analytics_service.dart';
+
 class LawyersScreen extends StatefulWidget {
   const LawyersScreen({super.key});
 
@@ -17,11 +19,64 @@ class LawyersScreen extends StatefulWidget {
 
 class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateMixin {
   late TabController _tabController;
+  late AnalyticsService _analytics;
+  DateTime? _screenEnterTime;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initializeAnalytics();
+    _setupTabTracking();
+    _screenEnterTime = DateTime.now();
+  }
+
+  Future<void> _initializeAnalytics() async {
+    _analytics = await AnalyticsService.getInstance();
+    _trackScreenView();
+  }
+
+  void _setupTabTracking() {
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _trackTabChange(_tabController.index);
+      }
+    });
+  }
+
+  void _trackScreenView() {
+    _analytics.trackUserClick(
+      'screen_view',
+      'lawyers_screen',
+      additionalData: {
+        'screen_type': 'main_search',
+        'has_tab_navigation': true,
+        'tab_count': 2,
+        'initial_tab': 'search',
+      },
+    );
+  }
+
+  void _trackTabChange(int tabIndex) {
+    final tabNames = ['search', 'matches'];
+    final tabName = tabIndex < tabNames.length ? tabNames[tabIndex] : 'unknown';
+    
+    _analytics.trackUserClick(
+      'tab_navigation',
+      'lawyers_screen',
+      additionalData: {
+        'from_tab': _tabController.previousIndex,
+        'to_tab': tabIndex,
+        'tab_name': tabName,
+        'time_on_previous_tab': _getTimeOnCurrentTab(),
+      },
+    );
+  }
+
+  Duration _getTimeOnCurrentTab() {
+    return _screenEnterTime != null 
+        ? DateTime.now().difference(_screenEnterTime!)
+        : Duration.zero;
   }
 
   @override
@@ -163,15 +218,27 @@ class _SearchResults extends StatelessWidget {
             );
           }
           
-          return ListView.builder(
-            itemCount: state.matches.length,
-            itemBuilder: (context, index) {
-              final match = state.matches[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: LawyerMatchCard(lawyer: match),
-              );
+          return InstrumentedListView(
+            listId: 'lawyer_matches_list',
+            listType: 'list',
+            contentType: 'lawyers',
+            sourceContext: 'lawyers_screen_matches',
+            totalItems: state.matches.length,
+            additionalData: {
+              'match_type': 'hybrid_search',
+              'result_count': state.matches.length,
+              'has_matches': state.matches.isNotEmpty,
             },
+            child: ListView.builder(
+              itemCount: state.matches.length,
+              itemBuilder: (context, index) {
+                final match = state.matches[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: LawyerMatchCard(lawyer: match),
+                );
+              },
+            ),
           );
         }
         

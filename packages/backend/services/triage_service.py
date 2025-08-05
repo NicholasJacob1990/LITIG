@@ -11,8 +11,8 @@ import anthropic
 import openai
 # NOVO: A API do TogetherAI (para Llama 4) é compatível com o cliente OpenAI
 
-# Importação do serviço de embedding
-from embedding_service import generate_embedding
+# MUDANÇA: Apontando para o novo serviço orquestrador
+from .embedding_orchestrator import generate_embedding
 from .premium_criteria_service import evaluate_case_premium
 from ..dependencies import get_db
 
@@ -388,10 +388,15 @@ class TriageService:
 
         summary = triage_results.get("summary")
         if summary:
-            embedding_vector = await generate_embedding(summary)
-            triage_results["summary_embedding"] = embedding_vector
+            # MUDANÇA: Usando o orquestrador para gerar o embedding
+            result = await generate_embedding(summary, context_type="case")
+            triage_results["embedding"] = result.embedding
         else:
-            triage_results["summary_embedding"] = None
+            triage_results["embedding"] = None
+
+        # Remover a chave antiga para evitar erros no DB
+        if "summary_embedding" in triage_results:
+            del triage_results["summary_embedding"]
 
         return triage_results
 

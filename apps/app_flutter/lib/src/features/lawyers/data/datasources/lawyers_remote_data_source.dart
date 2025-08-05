@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/match_result.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
-import 'package:meu_app/src/features/firms/data/models/law_firm_model.dart';
 
 abstract class LawyersRemoteDataSource {
   Future<List<MatchedLawyer>> findMatches({

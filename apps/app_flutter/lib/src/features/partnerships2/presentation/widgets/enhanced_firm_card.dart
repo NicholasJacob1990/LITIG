@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../firms/domain/entities/law_firm.dart';
+import '../../../../shared/widgets/instrumented_widgets.dart';
 
 /// Widget aprimorado para FirmCard com funcionalidades B2B básicas
 /// 
@@ -17,6 +18,9 @@ class EnhancedFirmCard extends StatelessWidget {
   final String? currentClientId;
   final bool compact;
   final VoidCallback? onTap;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final double? listRank;
 
   const EnhancedFirmCard({
     super.key,
@@ -27,18 +31,25 @@ class EnhancedFirmCard extends StatelessWidget {
     this.currentClientId,
     this.compact = false,
     this.onTap,
+    this.sourceContext,
+    this.listRank,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
-        onTap: onTap ?? () => _showNavigationOptions(context),
-        onLongPress: () => _showNavigationOptions(context),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
+    return InstrumentedProfileCard(
+      profileId: firm.id,
+      profileType: 'enhanced_firm',
+      sourceContext: sourceContext ?? 'enhanced_firm_list',
+      onTap: onTap ?? () => _showNavigationOptions(context),
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: InkWell(
+          onTap: onTap ?? () => _showNavigationOptions(context),
+          onLongPress: () => _showNavigationOptions(context),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,6 +62,7 @@ class EnhancedFirmCard extends StatelessWidget {
                 _buildActionButtons(context),
               ],
             ],
+          ),
           ),
         ),
       ),
@@ -145,23 +157,57 @@ class EnhancedFirmCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton.icon(
+          child: InstrumentedButton(
+            elementId: 'enhanced_firm_view_details_${firm.id}',
+            context: 'enhanced_firm_card',
             onPressed: () => _navigateToFirmDetail(context),
-            icon: const Icon(Icons.visibility, size: 16),
-            label: const Text('Ver Detalhes'),
-            style: OutlinedButton.styleFrom(
+            additionalData: {
+              'firm_id': firm.id,
+              'firm_name': firm.name,
+              'action_type': 'view_details',
+              'firm_specialization': firm.specializations.join(', '),
+              'partner_count': firm.teamSize,
+            },
+            child: Container(
+              width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).primaryColor),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.visibility, size: 16, color: Theme.of(context).primaryColor),
+                  const SizedBox(width: 4),
+                  Text('Ver Detalhes', style: TextStyle(color: Theme.of(context).primaryColor)),
+                ],
+              ),
             ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: ElevatedButton.icon(
+          child: InstrumentedInviteButton(
+            recipientId: firm.id,
+            invitationType: 'firm_hire',
+            context: 'enhanced_firm_card',
             onPressed: () => _showSimpleHiringDialog(context),
-            icon: const Icon(Icons.handshake, size: 16),
-            label: const Text('Contratar'),
-            style: ElevatedButton.styleFrom(
+            child: Container(
+              width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.handshake, size: 16, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text('Contratar', style: TextStyle(color: Colors.white)),
+                ],
+              ),
             ),
           ),
         ),

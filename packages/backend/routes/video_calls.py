@@ -6,10 +6,16 @@ import os
 from datetime import datetime, timedelta
 import jwt
 from supabase import create_client, Client
-from config import get_settings
-
-# Configurações
-settings = get_settings()
+try:
+    from config import get_settings
+    settings = get_settings()
+except ImportError:
+    # Fallback para desenvolvimento
+    class MockSettings:
+        def __init__(self):
+            self.SUPABASE_URL = "http://localhost:54321"
+            self.SUPABASE_SERVICE_KEY = "mock_key"
+    settings = MockSettings()
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
 router = APIRouter(prefix="/api/video-calls", tags=["video-calls"])
@@ -216,6 +222,18 @@ async def get_user_rooms(user_id: str):
     try:
         rooms_response = supabase.table("video_calls").select("*").or_(
             f"client_id.eq.{user_id},lawyer_id.eq.{user_id}"
+        ).order("created_at", desc=True).execute()
+        
+        return rooms_response.data
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+        ).order("created_at", desc=True).execute()
+        
+        return rooms_response.data
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
         ).order("created_at", desc=True).execute()
         
         return rooms_response.data

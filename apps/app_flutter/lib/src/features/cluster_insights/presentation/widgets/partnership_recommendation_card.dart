@@ -126,7 +126,7 @@ class _PartnershipRecommendationCardState extends State<PartnershipRecommendatio
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.psychology,
             color: scoreColor,
             size: 20,
@@ -267,7 +267,7 @@ class _PartnershipRecommendationCardState extends State<PartnershipRecommendatio
           const SizedBox(height: 8),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: _FeedbackButton(
                   label: 'Aceitar',
                   icon: Icons.thumb_up_outlined,
@@ -276,7 +276,7 @@ class _PartnershipRecommendationCardState extends State<PartnershipRecommendatio
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: _FeedbackButton(
                   label: 'Contatar',
                   icon: Icons.message_outlined,
@@ -285,7 +285,7 @@ class _PartnershipRecommendationCardState extends State<PartnershipRecommendatio
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: _FeedbackButton(
                   label: 'Rejeitar',
                   icon: Icons.thumb_down_outlined,
@@ -294,7 +294,7 @@ class _PartnershipRecommendationCardState extends State<PartnershipRecommendatio
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: _FeedbackButton(
                   label: 'Dispensar',
                   icon: Icons.close_outlined,

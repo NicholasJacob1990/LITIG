@@ -85,9 +85,15 @@ class PlanValidationService:
         feature_validators = {
             "unipile_messaging": self.can_use_unipile_messaging,
             "advanced_search": self.can_use_advanced_search,
+            "unipile_whatsapp": lambda et, p: self._get_plan_restrictions(et, p).get("unipile_whatsapp", False),
+            "unipile_full_suite": lambda et, p: self._get_plan_restrictions(et, p).get("unipile_full_suite", False),
             "hybrid_search": self.can_use_advanced_search,  # Mesmo que advanced_search
             "priority_support": lambda et, p: self._get_plan_restrictions(et, p).get("priority_support", False),
             "multi_user": lambda et, p: self._get_plan_restrictions(et, p).get("multi_user", False),
+            "b2b_chat": lambda et, p: self._get_plan_restrictions(et, p).get("b2b_chat", False),
+            "partnership_chat": lambda et, p: self._get_plan_restrictions(et, p).get("partnership_chat", False),
+            "firm_collaboration": lambda et, p: self._get_plan_restrictions(et, p).get("firm_collaboration", False),
+            "multi_participant_chat": lambda et, p: self._get_plan_restrictions(et, p).get("multi_participant_chat", False),
         }
         
         if feature in feature_validators:
@@ -113,6 +119,8 @@ class PlanValidationService:
             EntityType.CLIENT_PF: {
                 "free_pf": {
                     "unipile_messaging": False,
+                    "unipile_whatsapp": False,
+                    "unipile_full_suite": False,
                     "max_cases": 3,
                     "priority_support": False,
                     "advanced_search": False,
@@ -120,6 +128,8 @@ class PlanValidationService:
                 },
                 "pro_pf": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": False, # Clientes PRO só têm WhatsApp
                     "max_cases": 20,
                     "priority_support": True,
                     "advanced_search": True,
@@ -127,6 +137,8 @@ class PlanValidationService:
                 },
                 "vip_pf": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True, # Clientes VIP têm tudo
                     "max_cases": -1,  # Unlimited
                     "priority_support": True,
                     "advanced_search": True,
@@ -139,6 +151,8 @@ class PlanValidationService:
             EntityType.CLIENT_PJ: {
                 "free_pj": {
                     "unipile_messaging": False,
+                    "unipile_whatsapp": False,
+                    "unipile_full_suite": False,
                     "max_cases": 5,  # PJ tem mais casos no free
                     "priority_support": False,
                     "advanced_search": False,
@@ -147,6 +161,8 @@ class PlanValidationService:
                 },
                 "business_pj": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True, # Business já tem tudo
                     "max_cases": 50,
                     "priority_support": True,
                     "advanced_search": True,
@@ -156,6 +172,8 @@ class PlanValidationService:
                 },
                 "enterprise_pj": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True,
                     "max_cases": -1,  # Unlimited
                     "priority_support": True,
                     "advanced_search": True,
@@ -171,24 +189,46 @@ class PlanValidationService:
             EntityType.LAWYER_INDIVIDUAL: {
                 "free_lawyer": {
                     "unipile_messaging": False,
+                    "unipile_whatsapp": False,
+                    "unipile_full_suite": False,
                     "max_partnerships": 10,
                     "client_invitations": 5,
                     "advanced_search": False,
+                    "b2b_chat": False,  # Chat B2B bloqueado
+                    "partnership_chat": False,  # Chat de parcerias bloqueado
+                    "firm_collaboration": False,  # Colaboração entre escritórios bloqueada
+                    "multi_participant_chat": False,  # Chat multi-participante bloqueado
                 },
                 "pro_lawyer": {
-                    "unipile_messaging": True,
+                    "unipile_messaging": True, # Mantém para compatibilidade
+                    "unipile_whatsapp": True,  # Acesso ao WhatsApp
+                    "unipile_full_suite": False, # NÃO tem acesso à suíte completa
                     "max_partnerships": 50,
                     "client_invitations": 50,
                     "advanced_search": True,
                     "priority_support": True,
+                    "b2b_chat": True,  # Chat B2B básico liberado
+                    "partnership_chat": True,  # Chat de parcerias liberado
+                    "firm_collaboration": False,  # Colaboração entre escritórios ainda bloqueada
+                    "multi_participant_chat": False,  # Chat multi-participante ainda bloqueado
+                    "max_chat_participants": 2,  # Máximo 2 participantes por chat
                 },
                 "premium_lawyer": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True, # Acesso à suíte completa
                     "max_partnerships": -1,  # Unlimited
                     "client_invitations": -1,  # Unlimited
                     "advanced_search": True,
                     "priority_support": True,
                     "ai_insights": True,
+                    "b2b_chat": True,  # Chat B2B completo
+                    "partnership_chat": True,  # Chat de parcerias completo
+                    "firm_collaboration": True,  # Colaboração entre escritórios liberada
+                    "multi_participant_chat": True,  # Chat multi-participante liberado
+                    "max_chat_participants": 10,  # Até 10 participantes por chat
+                    "chat_file_sharing": True,  # Compartilhamento de arquivos no chat
+                    "chat_screen_sharing": True,  # Compartilhamento de tela (futuro)
                 }
             },
             
@@ -196,6 +236,8 @@ class PlanValidationService:
             EntityType.LAWYER_FIRM_MEMBER: {
                 "free_lawyer": {
                     "unipile_messaging": False,
+                    "unipile_whatsapp": False,
+                    "unipile_full_suite": False,
                     "max_partnerships": 5,  # Menos que individuais
                     "client_invitations": 3,  # Menos que individuais
                     "advanced_search": False,
@@ -203,6 +245,8 @@ class PlanValidationService:
                 },
                 "pro_lawyer": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": False,
                     "max_partnerships": 25,  # Menos que individuais
                     "client_invitations": 25,  # Menos que individuais
                     "advanced_search": True,
@@ -211,6 +255,8 @@ class PlanValidationService:
                 },
                 "premium_lawyer": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True,
                     "max_partnerships": 100,  # Menos que individuais ilimitado
                     "client_invitations": 100,  # Menos que individuais ilimitado
                     "advanced_search": True,
@@ -222,23 +268,61 @@ class PlanValidationService:
             
             # === ESCRITÓRIOS ===
             EntityType.FIRM: {
+                "free_firm": {
+                    "unipile_messaging": False,  # Escritórios gratuitos seguem regras de advogados gratuitos
+                    "unipile_whatsapp": False,
+                    "unipile_full_suite": False,
+                    "max_lawyers": 3,  # Limite baixo para escritórios gratuitos
+                    "client_invitations": 10,
+                    "advanced_search": False,
+                    "priority_support": False,
+                    "b2b_chat": False,  # Chat B2B bloqueado para escritórios gratuitos
+                    "partnership_chat": False,  # Chat de parcerias bloqueado
+                    "firm_collaboration": False,  # Colaboração entre escritórios bloqueada
+                    "multi_participant_chat": False,  # Chat multi-participante bloqueado
+                    "max_chat_participants": 2,  # Máximo 2 participantes
+                    "chat_file_sharing": False,  # Compartilhamento de arquivos bloqueado
+                    "chat_delegation": False,  # Delegação bloqueada
+                },
                 "partner_firm": {
-                    "unipile_messaging": True,  # Escritórios sempre têm messaging
+                    "unipile_messaging": True,  # Escritórios pagos têm messaging
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True,
                     "max_lawyers": 10,
                     "client_invitations": 100,
                     "advanced_search": True,
                     "priority_support": True,
+                    "b2b_chat": True,  # Chat B2B liberado para escritórios pagos
+                    "partnership_chat": True,  # Chat de parcerias liberado
+                    "firm_collaboration": True,  # Colaboração entre escritórios liberada
+                    "multi_participant_chat": True,  # Chat multi-participante liberado
+                    "max_chat_participants": 15,  # Até 15 participantes por chat
+                    "chat_file_sharing": True,  # Compartilhamento de arquivos
+                    "chat_delegation": True,  # Pode delegar conversas para associados
                 },
                 "premium_firm": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True,
                     "max_lawyers": 50,
                     "client_invitations": 500,
                     "advanced_search": True,
                     "priority_support": True,
                     "ai_insights": True,
+                    "b2b_chat": True,
+                    "partnership_chat": True,
+                    "firm_collaboration": True,
+                    "multi_participant_chat": True,
+                    "max_chat_participants": 25,  # Mais participantes para premium
+                    "chat_file_sharing": True,
+                    "chat_delegation": True,
+                    "chat_analytics": True,  # Analytics de comunicação
+                    "chat_integrations": True,  # Integrações com CRM/ERP
                 },
                 "enterprise_firm": {
                     "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True,
                     "max_lawyers": -1,  # Unlimited
                     "client_invitations": -1,  # Unlimited
                     "advanced_search": True,
@@ -246,6 +330,45 @@ class PlanValidationService:
                     "ai_insights": True,
                     "custom_integration": True,
                     "dedicated_support": True,
+                    "b2b_chat": True,
+                    "partnership_chat": True,
+                    "firm_collaboration": True,
+                    "multi_participant_chat": True,
+                    "max_chat_participants": -1,  # Participantes ilimitados
+                    "chat_file_sharing": True,
+                    "chat_delegation": True,
+                    "chat_analytics": True,
+                    "chat_integrations": True,
+                    "chat_white_label": True,  # Chat com marca própria
+                    "chat_api_access": True,  # Acesso à API de chat
+                    "chat_backup_export": True,  # Backup e exportação de conversas
+                }
+            },
+            
+            # === SUPER ASSOCIADO ===
+            EntityType.SUPER_ASSOCIATE: {
+                "premium_lawyer": {  # Super Associado sempre premium
+                    "unipile_messaging": True,
+                    "unipile_whatsapp": True,
+                    "unipile_full_suite": True,
+                    "cost_subsidized": True,  # Plataforma paga os custos
+                    "beta_features": True,    # Acesso antecipado a recursos
+                    "max_partnerships": -1,  # Ilimitado
+                    "client_invitations": -1,  # Ilimitado
+                    "priority_support": True,
+                    "dedicated_support": True,
+                    "ai_insights": True,
+                    "b2b_chat": True,
+                    "partnership_chat": True,
+                    "firm_collaboration": True,
+                    "multi_participant_chat": True,
+                    "max_chat_participants": 15,  # Premium level
+                    "chat_file_sharing": True,
+                    "chat_delegation": True,
+                    "chat_analytics": True,
+                    "chat_integrations": True,
+                    "platform_representative": True,  # Pode representar a plataforma
+                    "cross_platform_messaging": True,  # Messaging entre plataformas
                 }
             }
         }
@@ -268,6 +391,26 @@ class PlanValidationService:
                 EntityType.LAWYER_INDIVIDUAL: "Para busca avançada, faça upgrade para o plano PRO.",
                 EntityType.LAWYER_FIRM_MEMBER: "Para busca avançada e ferramentas do escritório, faça upgrade para o plano PRO.",
                 EntityType.FIRM: "Esta funcionalidade está incluída em todos os planos de escritório.",
+            },
+            "b2b_chat": {
+                EntityType.LAWYER_INDIVIDUAL: "Para chat B2B com outros advogados e escritórios, faça upgrade para o plano PRO.",
+                EntityType.LAWYER_FIRM_MEMBER: "Para comunicação B2B inter-escritórios, faça upgrade para o plano PRO.",
+                EntityType.FIRM: "Para chat B2B entre escritórios, faça upgrade para o plano Partner.",
+            },
+            "partnership_chat": {
+                EntityType.LAWYER_INDIVIDUAL: "Para chat interno de parcerias, faça upgrade para o plano PRO.",
+                EntityType.LAWYER_FIRM_MEMBER: "Para gestão de parcerias com chat integrado, faça upgrade para o plano PRO.",
+                EntityType.FIRM: "Para chat de parcerias entre escritórios, faça upgrade para o plano Partner.",
+            },
+            "firm_collaboration": {
+                EntityType.LAWYER_INDIVIDUAL: "Para colaboração direta com escritórios, faça upgrade para o plano PREMIUM.",
+                EntityType.LAWYER_FIRM_MEMBER: "Para colaboração inter-escritórios, faça upgrade para o plano PREMIUM.",
+                EntityType.FIRM: "Para colaboração entre escritórios, faça upgrade para o plano Partner.",
+            },
+            "multi_participant_chat": {
+                EntityType.LAWYER_INDIVIDUAL: "Para chat com múltiplos participantes, faça upgrade para o plano PREMIUM.",
+                EntityType.LAWYER_FIRM_MEMBER: "Para reuniões virtuais com múltiplos advogados, faça upgrade para o plano PREMIUM.",
+                EntityType.FIRM: "Para chat multi-participante entre escritórios, faça upgrade para o plano Partner.",
             }
         }
         
@@ -283,7 +426,7 @@ class PlanValidationService:
             EntityType.CLIENT_PJ: "business_pj",
             EntityType.LAWYER_INDIVIDUAL: "pro_lawyer",
             EntityType.LAWYER_FIRM_MEMBER: "pro_lawyer",
-            EntityType.FIRM: "premium_firm",
+            EntityType.FIRM: "partner_firm",  # Escritórios gratuitos devem fazer upgrade para Partner
         }
         
         return suggestions.get(entity_type, "pro_pf")

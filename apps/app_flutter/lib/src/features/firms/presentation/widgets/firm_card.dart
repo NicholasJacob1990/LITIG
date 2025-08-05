@@ -5,6 +5,7 @@ import '../../domain/entities/law_firm.dart';
 import '../../domain/entities/firm_kpi.dart';
 import 'firm_card_helpers.dart';
 import 'firm_match_explanation_dialog.dart';
+import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
 
 /// Widget reutilizável para exibir informações de um escritório de advocacia
 /// 
@@ -19,6 +20,12 @@ class FirmCard extends StatelessWidget {
   final bool showKpis;
   final bool isCompact;
   final bool showHireButton;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final String? searchQuery;
+  final double? searchRank;
+  final Map<String, dynamic>? searchFilters;
+  final String? caseContext;
 
   const FirmCard({
     super.key,
@@ -29,6 +36,11 @@ class FirmCard extends StatelessWidget {
     this.showKpis = true,
     this.isCompact = false,
     this.showHireButton = false,
+    this.sourceContext,
+    this.searchQuery,
+    this.searchRank,
+    this.searchFilters,
+    this.caseContext,
   });
 
   @override
@@ -36,38 +48,48 @@ class FirmCard extends StatelessWidget {
     // Acesso seguro aos KPIs a partir da entidade firm
     final kpis = firm.kpis;
 
-    return Card(
-      margin: EdgeInsets.symmetric(
-        horizontal: isCompact ? 8.0 : 16.0,
-        vertical: isCompact ? 4.0 : 8.0,
-      ),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(isCompact ? 12.0 : 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context, kpis),
-              if (!isCompact) ...[
-                const SizedBox(height: 12),
-                _buildDetails(context),
+    return InstrumentedProfileCard(
+      profileId: firm.id,
+      profileType: 'firm',
+      sourceContext: sourceContext ?? 'firm_list',
+      searchQuery: searchQuery,
+      searchRank: searchRank,
+      searchFilters: searchFilters,
+      caseContext: caseContext,
+      onTap: onTap,
+      child: Card(
+        margin: EdgeInsets.symmetric(
+          horizontal: isCompact ? 8.0 : 16.0,
+          vertical: isCompact ? 4.0 : 8.0,
+        ),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(isCompact ? 12.0 : 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context, kpis),
+                if (!isCompact) ...[
+                  const SizedBox(height: 12),
+                  _buildDetails(context),
+                ],
+                if (showKpis && kpis != null && !isCompact) ...[
+                  const SizedBox(height: 12),
+                  _buildKpis(context, kpis),
+                ],
+                if (showHireButton && !isCompact) ...[
+                  const SizedBox(height: 16),
+                  _buildActionButtons(context),
+                ],
               ],
-              if (showKpis && kpis != null && !isCompact) ...[
-                const SizedBox(height: 12),
-                _buildKpis(context, kpis),
-              ],
-              if (showHireButton && !isCompact) ...[
-                const SizedBox(height: 16),
-                _buildActionButtons(context),
-              ],
-            ],
+            ),
           ),
         ),
       ),
@@ -285,54 +307,83 @@ class FirmCard extends StatelessWidget {
   Widget _buildActionButtons(BuildContext context) {
     return Column(
       children: [
-        // Primeira linha: Ver Perfil (destaque)
+        // Primeira linha: Ver Perfil (destaque) - Instrumentado
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: InstrumentedButton(
+            elementId: 'view_firm_profile_${firm.id}',
+            context: 'firm_card',
             onPressed: () => _navigateToFirmProfile(context),
-            icon: const Icon(LucideIcons.building),
-            label: const Text('Ver Perfil do Escritório'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              side: BorderSide(color: Theme.of(context).colorScheme.primary),
+            additionalData: {
+              'firm_id': firm.id,
+              'firm_name': firm.name,
+              'source_context': sourceContext,
+              'search_rank': searchRank,
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.building, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text('Ver Perfil do Escritório', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              ],
             ),
           ),
         ),
         const SizedBox(height: 8),
         
-        // Segunda linha: Ações rápidas
+        // Segunda linha: Ações rápidas - Instrumentadas
         Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
+              child: InstrumentedButton(
+                elementId: 'firm_details_${firm.id}',
+                context: 'firm_card',
                 onPressed: onTap,
-                icon: const Icon(Icons.visibility, size: 16),
-                label: const Text('Detalhes'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                additionalData: {
+                  'firm_id': firm.id,
+                  'action_type': 'view_details',
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.visibility, size: 16),
+                    SizedBox(width: 4),
+                    Text('Detalhes'),
+                  ],
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            IconButton(
+            InstrumentedButton(
+              elementId: 'firm_explanation_${firm.id}',
+              context: 'firm_card',
               onPressed: () => _showFirmMatchExplanation(context),
-              icon: const Icon(LucideIcons.helpCircle),
-              tooltip: 'Por que foi recomendado?',
-              style: IconButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              additionalData: {
+                'firm_id': firm.id,
+                'action_type': 'explanation_request',
+              },
+              child: Icon(
+                LucideIcons.helpCircle,
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed: onHire,
-                icon: const Icon(Icons.handshake, size: 16),
-                label: const Text('Contratar'),
-                key: Key('hire_firm_button_${firm.id}'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
+              child: InstrumentedInviteButton(
+                invitationType: 'firm_hire',
+                recipientId: firm.id,
+                context: 'firm_card',
+                caseId: caseContext,
+                recipientType: 'firm',
+                onPressed: onHire ?? () {},
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.handshake, size: 16, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text('Contratar', style: TextStyle(color: Colors.white)),
+                  ],
                 ),
               ),
             ),

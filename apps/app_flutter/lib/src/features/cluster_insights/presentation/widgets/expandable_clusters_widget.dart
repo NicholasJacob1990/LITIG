@@ -5,7 +5,8 @@ import '../bloc/trending_clusters_state.dart';
 import '../bloc/trending_clusters_event.dart';
 import '../../domain/entities/trending_cluster.dart';
 import 'cluster_insights_modal.dart';
-import 'package.meu_app/src/shared/widgets/error_display_widget.dart';
+import '../../../../shared/widgets/error_display_widget.dart';
+import '../../../../../injection_container.dart';
 
 class ExpandableClustersWidget extends StatelessWidget {
   const ExpandableClustersWidget({super.key});
@@ -13,7 +14,7 @@ class ExpandableClustersWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TrendingClustersBloc()..add(const FetchTrendingClusters()),
+      create: (context) => getIt<TrendingClustersBloc>()..add(const FetchTrendingClusters()),
       child: Card(
         key: const Key('expandable_clusters_card'),
         margin: const EdgeInsets.all(16),

@@ -3,7 +3,8 @@
 import asyncio
 from typing import Dict, Any, List, Optional
 from ..dependencies import get_db
-from .embedding_service import generate_embedding
+# MUDANÇA: Apontando para o novo serviço orquestrador
+from .embedding_orchestrator import generate_embedding
 from psycopg2.extras import Json
 
 class FirmProfileService:
@@ -33,8 +34,9 @@ class FirmProfileService:
         # 2. Construir o perfil semântico
         semantic_profile = self._build_semantic_profile(firm_data)
 
-        # 3. Gerar o embedding
-        embedding = await generate_embedding(semantic_profile)
+        # 3. Gerar o embedding via orquestrador
+        result = await generate_embedding(semantic_profile, context_type="lawyer_cv")
+        embedding = result.embedding
 
         # 4. Atualizar o banco de dados
         success = await self._update_firm_profile_and_embedding(firm_id, semantic_profile, embedding)
@@ -172,9 +174,10 @@ class FirmProfileService:
         if not text_query:
             return []
 
-        # 1. Gerar o embedding para a consulta do usuário
+        # 1. Gerar o embedding para a consulta do usuário via orquestrador
         try:
-            query_embedding = await generate_embedding(text_query)
+            result = await generate_embedding(text_query, context_type="case")
+            query_embedding = result.embedding
         except Exception as e:
             print(f"Falha ao gerar embedding para a consulta: {e}")
             return []

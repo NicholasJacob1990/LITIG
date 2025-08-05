@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/law_firm.dart';
 import '../../domain/usecases/hire_firm.dart';
 import '../bloc/firm_hiring_bloc.dart';
+import '../../../../shared/widgets/instrumented_widgets.dart';
 
 /// Modal para confirmação de contratação de escritório
 /// 
@@ -322,18 +323,32 @@ class _FirmHiringModalState extends State<FirmHiringModal> {
               child: const Text('Cancelar'),
             ),
             const SizedBox(width: 16),
-            ElevatedButton(
+            InstrumentedInviteButton(
+              recipientId: widget.firm.id,
+              invitationType: 'firm_hire_confirmation',
+              additionalData: {
+                'firm_name': widget.firm.name,
+                'firm_team_size': widget.firm.teamSize,
+                'contract_type': _selectedContractType,
+                'case_id': widget.caseId,
+                'client_id': widget.clientId,
+                'has_notes': _notesController.text.trim().isNotEmpty,
+                'notes_length': _notesController.text.trim().length,
+                'firm_success_rate': widget.firm.kpis?.successRate,
+                'firm_reputation': widget.firm.kpis?.reputationScore,
+                'hiring_context': 'firm_hiring_modal',
+              },
               onPressed: isLoading ? null : _handleConfirmHiring,
-              style: ElevatedButton.styleFrom(
+              child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Confirmar Contratação'),
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Confirmar Contratação'),
             ),
           ],
         );

@@ -1,6 +1,8 @@
 import '../../domain/entities/enriched_firm.dart';
+import '../../../lawyers/domain/entities/enriched_lawyer.dart';
 import '../../../lawyers/data/models/enriched_lawyer_model.dart';
-import '../../../lawyers/data/models/data_source_info_model.dart';
+import '../../../lawyers/data/models/data_source_info_model.dart' as ds;
+
 
 class EnrichedFirmModel extends EnrichedFirm {
   const EnrichedFirmModel({
@@ -37,11 +39,11 @@ class EnrichedFirmModel extends EnrichedFirm {
       logoUrl: json['logo_url'],
       specializations: List<String>.from(json['specializations'] ?? []),
       partners: (json['partners'] as List<dynamic>?)
-              ?.map((p) => EnrichedLawyerModel.fromJson(p))
+              ?.map((p) => EnrichedLawyerModel.fromJson(p) as EnrichedLawyer)
               .toList() ??
           [],
       associates: (json['associates'] as List<dynamic>?)
-              ?.map((a) => EnrichedLawyerModel.fromJson(a))
+              ?.map((a) => EnrichedLawyerModel.fromJson(a) as EnrichedLawyer)
               .toList() ??
           [],
       totalLawyers: json['total_lawyers'] ?? 0,
@@ -64,7 +66,7 @@ class EnrichedFirmModel extends EnrichedFirm {
           ? FirmContactInfoModel.fromJson(json['contact_info']) 
           : null,
       dataSources: (json['data_sources'] as Map<String, dynamic>?)
-              ?.map((key, value) => MapEntry(key, DataSourceInfoModel.fromJson(value)))
+              ?.map((key, value) => MapEntry(key, ds.DataSourceInfoModel.fromJson(value)))
               ?? {},
       overallQualityScore: (json['overall_quality_score'] ?? 0.0).toDouble(),
       completenessScore: (json['completeness_score'] ?? 0.0).toDouble(),
@@ -87,8 +89,8 @@ class EnrichedFirmModel extends EnrichedFirm {
       'description': description,
       'logo_url': logoUrl,
       'specializations': specializations,
-      'partners': partners.map((p) => (p as EnrichedLawyerModel).toJson()).toList(),
-      'associates': associates.map((a) => (a as EnrichedLawyerModel).toJson()).toList(),
+      'partners': partners.map((p) => {'id': (p as dynamic).id, 'name': (p as dynamic).name}).toList(),
+      'associates': associates.map((a) => {'id': (a as dynamic).id, 'name': (a as dynamic).name}).toList(),
       'total_lawyers': totalLawyers,
       'partners_count': partnersCount,
       'associates_count': associatesCount,
@@ -98,7 +100,7 @@ class EnrichedFirmModel extends EnrichedFirm {
       'awards': awards.map((a) => (a as FirmAwardModel).toJson()).toList(),
       'location': (location as FirmLocationModel?)?.toJson(),
       'contact_info': (contactInfo as FirmContactInfoModel?)?.toJson(),
-      'data_sources': dataSources.map((key, value) => MapEntry(key, (value as DataSourceInfoModel).toJson())),
+      'data_sources': dataSources.map((key, value) => MapEntry(key, {'source_name': value.sourceName, 'quality_score': value.qualityScore})),
       'overall_quality_score': overallQualityScore,
       'completeness_score': completenessScore,
       'last_consolidated': lastConsolidated.toIso8601String(),

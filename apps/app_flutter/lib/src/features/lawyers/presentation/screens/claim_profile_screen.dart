@@ -9,11 +9,11 @@ class ClaimProfileScreen extends StatefulWidget {
   final String? caseId;
 
   const ClaimProfileScreen({
-    Key? key,
+    super.key,
     required this.invitationToken,
     this.profileName,
     this.caseId,
-  }) : super(key: key);
+  });
 
   @override
   State<ClaimProfileScreen> createState() => _ClaimProfileScreenState();
@@ -245,19 +245,19 @@ class _ClaimProfileScreenState extends State<ClaimProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
                               Icon(
                                 Icons.person_add,
                                 color: Colors.white,
                                 size: 32,
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       "Você foi recomendado!",
                                       style: TextStyle(
                                         color: Colors.white,
@@ -265,8 +265,8 @@ class _ClaimProfileScreenState extends State<ClaimProfileScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    const Text(
+                                    SizedBox(height: 4),
+                                    Text(
                                       "Complete seu cadastro para acessar novos clientes",
                                       style: TextStyle(
                                         color: Colors.white70,

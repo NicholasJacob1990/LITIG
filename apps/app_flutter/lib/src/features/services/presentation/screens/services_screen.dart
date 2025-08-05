@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../shared/widgets/instrumented_widgets.dart';
 
 class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});
@@ -44,6 +45,9 @@ class ServiceCard extends StatelessWidget {
   final String title;
   final String description;
   final String route;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final double? listRank;
 
   const ServiceCard({
     super.key,
@@ -51,25 +55,49 @@ class ServiceCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.route,
+    this.sourceContext,
+    this.listRank,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      child: ListTile(
-        leading: Icon(icon, size: 40),
-        title: Text(title),
-        subtitle: Text(description),
-        onTap: () {
-          if (route.isNotEmpty) {
-            context.go(route);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Em breve: $title')),
-            );
-          }
-        },
+    return InstrumentedContentCard(
+      contentId: route.isNotEmpty ? route : title.toLowerCase().replaceAll(' ', '_'),
+      contentType: 'service',
+      sourceContext: sourceContext ?? 'services_screen',
+      listRank: listRank,
+      onTap: () {
+        if (route.isNotEmpty) {
+          context.go(route);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Em breve: $title')),
+          );
+        }
+      },
+      additionalData: {
+        'service_title': title,
+        'service_description': description,
+        'target_route': route,
+        'is_available': route.isNotEmpty,
+        'action_type': route.isNotEmpty ? 'navigate' : 'show_coming_soon',
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16.0),
+        child: ListTile(
+          leading: Icon(icon, size: 40),
+          title: Text(title),
+          subtitle: Text(description),
+          onTap: () {
+            if (route.isNotEmpty) {
+              context.go(route);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Em breve: $title')),
+              );
+            }
+          },
+        ),
       ),
     );
   }

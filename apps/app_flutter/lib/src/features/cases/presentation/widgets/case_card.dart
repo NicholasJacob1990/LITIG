@@ -14,6 +14,7 @@ import 'package:meu_app/src/shared/utils/badge_visibility_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
 
 class CaseCard extends StatelessWidget {
   final String caseId;
@@ -24,6 +25,10 @@ class CaseCard extends StatelessWidget {
   final String preAnalysisDate;
   final LawyerInfo? lawyer;
   final Case? caseData; // Dados completos do caso para acessar recommendedFirm
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final String? listContext;
+  final double? listRank;
 
   const CaseCard({
     super.key,
@@ -35,29 +40,45 @@ class CaseCard extends StatelessWidget {
     required this.preAnalysisDate,
     this.lawyer,
     this.caseData,
+    this.sourceContext,
+    this.listContext,
+    this.listRank,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
-        onTap: () => context.push('/case-detail/$caseId'),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              const SizedBox(height: 8),
-              // NOVO: Badge Cliente VIP/Enterprise (apenas para advogados)
-              BlocBuilder<AuthBloc, auth_states.AuthState>(
+    return InstrumentedContentCard(
+      contentId: caseId,
+      contentType: 'case',
+      sourceContext: sourceContext ?? 'case_list',
+      listContext: listContext,
+      listRank: listRank,
+      onTap: () => context.push('/case-detail/$caseId'),
+      additionalData: {
+        'case_status': status,
+        'case_title': title,
+        'client_type': clientType,
+        'has_lawyer': lawyer != null,
+      },
+      child: Card(
+        elevation: 2,
+        shadowColor: Colors.black26,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: InkWell(
+          onTap: () => context.push('/case-detail/$caseId'),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                const SizedBox(height: 8),
+                // NOVO: Badge Cliente VIP/Enterprise (apenas para advogados)
+                BlocBuilder<AuthBloc, auth_states.AuthState>(
                 builder: (context, authState) {
                   if (authState is auth_states.Authenticated) {
                     final clientBadgeContext = BadgeVisibilityHelper.getVipClientContext(
@@ -120,28 +141,60 @@ class CaseCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Botão da agenda do caso
-                  TextButton.icon(
-                    onPressed: () => context.push('/case-detail/$caseId/agenda'),
-                    icon: const Icon(LucideIcons.calendar, size: 16),
-                    label: const Text('Agenda'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                    ),
-                  ),
+                                     // Botão da agenda do caso - Instrumentado
+                   InstrumentedNavigationAction(
+                     routeName: '/case-detail/$caseId/agenda',
+                     actionType: 'push',
+                     onPressed: () => context.push('/case-detail/$caseId/agenda'),
+                     additionalData: {
+                       'case_id': caseId,
+                       'action_source': 'case_card_agenda_button',
+                       'case_status': status,
+                     },
+                                          child: InstrumentedButton(
+                       elementId: 'case_agenda_$caseId',
+                       context: 'case_card',
+                       onPressed: () => context.push('/case-detail/$caseId/agenda'),
+                       additionalData: {
+                         'case_id': caseId,
+                         'action_type': 'view_agenda',
+                         'case_status': status,
+                       },
+                       child: const Row(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           Icon(LucideIcons.calendar, size: 16, color: AppColors.success),
+                           SizedBox(width: 4),
+                           Text('Agenda', style: TextStyle(color: AppColors.success)),
+                         ],
+                       ),
+                     ),
+                   ),
                   const SizedBox(width: 8),
-                  // Botão ver detalhes existente
-                  TextButton.icon(
+                  // Botão ver detalhes - Instrumentado
+                  InstrumentedButton(
+                    elementId: 'case_details_$caseId',
+                    context: 'case_card',
                     onPressed: () => context.push('/case-detail/$caseId'),
-                    icon: const Icon(LucideIcons.eye, size: 16),
-                    label: const Text('Ver Detalhes'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primaryBlue,
+                    additionalData: {
+                      'case_id': caseId,
+                      'action_type': 'view_details',
+                      'case_status': status,
+                      'has_lawyer': lawyer != null,
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(LucideIcons.eye, size: 16, color: AppColors.primaryBlue),
+                        SizedBox(width: 4),
+                        Text('Ver Detalhes', style: TextStyle(color: AppColors.primaryBlue)),
+                      ],
                     ),
                   ),
                 ],
               )
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -665,8 +718,6 @@ class CaseCard extends StatelessWidget {
   Widget? _buildTypeBadge(BuildContext context) {
     if (caseData?.caseType == null) return null;
     
-    final theme = Theme.of(context);
-    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -844,18 +895,5 @@ class CaseCard extends StatelessWidget {
     );
   }
 
-  bool _isLawyer(String role) {
-    return role == 'lawyer_firm_member' ||  // Atualizado de lawyer_associated
-           role == 'lawyer_individual' ||
-           role == 'lawyer_office' ||
-           role == 'lawyer_platform_associate' ||
-           role == 'lawyer';
-  }
 
-  bool _isClient(String role) {
-    return role == 'client_associated' ||
-           role == 'client_individual' ||
-           role == 'client_platform_associate' ||
-           role == 'client';
-  }
 } 

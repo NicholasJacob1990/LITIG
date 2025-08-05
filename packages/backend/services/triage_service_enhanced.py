@@ -11,8 +11,8 @@ import anthropic
 import openai
 from dotenv import load_dotenv
 
-# Importação do serviço de embedding
-from embedding_service import generate_embedding
+# MUDANÇA: Apontando para o novo serviço orquestrador
+from .embedding_orchestrator import generate_embedding
 
 load_dotenv()
 
@@ -311,13 +311,18 @@ class EnhancedTriageService:
         summary = triage_results.get("summary")
         if summary:
             try:
-                embedding_vector = await generate_embedding(summary)
-                triage_results["summary_embedding"] = embedding_vector
+                # MUDANÇA: Usando o orquestrador para gerar o embedding
+                result = await generate_embedding(summary, context_type="case")
+                triage_results["embedding"] = result.embedding
             except Exception as e:
                 print(f"Falha ao gerar embedding: {e}")
-                triage_results["summary_embedding"] = None
+                triage_results["embedding"] = None
         else:
-            triage_results["summary_embedding"] = None
+            triage_results["embedding"] = None
+
+        # Remover a chave antiga, se existir
+        if "summary_embedding" in triage_results:
+            del triage_results["summary_embedding"]
 
         # Adicionar métricas de performance
         processing_time = time.time() - start_time

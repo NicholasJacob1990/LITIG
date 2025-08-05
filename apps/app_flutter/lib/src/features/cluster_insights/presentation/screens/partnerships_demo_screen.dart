@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/hybrid_partnerships_widget.dart';
-import '../../domain/entities/partnership_recommendation.dart';
 
 /// Tela de demonstração para as funcionalidades de parcerias híbridas
 class PartnershipsDemoScreen extends StatelessWidget {

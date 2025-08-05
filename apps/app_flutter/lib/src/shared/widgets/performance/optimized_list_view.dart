@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'dart:async'; // Added for Timer
 
 /// Widget otimizado para listas grandes com virtualização e lazy loading

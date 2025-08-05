@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """algoritmo_match.py
-Algoritmo de Match Jurídico Inteligente — v2.10-iep
+Algoritmo de Match Jurídico Inteligente — v2.11-full-escavador
 ======================================================================
 Versão consolidada que combina funcionalidades das versões:
 - v2.7-rc3: Sponsored recommendations, premium cases, complete logging
 - v2.8-academic: Academic enrichment, LTR service, async features
 - v2.9-unified: Sistema híbrido completo
 - v2.10-iep: 🆕 Feature I - Índice de Engajamento na Plataforma (IEP)
+- v2.11-full-escavador: 🆕 Uso completo dos dados do Escavador (100%)
 
-Funcionalidades v2.10-iep 🚀
-----------------------------
+Funcionalidades v2.11-full-escavador 🚀
+----------------------------------------
 1.  **Academic Enrichment**: Feature Q enriquecida com dados acadêmicos externos
     - Avaliação de universidades via rankings QS/THE
     - Análise de periódicos por fator de impacto (JCR/Qualis)
@@ -26,6 +27,11 @@ Funcionalidades v2.10-iep 🚀
     - Pré-calculado pelo job calculate_engagement_scores.py
     - Integrado em todos os presets de matching
     - Beneficia tanto cliente→advogado quanto advogado→advogado
+9.  🆕 **100% Escavador Data Usage**: Uso completo dos dados do currículo Lattes
+    - Feature Q expandida com projetos de pesquisa e prêmios
+    - Feature L nova para idiomas e participação em eventos
+    - Análise avançada de formação acadêmica e experiência
+    - Scoring inteligente de atividades de networking e atualização profissional
 
 Funcionalidades anteriores mantidas:
 - Feature-E (Firm Reputation), B2B Two-Pass Algorithm
@@ -47,9 +53,26 @@ from math import asin, cos, log1p, radians, sin, sqrt
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Literal, Set, cast
 from datetime import datetime, timedelta
-from schemas.recommendation import Recommendation
-from services.ads_service import fetch_ads_for_case
-from services.weight_optimizer_service import get_optimized_weights
+# Imports relativos condicionais para evitar problemas quando arquivo é executado diretamente
+try:
+    from ..schemas.recommendation import Recommendation
+    from ..services.ads_service import fetch_ads_for_case
+    from ..services.weight_optimizer_service import get_optimized_weights
+except ImportError:
+    # Fallback quando executado diretamente ou em contexto diferente
+    try:
+        from schemas.recommendation import Recommendation
+        from services.ads_service import fetch_ads_for_case
+        from services.weight_optimizer_service import get_optimized_weights
+    except ImportError:
+        # Último fallback: definir classes/funções mock
+        print("⚠️ Imports de schemas/services não disponíveis - usando fallbacks")
+        class Recommendation:
+            pass
+        def fetch_ads_for_case(*args, **kwargs):
+            return []
+        def get_optimized_weights(*args, **kwargs):
+            return {}
 import re
 import unicodedata
 import hashlib
@@ -169,9 +192,10 @@ WEIGHTS_FILE = Path(os.getenv("LTR_WEIGHTS_PATH", default_path))
 
 # Pesos fixos, definidos no código, como última camada de segurança
 HARDCODED_FALLBACK_WEIGHTS = {
-    "A": 0.23, "S": 0.18, "T": 0.11, "G": 0.07,
+    "A": 0.22, "S": 0.17, "T": 0.10, "G": 0.07,
     "Q": 0.07, "U": 0.05, "R": 0.05, "C": 0.03,
-    "E": 0.02, "P": 0.02, "M": 0.15, "I": 0.02  # 🆕 Feature I (IEP)
+    "E": 0.02, "P": 0.02, "M": 0.14, "I": 0.02,
+    "L": 0.04  # 🆕 Feature L (Languages & Events)
 }
 
 # Tenta carregar os pesos otimizados; se falhar, usa o fallback fixo
@@ -191,35 +215,35 @@ DEFAULT_WEIGHTS = OPTIMIZED_WEIGHTS
 # Presets revisados v2.8 – todos somam 1.0 e incluem chave "M"
 PRESET_WEIGHTS = {
     "fast": {
-        "A": 0.39, "S": 0.15, "T": 0.19, "G": 0.15,
+        "A": 0.38, "S": 0.15, "T": 0.18, "G": 0.15,
         "Q": 0.07, "U": 0.03, "R": 0.01,
-        "C": 0.00, "P": 0.00, "E": 0.00, "M": 0.00, "I": 0.01  # 🆕 IEP
+        "C": 0.00, "P": 0.00, "E": 0.00, "M": 0.00, "I": 0.01, "L": 0.02  # 🆕 Features I+L
     },
     "expert": {
-        "A": 0.19, "S": 0.25, "T": 0.14, "G": 0.05,
+        "A": 0.18, "S": 0.24, "T": 0.13, "G": 0.05,
         "Q": 0.15, "U": 0.05, "R": 0.03,
-        "C": 0.02, "P": 0.01, "E": 0.00, "M": 0.09, "I": 0.02  # 🆕 IEP
+        "C": 0.02, "P": 0.01, "E": 0.00, "M": 0.08, "I": 0.02, "L": 0.04  # 🆕 Features I+L
     },
     "balanced": DEFAULT_WEIGHTS,
     "economic": {
-        "A": 0.17, "S": 0.12, "T": 0.06, "G": 0.17,
-        "Q": 0.04, "U": 0.17, "R": 0.05,
-        "C": 0.05, "P": 0.12, "E": 0.00, "M": 0.04, "I": 0.01  # 🆕 IEP
+        "A": 0.16, "S": 0.11, "T": 0.06, "G": 0.16,
+        "Q": 0.04, "U": 0.16, "R": 0.05,
+        "C": 0.05, "P": 0.11, "E": 0.00, "M": 0.04, "I": 0.01, "L": 0.05  # 🆕 Features I+L
     },
     "b2b": {
-        "A": 0.12, "S": 0.15, "T": 0.14, "Q": 0.17,
+        "A": 0.11, "S": 0.14, "T": 0.13, "Q": 0.16,
         "E": 0.10, "G": 0.05, "U": 0.05, "R": 0.03,
-        "C": 0.03, "P": 0.10, "M": 0.04, "I": 0.02  # 🆕 IEP (importante para B2B)
+        "C": 0.03, "P": 0.09, "M": 0.04, "I": 0.02, "L": 0.05  # 🆕 Features I+L (importante para B2B)
     },
     "correspondent": {
-        "A": 0.10, "S": 0.05, "T": 0.04, "G": 0.25,
-        "Q": 0.10, "U": 0.20, "R": 0.03, "C": 0.05,
-        "E": 0.02, "P": 0.15, "M": 0.00, "I": 0.01  # 🆕 IEP
+        "A": 0.09, "S": 0.05, "T": 0.04, "G": 0.24,
+        "Q": 0.09, "U": 0.19, "R": 0.03, "C": 0.05,
+        "E": 0.02, "P": 0.14, "M": 0.00, "I": 0.01, "L": 0.05  # 🆕 Features I+L
     },
     "expert_opinion": {
-        "A": 0.10, "S": 0.30, "T": 0.02, "G": 0.00,
-        "Q": 0.35, "U": 0.00, "R": 0.00, "C": 0.00,
-        "E": 0.02, "P": 0.00, "M": 0.20, "I": 0.01  # 🆕 IEP
+        "A": 0.09, "S": 0.29, "T": 0.02, "G": 0.00,
+        "Q": 0.34, "U": 0.00, "R": 0.00, "C": 0.00,
+        "E": 0.02, "P": 0.00, "M": 0.19, "I": 0.01, "L": 0.04  # 🆕 Features I+L
     }
 }
 
@@ -1001,7 +1025,40 @@ class FeatureCalculator:
         num_pareceres_rel = len([p for p in self.lawyer.pareceres if self.case.area.lower() in p.area.lower()])
         score_par = min(1.0, math.log1p(num_pareceres_rel) / math.log1p(5))
 
-        # ── 5. Reconhecimentos de mercado (inalterado) ──────────────
+        # ── 5. Projetos de pesquisa (NOVO) ──────────────────────────
+        projetos = cv.get("projetos_pesquisa", [])
+        score_projetos = 0.0
+        if projetos:
+            # Contar projetos relevantes para a área do caso
+            projetos_relevantes = [
+                p for p in projetos 
+                if self.case.area.lower() in str(p.get("area", "")).lower() or
+                   self.case.area.lower() in str(p.get("descricao", "")).lower()
+            ]
+            # Score baseado no número de projetos relevantes
+            score_projetos = min(1.0, len(projetos_relevantes) / 3.0)  # Máximo 3 projetos
+        
+        # ── 6. Prêmios e títulos acadêmicos (NOVO) ──────────────────
+        premios = cv.get("premios", [])
+        score_premios = 0.0
+        if premios:
+            # Peso por tipo de prêmio
+            pontos_premios = 0.0
+            for premio in premios:
+                nome_premio = str(premio.get("nome", "")).lower()
+                if any(keyword in nome_premio for keyword in [
+                    "melhor", "excelência", "destaque", "prêmio", "honra"
+                ]):
+                    pontos_premios += 0.3
+                elif any(keyword in nome_premio for keyword in [
+                    "participação", "conclusão", "certificado"
+                ]):
+                    pontos_premios += 0.1
+                else:
+                    pontos_premios += 0.2  # Prêmio genérico
+            score_premios = min(1.0, pontos_premios)
+        
+        # ── 7. Reconhecimentos de mercado (expandido) ───────────────
         pesos_rec = {
             "análise advocacia 500": 1.0,
             "chambers and partners": 1.0,
@@ -1014,15 +1071,17 @@ class FeatureCalculator:
                 pontos_rec += pesos_rec.get(rec.publicacao.lower(), 0.4)
         score_rec = np.clip(pontos_rec / 3.0, 0, 1)
 
-        # ── 6. Combinação final enriquecida ─────────────────────────
+        # ── 8. Combinação final enriquecida (100% dados Escavador) ──
         final_score = (
-            0.30 * score_exp +        # 30% experiência
-            0.20 * score_titles +     # 20% títulos acadêmicos 
-            0.15 * score_uni +        # 15% reputação das universidades (NOVO)
-            0.10 * score_pub_qual +   # 10% qualidade dos periódicos (NOVO)
+            0.25 * score_exp +        # 25% experiência
+            0.18 * score_titles +     # 18% títulos acadêmicos 
+            0.15 * score_uni +        # 15% reputação das universidades
+            0.10 * score_pub_qual +   # 10% qualidade dos periódicos
             0.05 * score_pub_qty +    # 5% quantidade de publicações
-            0.10 * score_par +        # 10% pareceres
-            0.10 * score_rec          # 10% reconhecimentos
+            0.08 * score_projetos +   # 8% projetos de pesquisa (NOVO)
+            0.07 * score_premios +    # 7% prêmios acadêmicos (NOVO)
+            0.07 * score_par +        # 7% pareceres
+            0.05 * score_rec          # 5% reconhecimentos de mercado
         )
 
         # Integração com CV score v2.2 (reduzida devido ao enriquecimento)
@@ -1322,6 +1381,112 @@ class FeatureCalculator:
         # Garantir que está no range [0, 1]
         return float(np.clip(iep_score, 0.0, 1.0))
 
+    def languages_events_score(self) -> float:
+        """
+        🆕 Feature-L: Languages & Events (Idiomas e Participação em Eventos)
+        
+        Pontuação baseada em:
+        1. Proficiência em idiomas (importantes para casos internacionais)
+        2. Participação em eventos acadêmicos/profissionais
+        3. Atividade de networking e atualização profissional
+        
+        Returns:
+            float: Score normalizado entre 0 e 1
+        """
+        cv = self.cv
+        
+        # ── 1. Score de idiomas ──────────────────────────────────────
+        idiomas = cv.get("idiomas", [])
+        score_idiomas = 0.0
+        
+        if idiomas:
+            pontos_idiomas = 0.0
+            for idioma in idiomas:
+                idioma_nome = str(idioma.get("idioma", "")).lower()
+                nivel = str(idioma.get("nivel", "")).lower()
+                
+                # Peso por idioma (inglês e espanhol são mais valorizados no direito)
+                peso_idioma = 1.0
+                if "inglês" in idioma_nome or "english" in idioma_nome:
+                    peso_idioma = 1.5  # Inglês é muito importante
+                elif any(lang in idioma_nome for lang in ["espanhol", "spanish", "français", "francês"]):
+                    peso_idioma = 1.2  # Outros idiomas importantes
+                
+                # Peso por nível de proficiência
+                peso_nivel = 0.3  # Básico
+                if any(keyword in nivel for keyword in ["fluente", "avançado", "advanced", "fluent"]):
+                    peso_nivel = 1.0
+                elif any(keyword in nivel for keyword in ["intermediário", "intermediate", "médio"]):
+                    peso_nivel = 0.7
+                elif any(keyword in nivel for keyword in ["básico", "basic", "iniciante"]):
+                    peso_nivel = 0.3
+                
+                pontos_idiomas += peso_idioma * peso_nivel
+            
+            # Normalizar score de idiomas (máximo 3 idiomas fluentes = score 1.0)
+            score_idiomas = min(1.0, pontos_idiomas / 4.5)
+        
+        # ── 2. Score de eventos ──────────────────────────────────────
+        eventos = cv.get("eventos", [])
+        score_eventos = 0.0
+        
+        if eventos:
+            # Contar eventos por tipo e relevância
+            pontos_eventos = 0.0
+            eventos_recentes = 0  # Últimos 3 anos
+            
+            from datetime import datetime
+            ano_atual = datetime.now().year
+            
+            for evento in eventos:
+                ano_evento = evento.get("ano")
+                tipo_evento = str(evento.get("tipo", "")).lower()
+                nome_evento = str(evento.get("nome", "")).lower()
+                
+                # Peso por tipo de evento
+                peso_tipo = 0.2  # Padrão
+                if any(keyword in tipo_evento for keyword in [
+                    "congresso", "conference", "seminário", "simpósio"
+                ]):
+                    peso_tipo = 1.0  # Eventos acadêmicos importantes
+                elif any(keyword in tipo_evento for keyword in [
+                    "workshop", "curso", "treinamento", "capacitação"
+                ]):
+                    peso_tipo = 0.8  # Eventos de capacitação
+                elif any(keyword in tipo_evento for keyword in [
+                    "palestra", "lecture", "webinar"
+                ]):
+                    peso_tipo = 0.6  # Eventos menores
+                
+                # Bonus por eventos recentes (últimos 3 anos)
+                bonus_recencia = 1.0
+                if ano_evento and ano_atual - ano_evento <= 3:
+                    bonus_recencia = 1.3
+                    eventos_recentes += 1
+                elif ano_evento and ano_atual - ano_evento <= 5:
+                    bonus_recencia = 1.1
+                
+                # Bonus por relevância à área do caso
+                bonus_relevancia = 1.0
+                if self.case.area.lower() in nome_evento or self.case.area.lower() in tipo_evento:
+                    bonus_relevancia = 1.4
+                
+                pontos_eventos += peso_tipo * bonus_recencia * bonus_relevancia
+            
+            # Bonus por participação consistente (5+ eventos recentes)
+            if eventos_recentes >= 5:
+                pontos_eventos *= 1.2
+            
+            # Normalizar score de eventos (máximo ~8 pontos = score 1.0)
+            score_eventos = min(1.0, pontos_eventos / 8.0)
+        
+        # ── 3. Combinação final ──────────────────────────────────────
+        # 60% idiomas (mais importante para casos internacionais)
+        # 40% eventos (importante para networking e atualização)
+        final_score = 0.6 * score_idiomas + 0.4 * score_eventos
+        
+        return float(np.clip(final_score, 0.0, 1.0))
+
     # --------‑‑‑‑‑ Aggregate ‑‑‑‑‑---------
 
     def all(self) -> Dict[str, float]:  # noqa: D401
@@ -1338,6 +1503,7 @@ class FeatureCalculator:
             "P": self.price_fit(),       # Nova feature P
             "M": self.maturity_score(),  # 🆕 Feature M (Maturity)
             "I": self.interaction_score(),  # 🆕 Feature I (IEP - Índice de Engajamento)
+            "L": self.languages_events_score(),  # 🆕 Feature L (Languages & Events)
         }
 
     async def all_async(self) -> Dict[str, float]:
@@ -1355,6 +1521,7 @@ class FeatureCalculator:
             "P": self.price_fit(),
             "M": self.maturity_score(),
             "I": self.interaction_score(),  # 🆕 Feature I (IEP - Índice de Engajamento)
+            "L": self.languages_events_score(),  # 🆕 Feature L (Languages & Events)
         }
 
     # 🆕 FASE 1: Cache Inteligente de Features
@@ -1510,7 +1677,7 @@ class MatchmakingAlgorithm:
         
         # Importar templates organizados
         try:
-            from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+            from ..services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
             self.templates = AcademicPromptTemplates()
             self.validator = AcademicPromptValidator()
         except ImportError:
@@ -2025,7 +2192,7 @@ class MatchmakingAlgorithm:
             AUDIT_LOGGER.info(f"Escritório ranqueado #{i+1}", {
                 "case_id": case.id,
                 "firm_id": firm.id,
-                "firm_name": getattr(firm, 'nome', getattr(firm, 'name', 'Unknown')),
+                "firm_name": firm.nome,
                 "final_score": round(firm.scores["final_score"], 4),
                 "base_score": round(firm.scores.get('base_score', firm.scores['final_score']), 4),
                 "premium_boost": round(firm.scores.get('premium_boost', 0.0), 4),
@@ -2040,16 +2207,11 @@ class MatchmakingAlgorithm:
     # ------------------------------------------------------------------
     async def rank(self, case: Case, lawyers: List[Lawyer], *, top_n: int = 5,
                    preset: str = "balanced", model_version: Optional[str] = None,
-                   exclude_ids: Optional[Set[str]] = None, expand_search: bool = False, 
-                   include_firms: bool = True) -> Tuple[List['Recommendation'], List[LawFirm]]:
-        """Classifica advogados e escritórios para um caso e mescla com recomendações patrocinadas.
+                   exclude_ids: Optional[Set[str]] = None, expand_search: bool = False) -> List['Recommendation']:
+        """Classifica advogados para um caso e mescla com recomendações patrocinadas.
         
         Args:
             expand_search: Se True, habilita busca híbrida (interna + externa)
-            include_firms: Se True, inclui ranking de escritórios na resposta
-            
-        Returns:
-            Tuple[List[Recommendation], List[LawFirm]]: Tupla com advogados ranqueados e escritórios ranqueados
         """
         
         if not lawyers:
@@ -2367,36 +2529,7 @@ class MatchmakingAlgorithm:
         sponsored_lawyers = await fetch_ads_for_case(case, limit=3)
         sponsored_recommendations = [Recommendation(lawyer=sl, fair_score=sl.scores.get('fair_base', 0.0), is_sponsored=True, ad_campaign_id=getattr(sl, 'ad_meta', {}).get('campaign_id')) for sl in sponsored_lawyers]
 
-        final_recommendations = organic_recommendations + sponsored_recommendations
-        
-        # 8. Ranking de escritórios (se habilitado)
-        ranked_firms = []
-        if include_firms:
-            # Coletar escritórios únicos dos advogados disponíveis
-            firm_candidates = []
-            for lw in lawyers:
-                if lw.firm_id and lw.firm:
-                    firm_candidates.append(lw.firm)
-            
-            # Remover duplicatas mantendo a ordem
-            unique_firms_dict = {}
-            for firm in firm_candidates:
-                if firm.id not in unique_firms_dict:
-                    unique_firms_dict[firm.id] = firm
-            
-            if unique_firms_dict:
-                # Rankear escritórios (máximo 3 para evitar sobrecarga)
-                ranked_firms = await self._rank_firms(case, list(unique_firms_dict.values()), top_n=min(3, len(unique_firms_dict)))
-                
-                AUDIT_LOGGER.info("Firms ranked for case", {
-                    "case_id": case.id,
-                    "total_firms_evaluated": len(unique_firms_dict),
-                    "firms_returned": len(ranked_firms),
-                    "preset": preset,
-                    "include_firms": include_firms
-                })
-
-        return final_recommendations, ranked_firms
+        return organic_recommendations + sponsored_recommendations
 
     # 🆕 FASE 3: Case Feedback Collection para AutoML
     async def record_case_outcome(
@@ -2925,6 +3058,24 @@ if __name__ == "__main__":
                 "anos_experiencia": exp,
                 "pos_graduacoes": titles,
                 "num_publicacoes": 5,
+                "publicacoes": [
+                    {"ano": 2023, "titulo": "Artigo sobre Direito do Trabalho", "journal": "Revista Trabalhista"},
+                    {"ano": 2022, "titulo": "Tendências em Rescisão", "journal": "Revista dos Tribunais"}
+                ],
+                "projetos_pesquisa": [
+                    {"nome": "Pesquisa sobre CLT", "area": "Trabalhista", "ano_inicio": 2022}
+                ],
+                "premios": [
+                    {"nome": "Melhor Advogado Trabalhista 2023", "ano": 2023, "instituicao": "OAB-SP"}
+                ],
+                "idiomas": [
+                    {"idioma": "inglês", "nivel": "fluente"},
+                    {"idioma": "espanhol", "nivel": "intermediário"}
+                ],
+                "eventos": [
+                    {"nome": "Congresso de Direito do Trabalho", "tipo": "congresso", "ano": 2023},
+                    {"nome": "Workshop CLT Atualizada", "tipo": "workshop", "ano": 2023}
+                ]
             },
             kpi=KPI(
                 success_rate=succ,
@@ -3004,19 +3155,24 @@ if __name__ == "__main__":
                 f"  Features: A={feats['A']:.2f} S={feats['S']:.2f} T={feats['T']:.2f} G={feats['G']:.2f}")
             print(
                 f"           Q={feats['Q']:.2f} U={feats['U']:.2f} R={feats['R']:.2f} C={feats['C']:.2f}")
+            print(
+                f"           E={feats['E']:.2f} P={feats['P']:.2f} M={feats['M']:.2f} I={feats['I']:.2f} L={feats['L']:.2f}")
             print(f"  Delta: {delta}")
             print(f"  Preset: {scores['preset']} | Complexity: {scores['complexity']}")
             print(f"  Degraded Mode: {'SIM' if scores.get('degraded_mode', False) else 'NÃO'}")
             print(f"  Last offered: {datetime.fromtimestamp(adv.last_offered_at).isoformat()}")
             print()
 
-        print(f"\n📊 Observações {algorithm_version}:")
-        print("• Academic Enrichment: Universidades e periódicos avaliados via APIs externas")
-        print("• Sponsored recommendations e lógica de casos premium integradas")
-        print("• Validação robusta: Sanitização e validação de inputs")
-        print("• Feature-E (Firm Reputation) e B2B Two-Pass mantidos")
-        print("• Safe conflict scan e configurações via ENV")
-        print("• Logs estruturados com métricas acadêmicas")
+        print(f"\n📊 Observações v2.11-full-escavador:")
+        print("• 🎓 Academic Enrichment: Universidades e periódicos avaliados via APIs externas")
+        print("• 🏆 100% Dados Escavador: Projetos, prêmios, idiomas e eventos totalmente integrados")
+        print("• 🌐 Feature L (Languages & Events): Nova feature para idiomas e networking")
+        print("• 📈 Feature Q Expandida: Inclui projetos de pesquisa e prêmios acadêmicos")
+        print("• 🚀 Sponsored recommendations e lógica de casos premium integradas")
+        print("• 🔒 Validação robusta: Sanitização e validação de inputs")
+        print("• 🏢 Feature-E (Firm Reputation) e B2B Two-Pass mantidos")
+        print("• 🛡️ Safe conflict scan e configurações via ENV")
+        print("• 📊 Logs estruturados com métricas acadêmicas completas")
 
     async def test_academic_enrichment():
         """Testes mínimos para enriquecimento acadêmico."""
@@ -3063,3 +3219,326 @@ def _close_redis():
             loop.run_until_complete(cache.close())
     except RuntimeError:
         pass
+
+# =============================================================================
+# 5.5. Academic Enrichment Service
+# =============================================================================
+
+
+class AcademicEnricher:
+    """
+    Serviço de enriquecimento acadêmico que avalia universidades e periódicos
+    usando APIs externas (Perplexity + Deep Research) com cache inteligente.
+    """
+    
+    def __init__(self, cache: RedisCache):
+        self.cache = cache
+        self.validator = AcademicPromptValidator()
+        self.templates = AcademicPromptTemplates()
+        
+    async def score_universities(self, uni_names: List[str]) -> Dict[str, float]:
+        """
+        Avalia universidades usando APIs externas com cache Redis.
+        
+        Args:
+            uni_names: Lista de nomes de universidades
+            
+        Returns:
+            Dicionário {nome_universidade: score_0_1}
+        """
+        if not uni_names:
+            return {}
+            
+        try:
+            # Validar input
+            self.validator.validate_batch_size(uni_names, 15)
+            
+            # Processar em lotes para eficiência
+            results = {}
+            for chunk in self._chunks(uni_names, 5):  # Lotes de 5
+                chunk_results = await self._score_universities_batch(chunk)
+                results.update(chunk_results)
+                
+            return results
+            
+        except Exception as e:
+            AUDIT_LOGGER.error("Erro no scoring de universidades", {
+                "error": str(e),
+                "universities": uni_names
+            })
+            # Fallback: scores neutros
+            return {name: 0.5 for name in uni_names}
+    
+    async def score_journals(self, journ_names: List[str]) -> Dict[str, float]:
+        """
+        Avalia periódicos/journals usando APIs externas com cache Redis.
+        
+        Args:
+            journ_names: Lista de nomes de periódicos
+            
+        Returns:
+            Dicionário {nome_periodico: score_0_1}
+        """
+        if not journ_names:
+            return {}
+            
+        try:
+            # Validar input
+            self.validator.validate_batch_size(journ_names, 10)
+            
+            # Processar em lotes
+            results = {}
+            for chunk in self._chunks(journ_names, 3):  # Lotes menores para journals
+                chunk_results = await self._score_journals_batch(chunk)
+                results.update(chunk_results)
+                
+            return results
+            
+        except Exception as e:
+            AUDIT_LOGGER.error("Erro no scoring de periódicos", {
+                "error": str(e),
+                "journals": journ_names
+            })
+            # Fallback: scores neutros
+            return {name: 0.5 for name in journ_names}
+    
+    async def _score_universities_batch(self, universities: List[str]) -> Dict[str, float]:
+        """Processa um lote de universidades."""
+        results = {}
+        
+        for uni_name in universities:
+            # Chave de cache normalizada
+            cache_key = canonical(uni_name)
+            
+            # Tentar obter do cache
+            cached_score = await self.cache.get_academic_score(f"uni:{cache_key}")
+            if cached_score is not None:
+                results[uni_name] = cached_score
+                continue
+            
+            # Cache miss - consultar APIs externas
+            score = await self._query_university_reputation(uni_name)
+            
+            # Armazenar no cache com TTL configurável
+            await self.cache.set_academic_score(
+                f"uni:{cache_key}", 
+                score, 
+                ttl_h=UNI_RANK_TTL_H
+            )
+            
+            results[uni_name] = score
+            
+            # Rate limiting entre requisições
+            await asyncio.sleep(0.5)
+        
+        return results
+    
+    async def _score_journals_batch(self, journals: List[str]) -> Dict[str, float]:
+        """Processa um lote de periódicos."""
+        results = {}
+        
+        for journ_name in journals:
+            # Chave de cache normalizada
+            cache_key = canonical(journ_name)
+            
+            # Tentar obter do cache
+            cached_score = await self.cache.get_academic_score(f"jour:{cache_key}")
+            if cached_score is not None:
+                results[journ_name] = cached_score
+                continue
+            
+            # Cache miss - consultar APIs externas
+            score = await self._query_journal_impact(journ_name)
+            
+            # Armazenar no cache
+            await self.cache.set_academic_score(
+                f"jour:{cache_key}", 
+                score, 
+                ttl_h=JOUR_RANK_TTL_H
+            )
+            
+            results[journ_name] = score
+            
+            # Rate limiting
+            await asyncio.sleep(0.3)
+        
+        return results
+    
+    async def _query_university_reputation(self, uni_name: str) -> float:
+        """
+        Consulta reputação de universidade usando Perplexity + Deep Research.
+        
+        Returns:
+            Score normalizado entre 0 e 1
+        """
+        try:
+            # Template para avaliação de universidade
+            prompt = self.templates.get_university_evaluation_prompt(uni_name)
+            
+            # Tentar Perplexity primeiro (mais rápido)
+            payload = {
+                "model": "llama-3.1-sonar-small-128k-online",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 500,
+                "temperature": 0.1
+            }
+            
+            result = await perplexity_chat(payload)
+            if result and "score" in result:
+                return self._normalize_score(result["score"])
+            
+            # Fallback para Deep Research (mais lento mas preciso)
+            deep_payload = {
+                "model": "gpt-4o-deep",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_completion_tokens": 300
+            }
+            
+            deep_result = await deep_research_request(deep_payload)
+            if deep_result and "score" in deep_result:
+                return self._normalize_score(deep_result["score"])
+            
+            # Fallback baseado em heurísticas simples
+            return self._heuristic_university_score(uni_name)
+            
+        except Exception as e:
+            AUDIT_LOGGER.warning("Erro na consulta de universidade", {
+                "university": uni_name,
+                "error": str(e)
+            })
+            return self._heuristic_university_score(uni_name)
+    
+    async def _query_journal_impact(self, journ_name: str) -> float:
+        """
+        Consulta fator de impacto de periódico usando APIs externas.
+        
+        Returns:
+            Score normalizado entre 0 e 1
+        """
+        try:
+            # Template para avaliação de periódico
+            prompt = self.templates.get_journal_evaluation_prompt(journ_name)
+            
+            # Usar Perplexity para busca de impacto
+            payload = {
+                "model": "llama-3.1-sonar-small-128k-online",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 400,
+                "temperature": 0.1
+            }
+            
+            result = await perplexity_chat(payload)
+            if result and "score" in result:
+                return self._normalize_score(result["score"])
+            
+            # Fallback heurístico
+            return self._heuristic_journal_score(journ_name)
+            
+        except Exception as e:
+            AUDIT_LOGGER.warning("Erro na consulta de periódico", {
+                "journal": journ_name,
+                "error": str(e)
+            })
+            return self._heuristic_journal_score(journ_name)
+    
+    def _normalize_score(self, raw_score: Any) -> float:
+        """Normaliza score retornado pelas APIs para range 0-1."""
+        try:
+            if isinstance(raw_score, (int, float)):
+                # Se já for numérico, normalizar
+                if 0 <= raw_score <= 1:
+                    return float(raw_score)
+                elif 0 <= raw_score <= 10:
+                    return float(raw_score / 10)
+                elif 0 <= raw_score <= 100:
+                    return float(raw_score / 100)
+                else:
+                    return 0.5  # Valor fora do esperado
+            elif isinstance(raw_score, str):
+                # Tentar converter string para float
+                return float(raw_score.strip()) if raw_score.strip() else 0.5
+            else:
+                return 0.5
+        except (ValueError, TypeError):
+            return 0.5
+    
+    def _heuristic_university_score(self, uni_name: str) -> float:
+        """Fallback heurístico para universidades quando APIs falham."""
+        name_lower = uni_name.lower()
+        
+        # Universidades top mundial
+        if any(keyword in name_lower for keyword in [
+            "harvard", "stanford", "mit", "yale", "princeton", 
+            "cambridge", "oxford", "sorbonne"
+        ]):
+            return 1.0
+        
+        # Universidades brasileiras reconhecidas
+        if any(keyword in name_lower for keyword in [
+            "usp", "unicamp", "ufrj", "puc", "fgv", "insper", 
+            "universidade de sao paulo", "pontifícia universidade"
+        ]):
+            return 0.8
+        
+        # Universidades federais/estaduais
+        if any(keyword in name_lower for keyword in [
+            "federal", "estadual", "ufmg", "ufrgs", "ufsc"
+        ]):
+            return 0.7
+        
+        # Outras universidades
+        if "universidade" in name_lower or "faculdade" in name_lower:
+            return 0.6
+        
+        # Default para instituições não reconhecidas
+        return 0.4
+    
+    def _heuristic_journal_score(self, journ_name: str) -> float:
+        """Fallback heurístico para periódicos quando APIs falham."""
+        name_lower = journ_name.lower()
+        
+        # Periódicos internacionais top
+        if any(keyword in name_lower for keyword in [
+            "harvard law review", "yale law", "columbia law", 
+            "stanford law", "nature", "science"
+        ]):
+            return 1.0
+        
+        # Periódicos brasileiros reconhecidos
+        if any(keyword in name_lower for keyword in [
+            "revista de direito administrativo", "revista dos tribunais",
+            "revista de direito constitucional", "conjur"
+        ]):
+            return 0.8
+        
+        # Revistas acadêmicas gerais
+        if any(keyword in name_lower for keyword in [
+            "revista", "journal", "law review", "direito"
+        ]):
+            return 0.6
+        
+        # Default
+        return 0.4
+    
+    def _chunks(self, lst: List[str], n: int):
+        """Divide lista em chunks de tamanho n."""
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+
+
+# Importar templates acadêmicos
+try:
+    from services.academic_prompt_templates import AcademicPromptTemplates, AcademicPromptValidator
+except ImportError:
+    # Fallback básico se templates não estiverem disponíveis
+    class AcademicPromptTemplates:
+        def get_university_evaluation_prompt(self, uni_name: str) -> str:
+            return f"Evaluate the academic reputation of {uni_name} university on a scale from 0 to 1, considering global rankings, research output, and legal education quality. Return only a JSON with 'score' field."
+        
+        def get_journal_evaluation_prompt(self, journ_name: str) -> str:
+            return f"Evaluate the impact factor and academic reputation of the journal '{journ_name}' on a scale from 0 to 1. Consider JCR impact factor, Qualis classification, and citation metrics. Return only a JSON with 'score' field."
+    
+    class AcademicPromptValidator:
+        def validate_batch_size(self, items: List[str], max_size: int):
+            if len(items) > max_size:
+                raise ValueError(f"Batch size {len(items)} exceeds maximum {max_size}")

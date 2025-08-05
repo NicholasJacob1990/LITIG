@@ -10,6 +10,7 @@ import 'package:meu_app/injection_container.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/src/features/search/presentation/widgets/partner_search_result_list.dart';
+import '../../../../shared/services/analytics_service.dart';
 
 /// Tela de busca de parceiros para advogados contratantes
 /// 
@@ -37,16 +38,42 @@ class PartnersSearchView extends StatefulWidget {
 class _PartnersSearchViewState extends State<PartnersSearchView> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  late AnalyticsService _analytics;
+  DateTime? _searchStartTime;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initializeAnalytics();
+    _setupSearchListeners();
     
     // Buscar parceiros por padrão (incluindo escritórios)
     context.read<SearchBloc>().add(const SearchRequested(
       SearchParams(preset: 'correspondent', includeFirms: true),
     ));
+  }
+
+  Future<void> _initializeAnalytics() async {
+    _analytics = await AnalyticsService.getInstance();
+  }
+
+  void _setupSearchListeners() {
+    _searchController.addListener(() {
+      if (_searchStartTime == null && _searchController.text.isNotEmpty) {
+        _searchStartTime = DateTime.now();
+        _trackSearchStart();
+      }
+    });
+  }
+
+  void _trackSearchStart() {
+    _analytics.trackSearch(
+      'partners_search',
+      _searchController.text,
+      results: [], // Will be filled when results arrive
+      searchContext: 'partners_search_screen',
+    );
   }
 
   @override
@@ -304,6 +331,30 @@ class _PartnersSearchTabViewState extends State<PartnersSearchTabView> {
         ? const SearchParams(preset: 'correspondent', includeFirms: true)
         : SearchParams(query: queryTrimmed, includeFirms: true);
 
+    _trackSearchExecution(queryTrimmed);
     context.read<SearchBloc>().add(SearchRequested(params));
+  }
+
+  void _trackSearchExecution(String query) {
+    final searchDuration = _searchStartTime != null 
+        ? DateTime.now().difference(_searchStartTime!) 
+        : null;
+
+    _analytics.trackSearch(
+      'partners_search',
+      query,
+      results: [], // Will be filled when results arrive
+      searchContext: 'partners_search_screen',
+      searchDuration: searchDuration,
+      appliedFilters: {
+        'search_type': 'correspondent',
+        'include_firms': true,
+        'current_tab': _tabController.index == 0 ? 'lawyers' : 'firms',
+        'is_empty_search': query.isEmpty,
+      },
+    );
+
+    // Reset search start time for next search
+    _searchStartTime = null;
   }
 } 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/notification_entity.dart';
+import '../../../../shared/widgets/instrumented_widgets.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationEntity notification;
@@ -8,6 +9,9 @@ class NotificationCard extends StatelessWidget {
   final VoidCallback? onMarkAsRead;
   final VoidCallback? onDelete;
   final bool showActions;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final double? listRank;
 
   const NotificationCard({
     super.key,
@@ -16,6 +20,8 @@ class NotificationCard extends StatelessWidget {
     this.onMarkAsRead,
     this.onDelete,
     this.showActions = true,
+    this.sourceContext,
+    this.listRank,
   });
 
   @override
@@ -23,22 +29,43 @@ class NotificationCard extends StatelessWidget {
     final theme = Theme.of(context);
     final color = _parseColor(notification.colorHex);
     
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      elevation: notification.isRead ? 1 : 3,
-      color: notification.isRead 
-          ? theme.cardColor 
-          : theme.cardColor.withValues(alpha: 0.95),
-      child: InkWell(
-        onTap: () {
-          if (!notification.isRead) {
-            onMarkAsRead?.call();
-          }
-          onTap?.call();
-        },
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+    return InstrumentedContentCard(
+      contentId: notification.id,
+      contentType: 'notification',
+      sourceContext: sourceContext ?? 'notifications_list',
+      listRank: listRank,
+      onTap: () {
+        if (!notification.isRead) {
+          onMarkAsRead?.call();
+        }
+        onTap?.call();
+      },
+      additionalData: {
+        'notification_type': notification.type.name,
+        'is_critical': notification.isCritical,
+        'is_offer_related': notification.isOfferRelated,
+        'is_read': notification.isRead,
+        'days_since_created': DateTime.now().difference(notification.createdAt).inDays,
+        'icon_name': notification.iconName,
+        'has_offer_id': notification.offerId != null,
+        'has_case_id': notification.caseId != null,
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        elevation: notification.isRead ? 1 : 3,
+        color: notification.isRead 
+            ? theme.cardColor 
+            : theme.cardColor.withValues(alpha: 0.95),
+        child: InkWell(
+          onTap: () {
+            if (!notification.isRead) {
+              onMarkAsRead?.call();
+            }
+            onTap?.call();
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -125,6 +152,7 @@ class NotificationCard extends StatelessWidget {
                 ],
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -217,18 +245,43 @@ class NotificationCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (!notification.isRead && onMarkAsRead != null)
-          IconButton(
-            onPressed: onMarkAsRead,
-            icon: const Icon(Icons.mark_email_read_outlined),
-            tooltip: 'Marcar como lida',
-            iconSize: 20,
+          InstrumentedButton(
+            elementId: 'notification_mark_read_${notification.id}',
+            context: 'notification_card',
+            onPressed: onMarkAsRead!,
+            additionalData: {
+              'notification_id': notification.id,
+              'notification_type': notification.type.name,
+              'action_type': 'mark_as_read',
+              'is_critical': notification.isCritical,
+              'days_since_created': DateTime.now().difference(notification.createdAt).inDays,
+            },
+            child: IconButton(
+              onPressed: onMarkAsRead,
+              icon: const Icon(Icons.mark_email_read_outlined),
+              tooltip: 'Marcar como lida',
+              iconSize: 20,
+            ),
           ),
         if (onDelete != null)
-          IconButton(
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Deletar',
-            iconSize: 20,
+          InstrumentedButton(
+            elementId: 'notification_delete_${notification.id}',
+            context: 'notification_card',
+            onPressed: onDelete!,
+            additionalData: {
+              'notification_id': notification.id,
+              'notification_type': notification.type.name,
+              'action_type': 'delete',
+              'is_critical': notification.isCritical,
+              'was_read': notification.isRead,
+              'days_since_created': DateTime.now().difference(notification.createdAt).inDays,
+            },
+            child: IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Deletar',
+              iconSize: 20,
+            ),
           ),
       ],
     );

@@ -10,6 +10,7 @@ import 'package:meu_app/src/shared/utils/badge_visibility_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
+import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
 
 class LawyerMatchCard extends StatefulWidget {
   final MatchedLawyer lawyer;
@@ -17,6 +18,11 @@ class LawyerMatchCard extends StatefulWidget {
   final VoidCallback? onExplain;
   final String? caseId;
   final String? clientId;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final String? searchQuery;
+  final double? searchRank;
+  final Map<String, dynamic>? searchFilters;
 
   const LawyerMatchCard({
     super.key,
@@ -25,6 +31,10 @@ class LawyerMatchCard extends StatefulWidget {
     this.onExplain,
     this.caseId,
     this.clientId,
+    this.sourceContext,
+    this.searchQuery,
+    this.searchRank,
+    this.searchFilters,
   });
 
   @override
@@ -46,55 +56,65 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
     final matchColor = _getMatchColor(widget.lawyer.fair);
     final isAutoridade = widget.lawyer.features.successRate > 0.8; // Exemplo de lógica
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // --- HEADER ---
-            Row(
-              children: [
-                _buildAvatar(theme),
-                const SizedBox(width: 16),
-                _buildBasicInfo(theme),
-                _buildScoreCircle(matchColor, theme),
-              ],
-            ),
-            const SizedBox(height: 12),
-            
-            // --- EXPERIÊNCIA E PRÊMIOS ---
-            _buildExperienceAndAwards(theme),
-            
-            // --- BADGE DE AUTORIDADE ---
-            if (isAutoridade) _buildAuthorityBadge(theme),
-            
-            const SizedBox(height: 16),
+    return InstrumentedProfileCard(
+      profileId: widget.lawyer.id,
+      profileType: 'lawyer',
+      sourceContext: widget.sourceContext ?? 'match_list',
+      searchQuery: widget.searchQuery,
+      searchRank: widget.searchRank,
+      searchFilters: widget.searchFilters,
+      caseContext: widget.caseId,
+      onTap: () => _navigateToLawyerProfile(context),
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // --- HEADER ---
+              Row(
+                children: [
+                  _buildAvatar(theme),
+                  const SizedBox(width: 16),
+                  _buildBasicInfo(theme),
+                  _buildScoreCircle(matchColor, theme),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // --- EXPERIÊNCIA E PRÊMIOS ---
+              _buildExperienceAndAwards(theme),
+              
+              // --- BADGE DE AUTORIDADE ---
+              if (isAutoridade) _buildAuthorityBadge(theme),
+              
+              const SizedBox(height: 16),
 
-            // --- MÉTRICAS ---
-            _buildMetricsRow(),
+              // --- MÉTRICAS ---
+              _buildMetricsRow(),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            // --- DADOS SOCIAIS ---
-            _buildSocialSection(),
+              // --- DADOS SOCIAIS ---
+              _buildSocialSection(),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // --- ANÁLISE EXPANSÍVEL ---
-            _buildExpansionPanel(theme),
+              // --- ANÁLISE EXPANSÍVEL ---
+              _buildExpansionPanel(theme),
 
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
 
-            // --- BOTÕES DE AÇÃO ---
-            _buildActionButtons(),
-          ],
+              // --- BOTÕES DE AÇÃO ---
+              _buildActionButtons(),
+            ],
+          ),
         ),
       ),
     );
@@ -442,54 +462,90 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
   Widget _buildActionButtons() {
     return Column(
       children: [
-        // Primeira linha: Ver Perfil (destaque)
+        // Primeira linha: Ver Perfil (destaque) - Instrumentado
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: InstrumentedButton(
+            elementId: 'view_lawyer_profile_${widget.lawyer.id}',
+            context: 'lawyer_match_card',
             onPressed: () => _navigateToLawyerProfile(context),
-            icon: const Icon(LucideIcons.user),
-            label: const Text('Ver Perfil Completo'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              side: BorderSide(color: Theme.of(context).colorScheme.primary),
+            additionalData: {
+              'lawyer_id': widget.lawyer.id,
+              'match_score': widget.lawyer.fair,
+              'source_context': widget.sourceContext,
+              'search_rank': widget.searchRank,
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.user, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text('Ver Perfil Completo', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              ],
             ),
           ),
         ),
         const SizedBox(height: 8),
         
-        // Segunda linha: Ações rápidas
+        // Segunda linha: Ações rápidas - Instrumentadas
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(
-              child: ElevatedButton.icon(
+              child: InstrumentedInviteButton(
+                invitationType: 'lawyer_hire',
+                recipientId: widget.lawyer.id,
+                context: 'lawyer_match_card',
+                caseId: widget.caseId,
+                matchScore: widget.lawyer.fair,
+                recipientType: 'lawyer',
                 onPressed: _handleHireLawyer,
-                icon: const Icon(LucideIcons.fileSignature),
-                label: const Text('Contratar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(LucideIcons.fileSignature, color: Theme.of(context).colorScheme.onPrimary),
+                    const SizedBox(width: 8),
+                    Text('Contratar', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                  ],
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            IconButton(
+            InstrumentedButton(
+              elementId: 'match_explanation_${widget.lawyer.id}',
+              context: 'lawyer_match_card',
               onPressed: () => _showMatchExplanation(context),
-              icon: const Icon(LucideIcons.helpCircle),
-              tooltip: 'Por que foi recomendado?',
-              style: IconButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              additionalData: {
+                'lawyer_id': widget.lawyer.id,
+                'match_score': widget.lawyer.fair,
+                'action_type': 'explanation_request',
+              },
+              child: Icon(
+                LucideIcons.helpCircle,
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
             ),
-            IconButton(
-              onPressed: () { /* TODO: Implementar chat */ },
-              icon: const Icon(LucideIcons.messageSquare),
-              tooltip: 'Chat',
+            InstrumentedButton(
+              elementId: 'start_chat_${widget.lawyer.id}',
+              context: 'lawyer_match_card',
+              onPressed: () => _handleStartChat(context),
+              additionalData: {
+                'lawyer_id': widget.lawyer.id,
+                'action_type': 'start_chat',
+                'case_id': widget.caseId,
+              },
+              child: const Icon(LucideIcons.messageSquare),
             ),
-            IconButton(
+            InstrumentedButton(
+              elementId: 'video_call_${widget.lawyer.id}',
+              context: 'lawyer_match_card',
               onPressed: () => _handleVideoCall(context),
-              icon: const Icon(LucideIcons.video),
-              tooltip: 'Vídeo Chamada',
+              additionalData: {
+                'lawyer_id': widget.lawyer.id,
+                'action_type': 'video_call',
+                'case_id': widget.caseId,
+              },
+              child: const Icon(LucideIcons.video),
             ),
           ],
         ),
@@ -499,6 +555,16 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
 
   void _navigateToLawyerProfile(BuildContext context) {
     context.push('/lawyer/${widget.lawyer.id}/profile');
+  }
+
+  void _handleStartChat(BuildContext context) {
+    // TODO: Implementar navegação para chat
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Funcionalidade de chat em desenvolvimento'),
+        backgroundColor: Colors.blue,
+      ),
+    );
   }
 
   void _showMatchExplanation(BuildContext context) {

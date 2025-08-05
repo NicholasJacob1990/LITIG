@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:meu_app/src/features/offers/domain/entities/case_offer.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
 
 class CaseOfferCard extends StatelessWidget {
   final CaseOffer offer;
   final VoidCallback onAccept;
   final VoidCallback onReject;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final double? listRank;
 
   const CaseOfferCard({
     super.key,
     required this.offer,
     required this.onAccept,
     required this.onReject,
+    this.sourceContext,
+    this.listRank,
   });
 
   @override
@@ -19,7 +25,19 @@ class CaseOfferCard extends StatelessWidget {
     final timeRemaining = offer.expiresAt.difference(DateTime.now());
     final isExpiringSoon = timeRemaining.inHours < 6;
 
-    return Card(
+    return InstrumentedContentCard(
+      contentId: offer.id,
+      contentType: 'offer',
+      sourceContext: sourceContext ?? 'offers_list',
+      listRank: listRank,
+      additionalData: {
+        'offer_amount': offer.estimatedFee,
+        'legal_area': offer.legalArea,
+        'urgency_level': offer.urgencyLevel,
+        'expires_in_hours': timeRemaining.inHours,
+        'is_expiring_soon': isExpiringSoon,
+      },
+      child: Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -76,29 +94,69 @@ class CaseOfferCard extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // Botões de ação
+            // Botões de ação - Instrumentados
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: InstrumentedButton(
+                    elementId: 'reject_offer_${offer.id}',
+                    context: 'case_offer_card',
                     onPressed: onReject,
-                    icon: const Icon(LucideIcons.x),
-                    label: const Text('Recusar'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
+                    additionalData: {
+                      'offer_id': offer.id,
+                      'action_type': 'reject_offer',
+                      'offer_amount': offer.estimatedFee,
+                      'legal_area': offer.legalArea,
+                      'urgency_level': offer.urgencyLevel,
+                      'time_to_decision_hours': DateTime.now().difference(offer.createdAt).inHours,
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.red),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LucideIcons.x, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Recusar', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: InstrumentedButton(
+                    elementId: 'accept_offer_${offer.id}',
+                    context: 'case_offer_card',
                     onPressed: onAccept,
-                    icon: const Icon(LucideIcons.check),
-                    label: const Text('Aceitar'),
-                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                    additionalData: {
+                      'offer_id': offer.id,
+                      'action_type': 'accept_offer',
+                      'offer_amount': offer.estimatedFee,
+                      'legal_area': offer.legalArea,
+                      'urgency_level': offer.urgencyLevel,
+                      'time_to_decision_hours': DateTime.now().difference(offer.createdAt).inHours,
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LucideIcons.check, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('Aceitar', style: TextStyle(color: Colors.white)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -106,6 +164,7 @@ class CaseOfferCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
