@@ -385,7 +385,7 @@ class OpenRouterClient:
                 # Converter mensagens para formato Gemini
                 prompt = self._messages_to_prompt(messages)
                 
-                model = genai.GenerativeModel("gemini-2.0-flash-exp")
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 response = await asyncio.wait_for(
                     model.generate_content_async(prompt),
                     timeout=30
@@ -534,7 +534,7 @@ class OpenRouterClient:
             try:
                 response = await asyncio.wait_for(
                     self.openrouter_client.chat.completions.create(
-                        model="google/gemini-2.0-flash-exp",
+                        model="google/gemini-2.5-flash",
                         messages=test_messages,
                         max_tokens=10
                     ),

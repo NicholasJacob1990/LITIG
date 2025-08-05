@@ -89,7 +89,7 @@ async def analyze_complex_case_new(self, conversation_data):
     try:
         # ✅ Nível 1: Grok 4 com mesmo prompt rico + function calling
         response = await self.openrouter_client.chat.completions.create(
-            model="xai/grok-1",  # Grok 4
+            model="x-ai/grok-4",  # Grok 4
             messages=[
                 {"role": "system", "content": self.lex_system_prompt},  # ✅ MESMO PROMPT RICO
                 {"role": "user", "content": context}

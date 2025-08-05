@@ -52,8 +52,8 @@ class Settings:
     # Modelos OpenRouter por serviço
     OPENROUTER_LAWYER_PROFILE_MODEL: str = os.getenv("OPENROUTER_LAWYER_PROFILE_MODEL", "google/gemini-2.5-flash")
     OPENROUTER_CASE_CONTEXT_MODEL: str = os.getenv("OPENROUTER_CASE_CONTEXT_MODEL", "anthropic/claude-sonnet-4-20250514")
-    OPENROUTER_LEX9000_MODEL: str = os.getenv("OPENROUTER_LEX9000_MODEL", "xai/grok-1")
-    OPENROUTER_CLUSTER_LABELING_MODEL: str = os.getenv("OPENROUTER_CLUSTER_LABELING_MODEL", "xai/grok-1")
+    OPENROUTER_LEX9000_MODEL: str = os.getenv("OPENROUTER_LEX9000_MODEL", "x-ai/grok-4")
+    OPENROUTER_CLUSTER_LABELING_MODEL: str = os.getenv("OPENROUTER_CLUSTER_LABELING_MODEL", "x-ai/grok-4")
     OPENROUTER_OCR_MODEL: str = os.getenv("OPENROUTER_OCR_MODEL", "openai/gpt-4o-mini")
     OPENROUTER_PARTNERSHIP_MODEL: str = os.getenv("OPENROUTER_PARTNERSHIP_MODEL", "google/gemini-2.5-flash")
     

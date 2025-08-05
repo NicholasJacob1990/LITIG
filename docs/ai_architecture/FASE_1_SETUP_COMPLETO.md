@@ -22,8 +22,8 @@
 - [x] Modelos mapeados conforme especificação:
   - **Lawyer Profile:** `google/gemini-1.5-pro` (Gemini 2.5 Pro)
   - **Case Context:** `anthropic/claude-sonnet-4-20250514` (Claude Sonnet 4)
-  - **LEX-9000:** `xai/grok-1` (Grok 4)
-  - **Cluster Labeling:** `xai/grok-1` (Grok 4)
+  - **LEX-9000:** `x-ai/grok-4` (Grok 4)
+- **Cluster Labeling:** `x-ai/grok-4` (Grok 4)
   - **OCR:** `openai/gpt-4o-mini` (GPT-4o-mini)
   - **Partnership:** `google/gemini-1.5-pro` (Gemini 2.5 Pro)
 

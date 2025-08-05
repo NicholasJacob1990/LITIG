@@ -44,7 +44,7 @@ analysis_data = json.loads(response_text)  # ❌ Pode falhar
 ```python
 # Migração para Function Calling - 100% mais confiável
 response = await openrouter_client.chat.completions.create(
-    model="xai/grok-1",  # ✅ ATUALIZADO: Grok 4 (melhor para jurídico)
+    model="x-ai/grok-4",  # ✅ ATUALIZADO: Grok 4 (melhor para jurídico)
     messages=messages,
     tools=[legal_analysis_tool],  # ✅ NOVO: estrutura garantida
     tool_choice={"type": "function", "function": {"name": "analyze_legal_case"}}
@@ -202,7 +202,7 @@ tools=[partnership_synergy_tool]  # ✅ NOVO: estrutura confiável
 #### **PLANO PROPOSTO (ATUALIZADO)**
 ```python
 # Grok 4 + Function Calling
-model="xai/grok-1"  # ✅ UPGRADE: Grok 4 (melhor criatividade)
+model="x-ai/grok-4"  # ✅ UPGRADE: Grok 4 (melhor criatividade)
 tools=[cluster_label_tool]  # ✅ NOVO: rótulos estruturados
 ```
 
