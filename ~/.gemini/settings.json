@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "MCP_FILESYSTEM_ROOT": "."
+      }
+    }
+  },
+  "defaultModel": "gemini-2.5-pro-exp-03-25",
+  "apiKey": "AIzaSyCVHu0BwFrYbt1vhXNJXf4V4iMmL5pe0Uo"
+}

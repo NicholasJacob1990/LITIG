@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/cases/domain/entities/case.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.dart';
+import 'package:meu_app/src/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 
 part 'cases_event.dart';
@@ -8,8 +9,12 @@ part 'cases_state.dart';
 
 class CasesBloc extends Bloc<CasesEvent, CasesState> {
   final GetMyCasesUseCase getMyCasesUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
 
-  CasesBloc({required this.getMyCasesUseCase}) : super(CasesInitial()) {
+  CasesBloc({
+    required this.getMyCasesUseCase,
+    required this.getCurrentUserUseCase,
+  }) : super(CasesInitial()) {
     on<FetchCases>(_onFetchCases);
     on<FilterCases>(_onFilterCases);
   }
@@ -18,8 +23,16 @@ class CasesBloc extends Bloc<CasesEvent, CasesState> {
     AppLogger.info('CasesBloc: Iniciando busca de casos');
     emit(CasesLoading());
     try {
-      final cases = await getMyCasesUseCase();
-      AppLogger.info('CasesBloc: ${cases.length} casos carregados');
+      // Obter informações do usuário atual para filtragem
+      final currentUser = await getCurrentUserUseCase();
+      final userId = currentUser?.id;
+      final userRole = currentUser?.effectiveUserRole;
+      
+      AppLogger.info('CasesBloc: Buscando casos para usuário $userId com role $userRole');
+      
+      final cases = await getMyCasesUseCase(userId: userId, userRole: userRole);
+      AppLogger.info('CasesBloc: ${cases.length} casos carregados para $userRole');
+      
       emit(CasesLoaded(
         allCases: cases,
         filteredCases: cases,

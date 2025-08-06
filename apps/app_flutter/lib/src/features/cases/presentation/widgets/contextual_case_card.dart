@@ -6,6 +6,7 @@ import '../../../auth/domain/entities/user.dart';
 import '../../../../shared/utils/app_colors.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../shared/widgets/instrumented_widgets.dart';
+import '../../../../core/theme/adaptive_text_colors.dart';
 
 /// Fábrica principal de componentes contextuais
 /// Implementa o sistema de Contextual Case View conforme ARQUITETURA_GERAL_DO_SISTEMA.md
@@ -110,81 +111,85 @@ class ContextualCaseCard extends StatelessWidget {
   }
 
   Widget _buildKPIItem(ContextualKPI kpi) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(kpi.icon, style: const TextStyle(fontSize: 16)),
-        const SizedBox(height: 4),
-        Text(
-          kpi.label,
-          style: const TextStyle(fontSize: 10, color: Colors.grey),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          kpi.value,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
-      ],
+    return Builder(
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(kpi.icon, style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 4),
+          Text(
+            kpi.label,
+            style: TextStyle(fontSize: 10, color: AdaptiveTextColors.secondary(context)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            kpi.value,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildCaseInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          caseData.title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Caso ${caseData.caseType ?? 'Geral'} • ${caseData.status}',
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Icon(
-              Icons.access_time,
-              size: 16,
-              color: Colors.grey[600],
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            caseData.title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(width: 4),
-            Text(
-              _formatDate(caseData.createdAt),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Caso ${caseData.caseType ?? 'Geral'} • ${caseData.status}',
+            style: TextStyle(
+              fontSize: 14,
+              color: AdaptiveTextColors.secondary(context),
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                Icons.access_time,
+                size: 16,
+                color: AdaptiveTextColors.iconSecondary(context),
               ),
-            ),
-            const SizedBox(width: 16),
-            Icon(
-              _getStatusIcon(),
-              size: 16,
-              color: _getStatusColor(),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              _formatStatus(caseData.status),
-              style: TextStyle(
-                fontSize: 12,
+              const SizedBox(width: 4),
+              Text(
+                _formatDate(caseData.createdAt),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AdaptiveTextColors.secondary(context),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                _getStatusIcon(),
+                size: 16,
                 color: _getStatusColor(),
-                fontWeight: FontWeight.w500,
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 4),
+              Text(
+                _formatStatus(caseData.status),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _getStatusColor(),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -347,26 +352,76 @@ class ContextualCaseCardFactory {
     required User currentUser,
     Function(String action)? onActionTap,
   }) {
+    // Debug logs detalhados
+    AppLogger.info('=== CONTEXTUAL CARD FACTORY ===');
+    AppLogger.info('User role: ${currentUser.role}');
+    AppLogger.info('User isClient: ${currentUser.isClient}');
+    AppLogger.info('User isIndividualLawyer: ${currentUser.isIndividualLawyer}');
+    AppLogger.info('User isAssociatedLawyer: ${currentUser.isAssociatedLawyer}');
+    AppLogger.info('User isLawOffice: ${currentUser.isLawOffice}');
+    AppLogger.info('User isPlatformAssociate: ${currentUser.isPlatformAssociate}');
+    AppLogger.info('Case allocationType: ${contextualData.allocationType}');
+    
+    // Clientes nunca veem cards contextuais - isso deve ser tratado antes de chegar aqui
+    if (currentUser.isClient) {
+      AppLogger.warning('Cliente não deveria ver ContextualCaseCard, usando card básico');
+      return ContextualCaseCard(
+        caseData: caseData,
+        contextualData: contextualData,
+        kpis: kpis,
+        actions: actions,
+        highlight: highlight,
+        currentUser: currentUser,
+        onActionTap: onActionTap,
+      );
+    }
+    
+    // Advogados autônomos só veem casos de parceria, nunca delegação interna
+    if (currentUser.isIndividualLawyer && 
+        contextualData.allocationType == AllocationType.internalDelegation) {
+      AppLogger.info('FACTORY: Advogado autônomo - convertendo delegação para parceria');
+      return CapturedCaseCard(
+        caseData: caseData,
+        contextualData: contextualData,
+        onActionTap: onActionTap,
+      );
+    }
+    
+    // Apenas advogados associados veem casos de delegação interna
     switch (contextualData.allocationType) {
       case AllocationType.internalDelegation:
-        return DelegatedCaseCard(
-          caseData: caseData,
-          contextualData: contextualData,
-          onActionTap: onActionTap,
-        );
+        // SOMENTE lawyer_firm_member pode ver delegação interna
+        if (currentUser.role == 'lawyer_firm_member') {
+          AppLogger.info('FACTORY: Renderizando DelegatedCaseCard para lawyer_firm_member');
+          return DelegatedCaseCard(
+            caseData: caseData,
+            contextualData: contextualData,
+            onActionTap: onActionTap,
+          );
+        } else {
+          AppLogger.info('FACTORY: Usuário ${currentUser.role} NÃO É lawyer_firm_member - convertendo delegação para parceria');
+          return CapturedCaseCard(
+            caseData: caseData,
+            contextualData: contextualData,
+            onActionTap: onActionTap,
+          );
+        }
       case AllocationType.partnershipProactiveSearch:
+        AppLogger.info('FACTORY: Renderizando CapturedCaseCard (parceria)');
         return CapturedCaseCard(
           caseData: caseData,
           contextualData: contextualData,
           onActionTap: onActionTap,
         );
       case AllocationType.platformMatchDirect:
+        AppLogger.info('FACTORY: Renderizando PlatformCaseCard');
         return PlatformCaseCard(
           caseData: caseData,
           contextualData: contextualData,
           onActionTap: onActionTap,
         );
       default:
+        AppLogger.info('FACTORY: Renderizando ContextualCaseCard padrão');
         return ContextualCaseCard(
           caseData: caseData,
           contextualData: contextualData,
@@ -452,23 +507,25 @@ class DelegatedCaseCard extends StatelessWidget {
 
   Widget _buildKPI(String icon, String label, String value) {
     return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Builder(
+        builder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 10, color: AdaptiveTextColors.secondary(context)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -566,23 +623,25 @@ class CapturedCaseCard extends StatelessWidget {
 
   Widget _buildKPI(String icon, String label, String value) {
     return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Builder(
+        builder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 10, color: AdaptiveTextColors.secondary(context)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -680,23 +739,25 @@ class PlatformCaseCard extends StatelessWidget {
 
   Widget _buildKPI(String icon, String label, String value) {
     return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Builder(
+        builder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(fontSize: 10, color: AdaptiveTextColors.secondary(context)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -379,6 +379,11 @@ GoRouter appRouter(AuthBloc authBloc) {
       
       // Rotas fora da shell
       GoRoute(
+        path: '/triage',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ChatTriageScreen(),
+      ),
+      GoRoute(
         path: '/case-detail/:caseId',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => CaseDetailScreen(caseId: state.pathParameters['caseId']!),

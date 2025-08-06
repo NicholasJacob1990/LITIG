@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:meu_app/src/core/error/failures.dart';
 
 abstract class CasesRepository {
-  Future<List<Case>> getMyCases();
+  Future<List<Case>> getMyCases({String? userId, String? userRole});
   Future<Case> getCaseById(String caseId);
   
   /// Atualiza a alocação de um caso

@@ -17,6 +17,7 @@ import 'package:meu_app/src/core/services/social_auth_service.dart';
 import 'package:meu_app/src/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:meu_app/src/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:meu_app/src/features/auth/domain/repositories/auth_repository.dart';
+import 'package:meu_app/src/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 
 // Cases
@@ -40,6 +41,9 @@ import 'package:meu_app/src/features/cases/presentation/bloc/contextual_case_blo
 
 // Calendar
 import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart';
+
+// Messaging
+import 'package:meu_app/src/features/messaging/presentation/bloc/unified_messaging_bloc.dart';
 
 // VIP
 import 'src/features/vip/presentation/bloc/vip_status_bloc.dart';
@@ -250,6 +254,10 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(remoteDataSource: getIt()));
 
+  // Use Cases
+  getIt.registerLazySingleton<GetCurrentUserUseCase>(
+      () => GetCurrentUserUseCase(getIt()));
+
   // Blocs
   getIt.registerFactory(() => AuthBloc(authRepository: getIt()));
 
@@ -274,7 +282,10 @@ Future<void> configureDependencies() async {
       () => CaseFirmRecommendationService(getFirms: getIt()));
 
   // Blocs
-  getIt.registerFactory(() => CasesBloc(getMyCasesUseCase: getIt()));
+  getIt.registerFactory(() => CasesBloc(
+    getMyCasesUseCase: getIt(),
+    getCurrentUserUseCase: getIt(),
+  ));
 
   // Contextual Cases
   // Datasources
@@ -308,6 +319,9 @@ Future<void> configureDependencies() async {
 
   // Blocs
   getIt.registerFactory(() => CalendarBloc());
+  
+  // Messaging
+  getIt.registerFactory(() => UnifiedMessagingBloc());
   getIt.registerFactory(() => VipStatusBloc());
 
   // Documents

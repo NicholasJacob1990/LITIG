@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../base_info_section.dart';
+import '../../../../../core/theme/adaptive_colors.dart';
 
 /// Seção de Equipe Interna para Advogados Associados
 /// 
@@ -25,8 +26,8 @@ class InternalTeamSection extends BaseInfoSection {
       titleSuffix: buildStatusBadge(
         context,
         'Delegado',
-        backgroundColor: Colors.orange.shade100,
-        textColor: Colors.orange.shade800,
+        backgroundColor: context.isDarkTheme ? Colors.orange.shade200 : Colors.orange.shade100,
+        textColor: context.isDarkTheme ? Colors.orange.shade100 : Colors.orange.shade800,
         icon: Icons.arrow_downward,
       ),
       children: [

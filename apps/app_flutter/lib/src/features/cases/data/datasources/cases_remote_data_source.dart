@@ -5,7 +5,7 @@ import 'package:meu_app/src/features/cases/data/models/case_model.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 
 abstract class CasesRemoteDataSource {
-  Future<List<Case>> getMyCases();
+  Future<List<Case>> getMyCases({String? userId, String? userRole});
   Future<Case> getCaseById(String caseId);
 }
 
@@ -15,14 +15,14 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
   CasesRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<List<Case>> getMyCases() async {
+  Future<List<Case>> getMyCases({String? userId, String? userRole}) async {
     try {
       // ############ SOLUÇÃO TEMPORÁRIA ############
       // O endpoint /cases/my-cases está retornando 404 no backend.
       // Para destravar o fluxo, vamos chamar um caso específico e retorná-lo
       // dentro de uma lista, simulando o comportamento esperado.
-              // USANDO SOLUÇÃO TEMPORÁRIA: Chamando um caso mock em vez de /my-cases
-        return _getMockCases(); // Usando a função de mock já existente
+              // USANDO SOLUÇÃO TEMPORÁRIA: Chamando um caso mock filtrado por tipo de usuário
+        return _getMockCasesForUser(userId: userId, userRole: userRole);
       // ##########################################
     } on DioException catch (e) {
       // Se há erro de conectividade, usar dados mock como fallback
@@ -30,7 +30,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
                  // API não disponível, usando dados mock como fallback
-        return _getMockCases();
+        return _getMockCasesForUser(userId: userId, userRole: userRole);
       }
       
       // Melhor tratamento de erro Dio para outros casos
@@ -42,7 +42,7 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
     } catch (e) {
       // Fallback para qualquer outro erro não previsto
               // Erro inesperado na API, usando dados mock
-      return _getMockCases();
+      return _getMockCasesForUser(userId: userId, userRole: userRole);
     }
   }
 
@@ -83,8 +83,32 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
     }
   }
 
-  // Dados mock para fallback quando a API não está disponível
-  List<Case> _getMockCases() {
+  // Filtragem de casos por tipo de usuário
+  List<Case> _getMockCasesForUser({String? userId, String? userRole}) {
+    print('=== DEBUGGING DATA SOURCE ===');
+    print('Filtering cases for userId: $userId, userRole: $userRole');
+    
+    final baseCases = _getBaseCases();
+    final specificCases = _getSpecificCasesForUserRole(userRole);
+    final allCases = [...baseCases, ...specificCases];
+    
+    print('Base cases count: ${baseCases.length}');
+    print('Specific cases count: ${specificCases.length}');
+    print('Total cases count: ${allCases.length}');
+    
+    // Filtrar casos que não devem aparecer para determinados tipos de usuário
+    final filteredCases = _filterCasesForUserRole(allCases, userRole);
+    
+    print('Filtered cases count: ${filteredCases.length}');
+    for (final caseItem in filteredCases) {
+      print('Case: ${caseItem.id} - ${caseItem.title} - allocationType: ${caseItem.allocationType}');
+    }
+    
+    return filteredCases;
+  }
+
+  // Casos base visíveis para todos os advogados
+  List<Case> _getBaseCases() {
     final mockCases = [
       CaseModel(
         id: 'mock-case-1',
@@ -224,15 +248,215 @@ class CasesRemoteDataSourceImpl implements CasesRemoteDataSource {
     return mockCases;
   }
 
+  // Casos específicos baseados no tipo de usuário
+  List<Case> _getSpecificCasesForUserRole(String? userRole) {
+    print('Getting specific cases for userRole: $userRole');
+    
+    switch (userRole) {
+      case 'lawyer_firm_member':
+        // APENAS advogados associados da firma veem casos delegados
+        print('Returning delegated cases for lawyer_firm_member');
+        return _getDelegatedCases();
+      case 'lawyer_platform_associate':
+        // Super associados veem casos da plataforma
+        print('Returning platform cases for lawyer_platform_associate');
+        return _getPlatformCases();
+      case 'lawyer_individual':
+        // Advogados autônomos veem casos individuais
+        print('Returning individual cases for lawyer_individual');
+        return _getIndividualCases();
+      case 'lawyer_office':
+        // Escritórios veem casos de escritório
+        print('Returning office cases for lawyer_office');
+        return _getOfficeCases();
+      default:
+        print('No specific cases for userRole: $userRole');
+        return [];
+    }
+  }
+  
+  /// Filtrar casos que não devem aparecer para determinados tipos de usuário
+  List<Case> _filterCasesForUserRole(List<Case> allCases, String? userRole) {
+    print('Filtering ${allCases.length} cases for userRole: $userRole');
+    
+    return allCases.where((caseItem) {
+      // Para clientes - filtrar todos os casos com allocation types específicos
+      if (userRole == null || 
+          userRole == 'client' || 
+          userRole == 'client_pf' || 
+          userRole == 'client_pj') {
+        // Clientes não devem ver casos com allocation types específicos de advogados
+        final shouldInclude = caseItem.allocationType == null || 
+               caseItem.allocationType == 'direct' ||
+               caseItem.allocationType == 'assigned';
+        print('Client case ${caseItem.id}: ${shouldInclude ? "INCLUDE" : "EXCLUDE"} (allocationType: ${caseItem.allocationType})');
+        return shouldInclude;
+      }
+      
+      // Para casos delegados - APENAS lawyer_firm_member pode ver
+      if (caseItem.allocationType == 'internal_delegation') {
+        final shouldInclude = userRole == 'lawyer_firm_member';
+        print('Delegated case ${caseItem.id}: ${shouldInclude ? "INCLUDE" : "EXCLUDE"} for $userRole');
+        return shouldInclude;
+      }
+      
+      // Para casos de plataforma - apenas lawyer_platform_associate
+      if (caseItem.allocationType == 'platform_match') {
+        final shouldInclude = userRole == 'lawyer_platform_associate';
+        print('Platform case ${caseItem.id}: ${shouldInclude ? "INCLUDE" : "EXCLUDE"} for $userRole');
+        return shouldInclude;
+      }
+      
+      // Para outros casos, mostrar para todos os advogados (mas não para clientes)
+      final isLawyer = (
+        userRole.startsWith('lawyer_') || 
+        userRole == 'firm'
+      );
+      print('Other case ${caseItem.id}: ${isLawyer ? "INCLUDE" : "EXCLUDE"} for $userRole');
+      return isLawyer;
+    }).toList();
+  }
+
+  // Casos delegados - apenas para advogados associados
+  List<Case> _getDelegatedCases() {
+    return [
+      CaseModel(
+        id: 'delegated-case-1',
+        title: 'Divórcio Consensual - DELEGADO',
+        status: 'Em Andamento',
+        createdAt: DateTime.now().subtract(const Duration(days: 5)),
+        lawyerName: 'Dr. João Silva (Supervisor)',
+        lawyerId: 'mock-lawyer-supervisor',
+        caseType: 'litigation',
+        allocationType: 'internal_delegation',
+        isPremium: false,
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Supervisor&background=FF6B6B&color=fff',
+          name: 'Dr. João Silva (Supervisor)',
+          specialty: 'Família',
+          unreadMessages: 1,
+          createdDate: '2025-01-20',
+          pendingDocsText: 'Delegado por Dr. Silva - Prazo: 15 dias',
+          plan: 'PRO',
+        ),
+      ),
+      CaseModel(
+        id: 'delegated-case-2',
+        title: 'Ação Trabalhista - Horas Extras (DELEGADO)',
+        status: 'Aguardando',
+        createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        lawyerName: 'Dra. Maria Costa (Supervisora)',
+        lawyerId: 'mock-lawyer-supervisor-2',
+        caseType: 'litigation',
+        allocationType: 'internal_delegation',
+        isPremium: false,
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Maria+Costa&background=FF6B6B&color=fff',
+          name: 'Dra. Maria Costa (Supervisora)',
+          specialty: 'Trabalhista',
+          unreadMessages: 0,
+          createdDate: '2025-01-22',
+          pendingDocsText: 'Delegado por Dra. Costa - Análise inicial',
+          plan: 'PRO',
+        ),
+      ),
+    ];
+  }
+
+  // Casos da plataforma - apenas para super associados
+  List<Case> _getPlatformCases() {
+    return [
+      CaseModel(
+        id: 'platform-case-1',
+        title: 'Consultoria Tributária - Match 95%',
+        status: 'Em Andamento',
+        createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        lawyerName: 'Sistema (Match Automático)',
+        lawyerId: 'platform-match',
+        caseType: 'consultancy',
+        allocationType: 'platform_match',
+        isPremium: true,
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Platform&background=6366F1&color=fff',
+          name: 'Sistema (Match Automático)',
+          specialty: 'Tributário',
+          unreadMessages: 2,
+          createdDate: '2025-01-23',
+          pendingDocsText: 'Match: 95% - Cliente Premium',
+          plan: 'PLATFORM',
+        ),
+      ),
+    ];
+  }
+
+  // Casos individuais - apenas para advogados autônomos
+  List<Case> _getIndividualCases() {
+    return [
+      CaseModel(
+        id: 'individual-case-1',
+        title: 'Inventário - Cliente Direto',
+        status: 'Em Andamento',
+        createdAt: DateTime.now().subtract(const Duration(days: 7)),
+        lawyerName: 'Cliente Direto',
+        lawyerId: 'direct-client',
+        caseType: 'litigation',
+        allocationType: 'direct_client',
+        isPremium: false,
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Direct&background=10B981&color=fff',
+          name: 'Cliente Direto',
+          specialty: 'Sucessões',
+          unreadMessages: 0,
+          createdDate: '2025-01-18',
+          pendingDocsText: 'Cliente captado diretamente',
+          plan: 'FREE',
+        ),
+      ),
+    ];
+  }
+
+  // Casos de escritório - apenas para escritórios
+  List<Case> _getOfficeCases() {
+    return [
+      CaseModel(
+        id: 'office-case-1',
+        title: 'Fusão Empresarial - Parceria',
+        status: 'Em Andamento',
+        createdAt: DateTime.now().subtract(const Duration(days: 10)),
+        lawyerName: 'Parceria Estratégica',
+        lawyerId: 'partnership',
+        caseType: 'CORPORATE',
+        allocationType: 'partnership',
+        isPremium: true,
+        lawyer: const LawyerInfo(
+          avatarUrl: 'https://ui-avatars.com/api/?name=Partnership&background=F59E0B&color=fff',
+          name: 'Parceria Estratégica',
+          specialty: 'Empresarial',
+          unreadMessages: 1,
+          createdDate: '2025-01-15',
+          pendingDocsText: 'Caso obtido via parceria',
+          plan: 'PRO',
+        ),
+      ),
+    ];
+  }
+
   Case _getMockCaseById(String caseId) {
-    final mockCases = _getMockCases();
+    // Buscar em todos os casos (base + específicos)
+    final allCases = [
+      ..._getBaseCases(),
+      ..._getDelegatedCases(),
+      ..._getPlatformCases(),
+      ..._getIndividualCases(),
+      ..._getOfficeCases(),
+    ];
     
     // Tentar encontrar o caso específico
     try {
-      return mockCases.firstWhere((caso) => caso.id == caseId);
+      return allCases.firstWhere((caso) => caso.id == caseId);
     } catch (e) {
       // Se não encontrar, retornar o primeiro caso como padrão
-      return mockCases.first;
+      return allCases.first;
     }
   }
 } 

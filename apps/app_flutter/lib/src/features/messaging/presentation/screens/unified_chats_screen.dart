@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:get_it/get_it.dart';
 import 'package:meu_app/src/core/theme/app_colors.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 import 'package:meu_app/src/core/services/unipile_service.dart';
@@ -29,7 +30,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _messagingBloc = UnifiedMessagingBloc();
+    _messagingBloc = GetIt.instance<UnifiedMessagingBloc>();
     
     // Carregar dados na inicialização
     _messagingBloc.add(const LoadUnifiedMessages());

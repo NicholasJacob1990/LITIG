@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../base_info_section.dart';
+import '../../../../../core/theme/adaptive_colors.dart';
 
 /// Seção de Atribuição de Caso para Advogados Associados
 /// 
@@ -74,7 +75,9 @@ class CaseAssignmentSection extends BaseInfoSection {
           trailing: buildStatusBadge(
         context,
             billableHours ? 'Faturável' : 'Pro Bono',
-            backgroundColor: billableHours ? Colors.green.shade100 : Colors.blue.shade100,
+            backgroundColor: billableHours 
+              ? (context.isDarkTheme ? Colors.green.shade200 : Colors.green.shade100)
+              : (context.isDarkTheme ? Colors.blue.shade200 : Colors.blue.shade100),
           ),
         ),
         
@@ -268,7 +271,7 @@ class CaseAssignmentSection extends BaseInfoSection {
           decoration: BoxDecoration(
             color: Colors.blue.shade50,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue.shade200),
+            border: Border.all(color: context.isDarkTheme ? Colors.blue.shade300 : Colors.blue.shade200),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +279,7 @@ class CaseAssignmentSection extends BaseInfoSection {
               Icon(
                 Icons.lightbulb,
                 size: 20,
-                color: Colors.blue.shade700,
+                color: context.isDarkTheme ? Colors.blue.shade300 : Colors.blue.shade700,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -286,7 +289,7 @@ class CaseAssignmentSection extends BaseInfoSection {
                     Text(
                       'Dica de Produtividade',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Colors.blue.shade700,
+                        color: context.isDarkTheme ? Colors.blue.shade300 : Colors.blue.shade700,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -294,7 +297,7 @@ class CaseAssignmentSection extends BaseInfoSection {
                     Text(
                       _getProductivityTip(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.blue.shade700,
+                        color: context.isDarkTheme ? Colors.blue.shade300 : Colors.blue.shade700,
                       ),
                     ),
                   ],

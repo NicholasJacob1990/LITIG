@@ -4,6 +4,7 @@ import 'package:meu_app/src/features/cases/domain/entities/allocation_type.dart'
 import 'package:meu_app/src/features/cases/domain/repositories/cases_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:meu_app/src/core/error/failures.dart';
+import '../../../../core/utils/logger.dart';
 
 class CasesRepositoryImpl implements CasesRepository {
   final CasesRemoteDataSource remoteDataSource;
@@ -11,10 +12,17 @@ class CasesRepositoryImpl implements CasesRepository {
   CasesRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<List<Case>> getMyCases() async {
+  Future<List<Case>> getMyCases({String? userId, String? userRole}) async {
     try {
-      return await remoteDataSource.getMyCases();
+      AppLogger.info('=== CASES REPOSITORY ===');
+      AppLogger.info('Calling remoteDataSource with userId: $userId, userRole: $userRole');
+      
+      final cases = await remoteDataSource.getMyCases(userId: userId, userRole: userRole);
+      
+      AppLogger.info('RemoteDataSource returned ${cases.length} cases');
+      return cases;
     } catch (e) {
+      AppLogger.error('Repository error: $e');
       // TODO: Melhorar tratamento de erro
       rethrow;
     }

@@ -127,7 +127,7 @@ class GrokSDKIntegrationService:
             try:
                 self.langchain_xai_client = ChatXAI(
                     api_key=self.config.xai_api_key,
-                    model="grok-3",
+                    model="grok-4",
                     temperature=self.config.temperature,
                     max_tokens=self.config.max_tokens
                 )
@@ -253,7 +253,7 @@ class GrokSDKIntegrationService:
         try:
             # Preparar parâmetros para xai-sdk
             params = {
-                "model": "grok-3",  # Modelo disponível no SDK oficial
+                "model": "grok-4",  # Modelo disponível no SDK oficial
                 "messages": messages,
                 "max_tokens": self.config.max_tokens,
                 "temperature": self.config.temperature
@@ -289,7 +289,7 @@ class GrokSDKIntegrationService:
             
             return GrokSDKResponse(
                 content=content,
-                model_used="grok-3",
+                model_used="grok-4",
                 sdk_level=2,
                 sdk_name="xai-sdk oficial",
                 processing_time=processing_time,
@@ -331,7 +331,7 @@ class GrokSDKIntegrationService:
             
             return GrokSDKResponse(
                 content=response.content,
-                model_used="grok-3",
+                model_used="grok-4",
                 sdk_level=3,
                 sdk_name="LangChain-XAI",
                 processing_time=processing_time,

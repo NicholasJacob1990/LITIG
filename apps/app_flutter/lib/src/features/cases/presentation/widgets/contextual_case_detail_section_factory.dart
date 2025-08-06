@@ -64,43 +64,55 @@ class ContextualCaseDetailSectionFactory {
   }) {
     final stopwatch = Stopwatch()..start();
     
-    AppLogger.info('Building sections for user role: ${currentUser.role}, allocation: ${contextualData?.allocationType}');
+    AppLogger.info('Building sections for user: ${currentUser.id}, role: ${currentUser.role}, userRole: ${currentUser.userRole}, isClient: ${currentUser.isClient}, allocation: ${contextualData?.allocationType}');
+    
+    // **PRIMEIRA PROTEÇÃO: Verificar se é cliente antes de qualquer coisa**
+    if (currentUser.isClient) {
+      AppLogger.info('CLIENT DETECTED - Forcing pure client experience without any lawyer context');
+      stopwatch.stop();
+      final clientSections = _buildClientSections(caseDetail);
+      AppLogger.info('Pure client sections built in ${stopwatch.elapsedMilliseconds}ms - Total sections: ${clientSections.length}');
+      return clientSections;
+    }
     
     final cacheKey = _buildCacheKey(currentUser, caseDetail, contextualData);
     
-    // Verificar cache primeiro para performance
+    // Verificar cache primeiro para performance (APENAS para advogados)
     if (_sectionCache.containsKey(cacheKey)) {
       stopwatch.stop();
-      AppLogger.debug('Using cached sections (${stopwatch.elapsedMilliseconds}ms)');
+      AppLogger.debug('Using cached lawyer sections (${stopwatch.elapsedMilliseconds}ms)');
       return _sectionCache[cacheKey]!;
     }
     
     List<Widget> sections;
     
-    // **CLIENTE: Manter experiência atual INTACTA**
-    if (_isClient(currentUser.role)) {
-      sections = _buildClientSections(caseDetail);
-    } else {
-      // **ADVOGADOS: Usar contexto + allocation_type**
+    // **SOMENTE PARA ADVOGADOS: Usar contexto + allocation_type**
+    if (currentUser.isLawyer) {
       if (contextualData != null && caseDetail != null) {
+        AppLogger.info('Lawyer user with contextual data - building specialized lawyer sections');
         sections = _buildLawyerSections(
-          userRole: currentUser.role ?? '',
+          currentUser: currentUser,
           allocationType: contextualData.allocationType,
           caseDetail: caseDetail,
           contextualData: contextualData,
         );
       } else {
-        // **FALLBACK: Experiência padrão do cliente**
-        AppLogger.warning('No contextual data available, falling back to client sections');
-        sections = _buildClientSections(caseDetail);
+        // **FALLBACK: Para advogados sem contexto, usar seções básicas de advogado**
+        AppLogger.warning('Lawyer user without contextual data, using basic lawyer fallback');
+        sections = _buildClientSections(caseDetail); // Usar seções de cliente como fallback temporário
       }
+    } else {
+      // **FALLBACK FINAL: Experiência padrão do cliente para casos indefinidos**
+      AppLogger.warning('Undefined user type, falling back to client sections');
+      sections = _buildClientSections(caseDetail);
     }
     
-    // Cache para próximas utilizações
+    // Cache para próximas utilizações (APENAS para advogados)
     _sectionCache[cacheKey] = sections;
     
     stopwatch.stop();
-    AppLogger.info('Sections built in ${stopwatch.elapsedMilliseconds}ms');
+    AppLogger.info('Lawyer sections built in ${stopwatch.elapsedMilliseconds}ms - Total sections: ${sections.length}');
+    AppLogger.info('Final sections for lawyer user ${currentUser.id}: ${sections.length} widgets returned');
     
     return sections;
   }
@@ -169,18 +181,18 @@ class ContextualCaseDetailSectionFactory {
   /// **EXPERIÊNCIA DOS ADVOGADOS - CONTEXTUAL**
   /// Retorna seções específicas baseadas no role + allocation_type
   static List<Widget> _buildLawyerSections(
-    {required String userRole, 
+    {required User currentUser, 
     required AllocationType allocationType, 
     required CaseDetail caseDetail, 
     required ContextualCaseData contextualData}
   ) {
-    AppLogger.info('Building lawyer sections for role: $userRole, allocation: $allocationType');
+    AppLogger.info('Building lawyer sections for role: ${currentUser.effectiveUserRole}, allocation: $allocationType');
     
     switch (allocationType) {
       case AllocationType.internalDelegation:
         return _buildAssociatedLawyerSections(caseDetail, contextualData);
       case AllocationType.platformMatchDirect:
-        if (_isSuperAssociate(userRole)) {
+        if (currentUser.isPlatformAssociate) {
           return _buildSuperAssociateSections(caseDetail, contextualData);
         } else {
           return _buildContractingLawyerSections(caseDetail, contextualData);
@@ -452,13 +464,7 @@ class ContextualCaseDetailSectionFactory {
   
   // Métodos auxiliares
   
-  static bool _isClient(String? role) {
-    return role == null || role == 'client' || role == 'CLIENT' || role == 'PF';
-  }
   
-  static bool _isSuperAssociate(String role) {
-    return role == 'lawyer_platform_associate';
-  }
   
   static String _buildCacheKey(User currentUser, CaseDetail? caseDetail, ContextualCaseData? contextualData) {
     return '${currentUser.id}-${caseDetail?.id}-${contextualData?.allocationType}';

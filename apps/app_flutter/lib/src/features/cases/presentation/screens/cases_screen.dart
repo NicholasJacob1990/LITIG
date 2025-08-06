@@ -32,20 +32,52 @@ class CasesScreen extends StatelessWidget {
           title: const Text('Meus Casos'),
           centerTitle: true,
         ),
-        floatingActionButton: InstrumentedActionButton(
-          actionType: 'create_case',
-          elementId: 'fab_new_case',
-          context: 'cases_screen',
-          onPressed: () => context.go('/triage'),
-          additionalData: const {
-            'screen': 'cases_list',
-            'action': 'start_triage',
+        floatingActionButton: BlocBuilder<AuthBloc, auth_states.AuthState>(
+          builder: (context, authState) {
+            if (authState is! auth_states.Authenticated) {
+              return const SizedBox.shrink();
+            }
+            
+            // Para advogados autônomos, mostrar botão de buscar parcerias
+            if (authState.user.role == 'lawyer_individual') {
+              return InstrumentedActionButton(
+                actionType: 'search_partnerships',
+                elementId: 'fab_search_partnerships',
+                context: 'cases_screen',
+                onPressed: () => context.go('/partners'),
+                additionalData: const {
+                  'screen': 'cases_list',
+                  'action': 'search_partnerships',
+                },
+                child: const FloatingActionButton.extended(
+                  onPressed: null, // Handled by InstrumentedActionButton
+                  label: Text('Buscar Parcerias'),
+                  icon: Icon(LucideIcons.search),
+                ),
+              );
+            }
+            
+            // Para outros usuários que podem criar casos
+            if (_canCreateCases(authState.user.role)) {
+              return InstrumentedActionButton(
+                actionType: 'create_case',
+                elementId: 'fab_new_case',
+                context: 'cases_screen',
+                onPressed: () => context.go('/triage'),
+                additionalData: const {
+                  'screen': 'cases_list',
+                  'action': 'start_triage',
+                },
+                child: const FloatingActionButton.extended(
+                  onPressed: null, // Handled by InstrumentedActionButton
+                  label: Text('Criar Novo Caso'),
+                  icon: Icon(LucideIcons.plus),
+                ),
+              );
+            }
+            
+            return const SizedBox.shrink();
           },
-          child: const FloatingActionButton.extended(
-            onPressed: null, // Handled by InstrumentedActionButton
-            label: Text('Criar Novo Caso'),
-            icon: Icon(LucideIcons.plus),
-          ),
         ),
         body: Column(
           children: [
@@ -103,21 +135,21 @@ class CasesScreen extends StatelessWidget {
                             final caseData = state.filteredCases[index];
                             AppLogger.info('CasesScreen: Renderizando caso ${index + 1}: ${caseData.title}');
                             
-                            // Use ContextualCaseCard for lawyers, CaseCard for clients
-                            if (authState is auth_states.Authenticated && _isLawyer(authState.user.role)) {
-                              return _buildContextualCaseCard(context, caseData, authState.user);
+                            // Determinar tipo de card baseado no usuário
+                            if (authState is auth_states.Authenticated) {
+                              return _buildUserSpecificCaseCard(context, caseData, authState.user);
                             }
                             
-                            // Default CaseCard for clients
+                            // Default CaseCard para usuários não autenticados (fallback)
                             return CaseCard(
                               caseId: caseData.id,
                               title: caseData.title,
                               subtitle: 'Status: ${caseData.status}',
-                              clientType: 'PF', // TODO: Obter do caso
+                              clientType: 'PF',
                               status: caseData.status,
                               preAnalysisDate: caseData.createdAt.toIso8601String(),
                               lawyer: caseData.lawyer,
-                              caseData: caseData, // Passar dados completos do caso
+                              caseData: caseData,
                             );
                           },
                           ),
@@ -182,10 +214,82 @@ class CasesScreen extends StatelessWidget {
 
   bool _isLawyer(String? role) {
     return role != null && (
-      role == 'lawyer_firm_member' ||  // Atualizado de lawyer_associated
-      role == 'lawyer_individual' ||
-      role == 'firm' ||  // Atualizado de lawyer_office
-      role == 'super_associate'  // Atualizado de lawyer_platform_associate
+      role == 'lawyer_firm_member' ||     // Advogado associado da firma
+      role == 'lawyer_individual' ||      // Advogado autônomo
+      role == 'lawyer_office' ||          // Escritório
+      role == 'lawyer_platform_associate' // Super associado da plataforma
+    );
+  }
+
+  /// Determina se o usuário pode criar novos casos
+  /// Advogados autônomos NÃO podem criar casos, apenas buscar parcerias
+  bool _canCreateCases(String? role) {
+    if (role == null) return false;
+    
+    switch (role) {
+      case 'lawyer_firm_member':          // Advogado associado da firma
+      case 'lawyer_office':               // Escritório
+      case 'lawyer_platform_associate':   // Super associado da plataforma
+        return true; // Podem criar casos
+      case 'lawyer_individual':
+        return false; // Advogados autônomos NÃO podem criar casos
+      case 'client':
+      case 'client_pf':
+      case 'client_pj':
+        return true; // Clientes podem criar casos
+      default:
+        return false;
+    }
+  }
+
+  Widget _buildUserSpecificCaseCard(BuildContext context, dynamic caseData, dynamic user) {
+    // Debug logs detalhados
+    AppLogger.info('=== DEBUGGING USER SPECIFIC CARD ===');
+    AppLogger.info('User ID: ${user.id}');
+    AppLogger.info('User role: ${user.role}');
+    AppLogger.info('User effectiveUserRole: ${user.effectiveUserRole}');
+    AppLogger.info('User isClient: ${user.isClient}');
+    AppLogger.info('User isIndividualLawyer: ${user.isIndividualLawyer}');
+    AppLogger.info('User isAssociatedLawyer: ${user.isAssociatedLawyer}');
+    AppLogger.info('User isLawOffice: ${user.isLawOffice}');
+    AppLogger.info('User isPlatformAssociate: ${user.isPlatformAssociate}');
+    AppLogger.info('Case ID: ${caseData.id}');
+    AppLogger.info('Case title: ${caseData.title}');
+    AppLogger.info('Case allocationType: ${caseData.allocationType}');
+    AppLogger.info('_isLawyer(user.role): ${_isLawyer(user.role)}');
+    
+    // Clientes sempre veem CaseCard simples
+    if (user.isClient) {
+      AppLogger.info('RESULTADO: Renderizando CaseCard para cliente');
+      return CaseCard(
+        caseId: caseData.id,
+        title: caseData.title,
+        subtitle: 'Status: ${caseData.status}',
+        clientType: 'PF', // TODO: Obter do caso
+        status: caseData.status,
+        preAnalysisDate: caseData.createdAt.toIso8601String(),
+        lawyer: caseData.lawyer,
+        caseData: caseData,
+      );
+    }
+    
+    // Advogados veem cards contextuais
+    if (_isLawyer(user.role)) {
+      AppLogger.info('RESULTADO: Renderizando ContextualCaseCard para advogado');
+      return _buildContextualCaseCard(context, caseData, user);
+    }
+    
+    // Fallback para outros tipos de usuário
+    AppLogger.info('RESULTADO: Renderizando CaseCard fallback');
+    return CaseCard(
+      caseId: caseData.id,
+      title: caseData.title,
+      subtitle: 'Status: ${caseData.status}',
+      clientType: 'PF',
+      status: caseData.status,
+      preAnalysisDate: caseData.createdAt.toIso8601String(),
+      lawyer: caseData.lawyer,
+      caseData: caseData,
     );
   }
 

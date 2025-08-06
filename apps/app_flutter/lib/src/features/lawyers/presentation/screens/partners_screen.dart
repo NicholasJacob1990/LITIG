@@ -214,6 +214,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "partners_map_toggle_1",
         onPressed: () => setState(() => _showMapView = !_showMapView),
         child: Icon(_showMapView ? LucideIcons.list : LucideIcons.map),
       ),
@@ -630,6 +631,7 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "partners_map_toggle_2",
         onPressed: () => setState(() => _showMapView = !_showMapView),
         child: Icon(_showMapView ? LucideIcons.list : LucideIcons.map),
       ),

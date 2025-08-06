@@ -8,6 +8,20 @@ Sistema de matching jurídico com arquitetura distribuída em produção.
 
 ## 🔧 **INTEGRAÇÕES EXTERNAS**
 
+### ✅ **Gemini CLI - INTEGRAÇÃO COMPLETA NO CURSOR**
+- **Status**: 🟢 INSTALADO E INTEGRADO
+- **Versão**: Gemini CLI oficial do Google
+- **Instalação**: Via Homebrew (`brew install gemini-cli`)
+- **Extensão Cursor**: `~/.cursor/extensions/gemini-cli-integration/`
+- **Configuração**: `~/.gemini/settings.json` com suporte MCP
+- **Atalhos**: `Cmd+Shift+G` (Chat), `Cmd+Shift+A` (Análise), `Cmd+Shift+T` (Terminal)
+- **Funcionalidades**: Chat interativo, análise de código, geração de testes, terminal integrado
+- **MCP Support**: GitHub, filesystem, e outros servidores
+- **Modelos**: gemini-2.5-pro-exp-03-25 (recomendado)
+- **Documentação**: README completo na extensão
+- **Status API**: ✅ FUNCIONANDO (API key configurada e testada)
+- **Próximo passo**: Use `Cmd+Shift+T` no Cursor para começar a usar!
+
 ### ✅ **API do Escavador - INTEGRAÇÃO COMPLETA**
 - **Status**: 🟢 ATIVA E FUNCIONANDO
 - **SDK**: Escavador Python SDK v0.9.2 ✅ INSTALADO

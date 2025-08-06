@@ -15,76 +15,201 @@ class ChatTriageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('DEBUG: ChatTriageScreen sendo carregada');
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        String userName = 'Usuário';
-        if (authState is Authenticated) {
-          userName = authState.user.fullName ?? 'Usuário';
-        }
-        
-        return Scaffold(
-          appBar: AppBar(
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Triagem Inteligente'),
-                Text(
-                  'Olá, $userName',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
+    return BlocProvider(
+      create: (context) => ChatTriageBloc(),
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) {
+          String userName = 'Usuário';
+          if (authState is Authenticated) {
+            userName = authState.user.fullName ?? 'Usuário';
+          }
+          
+          return Scaffold(
+            appBar: AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Triagem Inteligente'),
+                  Text(
+                    'Olá, $userName',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            centerTitle: false,
-            actions: [
-              IconButton(
-                icon: const Icon(LucideIcons.logOut),
-                onPressed: () {
-                  context.read<AuthBloc>().add(AuthLogoutRequested());
-                  context.go('/login');
-                },
-                tooltip: 'Sair',
+                ],
               ),
-            ],
-          ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(LucideIcons.bot, size: 64, color: Color(0xFF1E40AF)),
-                const SizedBox(height: 24),
-                Text(
-                  'Seu Problema Jurídico, Resolvido com Inteligência',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Use nossa IA para uma pré-análise gratuita e seja conectado ao advogado certo para o seu caso.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 48),
-                ElevatedButton.icon(
-                  icon: const Icon(LucideIcons.playCircle),
-                  label: const Text('Iniciar Consulta com IA'),
-                  onPressed: () => context.go('/triage'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  ),
+              centerTitle: false,
+              actions: [
+                IconButton(
+                  icon: const Icon(LucideIcons.logOut),
+                  onPressed: () {
+                    context.read<AuthBloc>().add(AuthLogoutRequested());
+                    context.go('/login');
+                  },
+                  tooltip: 'Sair',
                 ),
               ],
             ),
-          ),
-        );
-      },
+            body: BlocConsumer<ChatTriageBloc, ChatTriageState>(
+              listener: (context, state) {
+                if (state is ChatTriageFinished) {
+                  _showTriageCompletedNotification(context, state.caseId);
+                  context.go('/advogados?case_highlight=${state.caseId}');
+                } else if (state is ChatTriageError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                  );
+                }
+              },
+              builder: (context, state) {
+                // Tela inicial de apresentação
+                if (state is ChatTriageInitial) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(LucideIcons.bot, size: 64, color: Color(0xFF1E40AF)),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Seu Problema Jurídico, Resolvido com Inteligência',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Use nossa IA para uma pré-análise gratuita e seja conectado ao advogado certo para o seu caso.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                        ),
+                        const SizedBox(height: 48),
+                        ElevatedButton.icon(
+                          icon: const Icon(LucideIcons.playCircle),
+                          label: const Text('Iniciar Consulta com IA'),
+                          onPressed: () {
+                            print('DEBUG: Botão Iniciar Consulta pressionado');
+                            // Iniciar o chat de triagem no BLoC existente
+                            final bloc = context.read<ChatTriageBloc>();
+                            print('DEBUG: BLoC obtido: $bloc');
+                            bloc.add(StartConversation());
+                            print('DEBUG: Evento StartConversation adicionado');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                // Loading da inicialização
+                if (state is ChatTriageLoading) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Iniciando conversa com IA...'),
+                      ],
+                    ),
+                  );
+                }
+                
+                // Chat ativo
+                if (state is ChatTriageActive) {
+                  return _buildChatView(state);
+                }
+                
+                // Estado de erro
+                if (state is ChatTriageError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(LucideIcons.alertCircle, size: 64, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text('Erro: ${state.message}'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => context.read<ChatTriageBloc>().add(StartConversation()),
+                          child: const Text('Tentar Novamente'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                // Triagem finalizada
+                if (state is ChatTriageFinished) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(LucideIcons.checkCircle, size: 64, color: Colors.green),
+                        SizedBox(height: 16),
+                        Text('Triagem concluída com sucesso!'),
+                      ],
+                    ),
+                  );
+                }
+                
+                // Fallback
+                return const Center(
+                  child: Text('Estado desconhecido'),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showTriageCompletedNotification(BuildContext context, String caseId) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Triagem concluída! Encontramos advogados para seu caso.',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green[600],
+        action: SnackBarAction(
+          label: 'Ver Recomendações',
+          textColor: Colors.white,
+          onPressed: () => context.go('/advogados?tab=recomendacoes&case_id=$caseId'),
+        ),
+        duration: const Duration(seconds: 8),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Widget _buildChatView(ChatTriageActive state) {
+    return ChatTriageView(
+      messages: state.messages,
+      isTyping: state.isTyping,
     );
   }
 }
 
 class ChatTriageView extends StatefulWidget {
-  const ChatTriageView({super.key});
+  final List<ChatMessage> messages;
+  final bool isTyping;
+  
+  const ChatTriageView({
+    super.key,
+    required this.messages,
+    this.isTyping = false,
+  });
 
   @override
   State<ChatTriageView> createState() => _ChatTriageViewState();
@@ -113,31 +238,20 @@ class _ChatTriageViewState extends State<ChatTriageView> {
     });
   }
 
-  void _showTriageCompletedNotification(BuildContext context, String caseId) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Triagem concluída! Encontramos advogados para seu caso.',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green[600],
-        action: SnackBarAction(
-          label: 'Ver Recomendações',
-          textColor: Colors.white,
-          onPressed: () => context.go('/advogados?tab=recomendacoes&case_id=$caseId'),
-        ),
-        duration: const Duration(seconds: 8),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    // Auto-scroll quando há mensagens iniciais
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+  }
+
+  @override
+  void didUpdateWidget(ChatTriageView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Auto-scroll quando recebe novas mensagens
+    if (widget.messages.length > oldWidget.messages.length) {
+      _scrollToBottom();
+    }
   }
 
   @override
@@ -179,13 +293,6 @@ class _ChatTriageViewState extends State<ChatTriageView> {
         listener: (context, state) {
           if (state is ChatTriageActive) {
             _scrollToBottom();
-          } else if (state is ChatTriageFinished) {
-            _showTriageCompletedNotification(context, state.caseId);
-            context.go('/advogados?case_highlight=${state.caseId}');
-          } else if (state is ChatTriageError) {
-             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
           }
         },
         builder: (context, state) {
@@ -199,62 +306,80 @@ class _ChatTriageViewState extends State<ChatTriageView> {
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: state.messages.length,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: widget.messages.length,
                     itemBuilder: (context, index) {
-                      final message = state.messages[index];
-                          final isUser = message.isUser;
-                          
-                          return Align(
-                            alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: isUser ? Theme.of(context).colorScheme.primary : Colors.grey[200],
-                                borderRadius: BorderRadius.circular(12),
-      ),
-                              child: Text(
-                                message.text,
-                                style: TextStyle(
-                                  color: isUser ? Colors.white : Colors.black87,
-                                ),
-                              ),
+                      final message = widget.messages[index];
+                      final isUser = message.isUser;
+                      
+                      return Align(
+                        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isUser ? Theme.of(context).colorScheme.primary : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            message.text,
+                            style: TextStyle(
+                              color: isUser ? Colors.white : Colors.black87,
                             ),
-                          );
-                        },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                if (widget.isTyping)
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.centerLeft,
+                    child: const Row(
+                      children: [
+                        SizedBox(width: 16),
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 8),
+                        Text('IA está digitando...', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: const InputDecoration(
+                            hintText: 'Descreva seu problema jurídico...',
+                            border: OutlineInputBorder(),
+                          ),
+                          onSubmitted: (_) => _sendMessage(),
+                          enabled: !widget.isTyping,
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-                              decoration: const InputDecoration(
-                                hintText: 'Descreva seu problema jurídico...',
-                                border: OutlineInputBorder(),
-              ),
-              onSubmitted: (_) => _sendMessage(),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(LucideIcons.send),
-            onPressed: _sendMessage,
-          ),
-        ],
-      ),
-                    ),
-                  ],
-    );
-  }
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(LucideIcons.send),
+                        onPressed: widget.isTyping ? null : _sendMessage,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
 
-              return const Center(
-                child: Text('Erro ao carregar triagem'),
-              );
-            },
+          return const Center(
+            child: Text('Erro ao carregar triagem'),
+          );
+        },
           ),
         );
       },

@@ -564,7 +564,7 @@ class OpenRouterClient:
         # Teste Nível 3: Diretos
         if GEMINI_AVAILABLE:
             try:
-                model = genai.GenerativeModel("gemini-2.0-flash-exp")
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 response = await asyncio.wait_for(
                     model.generate_content_async("Responda apenas: OK"),
                     timeout=10

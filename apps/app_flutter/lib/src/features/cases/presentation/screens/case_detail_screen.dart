@@ -25,19 +25,8 @@ class CaseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => CaseDetailBloc()..add(LoadCaseDetail(caseId)),
-        ),
-        BlocProvider(
-          create: (context) => GetIt.instance<ContextualCaseBloc>()
-            ..add(LoadContextualCaseData(
-              caseId: caseId,
-              userId: 'current_user', // TODO: Get from AuthBloc
-            )),
-        ),
-      ],
+    return BlocProvider(
+      create: (_) => CaseDetailBloc()..add(LoadCaseDetail(caseId)),
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -111,76 +100,80 @@ class CaseDetailScreen extends StatelessWidget {
 
                 final currentUser = authState.user;
                 
-                // Carregar dados contextuais quando há usuário autenticado
-                return BlocConsumer<ContextualCaseBloc, ContextualCaseState>(
-                  listener: (context, contextualState) {
-                    if (contextualState is ContextualCaseError) {
-                      AppLogger.error('Contextual data error: ${contextualState.message}');
-                      // Para erros contextuais, não impedir que o usuário veja o caso
-                      // O fallback client será usado pela factory
-                    }
-                  },
-                  builder: (context, contextualState) {
-                    // Trigger contextual data loading if not already loaded
-                    if (contextualState is ContextualCaseInitial) {
-                      context.read<ContextualCaseBloc>().add(
-                        LoadContextualCaseData(
-                          caseId: caseId,
-                          userId: currentUser.id,
+                AppLogger.info('User authenticated: ${currentUser.id}, role: ${currentUser.role}, userRole: ${currentUser.userRole}, isClient: ${currentUser.isClient}');
+                
+                // CORREÇÃO: Para clientes, usar APENAS a experiência padrão do cliente (sem contexto nem BlocProvider de advogado)
+                if (currentUser.isClient) {
+                  AppLogger.info('Client detected: ${currentUser.id} - Showing pure client experience without contextual data');
+                  return _buildFallbackClientView(caseDetail);
+                }
+                
+                // Carregar dados contextuais SOMENTE para advogados
+                AppLogger.info('Lawyer detected: ${currentUser.id} - Loading contextual view');
+                return BlocProvider(
+                  create: (context) => GetIt.instance<ContextualCaseBloc>()
+                    ..add(LoadContextualCaseData(
+                      caseId: caseId,
+                      userId: currentUser.id,
+                    )),
+                  child: BlocConsumer<ContextualCaseBloc, ContextualCaseState>(
+                    listener: (context, contextualState) {
+                      if (contextualState is ContextualCaseError) {
+                        AppLogger.error('Contextual data error: ${contextualState.message}');
+                      }
+                    },
+                    builder: (context, contextualState) {
+                      // Extract contextual data if available
+                      ContextualCaseData? contextualData;
+                      if (contextualState is ContextualCaseLoaded) {
+                        contextualData = contextualState.contextualData;
+                        AppLogger.info('Using contextual data for allocation: ${contextualData.allocationType}');
+                      } else {
+                        AppLogger.info('No contextual data available for lawyer, using basic lawyer sections');
+                      }
+                      
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Show contextual loading indicator if loading
+                            if (contextualState is ContextualCaseLoading)
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Carregando dados contextuais...',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            
+                            // Render sections using factory (ONLY FOR LAWYERS)
+                            ...ContextualCaseDetailSectionFactory.buildSectionsForUser(
+                              currentUser: currentUser,
+                              caseDetail: caseDetail,
+                              contextualData: contextualData,
+                            ),
+                          ],
                         ),
                       );
-                    }
-
-                    // Extract contextual data if available
-                    ContextualCaseData? contextualData;
-                    if (contextualState is ContextualCaseLoaded) {
-                      contextualData = contextualState.contextualData;
-                      AppLogger.info('Using contextual data for allocation: ${contextualData.allocationType}');
-                    } else {
-                      AppLogger.info('No contextual data available, factory will use client sections');
-                    }
-                    
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Show contextual loading indicator if loading
-                          if (contextualState is ContextualCaseLoading)
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Carregando dados contextuais...',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          
-                          // Render sections using factory
-                          ...ContextualCaseDetailSectionFactory.buildSectionsForUser(
-                            currentUser: currentUser,
-                            caseDetail: caseDetail,
-                            contextualData: contextualData,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 );
               },
             );

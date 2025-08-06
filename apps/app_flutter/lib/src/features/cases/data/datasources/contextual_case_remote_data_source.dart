@@ -219,7 +219,9 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
 
   /// Mock data que simula a resposta da API `/contextual-cases/{case_id}`
   Map<String, dynamic> _getMockContextualData(String caseId, String userId) {
-    final allocationType = _getMockAllocationType(caseId);
+    // Obter tipo de usuário do userId (simulado)
+    final userRole = _getUserRoleFromUserId(userId);
+    final allocationType = _getMockAllocationTypeForUser(caseId, userRole);
     
     return {
       'case_detail': _getMockCaseDetail(caseId),
@@ -228,6 +230,35 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
       'actions': _getMockActionsData(allocationType),
       'highlight': _getMockHighlightData(allocationType),
     };
+  }
+
+  /// Simula obtenção do role do usuário baseado no userId
+  String _getUserRoleFromUserId(String userId) {
+    // Simulação: diferentes userIds correspondem a diferentes roles
+    final hash = userId.hashCode;
+    const roles = ['lawyer_individual', 'lawyer_firm_member', 'lawyer_platform_associate', 'lawyer_office'];
+    return roles[hash.abs() % roles.length];
+  }
+
+  /// Retorna tipo de alocação apropriado para o tipo de usuário
+  AllocationType _getMockAllocationTypeForUser(String caseId, String userRole) {
+    switch (userRole) {
+      case 'lawyer_firm_member':
+        // Advogados associados podem ver casos delegados
+        return AllocationType.internalDelegation;
+      case 'lawyer_individual':
+        // Advogados autônomos veem apenas casos diretos ou da plataforma
+        final hash = caseId.hashCode;
+        return hash % 2 == 0 ? AllocationType.platformMatchDirect : AllocationType.platformMatchPartnership;
+      case 'lawyer_platform_associate':
+        // Associados da plataforma veem matches da plataforma
+        return AllocationType.platformMatchDirect;
+      case 'lawyer_office':
+        // Escritórios veem parcerias
+        return AllocationType.partnershipProactiveSearch;
+      default:
+        return AllocationType.platformMatchDirect;
+    }
   }
 
   AllocationType _getMockAllocationType(String caseId) {

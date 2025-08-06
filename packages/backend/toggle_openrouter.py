@@ -65,7 +65,7 @@ async def test_current_config():
         test_messages = [{"role": "user", "content": "Responda apenas: OK"}]
         
         result = await client.chat_completion_with_fallback(
-            primary_model="google/gemini-2.0-flash-exp",
+            primary_model="gemini-2.5-flash",
             messages=test_messages,
             max_tokens=10
         )

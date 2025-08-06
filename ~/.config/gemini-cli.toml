@@ -1,0 +1,19 @@
+# Gemini CLI Configuration
+# Para usar, adicione sua chave da API do Google AI Studio
+
+[api]
+# Adicione sua chave da API aqui
+# token = "sua_chave_api_aqui"
+
+[generation_config]
+# Configurações de geração (opcional)
+# top_p = 0.8
+# top_k = 40
+# candidate_count = 1
+# max_output_tokens = 2048
+# stop_sequences = []
+
+[defaults]
+# Configurações padrão
+stream = true
+markdown = true

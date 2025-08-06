@@ -1,0 +1,93 @@
+{
+  "name": "gemini-cli-integration",
+  "displayName": "Gemini CLI Integration",
+  "description": "Integração do Gemini CLI no Cursor com ícone no topo",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:gemini-cli.openChat",
+    "onCommand:gemini-cli.analyzeCode",
+    "onCommand:gemini-cli.generateTests",
+    "onCommand:gemini-cli.explainCode"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gemini-cli.openChat",
+        "title": "Gemini CLI: Chat",
+        "category": "Gemini CLI"
+      },
+      {
+        "command": "gemini-cli.analyzeCode",
+        "title": "Gemini CLI: Analisar Código",
+        "category": "Gemini CLI"
+      },
+      {
+        "command": "gemini-cli.generateTests",
+        "title": "Gemini CLI: Gerar Testes",
+        "category": "Gemini CLI"
+      },
+      {
+        "command": "gemini-cli.explainCode",
+        "title": "Gemini CLI: Explicar Código",
+        "category": "Gemini CLI"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "gemini-cli.openChat",
+          "when": "true"
+        },
+        {
+          "command": "gemini-cli.analyzeCode",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "gemini-cli.generateTests",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "gemini-cli.explainCode",
+          "when": "editorHasSelection"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "gemini-cli.openChat",
+          "group": "navigation",
+          "when": "true"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "gemini-cli.openChat",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g"
+      },
+      {
+        "command": "gemini-cli.analyzeCode",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "editorHasSelection"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.60.0",
+    "@types/node": "^16.0.0",
+    "typescript": "^4.5.0"
+  }
+}
