@@ -5,6 +5,7 @@ import '../../domain/entities/allocation_type.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../../shared/utils/app_colors.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../shared/widgets/instrumented_widgets.dart';
 
 /// Fábrica principal de componentes contextuais
 /// Implementa o sistema de Contextual Case View conforme ARQUITETURA_GERAL_DO_SISTEMA.md
@@ -18,6 +19,9 @@ class ContextualCaseCard extends StatelessWidget {
     required this.highlight,
     required this.currentUser,
     this.onActionTap,
+    this.sourceContext,
+    this.listContext,
+    this.listRank,
   });
 
   final Case caseData;
@@ -27,26 +31,46 @@ class ContextualCaseCard extends StatelessWidget {
   final ContextualHighlight highlight;
   final User currentUser;
   final Function(String action)? onActionTap;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final String? listContext;
+  final double? listRank;
 
   @override
   Widget build(BuildContext context) {
     AppLogger.info('Building ContextualCaseCard for case ${caseData.id} with allocation type ${contextualData.allocationType}');
     
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildContextualHighlight(),
-            const SizedBox(height: 12),
-            _buildHeaderKPIs(),
-            const SizedBox(height: 12),
-            _buildCaseInfo(),
-            const SizedBox(height: 12),
-            _buildContextualActions(),
-          ],
+    return InstrumentedContentCard(
+      contentId: caseData.id,
+      contentType: 'contextual_case',
+      sourceContext: sourceContext ?? 'contextual_case_list',
+      listContext: listContext,
+      listRank: listRank,
+      onTap: () => onActionTap?.call('view_details'),
+      additionalData: {
+        'allocation_type': contextualData.allocationType.name,
+        'case_status': caseData.status,
+        'highlight_text': highlight.text,
+        'highlight_color': highlight.color,
+        'kpi_count': kpis.length,
+        'match_score': contextualData.matchScore,
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildContextualHighlight(),
+              const SizedBox(height: 12),
+              _buildHeaderKPIs(),
+              const SizedBox(height: 12),
+              _buildCaseInfo(),
+              const SizedBox(height: 12),
+              _buildContextualActions(),
+            ],
+          ),
         ),
       ),
     );
@@ -168,19 +192,51 @@ class ContextualCaseCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        ...actions.secondaryActions.map((action) => 
-          TextButton(
+        // Instrumentar ações secundárias
+        ...actions.secondaryActions.asMap().entries.map((entry) {
+          final index = entry.key;
+          final action = entry.value;
+          return InstrumentedButton(
+            elementId: 'contextual_case_secondary_${action.action}_${caseData.id}',
+            context: 'contextual_case_card',
             onPressed: () => onActionTap?.call(action.action),
+            additionalData: {
+              'case_id': caseData.id,
+              'action_type': action.action,
+              'action_label': action.label,
+              'action_priority': 'secondary',
+              'action_index': index,
+              'allocation_type': contextualData.allocationType.name,
+            },
             child: Text(action.label),
-          ),
-        ),
+          );
+        }),
         const SizedBox(width: 8),
-        ElevatedButton(
+        // Instrumentar ação primária
+        InstrumentedActionButton(
+          actionType: 'primary_contextual_action',
+          elementId: 'contextual_case_primary_${actions.primaryAction.action}_${caseData.id}',
+          context: 'contextual_case_card',
           onPressed: () => onActionTap?.call(actions.primaryAction.action),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _getActionColor(),
+          additionalData: {
+            'case_id': caseData.id,
+            'action_type': actions.primaryAction.action,
+            'action_label': actions.primaryAction.label,
+            'action_priority': 'primary',
+            'allocation_type': contextualData.allocationType.name,
+            'kpi_count': kpis.length,
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: _getActionColor(),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              actions.primaryAction.label,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
           ),
-          child: Text(actions.primaryAction.label),
         ),
       ],
     );

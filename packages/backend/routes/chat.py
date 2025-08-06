@@ -17,23 +17,29 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 router = APIRouter(prefix="/chat", tags=["chat"])
 logger = logging.getLogger(__name__)
 
-# WebSocket connection manager
+# WebSocket connection manager - Estendido para B2B
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.user_rooms: Dict[str, str] = {}  # user_id -> room_id
+        self.room_types: Dict[str, str] = {}  # room_id -> room_type
         
-    async def connect(self, websocket: WebSocket, user_id: str, room_id: str):
+    async def connect(self, websocket: WebSocket, user_id: str, room_id: str, room_type: str = "case"):
         await websocket.accept()
         self.active_connections[user_id] = websocket
         self.user_rooms[user_id] = room_id
-        logger.info(f"User {user_id} connected to room {room_id}")
+        self.room_types[room_id] = room_type
+        logger.info(f"User {user_id} connected to {room_type} room {room_id}")
         
     def disconnect(self, user_id: str):
         if user_id in self.active_connections:
             del self.active_connections[user_id]
         if user_id in self.user_rooms:
+            room_id = self.user_rooms[user_id]
             del self.user_rooms[user_id]
+            # Limpar room_type se não há mais usuários na sala
+            if room_id not in self.user_rooms.values():
+                self.room_types.pop(room_id, None)
         logger.info(f"User {user_id} disconnected")
         
     async def send_personal_message(self, message: str, user_id: str):
@@ -45,6 +51,27 @@ class ConnectionManager:
         for user_id, user_room in self.user_rooms.items():
             if user_room == room_id and user_id != exclude_user:
                 await self.send_personal_message(message, user_id)
+    
+    async def broadcast_to_partnership_participants(self, partnership_id: str, message: str, exclude_user: str = None):
+        """Broadcast para todos os participantes de uma parceria."""
+        try:
+            # Buscar participantes da parceria
+            participants_result = supabase.table("partnership_participants") \
+                .select("user_id") \
+                .eq("partnership_id", partnership_id) \
+                .execute()
+            
+            for participant in participants_result.data:
+                user_id = participant["user_id"]
+                if user_id != exclude_user and user_id in self.active_connections:
+                    await self.send_personal_message(message, user_id)
+                    
+        except Exception as e:
+            logger.error(f"Erro ao broadcast para participantes da parceria: {e}")
+    
+    def get_room_type(self, room_id: str) -> str:
+        """Retorna o tipo da sala."""
+        return self.room_types.get(room_id, "case")
 
 manager = ConnectionManager()
 
@@ -79,24 +106,51 @@ class ChatRoom(BaseModel):
     case_title: str
 
 @router.websocket("/ws/{room_id}")
-async def websocket_endpoint(websocket: WebSocket, room_id: str):
+async def websocket_endpoint(websocket: WebSocket, room_id: str, user_id: str = None):
     # Note: For production, implement proper WebSocket authentication
     # This is a simplified version
     await websocket.accept()
     
     try:
+        # Determinar tipo da sala
+        room_result = supabase.table("chat_rooms") \
+            .select("room_type, partnership_id") \
+            .eq("id", room_id) \
+            .single() \
+            .execute()
+        
+        room_type = "case"  # padrão
+        partnership_id = None
+        
+        if room_result.data:
+            room_type = room_result.data.get("room_type", "case")
+            partnership_id = room_result.data.get("partnership_id")
+        
+        # Conectar usuário à sala
+        if user_id:
+            await manager.connect(websocket, user_id, room_id, room_type)
+        
         while True:
             data = await websocket.receive_text()
             message_data = json.loads(data)
             
-            # Broadcast message to room participants
-            await manager.broadcast_to_room(data, room_id)
+            # Broadcast baseado no tipo da sala
+            if room_type == "partnership" and partnership_id:
+                # Para salas B2B, broadcast para participantes da parceria
+                await manager.broadcast_to_partnership_participants(
+                    partnership_id, data, exclude_user=user_id
+                )
+            else:
+                # Para salas tradicionais, broadcast para participantes da sala
+                await manager.broadcast_to_room(data, room_id, exclude_user=user_id)
             
             # Store message in database
             await _store_message(room_id, message_data)
             
     except WebSocketDisconnect:
-        logger.info(f"WebSocket disconnected for room {room_id}")
+        logger.info(f"WebSocket disconnected for {room_type} room {room_id}")
+        if user_id:
+            manager.disconnect(user_id)
 
 async def _store_message(room_id: str, message_data: dict):
     """Store message in database"""

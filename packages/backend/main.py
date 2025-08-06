@@ -45,6 +45,8 @@ from routes.auto_context import router as auto_context_router
 from routes.enriched_profiles import router as enriched_profiles_router
 from routes.enriched_firms import router as enriched_firms_router
 from routes.data_quality_dashboard import router as data_quality_router
+from routes.admin_economy_dashboard_simple import router as admin_economy_router
+from routes.academic_profiles import router as academic_profiles_router
 from middleware.auto_context_middleware import AutoContextMiddleware
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
@@ -71,6 +73,10 @@ from .routes import supabase_cases
 from .api import (
     auth, users, cases, lawyers, documents, chat, admin_premium
 )
+from .routes import b2b_chat
+from routes.process_updates import router as process_updates_router
+from routes.persons import router as persons_router
+from routes.process_movements import router as process_movements_router
 
 # models.Base.metadata.create_all(bind=engine)  # Removido - usa Supabase
 
@@ -101,6 +107,30 @@ async def lifespan(app: FastAPI):
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
         await init_simple_cache(redis_url)
         logger.info("Simple Cache Service inicializado.")
+        
+        # Inicializar job de sincronização de cache de processos
+        try:
+            from jobs.process_cache_sync_job import start_background_sync
+            await start_background_sync()
+            logger.info("Job de sincronização de cache de processos iniciado.")
+        except Exception as e:
+            logger.warning(f"Erro ao iniciar job de sincronização de cache: {e}")
+        
+        # Inicializar job de otimização econômica
+        try:
+            from jobs.economic_optimization_job import start_optimization_job
+            asyncio.create_task(start_optimization_job())
+            logger.info("Job de otimização econômica iniciado.")
+        except Exception as e:
+            logger.warning(f"Erro ao iniciar job de otimização: {e}")
+        
+        # Inicializar modelos ML para cache predictivo
+        try:
+            from services.predictive_cache_ml_service import predictive_cache_ml
+            asyncio.create_task(predictive_cache_ml.initialize_models())
+            logger.info("Modelos ML de cache predictivo inicializados.")
+        except Exception as e:
+            logger.warning(f"Erro ao inicializar ML predictivo: {e}")
 
     except Exception as e:
         logger.error(f"Erro crítico durante a inicialização dos serviços: {e}")
@@ -184,13 +214,19 @@ app.include_router(unipile_v2_router, tags=["Unipile-v2"])
 app.include_router(providers_router, prefix="/api", tags=["Providers"])
 app.include_router(users_router, prefix="/api", tags=["Users"])
 app.include_router(auto_context_router, prefix="/api", tags=["Auto Context"])
+app.include_router(admin_economy_router, prefix="/api", tags=["Admin Economy Dashboard"])
+app.include_router(academic_profiles_router, prefix="/api", tags=["Academic Profiles"])
 app.include_router(instagram.router)
 app.include_router(facebook.router)
 app.include_router(outlook.router)
 app.include_router(social.router)
 app.include_router(admin_premium.router)
+app.include_router(b2b_chat.router, prefix="/api/v1", tags=["B2B Chat"])
 app.include_router(privacy_cases.router, prefix="/api/v1/privacy-cases", tags=["Privacy Cases"])
 app.include_router(supabase_cases.router)
+app.include_router(process_updates_router)
+app.include_router(persons_router)
+app.include_router(process_movements_router)
 
 # Rotas de Advogados
 app.include_router(lawyer_routes.router, prefix="/api/v1/lawyers", tags=["lawyers"])
@@ -213,6 +249,46 @@ async def read_root():
 @app.get("/cache/stats", tags=["Monitoring"])
 async def get_cache_stats():
     """Retorna estatísticas do cache Redis."""
+    from services.cache_service_simple import simple_cache_service
+    stats = await simple_cache_service.get_cache_stats()
+    return stats
+
+
+@app.get("/metrics", tags=["Monitoring"])
+async def get_metrics():
+    """Endpoint para Prometheus coletar métricas."""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# Configuração de Logging
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# Configuração de Logging
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    from services.cache_service_simple import simple_cache_service
+    stats = await simple_cache_service.get_cache_stats()
+    return stats
+
+
+@app.get("/metrics", tags=["Monitoring"])
+async def get_metrics():
+    """Endpoint para Prometheus coletar métricas."""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# Configuração de Logging
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# Configuração de Logging
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
     from services.cache_service_simple import simple_cache_service
     stats = await simple_cache_service.get_cache_stats()
     return stats

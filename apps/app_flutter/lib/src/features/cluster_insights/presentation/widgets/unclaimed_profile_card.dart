@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/partnership_recommendation.dart';
+import '../../../../shared/widgets/instrumented_widgets.dart';
 
 /// Widget para exibir perfis externos (não cadastrados) com diferenciação visual
 class UnclaimedProfileCard extends StatelessWidget {
@@ -213,7 +213,7 @@ class UnclaimedProfileCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_outline, size: 14, color: Colors.purple),
+          const Icon(Icons.lock_outline, size: 14, color: Colors.purple),
           const SizedBox(width: 4),
           Text(
             'Análise Limitada',
@@ -334,13 +334,25 @@ class UnclaimedProfileCard extends StatelessWidget {
   }
 
   Widget _buildInviteButton(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onInvite,
-      icon: const Icon(Icons.mail_outline),
-      label: const Text('Convidar'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+    return InstrumentedInviteButton(
+      recipientId: recommendation.recommendedLawyerId,
+      invitationType: 'external_profile_invite',
+      context: 'unclaimed_profile_card',
+      additionalData: {
+        'profile_name': recommendation.profileData?.fullName ?? recommendation.lawyerName,
+        'profile_source': 'external',
+        'recommendation_score': recommendation.compatibilityScore,
+        'profile_specialization': recommendation.lawyerSpecialty ?? 'unknown',
+        'invitation_context': 'unclaimed_profile_card',
+      },
+      onPressed: onInvite ?? () {},
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.mail_outline),
+          SizedBox(width: 8),
+          Text('Convidar'),
+        ],
       ),
     );
   }
@@ -358,7 +370,7 @@ class UnclaimedProfileCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.schedule, color: Colors.blue, size: 20),
+          const Icon(Icons.schedule, color: Colors.blue, size: 20),
           const SizedBox(width: 8),
           Text(
             'Convite Enviado',

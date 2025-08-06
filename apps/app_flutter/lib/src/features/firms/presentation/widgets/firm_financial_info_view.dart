@@ -559,7 +559,7 @@ class _FirmFinancialInfoViewState extends State<FirmFinancialInfoView> {
             ),
             child: Text(
               '${percentage.toStringAsFixed(1)}%',
-              style: TextStyle(
+              style: const TextStyle(
                 color: color,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,

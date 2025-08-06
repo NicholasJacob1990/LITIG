@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/cluster_repository.dart';
+import '../../domain/entities/trending_cluster.dart';
 import 'trending_clusters_event.dart';
 import 'trending_clusters_state.dart';
 

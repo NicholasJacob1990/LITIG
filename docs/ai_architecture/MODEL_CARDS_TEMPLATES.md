@@ -123,7 +123,7 @@ Realizar análise jurídica detalhada e estruturada de casos complexos, extraind
 
 #### Nível 1: Grok 4
 - **Modelo:** Grok 4
-- **Identificador API:** `xai/grok-1`
+- **Identificador API:** `x-ai/grok-4`
 - **Justificativa:** Excelente capacidade de raciocínio jurídico e análise estruturada
 
 #### Nível 2-4: Conforme template base
@@ -673,7 +673,7 @@ Gerar rótulos profissionais e concisos para clusters de casos e advogados simil
 ### 2. Arquitetura de Modelo
 
 #### Nível 1: Grok 4
-- **Identificador API:** `xai/grok-1`
+- **Identificador API:** `x-ai/grok-4`
 - **Justificativa:** Excelente capacidade de síntese e criação de rótulos precisos
 
 ### 3. Function Calling Tool Definition

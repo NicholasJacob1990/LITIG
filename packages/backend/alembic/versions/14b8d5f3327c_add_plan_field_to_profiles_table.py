@@ -20,6 +20,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    # Create the ENUM type if it doesn't exist
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE clientplan AS ENUM ('FREE', 'VIP', 'ENTERPRISE');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
+    """)
+    
     # Add plan field to profiles table with ENUM constraint
     op.add_column(
         'profiles',

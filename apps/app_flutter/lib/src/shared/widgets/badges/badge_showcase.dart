@@ -52,10 +52,10 @@ class BadgeShowcase extends StatelessWidget {
             _buildSection(
               'Advogados',
               [
-                _buildBadgeDemo('Pro Lawyer', ProLawyerBadge(
+                _buildBadgeDemo('Pro Lawyer', const ProLawyerBadge(
                   plan: 'PRO',
                 )),
-                _buildBadgeDemo('Pro Lawyer (Premium Case)', ProLawyerBadge(
+                _buildBadgeDemo('Pro Lawyer (Premium Case)', const ProLawyerBadge(
                   plan: 'PRO',
                   isPremiumCase: true,
                 )),
@@ -94,10 +94,10 @@ class BadgeShowcase extends StatelessWidget {
             _buildSection(
               'Casos',
               [
-                _buildBadgeDemo('Premium Case', PremiumCaseBadge(
+                _buildBadgeDemo('Premium Case', const PremiumCaseBadge(
                   isPremium: true,
                 )),
-                _buildBadgeDemo('Enterprise Case', EnterpriseCaseBadge(
+                _buildBadgeDemo('Enterprise Case', const EnterpriseCaseBadge(
                   isEnterprise: true,
                 )),
               ],

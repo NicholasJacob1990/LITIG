@@ -58,7 +58,7 @@ response = await self.openai_client.chat.completions.create(
 
 # DEPOIS: Function calling robusto + MESMO PROMPT
 response = await self.openrouter_client.chat.completions.create(
-    model="xai/grok-1",  # Grok 4
+    model="x-ai/grok-4",  # Grok 4
     messages=[{"role": "system", "content": self.lex_system_prompt}],  # IDÊNTICO
     tools=[self.lex_analysis_tool]  # Estrutura garantida
 )

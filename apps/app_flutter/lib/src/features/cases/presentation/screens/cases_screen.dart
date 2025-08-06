@@ -5,12 +5,13 @@ import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/presentation/widgets/case_card.dart';
 import 'package:meu_app/src/features/cases/presentation/widgets/contextual_case_card.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/contextual_case_bloc.dart';
-import 'package:meu_app/src/features/cases/domain/entities/contextual_case_data.dart';
+
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/injection_container.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
+import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
 
 class CasesScreen extends StatelessWidget {
   const CasesScreen({super.key});
@@ -31,10 +32,20 @@ class CasesScreen extends StatelessWidget {
           title: const Text('Meus Casos'),
           centerTitle: true,
         ),
-        floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: InstrumentedActionButton(
+          actionType: 'create_case',
+          elementId: 'fab_new_case',
+          context: 'cases_screen',
           onPressed: () => context.go('/triage'),
-          label: const Text('Criar Novo Caso'),
-          icon: const Icon(LucideIcons.plus),
+          additionalData: const {
+            'screen': 'cases_list',
+            'action': 'start_triage',
+          },
+          child: const FloatingActionButton.extended(
+            onPressed: null, // Handled by InstrumentedActionButton
+            label: Text('Criar Novo Caso'),
+            icon: Icon(LucideIcons.plus),
+          ),
         ),
         body: Column(
           children: [
@@ -74,10 +85,21 @@ class CasesScreen extends StatelessWidget {
                     }
                     return BlocBuilder<AuthBloc, auth_states.AuthState>(
                       builder: (context, authState) {
-                        return ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: state.filteredCases.length,
-                          itemBuilder: (context, index) {
+                        return InstrumentedListView(
+                          listId: 'cases_list_main',
+                          listType: 'list',
+                          contentType: 'cases',
+                          sourceContext: 'cases_screen',
+                          totalItems: state.filteredCases.length,
+                          additionalData: {
+                            'filter_type': state.activeFilter.toString(),
+                            'user_role': authState is auth_states.Authenticated ? authState.user.role : 'unknown',
+                            'has_cases': state.filteredCases.isNotEmpty,
+                          },
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: state.filteredCases.length,
+                            itemBuilder: (context, index) {
                             final caseData = state.filteredCases[index];
                             AppLogger.info('CasesScreen: Renderizando caso ${index + 1}: ${caseData.title}');
                             
@@ -98,6 +120,7 @@ class CasesScreen extends StatelessWidget {
                               caseData: caseData, // Passar dados completos do caso
                             );
                           },
+                          ),
                         );
                       },
                     );
@@ -187,9 +210,9 @@ class CasesScreen extends StatelessWidget {
           return ContextualCaseCardFactory.create(
             caseData: caseData,
             contextualData: contextualData,
-            kpis: contextualState.kpis ?? [],
-            actions: contextualState.actions ?? _getDefaultActions(),
-            highlight: contextualState.highlight ?? _getDefaultHighlight(),
+            kpis: contextualState.kpis,
+            actions: contextualState.actions,
+            highlight: contextualState.highlight,
             currentUser: user,
             onActionTap: (action) {
               _handleContextualAction(context, action, caseData.id);
@@ -240,19 +263,5 @@ class CasesScreen extends StatelessWidget {
     }
   }
 
-  // Default actions for when contextual data is not available
-  ContextualActions _getDefaultActions() {
-    return const ContextualActions(
-      primaryAction: ContextualAction(action: 'view_details', label: 'Ver Detalhes'),
-      secondaryActions: [],
-    );
-  }
 
-  // Default highlight for when contextual data is not available
-  ContextualHighlight _getDefaultHighlight() {
-    return const ContextualHighlight(
-      text: 'Caso padrão',
-      color: 'blue',
-    );
-  }
 }

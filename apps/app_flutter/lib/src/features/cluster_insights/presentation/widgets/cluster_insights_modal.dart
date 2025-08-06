@@ -172,7 +172,13 @@ class _AllClustersTab extends StatelessWidget {
               if (state is AllClustersLoaded) {
                 return Column(
                   children: state.clusters.map((cluster) => 
-                    _ClusterOverviewCard(cluster: cluster)
+                    Card(
+                      child: ListTile(
+                        title: Text(cluster.name),
+                        subtitle: Text(cluster.description),
+                        trailing: Text('${cluster.memberCount} membros'),
+                      ),
+                    )
                   ).toList(),
                 );
               }

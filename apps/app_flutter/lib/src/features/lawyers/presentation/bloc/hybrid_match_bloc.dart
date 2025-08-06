@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/matched_lawyer.dart';
-import '../../domain/entities/match_result.dart';
 import '../../../firms/domain/entities/law_firm.dart';
 import '../../domain/repositories/lawyers_repository.dart';
 import '../../../firms/domain/repositories/firm_repository.dart';
@@ -270,8 +269,8 @@ class HybridMatchBloc extends Bloc<HybridMatchEvent, HybridMatchState> {
       } else {
         // Se não incluir advogados, retornar listas vazias
         emit(HybridMatchLoaded(
-          lawyers: [], 
-          firms: [],
+          lawyers: const [], 
+          firms: const [],
           mixedRendering: event.mixedRendering,
           isHybridSearchEnabled: _isHybridSearchEnabled,
         ));

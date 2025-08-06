@@ -157,18 +157,21 @@ class FirmMatchExplanationDialog extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _buildStrengthItem(
+          context,
           'Tamanho da Equipe',
           firm.teamSize > 0 ? firm.teamSize / 100.0 : 0.5,
           LucideIcons.users,
           '${firm.teamSize} profissionais qualificados',
         ),
         _buildStrengthItem(
+          context,
           'Reputação',
           firm.kpis?.reputationScore != null ? firm.kpis!.reputationScore / 100.0 : 0.7,
           LucideIcons.star,
           'Excelente reputação no mercado',
         ),
         _buildStrengthItem(
+          context,
           'Especialização',
           0.9,
           LucideIcons.target,
@@ -176,6 +179,7 @@ class FirmMatchExplanationDialog extends StatelessWidget {
         ),
         if (firm.hasLocation)
           _buildStrengthItem(
+            context,
             'Localização',
             0.85,
             LucideIcons.mapPin,
@@ -185,7 +189,7 @@ class FirmMatchExplanationDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildStrengthItem(String title, double score, IconData icon, String description) {
+  Widget _buildStrengthItem(BuildContext context, String title, double score, IconData icon, String description) {
     final color = _getScoreColor(score);
     final percentage = (score * 100).toInt();
     
@@ -267,8 +271,8 @@ class FirmMatchExplanationDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            if (firm.kpis?.topAreas != null && firm.kpis!.topAreas.isNotEmpty)
-              ...firm.kpis!.topAreas.take(3).map((area) => Padding(
+            if (firm.specializations.isNotEmpty)
+              ...firm.specializations.take(3).map((area) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
@@ -315,18 +319,18 @@ class FirmMatchExplanationDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            _buildFactorItem('Histórico de Casos', 'Casos similares resolvidos com sucesso'),
-            _buildFactorItem('Experiência da Equipe', 'Profissionais especializados na área'),
-            _buildFactorItem('Avaliações', 'Excelentes avaliações de clientes anteriores'),
+            _buildFactorItem(context, 'Histórico de Casos', 'Casos similares resolvidos com sucesso'),
+            _buildFactorItem(context, 'Experiência da Equipe', 'Profissionais especializados na área'),
+            _buildFactorItem(context, 'Avaliações', 'Excelentes avaliações de clientes anteriores'),
             if (firm.hasLocation)
-              _buildFactorItem('Proximidade', 'Localização conveniente para atendimento'),
+              _buildFactorItem(context, 'Proximidade', 'Localização conveniente para atendimento'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFactorItem(String title, String description) {
+  Widget _buildFactorItem(BuildContext context, String title, String description) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -383,7 +387,7 @@ class FirmMatchExplanationDialog extends StatelessWidget {
               Navigator.of(context).pop();
               // TODO: Implementar contratação do escritório
             },
-            icon: const Icon(LucideIcons.handshake),
+            icon: const Icon(LucideIcons.users),
             label: const Text('Contratar'),
           ),
         ),

@@ -23,6 +23,7 @@ def upgrade():
     op.create_foreign_key(
         "fk_cases_accepted_by_users", "cases", "users",
         ["accepted_by"], ["id"],
+        referent_schema="auth"
     )
 
 

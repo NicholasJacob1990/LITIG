@@ -262,10 +262,10 @@ class BadgeVisibilityHelper {
   /// CONTEXTO DE CLIENTE BUSINESS - Para badges de cliente PJ Business
   static BadgeContext getBusinessClientContext(String? viewerRole, String? clientPlan) {
     if (!shouldShowBusinessClientBadge(viewerRole, clientPlan)) {
-      return BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
+      return const BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
     }
 
-    return BadgeContext(
+    return const BadgeContext(
       showBadge: true,
       badgeText: 'Cliente Business',
       badgeColor: BadgeColor.blue,
@@ -276,7 +276,7 @@ class BadgeVisibilityHelper {
   /// CONTEXTO DE ESCRITÓRIO - Para badges de planos de escritório
   static BadgeContext getFirmPlanContext(String? viewerRole, String? firmPlan) {
     if (!shouldShowFirmPlanBadge(viewerRole, firmPlan)) {
-      return BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
+      return const BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
     }
 
     String badgeText;
@@ -313,7 +313,7 @@ class BadgeVisibilityHelper {
   /// CONTEXTO DE SUPER ASSOCIATE - Para badges de Super Associates
   static BadgeContext getSuperAssociateContext(String? viewerRole, String? plan) {
     if (!shouldShowSuperAssociateBadge(viewerRole, plan)) {
-      return BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
+      return const BadgeContext(showBadge: false, badgeText: '', badgeColor: BadgeColor.grey, priority: 0);
     }
 
     String badgeText;

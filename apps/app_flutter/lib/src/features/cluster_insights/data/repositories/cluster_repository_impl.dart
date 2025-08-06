@@ -1,5 +1,6 @@
 import '../../domain/repositories/cluster_repository.dart';
 import '../../domain/entities/partnership_recommendation.dart';
+import '../../domain/entities/cluster_detail.dart';
 import '../datasources/cluster_remote_datasource.dart';
 
 class ClusterRepositoryImpl implements ClusterRepository {
@@ -68,6 +69,52 @@ class ClusterRepositoryImpl implements ClusterRepository {
       return await remoteDataSource.getClusterDetails(clusterId);
     } catch (e) {
       throw Exception('Erro ao buscar detalhes do cluster: $e');
+    }
+  }
+
+  @override
+  Future<List<ClusterDetail>> getAllClusters({
+    int? limit,
+    String? category,
+  }) async {
+    try {
+      // Simulação de dados - em um ambiente real, viria do remoteDataSource
+      final clusters = <ClusterDetail>[
+        ClusterDetail(
+          id: '1',
+          name: 'Direito Trabalhista',
+          description: 'Cluster especializado em questões trabalhistas',
+          memberCount: 150,
+          topSkills: const ['CLT', 'Acordo Trabalhista', 'Rescisão'],
+          averageRating: 4.8,
+          category: 'trabalhista',
+          createdAt: DateTime.now().subtract(const Duration(days: 365)),
+          metadata: const {'specialization': 'trabalhista'},
+        ),
+        ClusterDetail(
+          id: '2', 
+          name: 'Direito Civil',
+          description: 'Cluster focado em direito civil e contratos',
+          memberCount: 200,
+          topSkills: const ['Contratos', 'Responsabilidade Civil', 'Família'],
+          averageRating: 4.6,
+          category: 'civil',
+          createdAt: DateTime.now().subtract(const Duration(days: 300)),
+          metadata: const {'specialization': 'civil'},
+        ),
+      ];
+
+      if (limit != null) {
+        return clusters.take(limit).toList();
+      }
+      
+      if (category != null) {
+        return clusters.where((c) => c.category == category).toList();
+      }
+
+      return clusters;
+    } catch (e) {
+      throw Exception('Erro ao buscar todos os clusters: $e');
     }
   }
 } 

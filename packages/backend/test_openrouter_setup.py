@@ -212,7 +212,7 @@ async def test_fallback_levels() -> Dict[str, Any]:
     try:
         print("🔄 Testando Nível 1 (modelo válido)...")
         result = await client.chat_completion_with_fallback(
-            primary_model="google/gemini-1.5-pro",
+            primary_model="google/gemini-2.0-flash-exp",
             messages=test_messages,
             max_tokens=10
         )

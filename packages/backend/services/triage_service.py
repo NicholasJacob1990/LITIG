@@ -11,8 +11,8 @@ import anthropic
 import openai
 # NOVO: A API do TogetherAI (para Llama 4) é compatível com o cliente OpenAI
 
-# Importação do serviço de embedding
-from embedding_service import generate_embedding
+# MUDANÇA: Apontando para o novo serviço orquestrador
+from .embedding_orchestrator import generate_embedding
 from .premium_criteria_service import evaluate_case_premium
 from ..dependencies import get_db
 
@@ -43,7 +43,7 @@ SIMPLE_TRIAGE_MODEL_CLAUDE_FALLBACK = "claude-3-haiku-20240307"
 DEFAULT_TRIAGE_PRIMARY_PROVIDER = "together"
 DEFAULT_TRIAGE_MODEL_LLAMA = "meta-llama/Llama-4-Scout" # Imbatível em custo e pronto para multimodal
 DEFAULT_TRIAGE_SECONDARY_PROVIDER = "openai"
-DEFAULT_TRIAGE_MODEL_OPENAI_FALLBACK = "gpt-4.1-turbo" # Ótimo backup
+DEFAULT_TRIAGE_MODEL_OPENAI_FALLBACK = "gpt-4o" # Ótimo backup
 
 # 4. Ensemble e Juiz (Foco: Máxima Qualidade para Casos Complexos)
 # MUDANÇA: Usando Sonnet no ensemble para melhor custo-benefício e velocidade
@@ -388,10 +388,15 @@ class TriageService:
 
         summary = triage_results.get("summary")
         if summary:
-            embedding_vector = await generate_embedding(summary)
-            triage_results["summary_embedding"] = embedding_vector
+            # MUDANÇA: Usando o orquestrador para gerar o embedding
+            result = await generate_embedding(summary, context_type="case")
+            triage_results["embedding"] = result.embedding
         else:
-            triage_results["summary_embedding"] = None
+            triage_results["embedding"] = None
+
+        # Remover a chave antiga para evitar erros no DB
+        if "summary_embedding" in triage_results:
+            del triage_results["summary_embedding"]
 
         return triage_results
 

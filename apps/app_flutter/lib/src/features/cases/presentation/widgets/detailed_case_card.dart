@@ -6,6 +6,7 @@ import 'package:meu_app/src/features/cases/domain/entities/lawyer_info.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/shared/widgets/atoms/initials_avatar.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_social_links.dart';
+import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
 
 class DetailedCaseCard extends StatelessWidget {
   final String caseId;
@@ -14,6 +15,10 @@ class DetailedCaseCard extends StatelessWidget {
   final double progress;
   final String nextStep;
   final LawyerInfo lawyer;
+  // Novos parâmetros para instrumentação
+  final String? sourceContext;
+  final String? listContext;
+  final double? listRank;
 
   const DetailedCaseCard({
     super.key,
@@ -23,34 +28,51 @@ class DetailedCaseCard extends StatelessWidget {
     required this.progress,
     required this.nextStep,
     required this.lawyer,
+    this.sourceContext,
+    this.listContext,
+    this.listRank,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black26,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () => context.go('/case-detail/$caseId'),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLawyerHeader(context),
-              const SizedBox(height: 16),
-              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
-              const SizedBox(height: 12),
-              _buildProgressSection(context),
-              const SizedBox(height: 12),
-              _buildNextStepSection(context),
-              const Divider(height: 24),
-              _buildActionButtons(context),
-            ],
+    return InstrumentedContentCard(
+      contentId: caseId,
+      contentType: 'detailed_case',
+      sourceContext: sourceContext ?? 'detailed_case_list',
+      listContext: listContext,
+      listRank: listRank,
+      onTap: () => context.go('/case-detail/$caseId'),
+      additionalData: {
+        'case_status': status,
+        'progress_percentage': progress,
+        'lawyer_name': lawyer.name,
+        'has_next_step': nextStep.isNotEmpty,
+      },
+      child: Card(
+        elevation: 2,
+        shadowColor: Colors.black26,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          onTap: () => context.go('/case-detail/$caseId'),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLawyerHeader(context),
+                const SizedBox(height: 16),
+                Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+                const SizedBox(height: 12),
+                _buildProgressSection(context),
+                const SizedBox(height: 12),
+                _buildNextStepSection(context),
+                const Divider(height: 24),
+                _buildActionButtons(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -59,7 +81,6 @@ class DetailedCaseCard extends StatelessWidget {
 
   Widget _buildLawyerHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final statusColors = theme.extension<AppStatusColors>()!;
     return Row(
       children: [
         CachedNetworkImage(
@@ -137,21 +158,63 @@ class DetailedCaseCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _actionButton(context, icon: LucideIcons.bot, label: 'Resumo IA', onPressed: () {}),
-        _actionButton(context, icon: LucideIcons.messageCircle, label: 'Chat', onPressed: () {}),
-        _actionButton(context, icon: LucideIcons.folder, label: 'Documentos', onPressed: () {}),
+        InstrumentedButton(
+          elementId: 'detailed_case_ai_summary_$caseId',
+          context: 'detailed_case_card',
+          onPressed: () {}, // TODO: Implementar ação
+          additionalData: {
+            'case_id': caseId,
+            'action_type': 'ai_summary',
+            'case_status': status,
+            'progress': progress,
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.bot, size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 4),
+              Text('Resumo IA', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            ],
+          ),
+        ),
+        InstrumentedButton(
+          elementId: 'detailed_case_chat_$caseId',
+          context: 'detailed_case_card',
+          onPressed: () {}, // TODO: Implementar ação
+          additionalData: {
+            'case_id': caseId,
+            'action_type': 'chat',
+            'lawyer_name': lawyer.name,
+            'case_status': status,
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.messageCircle, size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 4),
+              Text('Chat', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            ],
+          ),
+        ),
+        InstrumentedButton(
+          elementId: 'detailed_case_documents_$caseId',
+          context: 'detailed_case_card',
+          onPressed: () {}, // TODO: Implementar ação
+          additionalData: {
+            'case_id': caseId,
+            'action_type': 'documents',
+            'case_status': status,
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.folder, size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 4),
+              Text('Documentos', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            ],
+          ),
+        ),
       ],
-    );
-  }
-
-  Widget _actionButton(BuildContext context, {required IconData icon, required String label, required VoidCallback onPressed}) {
-    return TextButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label),
-      style: TextButton.styleFrom(
-        foregroundColor: Theme.of(context).colorScheme.primary,
-      ),
     );
   }
 

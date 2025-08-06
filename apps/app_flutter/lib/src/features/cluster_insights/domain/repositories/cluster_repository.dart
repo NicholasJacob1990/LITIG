@@ -1,4 +1,5 @@
 import '../entities/partnership_recommendation.dart';
+import '../entities/cluster_detail.dart';
 
 abstract class ClusterRepository {
   /// Busca recomendações de parceria para um advogado específico
@@ -25,4 +26,10 @@ abstract class ClusterRepository {
 
   /// Busca detalhes de um cluster específico
   Future<Map<String, dynamic>?> getClusterDetails(String clusterId);
+
+  /// Busca todos os clusters disponíveis
+  Future<List<ClusterDetail>> getAllClusters({
+    int? limit,
+    String? category,
+  });
 } 

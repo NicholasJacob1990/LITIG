@@ -390,7 +390,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
           Tab(icon: Icon(LucideIcons.building), text: 'Visão Geral'),
           Tab(icon: Icon(LucideIcons.users), text: 'Equipe'),
           Tab(icon: Icon(LucideIcons.briefcase), text: 'Casos'),
-          Tab(icon: Icon(LucideIcons.handshake), text: 'Parcerias'),
+          Tab(icon: Icon(LucideIcons.users), text: 'Parcerias'),
           Tab(icon: Icon(LucideIcons.dollarSign), text: 'Financeiro'),
           Tab(icon: Icon(LucideIcons.shield), text: 'Transparência'),
         ],
@@ -467,7 +467,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () => _showHiringOptions(context),
-      icon: const Icon(LucideIcons.handshake),
+      icon: const Icon(LucideIcons.users),
       label: const Text('Contratar Escritório'),
     );
   }

@@ -249,7 +249,7 @@ class OpenRouterClient:
         🆕 V2.1: Suporte a extra_headers para Web Search
         
         Args:
-            primary_model: Modelo primário via OpenRouter (ex: "google/gemini-1.5-pro")
+            primary_model: Modelo primário via OpenRouter (ex: "google/gemini-2.5-flash")
             messages: Lista de mensagens para o chat
             tools: Lista de ferramentas/functions para function calling
             tool_choice: Configuração de escolha de ferramenta
@@ -385,7 +385,7 @@ class OpenRouterClient:
                 # Converter mensagens para formato Gemini
                 prompt = self._messages_to_prompt(messages)
                 
-                model = genai.GenerativeModel("gemini-1.5-pro")
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 response = await asyncio.wait_for(
                     model.generate_content_async(prompt),
                     timeout=30
@@ -409,7 +409,7 @@ class OpenRouterClient:
                 return {
                     "response": self._format_direct_response(response.text, parsed_content),
                     "fallback_level": 3,
-                    "model_used": "gemini-1.5-pro",
+                    "model_used": "gemini-2.0-flash-exp",
                     "provider": "gemini_direct"
                 }
                 
@@ -534,7 +534,7 @@ class OpenRouterClient:
             try:
                 response = await asyncio.wait_for(
                     self.openrouter_client.chat.completions.create(
-                        model="google/gemini-1.5-pro",
+                        model="google/gemini-2.5-flash",
                         messages=test_messages,
                         max_tokens=10
                     ),
@@ -564,7 +564,7 @@ class OpenRouterClient:
         # Teste Nível 3: Diretos
         if GEMINI_AVAILABLE:
             try:
-                model = genai.GenerativeModel("gemini-1.5-pro")
+                model = genai.GenerativeModel("gemini-2.0-flash-exp")
                 response = await asyncio.wait_for(
                     model.generate_content_async("Responda apenas: OK"),
                     timeout=10

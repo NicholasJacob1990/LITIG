@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
 import 'package:meu_app/src/core/enums/legal_areas.dart';
+import '../../../../shared/services/analytics_service.dart';
 
 class LawyerSearchForm extends StatefulWidget {
   const LawyerSearchForm({super.key});
@@ -17,6 +18,18 @@ class _LawyerSearchFormState extends State<LawyerSearchForm> {
   LegalArea? _selectedLegalArea;
   RangeValues _priceRange = const RangeValues(100, 1000);
   double _minRating = 0.0;
+  
+  // Analytics
+  late AnalyticsService _analytics;
+  DateTime? _searchStartTime;
+  Map<String, dynamic> _currentFilters = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnalytics();
+    _setupSearchListeners();
+  }
 
   @override
   void dispose() {
@@ -25,7 +38,32 @@ class _LawyerSearchFormState extends State<LawyerSearchForm> {
     super.dispose();
   }
 
+  Future<void> _initializeAnalytics() async {
+    _analytics = await AnalyticsService.getInstance();
+  }
+
+  void _setupSearchListeners() {
+    _searchController.addListener(() {
+      if (_searchStartTime == null && _searchController.text.isNotEmpty) {
+        _searchStartTime = DateTime.now();
+        _trackSearchStart();
+      }
+    });
+  }
+
+  void _trackSearchStart() {
+    _analytics.trackSearch(
+      'lawyer_search',
+      _searchController.text,
+      results: [], // Will be filled when results arrive
+      searchContext: 'lawyer_search_form',
+    );
+  }
+
   void _performSearch() {
+    _updateCurrentFilters();
+    _trackSearchExecution();
+    
     context.read<MatchesBloc>().add(
       SearchLawyers(
         query: _searchController.text,
@@ -35,6 +73,49 @@ class _LawyerSearchFormState extends State<LawyerSearchForm> {
         maxPrice: _priceRange.end,
         minRating: _minRating,
       ),
+    );
+  }
+
+  void _updateCurrentFilters() {
+    _currentFilters = {
+      'query': _searchController.text,
+      'location': _locationController.text,
+      'legal_area': _selectedLegalArea?.name,
+      'min_price': _priceRange.start,
+      'max_price': _priceRange.end,
+      'min_rating': _minRating,
+      'has_location_filter': _locationController.text.isNotEmpty,
+      'has_legal_area_filter': _selectedLegalArea != null,
+      'has_price_filter': _priceRange.start > 100 || _priceRange.end < 1000,
+      'has_rating_filter': _minRating > 0.0,
+    };
+  }
+
+  void _trackSearchExecution() {
+    final searchDuration = _searchStartTime != null 
+        ? DateTime.now().difference(_searchStartTime!) 
+        : null;
+
+    _analytics.trackSearch(
+      'lawyer_search',
+      _searchController.text,
+      results: [], // Will be filled when results arrive
+      searchContext: 'lawyer_search_form',
+      appliedFilters: _currentFilters,
+      searchDuration: searchDuration,
+    );
+  }
+
+  void _trackFilterChange(String filterType, dynamic value) {
+    _analytics.trackUserClick(
+      'search_filter_$filterType',
+      'lawyer_search_form',
+      additionalData: {
+        'filter_type': filterType,
+        'filter_value': value,
+        'current_query': _searchController.text,
+        'has_query': _searchController.text.isNotEmpty,
+      },
     );
   }
 
@@ -91,6 +172,7 @@ class _LawyerSearchFormState extends State<LawyerSearchForm> {
                 setState(() {
                   _selectedLegalArea = value;
                 });
+                _trackFilterChange('legal_area', value?.name);
               },
             ),
             
@@ -115,6 +197,10 @@ class _LawyerSearchFormState extends State<LawyerSearchForm> {
                 setState(() {
                   _priceRange = values;
                 });
+                _trackFilterChange('price_range', {
+                  'min': values.start,
+                  'max': values.end,
+                });
               },
             ),
             
@@ -134,6 +220,7 @@ class _LawyerSearchFormState extends State<LawyerSearchForm> {
                 setState(() {
                   _minRating = value;
                 });
+                _trackFilterChange('min_rating', value);
               },
             ),
             

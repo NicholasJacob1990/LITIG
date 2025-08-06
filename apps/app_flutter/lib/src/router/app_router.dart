@@ -149,13 +149,14 @@ GoRouter appRouter(AuthBloc authBloc) {
         GoRoute(path: '/financial', builder: (context, state) => const FinancialDashboardScreen()),
       GoRoute(path: '/register-client', builder: (context, state) => const RegisterClientScreen()),
       GoRoute(
-      GoRoute(
         path: '/claim-profile',
         builder: (context, state) {
           final token = state.uri.queryParameters['token'] ?? 'invalid';
-          return ClaimProfileScreen(token: token);
+          return ClaimProfileScreen(invitationToken: token);
         },
-      ),        path: '/register-lawyer',
+      ),
+      GoRoute(
+        path: '/register-lawyer',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           final role = extra?['role'] as String? ?? 'lawyer_individual';

@@ -7,7 +7,7 @@
  * Este serviço utiliza o SDK oficial da Unipile para simplificar a integração
  * e garantir compatibilidade com as melhores práticas da API.
  * 
- * VERSÃO 4.0 - SDK Oficial Instalado e Atualizado ✅
+ * VERSÃO 4.1 - SDK Oficial + REST API para listAccounts ✅
  * 
  * Recursos Suportados:
  * - LinkedIn, WhatsApp, Instagram, Messenger, Telegram, Google, Microsoft, IMAP, X (Twitter)
@@ -46,35 +46,78 @@ class UnipileSDKService {
     }
 
     /**
-     * Lista todas as contas conectadas usando o SDK
-     * Nota: O SDK v1.9.3 não expõe um método direto para listar contas
-     * Este método simula a funcionalidade baseada nas contas conectadas
+     * Lista todas as contas conectadas usando o endpoint REST oficial
+     * Endpoint: GET /api/v1/accounts
+     * Documentação: https://developer.unipile.com/reference/accountscontroller_listaccounts
      */
     async listAccounts() {
         try {
-            console.log('🔄 Fetching connected accounts...');
+            console.log('🔄 Fetching connected accounts via REST API...');
             
-            // Como o SDK não tem um método direto list(), vamos simular
-            // baseado no status das contas conectadas
-            const accounts = this.connectedAccounts || [];
+            // Fazer chamada HTTP direta para o endpoint oficial
+            const apiUrl = `https://${this.dsn}/api/v1/accounts`;
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
             
-            console.log(`✅ Retrieved ${accounts.length} connected accounts`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const responseData = await response.json();
+            const accounts = responseData.data || responseData || [];
+            
+            // Sincronizar com cache local para compatibilidade
+            this.connectedAccounts = accounts.map(account => ({
+                id: account.id,
+                provider: account.provider,
+                email: account.email || account.login,
+                status: account.status || 'active',
+                connected_at: account.created_at || account.connected_at
+            }));
+            
+            console.log(`✅ Retrieved ${accounts.length} connected accounts via REST API`);
             
             return {
                 success: true,
                 data: accounts,
                 count: accounts.length,
                 timestamp: new Date().toISOString(),
-                sdk_version: '1.9.3',
-                note: 'Simulated account list - actual accounts stored locally'
+                sdk_version: '1.9.3+4.1',
+                api_endpoint: 'GET /api/v1/accounts',
+                api_url: apiUrl,
+                note: 'Using official REST API endpoint with fetch'
             };
         } catch (error) {
-            console.error('❌ Error listing accounts:', error.message);
+            console.error('❌ Error listing accounts via REST API:', error.message);
+            
+            // Fallback para cache local se a API falhar
+            console.log('🔄 Falling back to local cache...');
+            const accounts = this.connectedAccounts || [];
+            
+            if (accounts.length > 0) {
+                console.log(`✅ Using cached accounts: ${accounts.length} found`);
+                return {
+                    success: true,
+                    data: accounts,
+                    count: accounts.length,
+                    timestamp: new Date().toISOString(),
+                    sdk_version: '1.9.3+4.1',
+                    note: 'Fallback to cached accounts due to API error',
+                    api_error: error.message
+                };
+            }
             
             return {
                 success: false,
                 error: error.message,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                api_endpoint: 'GET /api/v1/accounts'
             };
         }
     }
@@ -1389,9 +1432,10 @@ class UnipileSDKService {
         try {
             console.log('🔄 Running comprehensive health check...');
             
-            // Test 1: List accounts
+            // Test 1: List accounts using official REST API
             const accounts = await this.listAccounts();
             const accountsCount = accounts.success ? accounts.data.length : 0;
+            const usingRestAPI = accounts.success && accounts.api_endpoint === 'GET /api/v1/accounts';
             
             // Test 2: Test messaging if accounts exist
             let messagingTest = { success: false, error: 'No accounts to test' };
@@ -1432,7 +1476,9 @@ class UnipileSDKService {
                 // Accounts Info
                 accounts: {
                     total: accountsCount,
-                    test_result: accounts.success
+                    test_result: accounts.success,
+                    using_rest_api: usingRestAPI,
+                    api_endpoint: 'GET /api/v1/accounts'
                 },
                 
                 // Messaging Info
@@ -1760,7 +1806,7 @@ if (require.main === module) {
                     error: `Unknown command: ${command}`,
                     available_commands: [
                         // 🔗 Account Management
-                        'list-accounts',
+                        'list-accounts',               // ✅ REST API oficial
                         'connect-linkedin',
                         'connect-instagram', 
                         'connect-messenger',
