@@ -15,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
+import 'package:meu_app/src/core/theme/adaptive_colors.dart';
 
 class CaseCard extends StatelessWidget {
   final String caseId;
@@ -303,10 +304,10 @@ class CaseCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12, 
               fontWeight: FontWeight.w500, 
-              color: _getStatusColor(status)
+              color: _getStatusColor(status, context)
             )
           ),
-          backgroundColor: _getStatusColor(status).withValues(alpha: 0.1),
+          backgroundColor: context.getBadgeBackground(_getStatusColor(status, context)),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8), 
@@ -699,19 +700,8 @@ class CaseCard extends StatelessWidget {
     });
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Em Andamento':
-        return Colors.blue;
-      case 'Concluído':
-        return Colors.green;
-      case 'Aguardando':
-        return Colors.orange;
-      case 'Cancelado':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+  Color _getStatusColor(String status, BuildContext context) {
+    return context.getStatusColor(status);
   }
 
   // Novo: Badge de tipo de caso
@@ -887,7 +877,7 @@ class CaseCard extends StatelessWidget {
           Text(
             description,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.lightText2,
+              color: context.adaptiveTextSecondaryColor,
             ),
           ),
         ],

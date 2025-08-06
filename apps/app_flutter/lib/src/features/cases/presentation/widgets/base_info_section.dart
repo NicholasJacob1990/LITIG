@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/case_detail.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 /// Classe base abstrata para todas as seções contextuais
 /// 
@@ -335,19 +336,19 @@ abstract class BaseInfoSection extends StatelessWidget {
 
   /// Obtém cor baseada no tipo de alocação
   Color getAllocationColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final allocationType = getContextualValue<String>('allocation_type');
+    final allocationType = getContextualValue<String>('allocation_type') ?? 'direct';
     
+    // Importar a extensão AdaptiveColors se ainda não foi importada
     switch (allocationType) {
       case 'internal_delegation':
-        return Colors.orange;
+        return context.isDarkTheme ? const Color(0xFFFB7185) : const Color(0xFFFF6B6B);
       case 'platform_match_direct':
-        return Colors.blue;
+        return context.isDarkTheme ? const Color(0xFF60A5FA) : const Color(0xFF3B82F6);
       case 'partnership_proactive_search':
       case 'partnership_platform_suggestion':
-        return Colors.green;
+        return context.isDarkTheme ? const Color(0xFF22C55E) : const Color(0xFF10B981);
       default:
-        return theme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 }

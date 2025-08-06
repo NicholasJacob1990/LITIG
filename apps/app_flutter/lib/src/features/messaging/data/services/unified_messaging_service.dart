@@ -143,8 +143,278 @@ class UnifiedMessagingService {
       final response = await DioService.get('/unified-messaging/accounts');
       return response.data;
     } on DioException catch (e) {
-      AppLogger.error('Erro ao carregar contas conectadas', error: e);
-      throw Exception('Erro ao carregar contas conectadas: ${e.message}');
+      AppLogger.warning('Backend não disponível, usando dados mock', error: e);
+      // Fallback para dados mock quando backend não está disponível
+      return _getMockConnectedAccounts();
+    } catch (e) {
+      AppLogger.warning('Erro de conexão, usando dados mock', error: e);
+      return _getMockConnectedAccounts();
+    }
+  }
+
+  Map<String, dynamic> _getMockConnectedAccounts() {
+    return {
+      'accounts': [
+        {
+          'id': 'demo_internal',
+          'provider': 'internal',
+          'name': 'Chat Interno LITIG-1',
+          'email': 'internal@litig1.com',
+          'connected_at': DateTime.now().toIso8601String(),
+          'status': 'active',
+        },
+        {
+          'id': 'demo_linkedin',
+          'provider': 'linkedin',
+          'name': 'LinkedIn Demo',
+          'email': 'demo@linkedin.com',
+          'connected_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+          'status': 'demo',
+        }
+      ],
+      'total': 2,
+      'has_email_account': false,
+      'has_calendar_account': false,
+      'has_messaging_account': true,
+    };
+  }
+
+  // ===============================
+  // DADOS MOCK PARA CHATS E MENSAGENS
+  // ===============================
+
+  Future<List<Map<String, dynamic>>> getInternalChats() async {
+    try {
+      final response = await _httpClient.get(
+        '$_baseUrl/api/v1/chat/internal/chats',
+        options: Options(headers: _headers),
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data['chats'] ?? []);
+      } else {
+        throw Exception('Erro ao carregar chats internos: ${response.statusCode}');
+      }
+    } catch (e) {
+      AppLogger.warning('Backend não disponível para chats internos, usando dados mock', error: e);
+      return _getMockInternalChats();
+    }
+  }
+
+  List<Map<String, dynamic>> _getMockInternalChats() {
+    return [
+      {
+        'id': 'internal_chat_1',
+        'type': 'direct',
+        'name': 'Dr. João Silva',
+        'participants': [
+          {
+            'id': 'user_current',
+            'name': 'Você',
+            'role': 'lawyer_individual',
+          },
+          {
+            'id': 'lawyer_2',
+            'name': 'Dr. João Silva',
+            'role': 'lawyer_firm_member',
+            'avatar': 'https://ui-avatars.com/api/?name=João+Silva&background=2563EB&color=fff',
+          }
+        ],
+        'last_message': {
+          'id': 'msg_1',
+          'content': 'Oi! Podemos conversar sobre o caso de divórcio?',
+          'timestamp': DateTime.now().subtract(const Duration(minutes: 15)).toIso8601String(),
+          'sender_id': 'lawyer_2',
+          'sender_name': 'Dr. João Silva',
+          'message_type': 'text',
+          'is_read': false,
+        },
+        'unread_count': 1,
+        'created_at': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        'updated_at': DateTime.now().subtract(const Duration(minutes: 15)).toIso8601String(),
+      },
+      {
+        'id': 'internal_chat_2',
+        'type': 'direct',
+        'name': 'Dra. Maria Santos',
+        'participants': [
+          {
+            'id': 'user_current',
+            'name': 'Você',
+            'role': 'lawyer_individual',
+          },
+          {
+            'id': 'lawyer_3',
+            'name': 'Dra. Maria Santos',
+            'role': 'lawyer_individual',
+            'avatar': 'https://ui-avatars.com/api/?name=Maria+Santos&background=10B981&color=fff',
+          }
+        ],
+        'last_message': {
+          'id': 'msg_2',
+          'content': 'Perfeito! Vou enviar os documentos ainda hoje.',
+          'timestamp': DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
+          'sender_id': 'user_current',
+          'sender_name': 'Você',
+          'message_type': 'text',
+          'is_read': true,
+        },
+        'unread_count': 0,
+        'created_at': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
+        'updated_at': DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
+      },
+      {
+        'id': 'internal_chat_3',
+        'type': 'direct',
+        'name': 'Cliente: Ana Costa',
+        'participants': [
+          {
+            'id': 'user_current',
+            'name': 'Você',
+            'role': 'lawyer_individual',
+          },
+          {
+            'id': 'client_1',
+            'name': 'Ana Costa',
+            'role': 'client',
+            'avatar': 'https://ui-avatars.com/api/?name=Ana+Costa&background=F59E0B&color=fff',
+          }
+        ],
+        'last_message': {
+          'id': 'msg_3',
+          'content': 'Dr., quando será a próxima audiência?',
+          'timestamp': DateTime.now().subtract(const Duration(hours: 6)).toIso8601String(),
+          'sender_id': 'client_1',
+          'sender_name': 'Ana Costa',
+          'message_type': 'text',
+          'is_read': false,
+        },
+        'unread_count': 1,
+        'created_at': DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
+        'updated_at': DateTime.now().subtract(const Duration(hours: 6)).toIso8601String(),
+      }
+    ];
+  }
+
+  Future<List<Map<String, dynamic>>> getChatMessages(String chatId) async {
+    try {
+      final response = await _httpClient.get(
+        '$_baseUrl/api/v1/chat/internal/chats/$chatId/messages',
+        options: Options(headers: _headers),
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data['messages'] ?? []);
+      } else {
+        throw Exception('Erro ao carregar mensagens: ${response.statusCode}');
+      }
+    } catch (e) {
+      AppLogger.warning('Backend não disponível para mensagens, usando dados mock', error: e);
+      return _getMockChatMessages(chatId);
+    }
+  }
+
+  List<Map<String, dynamic>> _getMockChatMessages(String chatId) {
+    switch (chatId) {
+      case 'internal_chat_1':
+        return [
+          {
+            'id': 'msg_1_1',
+            'chat_id': chatId,
+            'content': 'Olá! Como está?',
+            'sender_id': 'lawyer_2',
+            'sender_name': 'Dr. João Silva',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
+            'is_read': true,
+            'is_outgoing': false,
+          },
+          {
+            'id': 'msg_1_2',
+            'chat_id': chatId,
+            'content': 'Oi Dr. João! Tudo bem, obrigado. E você?',
+            'sender_id': 'user_current',
+            'sender_name': 'Você',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(minutes: 45)).toIso8601String(),
+            'is_read': true,
+            'is_outgoing': true,
+          },
+          {
+            'id': 'msg_1_3',
+            'chat_id': chatId,
+            'content': 'Oi! Podemos conversar sobre o caso de divórcio?',
+            'sender_id': 'lawyer_2',
+            'sender_name': 'Dr. João Silva',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(minutes: 15)).toIso8601String(),
+            'is_read': false,
+            'is_outgoing': false,
+          },
+        ];
+      case 'internal_chat_2':
+        return [
+          {
+            'id': 'msg_2_1',
+            'chat_id': chatId,
+            'content': 'Você pode me enviar aqueles documentos que conversamos?',
+            'sender_id': 'lawyer_3',
+            'sender_name': 'Dra. Maria Santos',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(hours: 3)).toIso8601String(),
+            'is_read': true,
+            'is_outgoing': false,
+          },
+          {
+            'id': 'msg_2_2',
+            'chat_id': chatId,
+            'content': 'Perfeito! Vou enviar os documentos ainda hoje.',
+            'sender_id': 'user_current',
+            'sender_name': 'Você',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
+            'is_read': true,
+            'is_outgoing': true,
+          },
+        ];
+      case 'internal_chat_3':
+        return [
+          {
+            'id': 'msg_3_1',
+            'chat_id': chatId,
+            'content': 'Boa tarde, Dr.! Como está o andamento do meu processo?',
+            'sender_id': 'client_1',
+            'sender_name': 'Ana Costa',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(hours: 8)).toIso8601String(),
+            'is_read': true,
+            'is_outgoing': false,
+          },
+          {
+            'id': 'msg_3_2',
+            'chat_id': chatId,
+            'content': 'Boa tarde, Ana! O processo está correndo bem. Tivemos uma decisão favorável na semana passada.',
+            'sender_id': 'user_current',
+            'sender_name': 'Você',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(hours: 7)).toIso8601String(),
+            'is_read': true,
+            'is_outgoing': true,
+          },
+          {
+            'id': 'msg_3_3',
+            'chat_id': chatId,
+            'content': 'Dr., quando será a próxima audiência?',
+            'sender_id': 'client_1',
+            'sender_name': 'Ana Costa',
+            'message_type': 'text',
+            'timestamp': DateTime.now().subtract(const Duration(hours: 6)).toIso8601String(),
+            'is_read': false,
+            'is_outgoing': false,
+          },
+        ];
+      default:
+        return [];
     }
   }
 

@@ -7,6 +7,8 @@ import 'package:meu_app/src/core/services/unipile_service.dart';
 import 'package:intl/intl.dart';
 import 'package:meu_app/src/features/messaging/presentation/widgets/calendar_integration_widget.dart';
 import 'dart:async';
+import '../../data/services/unified_messaging_service.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 class UnifiedMessagingScreen extends StatefulWidget {
   const UnifiedMessagingScreen({super.key});
@@ -131,16 +133,72 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
     setState(() => _isLoading = true);
     
     try {
-      // Carregar chats reais usando o serviço instanciado
-      final chatsData = await _unipileService.getAllChats();
-      _allChats = chatsData.map((chatData) => _mapChatFromUnipile(chatData)).toList();
+      // Tentar carregar chats internos primeiro
+      final UnifiedMessagingService messagingService = UnifiedMessagingService();
+      final internalChatsData = await messagingService.getInternalChats();
+      
+      // Converter dados internos para formato UnifiedChat
+      _allChats = internalChatsData.map((chatData) => _mapInternalChatToUnified(chatData)).toList();
+      
+      // Adicionar chats externos se disponíveis
+      try {
+        final externalChatsData = await _unipileService.getAllChats();
+        final externalChats = externalChatsData.map((chatData) => _mapChatFromUnipile(chatData)).toList();
+        _allChats.addAll(externalChats);
+      } catch (e) {
+        AppLogger.warning('Chats externos não disponíveis: $e');
+      }
     } catch (e) {
+      AppLogger.warning('Usando dados de fallback: $e');
       // Em caso de erro, usar dados de exemplo
       _allChats = _getFallbackChats();
     }
     
     _filterChats();
     setState(() => _isLoading = false);
+  }
+
+  UnifiedChat _mapInternalChatToUnified(Map<String, dynamic> chatData) {
+    final lastMessage = chatData['last_message'] as Map<String, dynamic>?;
+    
+    return UnifiedChat(
+      id: chatData['id'] ?? '',
+      name: chatData['name'] ?? 'Usuário desconhecido',
+      provider: 'internal',
+      avatar: chatData['participants']?.isNotEmpty == true
+          ? chatData['participants'][1]['avatar'] ?? ''
+          : '',
+      lastMessage: lastMessage != null
+          ? ChatMessage(
+              id: lastMessage['id'] ?? '',
+              senderId: lastMessage['sender_id'] ?? '',
+              senderName: lastMessage['sender_name'] ?? '',
+              content: lastMessage['content'] ?? '',
+              timestamp: DateTime.tryParse(lastMessage['timestamp'] ?? '') ?? DateTime.now(),
+              provider: 'internal',
+              isRead: lastMessage['is_read'] ?? false,
+              type: _getMessageType(lastMessage['message_type'] ?? 'text'),
+            )
+          : null,
+      unreadCount: chatData['unread_count'] ?? 0,
+      isOnline: true, // Assumir online para chats internos
+      lastActive: DateTime.now(),
+    );
+  }
+
+  MessageType _getMessageType(String type) {
+    switch (type) {
+      case 'image':
+        return MessageType.image;
+      case 'document':
+        return MessageType.document;
+      case 'audio':
+        return MessageType.audio;
+      case 'video':
+        return MessageType.video;
+      default:
+        return MessageType.text;
+    }
   }
 
   UnifiedChat _mapChatFromUnipile(Map<String, dynamic> chatData) {

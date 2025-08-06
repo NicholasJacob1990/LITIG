@@ -180,3 +180,4 @@ class CaseColors {
            (isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280));
   }
 }
+

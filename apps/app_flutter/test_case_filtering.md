@@ -76,3 +76,4 @@ _getBaseCases() + _getSpecificCasesForUserRole(userRole)
 - ✅ Dependency injection atualizado
 - ✅ Tipos de usuário diferenciados
 - 🔄 Aguardando teste manual no app
+

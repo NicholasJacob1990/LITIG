@@ -6,6 +6,7 @@ import '../../domain/entities/match_analysis.dart';
 import '../../domain/entities/lawyer_metrics.dart';
 import '../../../../shared/utils/app_colors.dart';
 import '../../../../shared/widgets/atoms/initials_avatar.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 /// Card de caso aprimorado para advogados com espelhamento completo
 /// Contraparte do CaseCard do cliente com informações simétricas
@@ -99,13 +100,14 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    _getCaseTypeIcon(),
-                    size: 16,
-                    color: _getCaseTypeColor(),
-                  ),
+              Builder(
+                builder: (context) => Row(
+                  children: [
+                    Icon(
+                      _getCaseTypeIcon(),
+                      size: 16,
+                      color: _getCaseTypeColor(context),
+                    ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -115,7 +117,8 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -128,13 +131,15 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            _buildStatusBadge(theme),
-            const SizedBox(height: 4),
-            _buildCaseTypeBadge(theme),
-          ],
+        Builder(
+          builder: (context) => Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _buildStatusBadge(theme, context),
+              const SizedBox(height: 4),
+              _buildCaseTypeBadge(theme, context),
+            ],
+          ),
         ),
       ],
     );
@@ -180,18 +185,20 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        clientInfo.name,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                Builder(
+                  builder: (context) => Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          clientInfo.name,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    _buildClientStatusBadge(theme),
-                  ],
+                      _buildClientStatusBadge(theme, context),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -550,14 +557,15 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(ThemeData theme) {
+  Widget _buildStatusBadge(ThemeData theme, BuildContext context) {
+    final statusColor = _getStatusColor(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor().withValues(alpha: 0.1),
+        color: context.getBadgeBackground(statusColor),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getStatusColor().withValues(alpha: 0.3),
+          color: statusColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -566,20 +574,20 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: _getStatusColor(),
+          color: statusColor,
         ),
       ),
     );
   }
 
-  Widget _buildCaseTypeBadge(ThemeData theme) {
+  Widget _buildCaseTypeBadge(ThemeData theme, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: _getCaseTypeColor().withValues(alpha: 0.1),
+        color: context.getBadgeBackground(_getCaseTypeColor(context)),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getCaseTypeColor().withValues(alpha: 0.3),
+          color: _getCaseTypeColor(context).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -588,29 +596,19 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: _getCaseTypeColor(),
+          color: _getCaseTypeColor(context),
         ),
       ),
     );
   }
 
-  Widget _buildClientStatusBadge(ThemeData theme) {
-    Color statusColor;
-    switch (clientInfo.status) {
-      case ClientStatus.vip:
-        statusColor = Colors.purple;
-        break;
-      case ClientStatus.problematic:
-        statusColor = Colors.orange;
-        break;
-      default:
-        statusColor = Colors.green;
-    }
+  Widget _buildClientStatusBadge(ThemeData theme, BuildContext context) {
+    final statusColor = context.getClientStatusColor(clientInfo.status.name);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: statusColor.withValues(alpha: 0.1),
+        color: context.getBadgeBackground(statusColor),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -624,20 +622,8 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor() {
-    switch (status.toLowerCase()) {
-      case 'active':
-      case 'ativo':
-        return Colors.green;
-      case 'pending':
-      case 'pendente':
-        return Colors.orange;
-      case 'blocked':
-      case 'bloqueado':
-        return Colors.red;
-      default:
-        return Colors.blue;
-    }
+  Color _getStatusColor(BuildContext context) {
+    return context.getStatusColor(status);
   }
 
   IconData _getCaseTypeIcon() {
@@ -663,27 +649,8 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     }
   }
 
-  Color _getCaseTypeColor() {
-    switch (caseType) {
-      case 'consultancy':
-        return AppColors.info;
-      case 'litigation':
-        return AppColors.error;
-      case 'contract':
-        return AppColors.success;
-      case 'compliance':
-        return AppColors.warning;
-      case 'due_diligence':
-        return AppColors.primaryBlue;
-      case 'ma':
-        return AppColors.primaryPurple;
-      case 'ip':
-        return AppColors.success;
-      case 'corporate':
-        return AppColors.secondaryYellow;
-      default:
-        return AppColors.primaryBlue;
-    }
+  Color _getCaseTypeColor(BuildContext context) {
+    return context.getCaseTypeColor(caseType);
   }
 
   String _getCaseTypeDisplayName() {

@@ -126,7 +126,7 @@ class HybridRecommendationsTabView extends StatefulWidget {
 
 class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabView> {
   String _selectedPreset = 'balanced';
-  bool _showMapView = false; // Nova variável para controlar visualização
+  bool _showMapView = false;
   
   @override
   void initState() {
@@ -145,127 +145,78 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Header com toggle de visualização
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Toggle de visualização Lista/Mapa (apenas ícones)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                Container(
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                  ),
-                  ),
-                  child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                    children: [
-                        _buildViewToggle(
-                          icon: LucideIcons.list,
-                          isSelected: !_showMapView,
-                          onTap: () => setState(() => _showMapView = false),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 32,
-                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                        ),
-                        _buildViewToggle(
-                          icon: LucideIcons.map,
-                          isSelected: _showMapView,
-                          onTap: () => setState(() => _showMapView = true),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              // Título da seção
-              Text(
-                'Tipo de Recomendação',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              
-              // Chips de seleção de preset (melhorados)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildPresetChip(
-                      'balanced', 
-                      'Recomendado', 
-                      'Equilibra experiência e custo',
-                      LucideIcons.star,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildPresetChip(
-                      'correspondent', 
-                      'Melhor Custo', 
-                      'Foca em economia',
-                      LucideIcons.dollarSign,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildPresetChip(
-                      'expert_opinion', 
-                      'Mais Experientes', 
-                      'Prioriza expertise',
-                      LucideIcons.award,
-                            ),
-                          ],
-                        ),
+    return Scaffold(
+      body: Column(
+        children: [
+          // Header com presets
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Tipo de Recomendação',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
+                ),
+                const SizedBox(height: 12),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildPresetChip('balanced', 'Recomendado', 'Equilibra experiência e custo', LucideIcons.star),
+                      const SizedBox(width: 8),
+                      _buildPresetChip('correspondent', 'Melhor Custo', 'Foca em economia', LucideIcons.dollarSign),
+                      const SizedBox(width: 8),
+                      _buildPresetChip('expert_opinion', 'Mais Experientes', 'Prioriza expertise', LucideIcons.award),
                     ],
                   ),
                 ),
-        
-        // Resultados das recomendações
-        Expanded(
-          child: BlocBuilder<SearchBloc, SearchState>(
-            builder: (context, state) {
-              if (state is SearchLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              
-              if (state is SearchError) {
-                return _buildErrorState(context, state.message);
-              }
-              
-              if (state is SearchLoaded) {
-                final lawyers = state.results.whereType<Lawyer>().toList();
-                final firms = state.results.whereType<LawFirm>().toList();
-
-                // Escolher visualização baseada no toggle
-                if (_showMapView) {
-                  return _buildMapView(lawyers, firms);
-                } else {
-                  return PartnerSearchResultList(
-                    lawyers: lawyers,
-                    firms: firms,
-                    emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
-                    onRefresh: _fetchRecommendations,
-                  );
-                }
-              }
-              
-              return _buildEmptyState(context);
-            },
+              ],
+            ),
           ),
-        ),
-      ],
+          
+          // Resultados das recomendações
+          Expanded(
+            child: BlocBuilder<SearchBloc, SearchState>(
+              builder: (context, state) {
+                if (state is SearchLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (state is SearchError) {
+                  return _buildErrorState(context, state.message);
+                }
+                
+                if (state is SearchLoaded) {
+                  final lawyers = state.results.whereType<Lawyer>().toList();
+                  final firms = state.results.whereType<LawFirm>().toList();
+
+                  // Escolher visualização baseada no toggle
+                  if (_showMapView) {
+                    return _buildMapView(lawyers, firms);
+                  } else {
+                    return PartnerSearchResultList(
+                      lawyers: lawyers,
+                      firms: firms,
+                      emptyMessage: 'Nenhuma recomendação encontrada.\nTente ajustar os filtros.',
+                      onRefresh: _fetchRecommendations,
+                    );
+                  }
+                }
+                
+                return _buildEmptyState(context);
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() => _showMapView = !_showMapView),
+        child: Icon(_showMapView ? LucideIcons.list : LucideIcons.map),
+      ),
     );
   }
 
@@ -289,12 +240,12 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
           border: Border.all(
             color: isSelected 
               ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              : Theme.of(context).colorScheme.outline.withOpacity(0.3),
             width: 1.5,
           ),
           boxShadow: isSelected ? [
             BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -330,40 +281,13 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
                   style: TextStyle(
                     fontSize: 11,
                     color: isSelected 
-                      ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8)
-                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)
+                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ),
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Widget para construir o toggle de visualização (apenas ícones)
-  Widget _buildViewToggle({
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected 
-            ? Theme.of(context).colorScheme.primary
-            : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: isSelected 
-            ? Theme.of(context).colorScheme.onPrimary
-            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -518,7 +442,7 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
           Icon(
             LucideIcons.search,
             size: 64,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -542,7 +466,7 @@ class HybridSearchTabView extends StatefulWidget {
 class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   final TextEditingController _searchController = TextEditingController();
   bool _searchingFirms = false;
-  bool _showMapView = false; // Nova variável para controlar visualização
+  bool _showMapView = false;
   
   // Novas variáveis para ferramentas de precisão
   String? _selectedLocation;
@@ -558,241 +482,157 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Header com toggle de visualização
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Toggle de visualização Lista/Mapa (apenas ícones)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildViewToggle(
-                          icon: LucideIcons.list,
-                          isSelected: !_showMapView,
-                          onTap: () => setState(() => _showMapView = false),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 32,
-                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                        ),
-                        _buildViewToggle(
-                          icon: LucideIcons.map,
-                          isSelected: _showMapView,
-                          onTap: () => setState(() => _showMapView = true),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              // Campo de busca principal
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Buscar advogados ou escritórios...',
-                  prefixIcon: const Icon(LucideIcons.search),
-                  suffixIcon: IconButton(
-                    icon: const Icon(LucideIcons.x),
-                    onPressed: () {
-                      _searchController.clear();
-                      _performSearch();
-                    },
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onChanged: (value) => _performSearch(),
-              ),
-              const SizedBox(height: 16),
-              
-              // Ferramentas de precisão
-              Row(
-                children: [
-                  // Dropdown de Foco da Busca
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _searchFocus,
-                      decoration: InputDecoration(
-                        labelText: 'Foco da Busca',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'balanced',
-                          child: Text('Equilibrado'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'correspondent',
-                          child: Text('Correspondente'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'expert_opinion',
-                          child: Text('Parecer Técnico'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _searchFocus = value!;
-                        });
+    return Scaffold(
+      body: Column(
+        children: [
+          // Header com filtros de busca
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar advogados ou escritórios...',
+                    prefixIcon: const Icon(LucideIcons.search),
+                    suffixIcon: IconButton(
+                      icon: const Icon(LucideIcons.x),
+                      onPressed: () {
+                        _searchController.clear();
                         _performSearch();
                       },
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  
-                  // Botão de Localização
-                  Expanded(
-                    flex: 1,
-                    child: OutlinedButton.icon(
-                      onPressed: _showLocationPicker,
-                      icon: Icon(
-                        _selectedLocation != null 
-                          ? LucideIcons.mapPin 
-                          : LucideIcons.plus,
-                        size: 18,
-                      ),
-                      label: Text(
-                        _selectedLocation != null 
-                          ? 'Local' 
-                          : 'Adicionar',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                        backgroundColor: _selectedLocation != null 
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : null,
-                      ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              
-              // Toggle para buscar escritórios
-              Row(
-                children: [
-                  Switch(
-                    value: _searchingFirms,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchingFirms = value;
-                      });
-                      _performSearch();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Incluir escritórios na busca',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  if (_selectedLocation != null) ...[
-                    const Spacer(),
-                    TextButton.icon(
-                      onPressed: _clearLocation,
-                      icon: const Icon(LucideIcons.x, size: 16),
-                      label: const Text('Limpar Local', style: TextStyle(fontSize: 12)),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.error,
+                  onChanged: (value) => _performSearch(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        value: _searchFocus,
+                        decoration: InputDecoration(
+                          labelText: 'Foco da Busca',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'balanced', child: Text('Equilibrado')),
+                          DropdownMenuItem(value: 'correspondent', child: Text('Correspondente')),
+                          DropdownMenuItem(value: 'expert_opinion', child: Text('Parecer Técnico')),
+                        ],
+                        onChanged: (value) {
+                          setState(() => _searchFocus = value!);
+                          _performSearch();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 1,
+                      child: OutlinedButton.icon(
+                        onPressed: _showLocationPicker,
+                        icon: Icon(_selectedLocation != null ? LucideIcons.mapPin : LucideIcons.plus, size: 18),
+                        label: Text(_selectedLocation != null ? 'Local' : 'Adicionar', style: const TextStyle(fontSize: 12)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                          backgroundColor: _selectedLocation != null ? Theme.of(context).colorScheme.primaryContainer : null,
+                        ),
                       ),
                     ),
                   ],
-                ],
-              ),
-              
-              // Indicador de localização selecionada
-              if (_selectedLocation != null) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Switch(
+                      value: _searchingFirms,
+                      onChanged: (value) {
+                        setState(() => _searchingFirms = value);
+                        _performSearch();
+                      },
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.mapPin,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Buscando próximo a: $_selectedLocation',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
+                    const SizedBox(width: 8),
+                    Text('Incluir escritórios na busca', style: Theme.of(context).textTheme.bodyMedium),
+                    if (_selectedLocation != null) ...[
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: _clearLocation,
+                        icon: const Icon(LucideIcons.x, size: 16),
+                        label: const Text('Limpar Local', style: TextStyle(fontSize: 12)),
+                        style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
                       ),
                     ],
-                  ),
+                  ],
                 ),
+                if (_selectedLocation != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(LucideIcons.mapPin, size: 16, color: Theme.of(context).colorScheme.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Buscando próximo a: $_selectedLocation',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        
-        // Resultados da busca
-        Expanded(
-          child: BlocBuilder<SearchBloc, SearchState>(
-            builder: (context, state) {
-              if (state is SearchLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              
-              if (state is SearchError) {
-                return _buildSearchError(context, state.message);
-              }
-              
-              if (state is SearchLoaded) {
-                final lawyers = state.results.whereType<Lawyer>().toList();
-                final firms = state.results.whereType<LawFirm>().toList();
-
-                // Escolher visualização baseada no toggle
-                if (_showMapView) {
-                  return _buildMapView(lawyers, firms);
-                } else {
-                  return PartnerSearchResultList(
-                    lawyers: lawyers,
-                    firms: firms,
-                    emptyMessage: 'Nenhum resultado encontrado.\nTente usar termos diferentes.',
-                    onRefresh: () => _performSearch(),
-                  );
+          
+          // Resultados da busca
+          Expanded(
+            child: BlocBuilder<SearchBloc, SearchState>(
+              builder: (context, state) {
+                if (state is SearchLoading) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-              }
-              
-              return _buildSearchEmptyState(context);
-            },
+                if (state is SearchError) {
+                  return _buildSearchError(context, state.message);
+                }
+                if (state is SearchLoaded) {
+                  final lawyers = state.results.whereType<Lawyer>().toList();
+                  final firms = state.results.whereType<LawFirm>().toList();
+                  if (_showMapView) {
+                    return _buildMapView(lawyers, firms);
+                  } else {
+                    return PartnerSearchResultList(
+                      lawyers: lawyers,
+                      firms: firms,
+                      emptyMessage: 'Nenhum resultado encontrado.\nTente usar termos diferentes.',
+                      onRefresh: _performSearch,
+                    );
+                  }
+                }
+                return _buildSearchEmptyState(context);
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() => _showMapView = !_showMapView),
+        child: Icon(_showMapView ? LucideIcons.list : LucideIcons.map),
+      ),
     );
   }
 
@@ -831,7 +671,6 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
   void _performSearch() {
     final query = _searchController.text.trim();
     
-    // Se há query ou localização, faz a busca usando o SearchBloc
     if (query.isNotEmpty || _selectedLocation != null) {
       final params = SearchParams(
         query: query.isNotEmpty ? query : null,
@@ -840,7 +679,6 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
         longitude: _selectedLongitude,
         includeFirms: _searchingFirms,
       );
-      
       context.read<SearchBloc>().add(SearchRequested(params));
     }
   }
@@ -856,16 +694,9 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: 16),
-          Text(
-            'Erro na busca',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('Erro na busca', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _performSearch,
@@ -885,13 +716,10 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
           Icon(
             LucideIcons.search,
             size: 64,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Digite para buscar',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text('Digite para buscar', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
             'Encontre advogados e escritórios\nque atendam suas necessidades',
@@ -899,33 +727,6 @@ class _HybridSearchTabViewState extends State<HybridSearchTabView> {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-
-  // Widget para construir o toggle de visualização (apenas ícones)
-  Widget _buildViewToggle({
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected 
-            ? Theme.of(context).colorScheme.primary
-            : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: isSelected 
-            ? Theme.of(context).colorScheme.onPrimary
-            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-        ),
       ),
     );
   }
