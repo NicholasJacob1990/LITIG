@@ -81,11 +81,13 @@ class PartnerSearchResultList extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundImage: NetworkImage(lawyer.avatarUrl),
+                  backgroundImage: lawyer.avatarUrl.isNotEmpty
+                      ? NetworkImage(lawyer.avatarUrl)
+                      : null,
                   onBackgroundImageError: (_, __) {},
-                  child: lawyer.avatarUrl.isEmpty 
-                    ? const Icon(LucideIcons.user) 
-                    : null,
+                  child: lawyer.avatarUrl.isEmpty
+                      ? const Icon(LucideIcons.user)
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

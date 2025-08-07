@@ -95,9 +95,11 @@ class MainTabsShell extends StatelessWidget {
 
   /// Nova lógica baseada em permissões
   List<NavigationTab> _getNavItemsForPermissions(List<String> userPermissions, String userRole) {
-    // TEMPORÁRIO: Ignorar sistema de permissões e usar fallback direto
-    // para resolver erro de BottomNavigationBar
-    print('DEBUG - Usando fallback direto para userRole: $userRole');
+    // Usar sistema baseado em permissões com ordem por perfil
+    final tabs = getVisibleTabsForUser(userPermissions: userPermissions, userRole: userRole);
+    if (tabs.isNotEmpty) return tabs;
+    // Fallback em último caso
+    print('DEBUG - Permissions returned empty. Falling back to role defaults for $userRole');
     return _getFallbackTabsForRole(userRole);
   }
   
@@ -154,8 +156,8 @@ class MainTabsShell extends StatelessWidget {
         ];
         
       case 'lawyer_individual':
-      case 'lawyer_office':
-      case 'lawyer_platform_associate':
+      case 'firm':
+      case 'super_associate':
         return [
           const NavigationTab(
             label: 'Início',
@@ -208,8 +210,8 @@ class MainTabsShell extends StatelessWidget {
           ),
         ];
         
-              case 'client_pf': // Cliente Pessoa Física
-        case 'PF': // LEGACY: Fallback para compatibilidade
+      case 'client_pf': // Cliente Pessoa Física
+      case 'PF': // LEGACY: Fallback para compatibilidade
       default:
         return [
           const NavigationTab(

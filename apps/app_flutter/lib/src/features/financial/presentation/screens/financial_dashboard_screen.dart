@@ -74,6 +74,24 @@ class _FinancialDashboardScreenState extends State<FinancialDashboardScreen> {
                     ),
                   );
                 }
+                if (state is PaymentMarkedReceived) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pagamento marcado como recebido'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  context.read<FinancialBloc>().add(LoadFinancialData(period: _selectedPeriod));
+                }
+                if (state is PaymentRepassRequested) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Repasse solicitado com sucesso'),
+                      backgroundColor: Colors.teal,
+                    ),
+                  );
+                  context.read<FinancialBloc>().add(LoadFinancialData(period: _selectedPeriod));
+                }
               },
               builder: (context, state) {
                 if (state is FinancialLoading) {
