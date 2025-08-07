@@ -259,8 +259,8 @@ class ProfitabilitySection extends BaseInfoSection {
       },
     ];
 
-    final totalEstimated = costs.fold<double>(0, (sum, cost) => sum + cost['estimated_amount']);
-    final totalActual = costs.fold<double>(0, (sum, cost) => sum + cost['actual_amount']);
+    final totalEstimated = costs.fold<double>(0, (double sum, cost) => sum + (cost['estimated_amount'] as num));
+    final totalActual = costs.fold<double>(0, (double sum, cost) => sum + (cost['actual_amount'] as num));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

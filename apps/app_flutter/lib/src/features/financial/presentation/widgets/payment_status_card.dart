@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../presentation/bloc/financial_bloc.dart';
+import '../../presentation/bloc/financial_event.dart';
 import '../../domain/entities/financial_data.dart';
 
 class PaymentStatusCard extends StatelessWidget {
@@ -116,6 +119,27 @@ class PaymentStatusCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+              const SizedBox(height: 8),
+              if (payment.status.toLowerCase() == 'pending')
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: 'Marcar como recebido',
+                      icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+                      onPressed: () {
+                        context.read<FinancialBloc>().add(MarkPaymentReceived(paymentId: payment.id));
+                      },
+                    ),
+                    IconButton(
+                      tooltip: 'Solicitar repasse',
+                      icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.teal),
+                      onPressed: () {
+                        context.read<FinancialBloc>().add(RequestPaymentRepass(paymentId: payment.id));
+                      },
+                    ),
+                  ],
+                ),
             ],
           ),
         ],

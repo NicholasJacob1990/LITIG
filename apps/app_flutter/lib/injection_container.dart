@@ -48,6 +48,12 @@ import 'package:meu_app/src/features/messaging/presentation/bloc/unified_messagi
 // VIP
 import 'src/features/vip/presentation/bloc/vip_status_bloc.dart';
 
+// Services
+import 'package:meu_app/src/features/services/data/repositories/services_repository_impl.dart';
+import 'package:meu_app/src/features/services/domain/repositories/services_repository.dart';
+import 'package:meu_app/src/features/services/domain/usecases/services_usecases.dart';
+import 'package:meu_app/src/features/services/presentation/bloc/services_bloc.dart';
+
 // Documents
 import 'package:meu_app/src/features/cases/data/datasources/documents_remote_data_source.dart';
 import 'package:meu_app/src/features/cases/data/repositories/documents_repository_impl.dart';
@@ -55,6 +61,8 @@ import 'package:meu_app/src/features/cases/domain/repositories/documents_reposit
 import 'package:meu_app/src/features/cases/domain/usecases/get_case_documents_usecase.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/upload_document_usecase.dart';
 import 'package:meu_app/src/features/cases/domain/usecases/delete_document_usecase.dart';
+import 'package:meu_app/src/features/cases/domain/services/case_notification_service.dart';
+import 'package:meu_app/src/features/cases/data/datasources/case_notification_remote_data_source.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/case_documents_bloc.dart';
 
 import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_bloc.dart';
@@ -119,6 +127,8 @@ import 'package:meu_app/src/features/partnerships/data/datasources/partnership_r
 import 'package:meu_app/src/features/partnerships/data/repositories/partnership_repository_impl.dart';
 import 'package:meu_app/src/features/partnerships/domain/repositories/partnership_repository.dart';
 import 'package:meu_app/src/features/partnerships/domain/usecases/get_partnerships.dart';
+import 'package:meu_app/src/features/partnerships/domain/usecases/accept_partnership.dart';
+import 'package:meu_app/src/features/partnerships/domain/usecases/reject_partnership.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_bloc.dart';
 
@@ -416,8 +426,14 @@ Future<void> configureDependencies() async {
           ));
   // Use Cases
   getIt.registerLazySingleton(() => GetPartnerships(getIt()));
+  getIt.registerLazySingleton(() => AcceptPartnership(getIt()));
+  getIt.registerLazySingleton(() => RejectPartnership(getIt()));
   // Blocs
-  getIt.registerFactory(() => PartnershipsBloc(getPartnerships: getIt()));
+  getIt.registerFactory(() => PartnershipsBloc(
+    getPartnerships: getIt(),
+    acceptPartnership: getIt(),
+    rejectPartnership: getIt(),
+  ));
   getIt.registerFactory(() => HybridPartnershipsBloc(
     getPartnerships: getIt(),
   ));
@@ -472,6 +488,13 @@ Future<void> configureDependencies() async {
   
   // Bloc
   getIt.registerFactory(() => NotificationBloc(repository: getIt()));
+  
+  // Services
+  getIt.registerLazySingleton(() => CaseNotificationRemoteDataSource(
+    httpClient: getIt(),
+    baseUrl: 'http://localhost:8000', // TODO: Mover para configuração
+  ));
+  getIt.registerLazySingleton(() => CaseNotificationService(getIt(), getIt()));
 
   // SLA Management System - TEMPORARIAMENTE COMENTADO PARA COMPILAÇÃO
   
@@ -805,4 +828,16 @@ Future<void> configureDependencies() async {
   // 💡 ADICIONADOS: Registro dos novos BLoCs para as abas do modal
   getIt.registerFactory(() => AllClustersBloc(repository: getIt()));
   getIt.registerFactory(() => PartnershipRecommendationsBloc(repository: getIt()));
+
+  // Services System
+  // Repositories
+  getIt.registerLazySingleton<ServicesRepository>(
+    () => ServicesRepositoryImpl(),
+  );
+
+  // Use Cases
+  getIt.registerLazySingleton(() => ServicesUseCases(getIt()));
+
+  // BLoCs
+  getIt.registerFactory(() => ServicesBloc(servicesUseCases: getIt()));
 }

@@ -47,6 +47,7 @@ from routes.enriched_firms import router as enriched_firms_router
 from routes.data_quality_dashboard import router as data_quality_router
 from routes.admin_economy_dashboard_simple import router as admin_economy_router
 from routes.academic_profiles import router as academic_profiles_router
+from routes.case_notifications import router as case_notifications_router
 from middleware.auto_context_middleware import AutoContextMiddleware
 from services.cache_service_simple import close_simple_cache, init_simple_cache
 from services.redis_service import redis_service
@@ -216,6 +217,7 @@ app.include_router(users_router, prefix="/api", tags=["Users"])
 app.include_router(auto_context_router, prefix="/api", tags=["Auto Context"])
 app.include_router(admin_economy_router, prefix="/api", tags=["Admin Economy Dashboard"])
 app.include_router(academic_profiles_router, prefix="/api", tags=["Academic Profiles"])
+app.include_router(case_notifications_router, prefix="/api", tags=["Case Notifications"])
 app.include_router(instagram.router)
 app.include_router(facebook.router)
 app.include_router(outlook.router)

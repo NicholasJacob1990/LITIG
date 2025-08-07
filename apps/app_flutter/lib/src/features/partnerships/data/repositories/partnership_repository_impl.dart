@@ -6,6 +6,7 @@ import 'package:meu_app/src/core/network/network_info.dart';
 import 'package:meu_app/src/features/partnerships/data/datasources/partnership_remote_data_source.dart';
 import 'package:meu_app/src/features/partnerships/domain/entities/partnership.dart';
 import 'package:meu_app/src/features/partnerships/domain/repositories/partnership_repository.dart';
+import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 
 class PartnershipRepositoryImpl implements PartnershipRepository {
   final PartnershipRemoteDataSource remoteDataSource;
@@ -261,5 +262,134 @@ class PartnershipRepositoryImpl implements PartnershipRepository {
         'generated_at': DateTime.now().toIso8601String(),
       },
     };
+  }
+  
+  @override
+  Future<Result<void>> acceptPartnership(String partnershipId) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl/partnerships/$partnershipId/accept'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer TOKEN', // TODO: Get from auth service
+          },
+        );
+        
+        if (response.statusCode == 200) {
+          return Result.success(null);
+        } else {
+          return Result.genericFailure(
+            'Erro ao aceitar parceria',
+            'ACCEPT_FAILED',
+          );
+        }
+      } catch (e) {
+        return Result.genericFailure(
+          'Erro ao aceitar parceria: ${e.toString()}',
+          'ACCEPT_ERROR',
+        );
+      }
+    } else {
+      return Result.connectionFailure(
+        'Sem conexão com a internet',
+        'NO_CONNECTION',
+      );
+    }
+  }
+  
+  @override
+  Future<Result<void>> rejectPartnership(String partnershipId) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final response = await http.post(
+          Uri.parse('$_baseUrl/partnerships/$partnershipId/reject'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer TOKEN', // TODO: Get from auth service
+          },
+        );
+        
+        if (response.statusCode == 200) {
+          return Result.success(null);
+        } else {
+          return Result.genericFailure(
+            'Erro ao rejeitar parceria',
+            'REJECT_FAILED',
+          );
+        }
+      } catch (e) {
+        return Result.genericFailure(
+          'Erro ao rejeitar parceria: ${e.toString()}',
+          'REJECT_ERROR',
+        );
+      }
+    } else {
+      return Result.connectionFailure(
+        'Sem conexão com a internet',
+        'NO_CONNECTION',
+      );
+    }
+  }
+  
+  @override
+  Future<Result<Partnership>> updatePartnershipStatus(String partnershipId, String status) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final response = await http.put(
+          Uri.parse('$_baseUrl/partnerships/$partnershipId/status'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer TOKEN', // TODO: Get from auth service
+          },
+          body: jsonEncode({'status': status}),
+        );
+        
+        if (response.statusCode == 200) {
+          // TODO: Create proper Partnership from JSON with real partner data
+          // For now, create a mock partnership with minimal data
+          const mockLawyer = Lawyer(
+            id: 'mock_lawyer_id',
+            name: 'Mock Partner',
+            avatarUrl: '',
+            oab: '123456/SP',
+            expertiseAreas: ['Direito Civil'],
+            rating: 4.5,
+            isAvailable: true,
+            plan: 'PRO',
+          );
+          
+          final partnership = Partnership(
+            id: partnershipId,
+            title: 'Parceria Atualizada',
+            type: PartnershipType.correspondent,
+            status: PartnershipStatus.values.firstWhere(
+              (s) => s.toString().split('.').last == status,
+              orElse: () => PartnershipStatus.pending,
+            ),
+            createdAt: DateTime.now(),
+            partner: mockLawyer,
+            partnerType: PartnerEntityType.lawyer,
+          );
+          
+          return Result.success(partnership);
+        } else {
+          return Result.genericFailure(
+            'Erro ao atualizar status da parceria',
+            'UPDATE_FAILED',
+          );
+        }
+      } catch (e) {
+        return Result.genericFailure(
+          'Erro ao atualizar parceria: ${e.toString()}',
+          'UPDATE_ERROR',
+        );
+      }
+    } else {
+      return Result.connectionFailure(
+        'Sem conexão com a internet',
+        'NO_CONNECTION',
+      );
+    }
   }
 } 

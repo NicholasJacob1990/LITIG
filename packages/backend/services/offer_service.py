@@ -112,8 +112,26 @@ async def create_offer_from_match(case_id: str, lawyer_id: str, choice_order: in
             offer_id = response.data[0]["id"]
             logger.info(f"Oferta criada com sucesso: {offer_id} para caso {case_id}")
             
-            # TODO: Enviar notificação para o advogado
-            # await NotificationService.send_new_offer_notification(lawyer_id, offer_id)
+            # Enviar notificação para o advogado sobre nova oferta
+            try:
+                from services.notify_service import send_notifications_to_lawyers
+                
+                notification_payload = {
+                    "title": "📋 Nova Oferta de Caso",
+                    "body": f"Você recebeu uma nova oferta na área de {offer_details.get('legal_area', 'Direito')}",
+                    "data": {
+                        "type": "new_offer",
+                        "offer_id": offer_id,
+                        "case_id": case_id,
+                        "action": "view_offer"
+                    }
+                }
+                
+                await send_notifications_to_lawyers([lawyer_id], notification_payload)
+                logger.info(f"Notificação de nova oferta enviada para advogado {lawyer_id}")
+                
+            except Exception as e:
+                logger.error(f"Erro ao enviar notificação de nova oferta: {e}")
             
             return offer_id
         else:
@@ -180,8 +198,36 @@ async def accept_offer(offer_id: UUID, lawyer_id: str, notes: Optional[str] = No
                 # TODO: Ativar o caso
                 # await CaseService.activate_case(result["case_id"], lawyer_id)
                 
-                # TODO: Notificar cliente
-                # await NotificationService.notify_client_lawyer_assigned(result["case_id"], lawyer_id)
+                # Notificar cliente sobre aceitação do caso
+                try:
+                    # Buscar dados do caso e cliente
+                    case_response = supabase.table("cases").select("client_id, case_number, title").eq("id", result["case_id"]).single().execute()
+                    
+                    if case_response.data:
+                        client_id = case_response.data["client_id"]
+                        case_title = case_response.data.get("title", "Seu caso")
+                        
+                        # Buscar nome do advogado
+                        lawyer_response = supabase.table("lawyers").select("name").eq("id", lawyer_id).single().execute()
+                        lawyer_name = lawyer_response.data.get("name", "Advogado") if lawyer_response.data else "Advogado"
+                        
+                        notification_payload = {
+                            "title": "🎉 Caso Aceito!",
+                            "body": f"O advogado {lawyer_name} aceitou seu caso '{case_title}'. O contrato será enviado em breve.",
+                            "data": {
+                                "type": "offer_accepted",
+                                "case_id": result["case_id"],
+                                "lawyer_id": lawyer_id,
+                                "action": "view_case"
+                            }
+                        }
+                        
+                        from services.notify_service import send_notification_to_client
+                        await send_notification_to_client(client_id, "offer_accepted", notification_payload)
+                        logger.info(f"Notificação de aceitação enviada para cliente {client_id}")
+                        
+                except Exception as e:
+                    logger.error(f"Erro ao enviar notificação de aceitação para cliente: {e}")
                 
                 return {
                     "success": True,

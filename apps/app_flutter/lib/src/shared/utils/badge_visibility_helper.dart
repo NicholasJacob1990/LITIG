@@ -12,7 +12,7 @@ class BadgeVisibilityHelper {
     'lawyer_firm_member',  // Atualizado de lawyer_associated
     'lawyer_individual',   // Autônomo
     'firm',               // Atualizado de lawyer_office
-    'super_associate',    // Atualizado de lawyer_platform_associate
+    'lawyer_platform_associate',    // Super Associado
   ];
 
   /// Tipos de usuário cliente
@@ -69,7 +69,7 @@ class BadgeVisibilityHelper {
 
   /// Verifica se o usuário é escritório
   static bool isLawOffice(String? role) {
-    return role == 'lawyer_office';
+    return role == 'firm';
   }
 
   /// Verifica se o usuário é super associado

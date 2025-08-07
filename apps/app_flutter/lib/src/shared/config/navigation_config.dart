@@ -88,7 +88,7 @@ final Map<String, NavigationTab> allPossibleTabs = {
     icon: LucideIcons.calendar,
     branchIndex: 2,
     requiredPermission: 'nav.view.agenda',
-    route: '/agenda',
+    route: '/schedule',
   ),
   'offers': const NavigationTab(
     label: 'Ofertas',
@@ -185,28 +185,28 @@ const Map<String, List<String>> tabOrderByProfile = {
   ],
   'lawyer_individual': [
     'home',
+    'contractor_cases',
     'contractor_offers',
     'partners',
     'partnerships',
-    'contractor_cases',
     'contractor_messages',
     'contractor_profile',
   ],
-  'lawyer_office': [
+  'firm': [
     'home',
+    'contractor_cases',
     'contractor_offers',
     'partners',
     'partnerships',
-    'contractor_cases',
     'contractor_messages',
     'contractor_profile',
   ],
-  'lawyer_platform_associate': [
+  'super_associate': [
     'home',
+    'contractor_cases',
     'contractor_offers',
     'partners',
     // 'partnerships', // REMOVIDO: Super Associados não fazem parcerias
-    'contractor_cases',
     'contractor_messages',
     'contractor_profile',
   ],
@@ -267,8 +267,8 @@ String getInitialRouteForUser(String userRole) {
     case 'lawyer_firm_member':  // Atualizado de lawyer_associated
       return '/dashboard';
     case 'lawyer_individual':
-    case 'lawyer_office':
-    case 'lawyer_platform_associate':
+    case 'firm':
+    case 'super_associate':
       return '/home';
     default: // cliente
       return '/client-home';

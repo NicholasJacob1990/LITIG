@@ -12,10 +12,16 @@ import 'package:meu_app/injection_container.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 import 'package:meu_app/src/shared/widgets/instrumented_widgets.dart';
+import '../widgets/case_search_dialog.dart';
 
-class CasesScreen extends StatelessWidget {
+class CasesScreen extends StatefulWidget {
   const CasesScreen({super.key});
 
+  @override
+  State<CasesScreen> createState() => _CasesScreenState();
+}
+
+class _CasesScreenState extends State<CasesScreen> {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -31,6 +37,23 @@ class CasesScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Meus Casos'),
           centerTitle: true,
+          actions: [
+            BlocBuilder<CasesBloc, CasesState>(
+              builder: (context, state) {
+                return IconButton(
+                  onPressed: () => _showSearchDialog(context),
+                  icon: Icon(
+                    state is CasesLoaded && state.isSearchMode
+                        ? LucideIcons.searchX
+                        : LucideIcons.search,
+                  ),
+                  tooltip: state is CasesLoaded && state.isSearchMode
+                      ? 'Limpar busca'
+                      : 'Buscar casos',
+                );
+              },
+            ),
+          ],
         ),
         floatingActionButton: BlocBuilder<AuthBloc, auth_states.AuthState>(
           builder: (context, authState) {
@@ -82,6 +105,7 @@ class CasesScreen extends StatelessWidget {
         body: Column(
           children: [
             _buildFilterSection(),
+            _buildSearchHeader(),
             Expanded(
               child: BlocBuilder<CasesBloc, CasesState>(
                 builder: (context, state) {
@@ -216,8 +240,8 @@ class CasesScreen extends StatelessWidget {
     return role != null && (
       role == 'lawyer_firm_member' ||     // Advogado associado da firma
       role == 'lawyer_individual' ||      // Advogado autônomo
-      role == 'lawyer_office' ||          // Escritório
-      role == 'lawyer_platform_associate' // Super associado da plataforma
+      role == 'firm' ||                   // Escritório
+      role == 'super_associate'           // Super associado da plataforma
     );
   }
 
@@ -228,8 +252,8 @@ class CasesScreen extends StatelessWidget {
     
     switch (role) {
       case 'lawyer_firm_member':          // Advogado associado da firma
-      case 'lawyer_office':               // Escritório
-      case 'lawyer_platform_associate':   // Super associado da plataforma
+      case 'firm':                        // Escritório
+      case 'super_associate':             // Super associado da plataforma
         return true; // Podem criar casos
       case 'lawyer_individual':
         return false; // Advogados autônomos NÃO podem criar casos
@@ -367,5 +391,136 @@ class CasesScreen extends StatelessWidget {
     }
   }
 
+  Widget _buildSearchHeader() {
+    return BlocBuilder<CasesBloc, CasesState>(
+      builder: (context, state) {
+        if (state is CasesLoaded && state.isSearchMode) {
+          return Container(
+            margin: const EdgeInsets.all(16),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.search,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Resultados da Busca',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton.icon(
+                          onPressed: () => _showSearchDialog(context),
+                          icon: const Icon(LucideIcons.edit),
+                          label: const Text('Editar'),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => context.read<CasesBloc>().add(ClearCaseSearch()),
+                          icon: const Icon(LucideIcons.x),
+                          label: const Text('Limpar'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${state.filteredCases.length} caso${state.filteredCases.length != 1 ? 's' : ''} encontrado${state.filteredCases.length != 1 ? 's' : ''}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    if (state.searchFilters?.hasActiveFilters == true) ...[
+                      const SizedBox(height: 12),
+                      _buildActiveFilters(state.searchFilters!),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
 
+  Widget _buildActiveFilters(CaseSearchFilters filters) {
+    final activeFilters = <String>[];
+    
+    if (filters.searchQuery != null) {
+      activeFilters.add('Busca: "${filters.searchQuery}"');
+    }
+    if (filters.status != null) {
+      activeFilters.add('Status: ${filters.status}');
+    }
+    if (filters.category != null) {
+      activeFilters.add('Categoria: ${filters.category}');
+    }
+    if (filters.priority != null) {
+      activeFilters.add('Prioridade: ${filters.priority}');
+    }
+    if (filters.clientName != null) {
+      activeFilters.add('Cliente: ${filters.clientName}');
+    }
+    if (filters.lawyerName != null) {
+      activeFilters.add('Advogado: ${filters.lawyerName}');
+    }
+    if (filters.dateFrom != null || filters.dateTo != null) {
+      String dateFilter = 'Data: ';
+      if (filters.dateFrom != null) {
+        dateFilter += 'de ${_formatDate(filters.dateFrom!)} ';
+      }
+      if (filters.dateTo != null) {
+        dateFilter += 'até ${_formatDate(filters.dateTo!)}';
+      }
+      activeFilters.add(dateFilter.trim());
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: activeFilters.map((filter) => 
+        Chip(
+          label: Text(filter),
+          deleteIcon: const Icon(LucideIcons.x, size: 14),
+        )
+      ).toList(),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  void _showSearchDialog(BuildContext context) {
+    final state = context.read<CasesBloc>().state;
+    CaseSearchFilters? currentFilters;
+    
+    if (state is CasesLoaded && state.isSearchMode) {
+      // Se já está em modo de busca, limpar a busca
+      context.read<CasesBloc>().add(ClearCaseSearch());
+      return;
+    }
+    
+    if (state is CasesLoaded) {
+      currentFilters = state.searchFilters;
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => CaseSearchDialog(
+        initialFilters: currentFilters,
+        onSearch: (filters) {
+          context.read<CasesBloc>().add(SearchCases(filters));
+        },
+      ),
+    );
+  }
 }

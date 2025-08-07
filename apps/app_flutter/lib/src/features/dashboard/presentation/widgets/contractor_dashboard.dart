@@ -46,30 +46,57 @@ class ContractorDashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Título do Dashboard
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withOpacity(0.2),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    LucideIcons.briefcase,
+                    size: 32,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'CONTRACTOR DASHBOARD',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Painel de Captação de Clientes e Gestão de Oportunidades',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            
             // Métricas de captação
             _buildCaptationMetrics(context),
             const SizedBox(height: 24),
             
-            // Oportunidades de negócio
             _buildBusinessOpportunities(context),
             const SizedBox(height: 24),
             
-            // Parcerias ativas
-            _buildActivePartnerships(context),
+            _buildClusterInsights(context),
             const SizedBox(height: 24),
             
-            // Insights de cluster e oportunidades de parceria
-            const ExpandableClustersWidget(),
-            const SizedBox(height: 24),
-            
-            // Pipeline de clientes
-            _buildClientPipeline(context),
-            const SizedBox(height: 24),
-            
-            // Ações rápidas de captação
-            Text('Captação & Negócios', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
-            _buildCaptationActions(context),
+            _buildQuickActions(context),
           ],
         ),
       ),
@@ -77,311 +104,89 @@ class ContractorDashboard extends StatelessWidget {
   }
 
   Widget _buildCaptationMetrics(BuildContext context) {
-    // TODO: Implementar chamada real da API baseada no tipo de advogado
     final metrics = _getMetricsForRole(userRole);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Suas Métricas de Captação', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: 'Clientes Ativos',
-                value: '${metrics['activeClients']}',
-                icon: LucideIcons.users,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Novos Leads',
-                value: '${metrics['newLeads']}',
-                icon: LucideIcons.userPlus,
-                color: Colors.green.shade400,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: 'Faturamento',
-                value: 'R\$ ${_formatCurrency(metrics['monthlyRevenue']!)}',
-                icon: LucideIcons.dollarSign,
-                color: Colors.orange.shade400,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                title: 'Taxa Conversão',
-                value: '${metrics['conversionRate']}%',
-                icon: LucideIcons.trendingUp,
-                color: Colors.purple.shade400,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBusinessOpportunities(BuildContext context) {
-    // TODO: Implementar chamada real da API
-    final opportunities = [
-      {
-        'id': 'opp-1',
-        'client': 'Empresa ABC Ltda',
-        'type': 'Direito Empresarial',
-        'value': 45000.0,
-        'probability': 85,
-        'stage': 'Proposta Enviada',
-        'daysInStage': 3
-      },
-      {
-        'id': 'opp-2',
-        'client': 'João da Silva',
-        'type': 'Direito Civil',
-        'value': 12000.0,
-        'probability': 60,
-        'stage': 'Negociação',
-        'daysInStage': 7
-      },
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Oportunidades de Negócio', style: Theme.of(context).textTheme.titleLarge),
-            TextButton(
-              onPressed: () => context.go('/opportunities'),
-              child: const Text('Ver todas'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...opportunities.map((opp) => _buildOpportunityCard(context, opp)),
-      ],
-    );
-  }
-
-  Widget _buildOpportunityCard(BuildContext context, Map<String, dynamic> opportunity) {
-    Color probabilityColor = opportunity['probability'] >= 80 
-        ? Colors.green 
-        : opportunity['probability'] >= 60 
-            ? Colors.orange 
-            : Colors.red;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => context.go('/opportunity/${opportunity['id']}'),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return _buildDashboardSection(
+      context,
+      title: 'Métricas de Captação',
+      icon: LucideIcons.trendingUp,
+      child: Column(
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      opportunity['client'],
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: probabilityColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: probabilityColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      '${opportunity['probability']}%',
-                      style: TextStyle(
-                        color: probabilityColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(LucideIcons.briefcase, size: 16, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 4),
-                  Text(
-                    opportunity['type'],
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(LucideIcons.dollarSign, size: 16, color: Colors.green),
-                  const SizedBox(width: 4),
-                  Text(
-                    'R\$ ${_formatCurrency(opportunity['value'])}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(LucideIcons.clock, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${opportunity['stage']} • ${opportunity['daysInStage']} dias',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActivePartnerships(BuildContext context) {
-    // TODO: Implementar chamada real da API
-    final partnerships = [
-      {
-        'id': 'partner-1',
-        'name': 'Dr. Carlos Silva',
-        'specialization': 'Direito Trabalhista',
-        'activeCases': 3,
-        'monthlyRevenue': 15000.0,
-        'rating': 4.8,
-        'status': 'active'
-      },
-      {
-        'id': 'partner-2',
-        'name': 'Silva & Associados',
-        'specialization': 'Direito Tributário',
-        'activeCases': 2,
-        'monthlyRevenue': 22000.0,
-        'rating': 4.9,
-        'status': 'active'
-      },
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Parcerias Ativas', style: Theme.of(context).textTheme.titleLarge),
-            TextButton(
-              onPressed: () => context.go('/partnerships'),
-              child: const Text('Gerenciar'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...partnerships.map((partner) => _buildPartnershipCard(context, partner)),
-      ],
-    );
-  }
-
-  Widget _buildPartnershipCard(BuildContext context, Map<String, dynamic> partner) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => context.go('/partnership/${partner['id']}'),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                child: Text(
-                  partner['name'].toString().substring(0, 2).toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+              Expanded(
+                child: StatCard(
+                  title: 'Clientes Ativos',
+                  value: '${metrics['activeClients']}',
+                  icon: LucideIcons.users,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      partner['name'],
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      partner['specialization'],
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(LucideIcons.star, size: 14, color: Colors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${partner['rating']}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '${partner['activeCases']} casos',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ],
+                child: StatCard(
+                  title: 'Oportunidades',
+                  value: '${metrics['newLeads']}',
+                  icon: LucideIcons.userPlus,
+                  color: Colors.green.shade400,
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'R\$ ${_formatCurrency(partner['monthlyRevenue'])}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                  Text(
-                    'este mês',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.green,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          StatCard(
+            title: 'Parcerias Ativas',
+            value: '${metrics['activePartnerships']}',
+            icon: LucideIcons.briefcase,
+            color: Colors.orange.shade400,
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildBusinessOpportunities(BuildContext context) {
+    return _buildDashboardSection(
+      context,
+      title: 'Oportunidades de Negócio',
+      icon: LucideIcons.dollarSign,
+      child: Column(
+        children: [
+          _buildClientPipeline(context),
+          const SizedBox(height: 16),
+          _buildCaptationActions(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClusterInsights(BuildContext context) {
+    return _buildDashboardSection(
+      context,
+      title: 'Insights de Cluster',
+      icon: LucideIcons.brainCircuit,
+      child: const ExpandableClustersWidget(),
+    );
+  }
+
+  Widget _buildDashboardSection(BuildContext context, {required String title, required IconData icon, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 8),
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+          ],
+        ),
+        const SizedBox(height: 16),
+        child,
+      ],
+    );
+  }
+
   Widget _buildClientPipeline(BuildContext context) {
-    // TODO: Implementar chamada real da API
     final pipelineData = {
       'prospects': 12,
       'qualified': 8,
@@ -390,32 +195,28 @@ class ContractorDashboard extends StatelessWidget {
       'closed': 2
     };
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Pipeline de Clientes', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              _buildPipelineStage(context, 'Prospects', pipelineData['prospects']!, Colors.blue),
-              const SizedBox(height: 8),
-              _buildPipelineStage(context, 'Qualificados', pipelineData['qualified']!, Colors.cyan),
-              const SizedBox(height: 8),
-              _buildPipelineStage(context, 'Proposta', pipelineData['proposal']!, Colors.orange),
-              const SizedBox(height: 8),
-              _buildPipelineStage(context, 'Negociação', pipelineData['negotiation']!, Colors.purple),
-              const SizedBox(height: 8),
-              _buildPipelineStage(context, 'Fechados', pipelineData['closed']!, Colors.green),
-            ],
-          ),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Pipeline de Clientes', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 16),
+          _buildPipelineStage(context, 'Prospects', pipelineData['prospects']!, Colors.blue),
+          const SizedBox(height: 8),
+          _buildPipelineStage(context, 'Qualificados', pipelineData['qualified']!, Colors.cyan),
+          const SizedBox(height: 8),
+          _buildPipelineStage(context, 'Proposta', pipelineData['proposal']!, Colors.orange),
+          const SizedBox(height: 8),
+          _buildPipelineStage(context, 'Negociação', pipelineData['negotiation']!, Colors.purple),
+          const SizedBox(height: 8),
+          _buildPipelineStage(context, 'Fechados', pipelineData['closed']!, Colors.green),
+        ],
+      ),
     );
   }
 
@@ -449,35 +250,45 @@ class ContractorDashboard extends StatelessWidget {
   }
 
   Widget _buildCaptationActions(BuildContext context) {
+    return _buildActionCard(
+      context,
+      'Ações de Captação',
+      LucideIcons.users,
+      '/opportunities',
+      Colors.blue,
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
     final actions = userRole == 'super_associate' 
         ? _getSuperAssociateActions() 
         : _getIndividualLawyerActions();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = (constraints.maxWidth / 200).floor().clamp(2, 4);
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.5,
-          ),
-          itemCount: actions.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return _buildActionCard(
-              context,
-              action['title']!,
-              action['icon'] as IconData,
-              action['route']!,
-              action['color'] as Color,
-            );
-          },
-        );
-      },
+    return _buildDashboardSection(
+      context,
+      title: 'Ações Rápidas',
+      icon: LucideIcons.zap,
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 2.5,
+        ),
+        itemCount: actions.length,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return _buildActionCard(
+            context,
+            action['title']!,
+            action['icon'] as IconData,
+            action['route']!,
+            action['color'] as Color,
+          );
+        },
+      ),
     );
   }
 
@@ -494,6 +305,12 @@ class ContractorDashboard extends StatelessWidget {
         'icon': LucideIcons.inbox,
         'route': '/contractor-offers',
         'color': Colors.green,
+      },
+      {
+        'title': 'Financeiro',
+        'icon': LucideIcons.wallet,
+        'route': '/financial',
+        'color': Colors.teal,
       },
       {
         'title': 'Relatórios',
@@ -529,6 +346,12 @@ class ContractorDashboard extends StatelessWidget {
         'icon': LucideIcons.briefcase,
         'route': '/contractor-cases',
         'color': Colors.orange,
+      },
+      {
+        'title': 'Financeiro',
+        'icon': LucideIcons.wallet,
+        'route': '/financial',
+        'color': Colors.teal,
       },
       {
         'title': 'Mensagens',
@@ -576,6 +399,7 @@ class ContractorDashboard extends StatelessWidget {
           'newLeads': 8,
           'monthlyRevenue': 45000.0,
           'conversionRate': 35,
+          'activePartnerships': 5,
         };
       case 'lawyer_individual':
       default:
@@ -584,6 +408,7 @@ class ContractorDashboard extends StatelessWidget {
           'newLeads': 5,
           'monthlyRevenue': 25000.0,
           'conversionRate': 28,
+          'activePartnerships': 2,
         };
     }
   }
@@ -599,12 +424,5 @@ class ContractorDashboard extends StatelessWidget {
     }
   }
 
-  String _formatCurrency(double value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(0)}K';
-    }
-    return value.toStringAsFixed(0);
-  }
+  // Removed unused _formatCurrency
 } 

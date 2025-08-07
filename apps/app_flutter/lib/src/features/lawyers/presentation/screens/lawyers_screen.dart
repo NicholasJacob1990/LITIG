@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
-import 'package:meu_app/src/features/lawyers/presentation/bloc/hybrid_match_bloc.dart';
 import 'package:meu_app/src/features/search/presentation/widgets/lawyer_search_form.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_card.dart';
-import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_bloc.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_event.dart';
+import 'package:meu_app/src/features/search/presentation/bloc/search_state.dart';
+import 'package:meu_app/src/features/search/domain/entities/search_params.dart';
+import 'package:meu_app/src/features/search/presentation/widgets/partner_search_result_list.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_filters_modal.dart';
+import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
+import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/injection_container.dart';
 
 import '../../../../shared/services/analytics_service.dart';
@@ -58,7 +64,7 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
   }
 
   void _trackTabChange(int tabIndex) {
-    final tabNames = ['search', 'matches'];
+    final tabNames = ['search', 'recommendations'];
     final tabName = tabIndex < tabNames.length ? tabNames[tabIndex] : 'unknown';
     
     _analytics.trackUserClick(
@@ -92,13 +98,19 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
         BlocProvider<MatchesBloc>(
           create: (context) => getIt<MatchesBloc>(),
         ),
-        BlocProvider<HybridMatchBloc>(
-          create: (context) => getIt<HybridMatchBloc>(),
+        BlocProvider<SearchBloc>(
+          create: (context) => getIt<SearchBloc>(),
         ),
       ],
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Buscar Advogados'),
+          title: const Text('Advogados & Escritórios'),
+          actions: [
+            IconButton(
+              icon: const Icon(LucideIcons.slidersHorizontal),
+              onPressed: () => _showFiltersModal(context),
+            ),
+          ],
           bottom: TabBar(
             controller: _tabController,
             tabs: const [
@@ -107,8 +119,8 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
                 text: 'Buscar',
               ),
               Tab(
-                icon: Icon(LucideIcons.users),
-                text: 'Matches',
+                icon: Icon(LucideIcons.sparkles),
+                text: 'Recomendações',
               ),
             ],
           ),
@@ -118,11 +130,19 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
           children: const [
             // Aba de busca
             _SearchTab(),
-            // Aba de matches
-            _MatchesTab(),
+            // Aba de recomendações com presets
+            _RecommendationsTab(),
           ],
         ),
       ),
+    );
+  }
+
+  void _showFiltersModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => const HybridFiltersModal(),
     );
   }
 }
@@ -218,27 +238,15 @@ class _SearchResults extends StatelessWidget {
             );
           }
           
-          return InstrumentedListView(
-            listId: 'lawyer_matches_list',
-            listType: 'list',
-            contentType: 'lawyers',
-            sourceContext: 'lawyers_screen_matches',
-            totalItems: state.matches.length,
-            additionalData: {
-              'match_type': 'hybrid_search',
-              'result_count': state.matches.length,
-              'has_matches': state.matches.isNotEmpty,
+          return ListView.builder(
+            itemCount: state.matches.length,
+            itemBuilder: (context, index) {
+              final match = state.matches[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: LawyerMatchCard(lawyer: match),
+              );
             },
-            child: ListView.builder(
-              itemCount: state.matches.length,
-              itemBuilder: (context, index) {
-                final match = state.matches[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: LawyerMatchCard(lawyer: match),
-                );
-              },
-            ),
           );
         }
         
@@ -270,81 +278,101 @@ class _SearchResults extends StatelessWidget {
   }
 }
 
-class _MatchesTab extends StatelessWidget {
-  const _MatchesTab();
+class _RecommendationsTab extends StatefulWidget {
+  const _RecommendationsTab();
+
+  @override
+  State<_RecommendationsTab> createState() => _RecommendationsTabState();
+}
+
+class _RecommendationsTabState extends State<_RecommendationsTab> {
+  String _selectedPreset = 'balanced';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecommendations();
+  }
+
+  void _fetchRecommendations() {
+    final params = SearchParams(
+      preset: _selectedPreset,
+      includeFirms: true,
+    );
+    context.read<SearchBloc>().add(SearchRequested(params));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HybridMatchBloc, HybridMatchState>(
-      builder: (context, state) {
-        if (state is HybridMatchLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        if (state is HybridMatchError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  LucideIcons.alertCircle,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Erro ao carregar matches',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.message,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          );
-        }
-        
-        if (state is HybridMatchLoaded) {
-          // Usar HybridMatchList que suporta tanto advogados quanto escritórios
-          return HybridMatchList(
-            lawyers: state.lawyers,
-            firms: state.firms,
-            showSectionHeaders: true,
-            emptyMessage: 'Complete seu perfil para receber matches personalizados',
-            onRefresh: () {
-              // Recarregar matches
-              context.read<HybridMatchBloc>().add(
-                const RefreshHybridMatches(caseId: 'current_case_id')
-              );
-            },
-          );
-        }
-        
-        return Center(
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(
-                LucideIcons.sparkles,
-                size: 48,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 16),
               Text(
-                'Matches Inteligentes',
-                style: Theme.of(context).textTheme.titleMedium,
+                'Tipo de Recomendação',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Baseados no seu perfil e necessidades',
-                style: Theme.of(context).textTheme.bodyMedium,
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: [
+                  _buildPresetChip('balanced', 'Recomendado', 'Equilibra experiência e custo', LucideIcons.star),
+                  _buildPresetChip('correspondent', 'Melhor Custo', 'Foca em economia', LucideIcons.dollarSign),
+                  _buildPresetChip('expert_opinion', 'Mais Experientes', 'Prioriza expertise', LucideIcons.award),
+                ],
               ),
             ],
           ),
-        );
+        ),
+        Expanded(
+          child: BlocBuilder<SearchBloc, SearchState>(
+            builder: (context, state) {
+              if (state is SearchLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is SearchError) {
+                return Center(child: Text(state.message));
+              }
+              if (state is SearchLoaded) {
+                final lawyers = state.results.whereType<Lawyer>().toList();
+                final firms = state.results.whereType<LawFirm>().toList();
+                return PartnerSearchResultList(
+                  lawyers: lawyers,
+                  firms: firms,
+                  emptyMessage: 'Nenhuma recomendação encontrada. Tente outro preset.',
+                  onRefresh: _fetchRecommendations,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPresetChip(String value, String title, String subtitle, IconData icon) {
+    final bool selected = _selectedPreset == value;
+    return ChoiceChip(
+      selected: selected,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14),
+          const SizedBox(width: 6),
+          Text(title),
+        ],
+      ),
+      onSelected: (_) {
+        setState(() {
+          _selectedPreset = value;
+        });
+        _fetchRecommendations();
       },
     );
   }

@@ -218,7 +218,8 @@ class FirmTeamView extends StatelessWidget {
       leading: Stack(
         children: [
           CircleAvatar(
-            backgroundImage: NetworkImage(lawyer.avatarUrl),
+            backgroundImage: lawyer.avatarUrl.isNotEmpty ? NetworkImage(lawyer.avatarUrl) : null,
+            child: lawyer.avatarUrl.isEmpty ? const Icon(LucideIcons.user) : null,
             radius: 24,
             onBackgroundImageError: (exception, stackTrace) {},
             child: lawyer.avatarUrl.isEmpty

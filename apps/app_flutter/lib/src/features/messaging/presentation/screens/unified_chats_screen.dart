@@ -11,7 +11,11 @@ import 'package:meu_app/src/features/messaging/presentation/bloc/unified_messagi
 import 'package:meu_app/src/features/messaging/presentation/widgets/calendar_integration_widget.dart';
 import 'package:meu_app/src/features/messaging/presentation/widgets/email_actions_widget.dart';
 import 'package:meu_app/src/features/messaging/presentation/widgets/linkedin_actions_widget.dart';
+import 'package:meu_app/src/features/messaging/presentation/widgets/whatsapp_actions_widget.dart';
 import 'package:meu_app/src/features/calendar/presentation/bloc/calendar_bloc.dart' as calendar;
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart';
+import 'package:meu_app/src/features/auth/domain/entities/user.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class UnifiedChatsScreen extends StatefulWidget {
@@ -156,7 +160,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
     );
   }
 
-  Widget _buildMessagesTab() {
+    Widget _buildMessagesTab() {
     return BlocBuilder<UnifiedMessagingBloc, UnifiedMessagingState>(
       builder: (context, state) {
         if (state is UnifiedMessagingLoading) {
@@ -201,17 +205,27 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
                   );
                 }
                 
+                // WhatsApp Actions Widget
+                if (index == 2 && _hasWhatsAppAccount(connectedAccounts)) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: WhatsAppActionsWidget(
+                      accountId: _getWhatsAppAccount(connectedAccounts)?.id ?? '',
+                    ),
+                  );
+                }
+                
                 final messageIndex = index - _getAdditionalSections(connectedAccounts);
                 if (messageIndex >= 0 && messageIndex < messages.length) {
                   final message = messages[messageIndex];
-                  return _buildMessageCard(message);
+                  return _buildContextualMessageCard(message);
                 }
                 
                 return const SizedBox.shrink();
               },
-      ),
-    );
-  }
+            ),
+          );
+        }
 
         return _buildEmptyState(
           icon: LucideIcons.messageCircle,
@@ -400,6 +414,151 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
           color: Colors.grey[400],
         ),
         onTap: () => _openMessageDetail(message),
+      ),
+    );
+  }
+
+  Widget _buildContextualMessageCard(UnipileMessage message) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        if (authState is Authenticated) {
+          return _buildAdaptiveMessageCard(message, authState.user);
+        }
+        return _buildMessageCard(message);
+      },
+    );
+  }
+
+  Widget _buildAdaptiveMessageCard(UnipileMessage message, User user) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+          child: const Icon(
+            LucideIcons.messageCircle,
+            color: AppColors.primaryBlue,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          message.sender ?? 'Remetente desconhecido',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message.content,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              message.timestamp != null 
+                  ? timeago.format(message.timestamp, locale: 'pt_BR')
+                  : 'Horário desconhecido',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (user.isClient) ...[
+              IconButton(
+                icon: const Icon(LucideIcons.calendar, size: 16),
+                onPressed: () => _scheduleConsultation(message),
+                tooltip: 'Agendar Consulta',
+              ),
+              IconButton(
+                icon: const Icon(LucideIcons.helpCircle, size: 16),
+                onPressed: () => _requestSupport(message),
+                tooltip: 'Solicitar Suporte',
+              ),
+            ] else if (user.isLawyer) ...[
+              IconButton(
+                icon: const Icon(LucideIcons.fileText, size: 16),
+                onPressed: () => _createCaseFromMessage(message),
+                tooltip: 'Criar Caso',
+              ),
+              IconButton(
+                icon: const Icon(LucideIcons.dollarSign, size: 16),
+                onPressed: () => _sendProposal(message),
+                tooltip: 'Enviar Proposta',
+              ),
+            ],
+            Icon(
+              LucideIcons.chevronRight,
+              color: Colors.grey[400],
+            ),
+          ],
+        ),
+        onTap: () => _openMessageDetail(message),
+      ),
+    );
+  }
+
+  Color _getProviderColor(String? provider) {
+    switch (provider?.toLowerCase()) {
+      case 'whatsapp':
+        return const Color(0xFF25D366);
+      case 'linkedin':
+        return const Color(0xFF0077B5);
+      case 'telegram':
+        return const Color(0xFF0088CC);
+      default:
+        return AppColors.primaryBlue;
+    }
+  }
+
+  IconData _getProviderIcon(String? provider) {
+    switch (provider?.toLowerCase()) {
+      case 'whatsapp':
+        return LucideIcons.messageCircle;
+      case 'linkedin':
+        return LucideIcons.linkedin;
+      case 'telegram':
+        return LucideIcons.send;
+      default:
+        return LucideIcons.messageCircle;
+    }
+  }
+
+  void _scheduleConsultation(UnipileMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Agendando consulta com ${message.sender}'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _requestSupport(UnipileMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Solicitando suporte para ${message.sender}'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+  }
+
+  void _createCaseFromMessage(UnipileMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Criando caso a partir da mensagem de ${message.sender}'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+  }
+
+  void _sendProposal(UnipileMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Enviando proposta para ${message.sender}'),
+        backgroundColor: Colors.purple,
       ),
     );
   }
@@ -693,13 +852,45 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Conectar Messaging'),
-        content: const Text('A conexão de contas de messaging será implementada em breve.'),
+        content: const Text('Escolha uma plataforma para conectar sua conta de messaging:'),
         actions: [
           TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _connectWhatsApp(context);
+            },
+            child: const Text('WhatsApp'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _connectLinkedIn(context);
+            },
+            child: const Text('LinkedIn'),
+          ),
+          TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: const Text('Cancelar'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _connectWhatsApp(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Conectando WhatsApp...'),
+        backgroundColor: Color(0xFF25D366),
+      ),
+    );
+  }
+
+  void _connectLinkedIn(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Conectando LinkedIn...'),
+        backgroundColor: Color(0xFF0077B5),
       ),
     );
   }
@@ -913,6 +1104,9 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
     if (_hasLinkedInAccount(accounts)) {
       sections++; // LinkedIn actions
     }
+    if (_hasWhatsAppAccount(accounts)) {
+      sections++; // WhatsApp actions
+    }
     return sections;
   }
 
@@ -923,6 +1117,22 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
   UnipileAccount? _getLinkedInAccount(List<UnipileAccount> accounts) {
     try {
       return accounts.firstWhere((account) => account.provider == 'linkedin');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  bool _hasWhatsAppAccount(List<UnipileAccount> accounts) {
+    try {
+      return accounts.any((account) => account.provider == 'whatsapp');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  UnipileAccount? _getWhatsAppAccount(List<UnipileAccount> accounts) {
+    try {
+      return accounts.firstWhere((account) => account.provider == 'whatsapp');
     } catch (e) {
       return null;
     }

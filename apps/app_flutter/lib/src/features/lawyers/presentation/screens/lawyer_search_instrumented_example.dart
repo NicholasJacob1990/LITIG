@@ -274,7 +274,12 @@ class _LawyerSearchInstrumentedExampleState extends State<LawyerSearchInstrument
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: NetworkImage(lawyer.photoUrl ?? ''),
+                  backgroundImage: (lawyer.photoUrl != null && lawyer.photoUrl!.isNotEmpty)
+                      ? NetworkImage(lawyer.photoUrl!)
+                      : null,
+                  child: (lawyer.photoUrl == null || lawyer.photoUrl!.isEmpty)
+                      ? const Icon(LucideIcons.user)
+                      : null,
                   child: lawyer.photoUrl == null ? const Icon(Icons.person) : null,
                 ),
                 const SizedBox(width: 12),

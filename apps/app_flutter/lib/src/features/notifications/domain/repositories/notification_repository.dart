@@ -24,4 +24,7 @@ abstract class NotificationRepository {
 
   /// Atualiza token FCM do usuário no backend
   Future<Either<Failure, void>> updateFCMToken(String token);
+
+  /// Cria uma nova notificação
+  Future<Either<Failure, void>> createNotification(NotificationEntity notification);
 }

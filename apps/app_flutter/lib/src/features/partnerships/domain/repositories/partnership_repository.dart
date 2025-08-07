@@ -26,4 +26,13 @@ abstract class PartnershipRepository {
   
   /// 🆕 Busca estatísticas de convites
   Future<Map<String, dynamic>> getInvitationStatistics();
+  
+  /// Aceita uma parceria
+  Future<Result<void>> acceptPartnership(String partnershipId);
+  
+  /// Rejeita uma parceria
+  Future<Result<void>> rejectPartnership(String partnershipId);
+  
+  /// Atualiza status de parceria
+  Future<Result<Partnership>> updatePartnershipStatus(String partnershipId, String status);
 } 

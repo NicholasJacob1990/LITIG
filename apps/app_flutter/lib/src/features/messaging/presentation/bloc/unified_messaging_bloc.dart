@@ -125,6 +125,42 @@ class SendLinkedInInvitation extends UnifiedMessagingEvent {
   List<Object?> get props => [accountId, userId, message];
 }
 
+// ===== NOVOS EVENTS WHATSAPP =====
+
+class SendWhatsAppMessage extends UnifiedMessagingEvent {
+  final String accountId;
+  final String phone;
+  final String message;
+  final List<String>? attachments;
+  
+  const SendWhatsAppMessage({
+    required this.accountId,
+    required this.phone,
+    required this.message,
+    this.attachments,
+  });
+
+  @override
+  List<Object?> get props => [accountId, phone, message, attachments];
+}
+
+class SendWhatsAppVoiceMessage extends UnifiedMessagingEvent {
+  final String accountId;
+  final String phone;
+  final String audioFilePath;
+  final Duration duration;
+  
+  const SendWhatsAppVoiceMessage({
+    required this.accountId,
+    required this.phone,
+    required this.audioFilePath,
+    required this.duration,
+  });
+
+  @override
+  List<Object?> get props => [accountId, phone, audioFilePath, duration];
+}
+
 // ===== NOVOS EVENTS EMAIL MANAGEMENT =====
 
 class ReplyToEmail extends UnifiedMessagingEvent {

@@ -12,6 +12,7 @@ import '../widgets/pre_analysis_section.dart';
 import '../widgets/next_steps_section.dart';
 import '../widgets/documents_section.dart';
 import '../widgets/process_status_section.dart';
+import '../widgets/sections/case_chat_section.dart';
 import '../../../../shared/utils/app_colors.dart';
 import 'package:meu_app/src/features/cases/domain/entities/process_status.dart';
 import '../../domain/entities/contextual_case_data.dart';
@@ -206,6 +207,13 @@ class CaseDetailScreen extends StatelessWidget {
           ProcessStatusSection(
             processStatus: _getMockProcessStatus(),
             caseId: caseDetail.id,
+          ),
+          const SizedBox(height: 16),
+          CaseChatSection(
+            caseId: caseDetail.id,
+            caseName: caseDetail.title ?? 'Caso',
+            lawyerName: caseDetail.assignedLawyer?.name,
+            clientName: 'Cliente', // This should come from the case or user context
           ),
         ],
       ),

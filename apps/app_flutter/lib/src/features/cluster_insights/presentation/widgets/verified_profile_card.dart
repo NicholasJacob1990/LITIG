@@ -47,7 +47,10 @@ class VerifiedProfileCard extends StatelessWidget {
                 // Avatar
                 CircleAvatar(
                   radius: 28,
-                  backgroundImage: NetworkImage(recommendation.avatarUrl),
+                  backgroundImage: (recommendation.avatarUrl.isNotEmpty)
+                      ? NetworkImage(recommendation.avatarUrl)
+                      : null,
+                  child: recommendation.avatarUrl.isEmpty ? const Icon(LucideIcons.user) : null,
                   onBackgroundImageError: (_, __) => {},
                   child: recommendation.avatarUrl.contains('ui-avatars.com')
                       ? null

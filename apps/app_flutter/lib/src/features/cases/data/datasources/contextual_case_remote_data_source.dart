@@ -249,7 +249,9 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
       case 'lawyer_individual':
         // Advogados autônomos veem apenas casos diretos ou da plataforma
         final hash = caseId.hashCode;
-        return hash % 2 == 0 ? AllocationType.platformMatchDirect : AllocationType.platformMatchPartnership;
+        return hash % 3 == 0 ? AllocationType.platformMatchDirect : 
+               hash % 3 == 1 ? AllocationType.platformMatchPartnership : 
+               AllocationType.partnershipProactiveSearch;
       case 'lawyer_platform_associate':
         // Associados da plataforma veem matches da plataforma
         return AllocationType.platformMatchDirect;
@@ -336,6 +338,22 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
           'conversion_rate': 85.0,
           'sla_hours': 2,
           'ai_reason': 'Match baseado em especialização e proximidade',
+          'client_urgency': 'Alta',
+          'potential_revenue': 12000.0,
+        };
+      
+      case AllocationType.platformMatchPartnership:
+        return {
+          'allocation_type': allocationType.value,
+          'match_score': 0.87,
+          'estimated_value': 6500.0,
+          'complexity_score': 6,
+          'conversion_rate': 75.0,
+          'sla_hours': 4,
+          'ai_reason': 'Match via parceria algorítmica',
+          'partner_name': 'Dr. Ana Costa',
+          'your_share': 60,
+          'partner_share': 40,
         };
       
       case AllocationType.partnershipProactiveSearch:
@@ -345,6 +363,8 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
           'your_share': 70,
           'partner_share': 30,
           'partner_rating': 4.8,
+          'estimated_value': 9500.0,
+          'complexity_score': 8,
         };
       
       default:
@@ -368,6 +388,15 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
           {'icon': '🎯', 'label': 'Match', 'value': '94%'},
           {'icon': '💰', 'label': 'Valor', 'value': 'R\$ 8.5k'},
           {'icon': '📊', 'label': 'Complexidade', 'value': '7/10'},
+          {'icon': '⚡', 'label': 'Urgência', 'value': 'Alta'},
+        ];
+      
+      case AllocationType.platformMatchPartnership:
+        return [
+          {'icon': '🤝', 'label': 'Parceiro', 'value': 'Dr. Ana Costa'},
+          {'icon': '📋', 'label': 'Divisão', 'value': '60/40%'},
+          {'icon': '💰', 'label': 'Valor', 'value': 'R\$ 6.5k'},
+          {'icon': '📊', 'label': 'Complexidade', 'value': '6/10'},
         ];
       
       case AllocationType.partnershipProactiveSearch:
@@ -375,6 +404,7 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
           {'icon': '🤝', 'label': 'Parceiro', 'value': 'Silva & Santos'},
           {'icon': '📋', 'label': 'Divisão', 'value': '70/30%'},
           {'icon': '⭐', 'label': 'Rating', 'value': '4.8'},
+          {'icon': '💰', 'label': 'Valor', 'value': 'R\$ 9.5k'},
         ];
       
       default:
@@ -401,8 +431,19 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
         return {
           'primary_action': {'label': 'Aceitar Caso', 'action': 'accept_case'},
           'secondary_actions': [
-            {'label': 'Ver Perfil', 'action': 'view_client_profile'},
+            {'label': 'Ver Perfil Cliente', 'action': 'view_client_profile'},
             {'label': 'Solicitar Info', 'action': 'request_info'},
+            {'label': 'Calcular Honorários', 'action': 'calculate_fees'},
+          ],
+        };
+      
+      case AllocationType.platformMatchPartnership:
+        return {
+          'primary_action': {'label': 'Aceitar Parceria', 'action': 'accept_partnership'},
+          'secondary_actions': [
+            {'label': 'Contatar Parceiro', 'action': 'contact_partner'},
+            {'label': 'Ver Perfil Parceiro', 'action': 'view_partner_profile'},
+            {'label': 'Negociar Divisão', 'action': 'negotiate_split'},
           ],
         };
       
@@ -412,6 +453,7 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
           'secondary_actions': [
             {'label': 'Contatar Parceiro', 'action': 'contact_partner'},
             {'label': 'Ver Contrato', 'action': 'view_contract'},
+            {'label': 'Revisar Divisão', 'action': 'review_split'},
           ],
         };
       
@@ -431,7 +473,10 @@ class ContextualCaseRemoteDataSourceImpl implements ContextualCaseRemoteDataSour
         return {'text': '👨‍💼 Delegado internamente', 'color': 'orange'};
       
       case AllocationType.platformMatchDirect:
-        return {'text': '🎯 Match direto para você', 'color': 'blue'};
+        return {'text': '🎯 Match direto - Oportunidade única', 'color': 'blue'};
+      
+      case AllocationType.platformMatchPartnership:
+        return {'text': '🤝 Parceria algorítmica sugerida', 'color': 'purple'};
       
       case AllocationType.partnershipProactiveSearch:
         return {'text': '🤝 Caso captado via parceria', 'color': 'green'};

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:meu_app/src/shared/widgets/official_social_icons.dart';
+
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
@@ -70,10 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     _buildHeader(context),
                     const SizedBox(height: 32),
                     _buildForm(context),
-                    const SizedBox(height: 24),
-                    _buildDivider(context),
-                    const SizedBox(height: 24),
-                    _buildSocialLogin(context),
                     const SizedBox(height: 32),
                     _buildRegisterPrompt(context),
                   ],
@@ -187,106 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildDivider(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(child: Divider()),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'ou',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-        Expanded(child: Divider()),
-      ],
-    );
-  }
 
-  Widget _buildSocialLogin(BuildContext context) {
-    return BlocBuilder<AuthBloc, auth_states.AuthState>(
-      builder: (context, state) {
-        final isLoading = state is auth_states.AuthLoading;
-        return Column(
-          children: [
-            // Google OAuth (funcional)
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: isLoading
-                  ? null
-                  : () {
-                      context.read<AuthBloc>().add(AuthGoogleSignInRequested());
-                    },
-              icon: const OfficialSocialIcon(platform: SocialPlatform.google, size: 18),
-              label: const Text('Entrar com Google'),
-            ),
-            
-            const SizedBox(height: 12),
-            
-            // Redes Sociais (em desenvolvimento)
-            Text(
-              'Outras opções sociais:',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.info,
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.info),
-                    ),
-                    onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthLinkedInSignInRequested());
-                    },
-                    icon: const OfficialSocialIcon(platform: SocialPlatform.linkedin, size: 16),
-                    label: const Text('LinkedIn'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.error,
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.error),
-                    ),
-                    onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthInstagramSignInRequested());
-                    },
-                    icon: const OfficialSocialIcon(platform: SocialPlatform.instagram, size: 16),
-                    label: const Text('Instagram'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: isLoading ? Colors.grey[400] : AppColors.primaryBlue,
-                      side: BorderSide(color: isLoading ? Colors.grey[300]! : AppColors.primaryBlue),
-                    ),
-                    onPressed: isLoading ? null : () {
-                      context.read<AuthBloc>().add(AuthFacebookSignInRequested());
-                    },
-                    icon: const OfficialSocialIcon(platform: SocialPlatform.facebook, size: 16),
-                    label: const Text('Facebook'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Widget _buildRegisterPrompt(BuildContext context) {
     return Column(
@@ -384,8 +281,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   _buildDebugButton(context, 'Cliente', 'PF', AppColors.info),
                   _buildDebugButton(context, 'Advogado Associado', 'lawyer_firm_member', AppColors.success),
                   _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', AppColors.primaryPurple),
-                  _buildDebugButton(context, 'Escritório', 'lawyer_office', AppColors.error),
-                  _buildDebugButton(context, 'Super Associado', 'lawyer_platform_associate', AppColors.warning),
+                          _buildDebugButton(context, 'Escritório', 'firm', AppColors.error),
+        _buildDebugButton(context, 'Super Associado', 'super_associate', AppColors.warning),
                 ],
               ),
             ],
@@ -434,20 +331,20 @@ class _LoginScreenState extends State<LoginScreen> {
         userRole: 'lawyer_individual',
         permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
       ),
-      'lawyer_office': const User(
-        id: 'debug-office-1',
+      'firm': const User(
+        id: 'debug-firm-1',
         email: 'escritorio@teste.com',
         fullName: 'Escritório Silva & Associados',
         role: 'lawyer',
-        userRole: 'lawyer_office',
+        userRole: 'firm',
         permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
       ),
-      'lawyer_platform_associate': const User(
+      'super_associate': const User(
         id: 'debug-super-1',
         email: 'super@teste.com',
         fullName: 'Ana Super (Super Associada)',
         role: 'lawyer',
-        userRole: 'lawyer_platform_associate',
+        userRole: 'super_associate',
         permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
       ),
     };

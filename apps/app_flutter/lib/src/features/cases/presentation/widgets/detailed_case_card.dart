@@ -83,15 +83,18 @@ class DetailedCaseCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        CachedNetworkImage(
-          imageUrl: lawyer.avatarUrl,
-          imageBuilder: (context, imageProvider) => CircleAvatar(
-            backgroundImage: imageProvider,
-            radius: 20,
-          ),
-          placeholder: (context, url) => const CircleAvatar(radius: 20, child: CircularProgressIndicator()),
-          errorWidget: (context, url, error) => InitialsAvatar(text: lawyer.name, radius: 20),
-        ),
+        if (lawyer.avatarUrl.isNotEmpty)
+          CachedNetworkImage(
+            imageUrl: lawyer.avatarUrl,
+            imageBuilder: (context, imageProvider) => CircleAvatar(
+              backgroundImage: imageProvider,
+              radius: 20,
+            ),
+            placeholder: (context, url) => const CircleAvatar(radius: 20, child: CircularProgressIndicator()),
+            errorWidget: (context, url, error) => InitialsAvatar(text: lawyer.name, radius: 20),
+          )
+        else
+          InitialsAvatar(text: lawyer.name, radius: 20),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

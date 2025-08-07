@@ -426,7 +426,7 @@ class _PublicProfileCardState extends State<PublicProfileCard> {
       backgroundColor: Colors.transparent,
       builder: (context) => ContactRequestModal(
         lawyer: widget.lawyer,
-        caseId: widget.caseId,
+        caseId: widget.caseId ?? '',
         onResult: (result) {
           // Callback para tratar resultado do contato
           if (widget.onRequestContact != null) {
@@ -438,19 +438,24 @@ class _PublicProfileCardState extends State<PublicProfileCard> {
           IconData icon = LucideIcons.check;
           Color color = Colors.green;
           
-          switch (result.status) {
-            case ContactRequestStatus.success:
+          switch (result) {
+            case ContactRequestResult.success:
               message = 'E-mail enviado com sucesso!';
               break;
-            case ContactRequestStatus.linkedinFallback:
+            case ContactRequestResult.linkedinFallback:
               message = 'Use o LinkedIn para melhor resultado';
               icon = LucideIcons.linkedin;
               color = Colors.blue;
               break;
-            case ContactRequestStatus.noContact:
+            case ContactRequestResult.noContact:
               message = 'Recomendamos nossos Advogados Verificados';
               icon = LucideIcons.alertTriangle;
               color = Colors.orange;
+              break;
+            case ContactRequestResult.error:
+              message = 'Erro ao enviar solicitação';
+              icon = LucideIcons.alertCircle;
+              color = Colors.red;
               break;
           }
           

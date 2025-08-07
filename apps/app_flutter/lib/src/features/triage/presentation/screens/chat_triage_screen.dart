@@ -29,7 +29,7 @@ class ChatTriageScreen extends StatelessWidget {
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Triagem Inteligente'),
+                  const Text('Busca de Parcerias'),
                   Text(
                     'Olá, $userName',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -71,20 +71,20 @@ class ChatTriageScreen extends StatelessWidget {
                         const Icon(LucideIcons.bot, size: 64, color: Color(0xFF1E40AF)),
                         const SizedBox(height: 24),
                         Text(
-                          'Seu Problema Jurídico, Resolvido com Inteligência',
+                          'Encontre Parcerias com Inteligência Artificial',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Use nossa IA para uma pré-análise gratuita e seja conectado ao advogado certo para o seu caso.',
+                          'Descreva o tipo de parceria que você busca e nossa IA encontrará os melhores parceiros para seus casos.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                         ),
                         const SizedBox(height: 48),
                         ElevatedButton.icon(
-                          icon: const Icon(LucideIcons.playCircle),
-                          label: const Text('Iniciar Consulta com IA'),
+                          icon: const Icon(LucideIcons.messageCircle),
+                          label: const Text('Iniciar Busca de Parcerias'),
                           onPressed: () {
                             print('DEBUG: Botão Iniciar Consulta pressionado');
                             // Iniciar o chat de triagem no BLoC existente

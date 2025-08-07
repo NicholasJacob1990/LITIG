@@ -602,7 +602,8 @@ class _LawyerMatchCardState extends State<LawyerMatchCard> {
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundImage: NetworkImage(widget.lawyer.avatarUrl),
+          backgroundImage: widget.lawyer.avatarUrl.isNotEmpty ? NetworkImage(widget.lawyer.avatarUrl) : null,
+          child: widget.lawyer.avatarUrl.isEmpty ? const Icon(LucideIcons.user) : null,
         ),
         const SizedBox(width: 12),
         Expanded(

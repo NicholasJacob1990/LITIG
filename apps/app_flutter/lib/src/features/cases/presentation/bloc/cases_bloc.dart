@@ -17,6 +17,8 @@ class CasesBloc extends Bloc<CasesEvent, CasesState> {
   }) : super(CasesInitial()) {
     on<FetchCases>(_onFetchCases);
     on<FilterCases>(_onFilterCases);
+    on<SearchCases>(_onSearchCases);
+    on<ClearCaseSearch>(_onClearCaseSearch);
   }
 
   Future<void> _onFetchCases(FetchCases event, Emitter<CasesState> emit) async {
@@ -57,5 +59,71 @@ class CasesBloc extends Bloc<CasesEvent, CasesState> {
         activeFilter: event.filter,
       ));
     }
+  }
+
+  void _onSearchCases(SearchCases event, Emitter<CasesState> emit) {
+    if (state is CasesLoaded) {
+      final currentState = state as CasesLoaded;
+      final searchResults = _performCaseSearch(currentState.allCases, event.filters);
+      
+      AppLogger.info('CasesBloc: Busca aplicada. ${searchResults.length} casos encontrados');
+      
+      emit(currentState.copyWith(
+        filteredCases: searchResults,
+        searchFilters: event.filters,
+        isSearchMode: true,
+        activeFilter: 'Busca',
+      ));
+    }
+  }
+
+  void _onClearCaseSearch(ClearCaseSearch event, Emitter<CasesState> emit) {
+    if (state is CasesLoaded) {
+      final currentState = state as CasesLoaded;
+      
+      AppLogger.info('CasesBloc: Limpando busca');
+      
+      emit(currentState.copyWith(
+        filteredCases: currentState.allCases,
+        searchFilters: null,
+        isSearchMode: false,
+        activeFilter: 'Todos',
+      ));
+    }
+  }
+
+  List<Case> _performCaseSearch(List<Case> cases, CaseSearchFilters filters) {
+    var results = cases.toList();
+
+    // Filtro por texto geral
+    if (filters.searchQuery != null && filters.searchQuery!.isNotEmpty) {
+      final query = filters.searchQuery!.toLowerCase();
+      results = results.where((caseItem) {
+        return caseItem.title.toLowerCase().contains(query) ||
+               caseItem.id.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    // Filtro por status
+    if (filters.status != null && filters.status != 'Todos') {
+      results = results.where((caseItem) => caseItem.status == filters.status).toList();
+    }
+
+    // Filtro por data
+    if (filters.dateFrom != null) {
+      results = results.where((caseItem) {
+        return caseItem.createdAt.isAfter(filters.dateFrom!) || 
+               caseItem.createdAt.isAtSameMomentAs(filters.dateFrom!);
+      }).toList();
+    }
+
+    if (filters.dateTo != null) {
+      final endOfDay = DateTime(filters.dateTo!.year, filters.dateTo!.month, filters.dateTo!.day + 1);
+      results = results.where((caseItem) {
+        return caseItem.createdAt.isBefore(endOfDay);
+      }).toList();
+    }
+
+    return results;
   }
 } 

@@ -5,6 +5,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'analytics_service.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class MetricsService {
   static const String _metricsKey = 'app_metrics';
   
@@ -37,6 +39,16 @@ class MetricsService {
   
   Future<DeviceInfo> _getDeviceInfo() async {
     final deviceInfoPlugin = DeviceInfoPlugin();
+
+    if (kIsWeb) {
+      return const DeviceInfo(
+        platform: 'Web',
+        version: 'Unknown',
+        model: 'Browser',
+        manufacturer: 'Unknown',
+        identifier: 'unknown',
+      );
+    }
     
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfoPlugin.androidInfo;

@@ -4,7 +4,6 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'package:meu_app/src/features/dashboard/presentation/widgets/client_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/lawyer_dashboard.dart';
-import 'package:meu_app/src/features/dashboard/presentation/widgets/firm_dashboard.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/contractor_dashboard.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 
@@ -23,11 +22,14 @@ class DashboardScreen extends StatelessWidget {
           
           // Determinar o dashboard baseado no tipo específico de usuário
           switch (user.role) {
-            case 'firm':  // Atualizado de lawyer_office
-              // Sócios de escritório recebem dashboard específico da firma
-              return FirmDashboard(userName: user.fullName ?? 'Sócio');
+            case 'firm':
+              // Sócios de escritório recebem dashboard de captação (igual ao individual)
+              return ContractorDashboard(
+                userName: user.fullName ?? 'Sócio',
+                userRole: user.role ?? 'firm',
+              );
             case 'lawyer_individual':
-            case 'super_associate':  // Atualizado de lawyer_platform_associate
+            case 'super_associate':
               // Advogados contratantes recebem dashboard de captação
               return ContractorDashboard(
                 userName: user.fullName ?? 'Advogado',

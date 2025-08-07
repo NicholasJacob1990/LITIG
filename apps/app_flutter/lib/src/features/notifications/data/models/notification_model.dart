@@ -84,6 +84,27 @@ class NotificationModel extends NotificationEntity {
         return NotificationType.paymentReceived;
       case 'deadline_reminder':
         return NotificationType.deadlineReminder;
+      // Notificações específicas de casos
+      case 'case_assigned':
+        return NotificationType.caseAssigned;
+      case 'case_status_changed':
+        return NotificationType.caseStatusChanged;
+      case 'document_uploaded':
+        return NotificationType.documentUploaded;
+      case 'document_approved':
+        return NotificationType.documentApproved;
+      case 'document_rejected':
+        return NotificationType.documentRejected;
+      case 'new_case_message':
+        return NotificationType.newCaseMessage;
+      case 'case_deadline_approaching':
+        return NotificationType.caseDeadlineApproaching;
+      case 'case_completed':
+        return NotificationType.caseCompleted;
+      case 'hearing_scheduled':
+        return NotificationType.hearingScheduled;
+      case 'case_transferred':
+        return NotificationType.caseTransferred;
       default:
         return NotificationType.general;
     }

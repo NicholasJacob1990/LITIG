@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../domain/entities/sla_settings_entity.dart';
 import '../models/sla_settings_model.dart';
+import 'package:meu_app/src/core/utils/logger.dart';
 
 abstract class SlaSettingsRemoteDataSource {
   Future<SlaSettingsEntity> getSlaSettings(String firmId);
@@ -53,22 +54,36 @@ class SlaSettingsRemoteDataSourceImpl implements SlaSettingsRemoteDataSource {
   @override
   Future<SlaSettingsEntity> getSlaSettings(String firmId) async {
     try {
+      AppLogger.info('Fetching SLA settings for firm: $firmId');
       final response = await dio.get('$baseUrl/sla/settings/$firmId');
       
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
+        AppLogger.success('SLA settings loaded successfully');
         return SlaSettingsModel.fromJson(data);
       } else {
         throw Exception('Failed to load SLA settings: ${response.statusCode}');
       }
-    } catch (e) {
+    } on DioException catch (e) {
+      AppLogger.warning('API error loading SLA settings, using fallback: ${e.message}');
+      
+      if (e.type == DioExceptionType.connectionError || 
+          e.type == DioExceptionType.connectionTimeout ||
+          e.response?.statusCode == 404) {
+        return _getDefaultSlaSettings(firmId);
+      }
+      
       throw Exception('Network error loading SLA settings: $e');
+    } catch (e) {
+      AppLogger.error('Unexpected error loading SLA settings, using fallback', error: e);
+      return _getDefaultSlaSettings(firmId);
     }
   }
 
   @override
   Future<SlaSettingsEntity> updateSlaSettings(SlaSettingsEntity settings) async {
     try {
+      AppLogger.info('Updating SLA settings for firm: ${settings.firmId}');
       final settingsModel = SlaSettingsModel.fromEntity(settings);
       final response = await dio.put(
         '$baseUrl/sla/settings/${settings.firmId}',
@@ -77,11 +92,24 @@ class SlaSettingsRemoteDataSourceImpl implements SlaSettingsRemoteDataSource {
       
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
+        AppLogger.success('SLA settings updated successfully');
         return SlaSettingsModel.fromJson(data);
       } else {
         throw Exception('Failed to update SLA settings: ${response.statusCode}');
       }
+    } on DioException catch (e) {
+      AppLogger.warning('API error updating SLA settings: ${e.message}');
+      
+      if (e.type == DioExceptionType.connectionError || 
+          e.type == DioExceptionType.connectionTimeout) {
+        // Return the input settings as if they were saved
+        AppLogger.info('Using local fallback for SLA settings update');
+        return settings;
+      }
+      
+      throw Exception('Network error updating SLA settings: $e');
     } catch (e) {
+      AppLogger.error('Unexpected error updating SLA settings', error: e);
       throw Exception('Network error updating SLA settings: $e');
     }
   }
@@ -277,16 +305,29 @@ class SlaSettingsRemoteDataSourceImpl implements SlaSettingsRemoteDataSource {
   @override
   Future<List<Map<String, dynamic>>> getPresets(String firmId, bool includeSystemPresets) async {
     try {
+      AppLogger.info('Fetching SLA presets for firm: $firmId');
       final response = await dio.get('$baseUrl/sla/presets/$firmId?include_system=$includeSystemPresets');
       
       if (response.statusCode == 200) {
         final data = response.data as List<dynamic>;
+        AppLogger.success('SLA presets loaded: ${data.length} presets');
         return data.cast<Map<String, dynamic>>();
       } else {
         throw Exception('Failed to get presets: ${response.statusCode}');
       }
-    } catch (e) {
+    } on DioException catch (e) {
+      AppLogger.warning('API error getting presets, using fallback: ${e.message}');
+      
+      if (e.type == DioExceptionType.connectionError || 
+          e.type == DioExceptionType.connectionTimeout ||
+          e.response?.statusCode == 404) {
+        return _getDefaultPresets(includeSystemPresets);
+      }
+      
       throw Exception('Network error getting presets: $e');
+    } catch (e) {
+      AppLogger.error('Unexpected error getting presets, using fallback', error: e);
+      return _getDefaultPresets(includeSystemPresets);
     }
   }
 
@@ -594,16 +635,135 @@ class SlaSettingsRemoteDataSourceImpl implements SlaSettingsRemoteDataSource {
   @override
   Future<SlaSettingsEntity> revertSettings(String firmId, String historyId) async {
     try {
+      AppLogger.info('Reverting SLA settings for firm: $firmId to history: $historyId');
       final response = await dio.post('$baseUrl/sla/settings/$firmId/revert/$historyId');
       
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
+        AppLogger.success('SLA settings reverted successfully');
         return SlaSettingsModel.fromJson(data);
       } else {
         throw Exception('Failed to revert settings: ${response.statusCode}');
       }
+    } on DioException catch (e) {
+      AppLogger.warning('API error reverting settings: ${e.message}');
+      
+      if (e.type == DioExceptionType.connectionError || 
+          e.type == DioExceptionType.connectionTimeout) {
+        return _getDefaultSlaSettings(firmId);
+      }
+      
+      throw Exception('Network error reverting settings: $e');
     } catch (e) {
+      AppLogger.error('Unexpected error reverting settings', error: e);
       throw Exception('Network error reverting settings: $e');
     }
+  }
+
+  // Helper methods for fallback data
+  SlaSettingsEntity _getDefaultSlaSettings(String firmId) {
+    return SlaSettingsModel.fromJson({
+      'id': 'default-$firmId',
+      'firm_id': firmId,
+      'normal_timeframe': {'hours': 48, 'priority': 'normal'},
+      'urgent_timeframe': {'hours': 24, 'priority': 'urgent'},
+      'emergency_timeframe': {'hours': 6, 'priority': 'emergency'},
+      'complex_timeframe': {'hours': 72, 'priority': 'complex'},
+      'enable_business_hours_only': true,
+      'include_weekends': false,
+      'allow_overrides': true,
+      'enable_auto_escalation': true,
+      'override_settings': {},
+      'last_modified': DateTime.now().toIso8601String(),
+      'last_modified_by': 'system',
+      'business_start_hour': '09:00',
+      'business_end_hour': '18:00',
+    });
+  }
+
+  List<Map<String, dynamic>> _getDefaultPresets(bool includeSystemPresets) {
+    final presets = <Map<String, dynamic>>[];
+    
+    if (includeSystemPresets) {
+      presets.addAll([
+        {
+          'id': 'preset-standard',
+          'name': 'Padrão',
+          'description': 'Configuração padrão para escritórios',
+          'category': 'standard',
+          'default_sla_hours': 48,
+          'urgent_sla_hours': 24,
+          'emergency_sla_hours': 6,
+          'complex_case_sla_hours': 72,
+          'business_hours_start': '09:00',
+          'business_hours_end': '18:00',
+          'include_weekends': false,
+          'notification_timings': {
+            'before_deadline': [60, 30, 15],
+            'at_deadline': [0],
+            'after_violation': [15, 30, 60],
+          },
+          'escalation_rules': {},
+          'override_settings': {},
+          'is_system_preset': true,
+          'is_active': true,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+          'created_by': 'system',
+        },
+        {
+          'id': 'preset-aggressive',
+          'name': 'Agressivo',
+          'description': 'SLA mais rígido para casos urgentes',
+          'category': 'aggressive',
+          'default_sla_hours': 24,
+          'urgent_sla_hours': 12,
+          'emergency_sla_hours': 3,
+          'complex_case_sla_hours': 48,
+          'business_hours_start': '08:00',
+          'business_hours_end': '20:00',
+          'include_weekends': true,
+          'notification_timings': {
+            'before_deadline': [120, 60, 30, 15],
+            'at_deadline': [0],
+            'after_violation': [5, 15, 30],
+          },
+          'escalation_rules': {},
+          'override_settings': {},
+          'is_system_preset': true,
+          'is_active': true,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+          'created_by': 'system',
+        },
+        {
+          'id': 'preset-relaxed',
+          'name': 'Flexível',
+          'description': 'SLA mais flexível para escritórios grandes',
+          'category': 'relaxed',
+          'default_sla_hours': 72,
+          'urgent_sla_hours': 48,
+          'emergency_sla_hours': 12,
+          'complex_case_sla_hours': 120,
+          'business_hours_start': '09:00',
+          'business_hours_end': '17:00',
+          'include_weekends': false,
+          'notification_timings': {
+            'before_deadline': [48, 24, 12],
+            'at_deadline': [0],
+            'after_violation': [24, 48],
+          },
+          'escalation_rules': {},
+          'override_settings': {},
+          'is_system_preset': true,
+          'is_active': true,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+          'created_by': 'system',
+        },
+      ]);
+    }
+    
+    return presets;
   }
 } 

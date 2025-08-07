@@ -18,6 +18,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meu_app/src/core/services/notification_service.dart';
 import 'package:meu_app/src/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:meu_app/src/shared/utils/development_helper.dart';
+import 'package:flutter/gestures.dart';
 import 'package:meu_app/src/features/profile/presentation/bloc/profile_bloc.dart';
 
 String get _supabaseUrl {
@@ -28,6 +29,15 @@ String get _supabaseUrl {
     return 'http://10.0.2.2:54321';
   }
   return 'http://127.0.0.1:54321';
+}
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
 }
 
 Future<void> main() async {
@@ -199,6 +209,7 @@ class _MyAppState extends State<MyApp> {
             darkTheme: AppTheme.dark(),
             routerConfig: appRouter(_authBloc),
             debugShowCheckedModeBanner: false,
+            scrollBehavior: MyCustomScrollBehavior(),
             locale: const Locale('pt', 'BR'),
             supportedLocales: const [
               Locale('pt', 'BR'),

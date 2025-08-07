@@ -10,6 +10,17 @@ enum NotificationType {
   paymentReceived,
   deadlineReminder,
   general,
+  // Notificações específicas de casos
+  caseAssigned,
+  caseStatusChanged,
+  documentUploaded,
+  documentApproved,
+  documentRejected,
+  newCaseMessage,
+  caseDeadlineApproaching,
+  caseCompleted,
+  hearingScheduled,
+  caseTransferred,
 }
 
 class NotificationEntity extends Equatable {
@@ -76,7 +87,10 @@ class NotificationEntity extends Equatable {
   bool get isCritical {
     return type == NotificationType.newOffer ||
            type == NotificationType.deadlineReminder ||
-           type == NotificationType.offerExpired;
+           type == NotificationType.offerExpired ||
+           type == NotificationType.caseDeadlineApproaching ||
+           type == NotificationType.documentRejected ||
+           type == NotificationType.hearingScheduled;
   }
 
   /// Verifica se a notificação é relacionada a ofertas
@@ -85,6 +99,21 @@ class NotificationEntity extends Equatable {
            type == NotificationType.offerAccepted ||
            type == NotificationType.offerDeclined ||
            type == NotificationType.offerExpired;
+  }
+
+  /// Verifica se a notificação é relacionada a casos
+  bool get isCaseRelated {
+    return type == NotificationType.caseUpdate ||
+           type == NotificationType.caseAssigned ||
+           type == NotificationType.caseStatusChanged ||
+           type == NotificationType.documentUploaded ||
+           type == NotificationType.documentApproved ||
+           type == NotificationType.documentRejected ||
+           type == NotificationType.newCaseMessage ||
+           type == NotificationType.caseDeadlineApproaching ||
+           type == NotificationType.caseCompleted ||
+           type == NotificationType.hearingScheduled ||
+           type == NotificationType.caseTransferred;
   }
 
   /// Retorna a cor da notificação baseada no tipo
@@ -105,6 +134,27 @@ class NotificationEntity extends Equatable {
       case NotificationType.paymentReceived:
         return '#4CAF50'; // Verde
       case NotificationType.caseUpdate:
+        return '#607D8B'; // Azul acinzentado
+      // Notificações de casos
+      case NotificationType.caseAssigned:
+        return '#2196F3'; // Azul
+      case NotificationType.caseStatusChanged:
+        return '#FF9800'; // Laranja
+      case NotificationType.documentUploaded:
+        return '#4CAF50'; // Verde
+      case NotificationType.documentApproved:
+        return '#4CAF50'; // Verde
+      case NotificationType.documentRejected:
+        return '#F44336'; // Vermelho
+      case NotificationType.newCaseMessage:
+        return '#9C27B0'; // Roxo
+      case NotificationType.caseDeadlineApproaching:
+        return '#FF5722'; // Vermelho escuro
+      case NotificationType.caseCompleted:
+        return '#4CAF50'; // Verde
+      case NotificationType.hearingScheduled:
+        return '#FF9800'; // Laranja
+      case NotificationType.caseTransferred:
         return '#607D8B'; // Azul acinzentado
       default:
         return '#757575'; // Cinza
@@ -130,6 +180,27 @@ class NotificationEntity extends Equatable {
         return 'payment';
       case NotificationType.caseUpdate:
         return 'update';
+      // Ícones para notificações de casos
+      case NotificationType.caseAssigned:
+        return 'assignment_ind';
+      case NotificationType.caseStatusChanged:
+        return 'swap_horiz';
+      case NotificationType.documentUploaded:
+        return 'cloud_upload';
+      case NotificationType.documentApproved:
+        return 'verified';
+      case NotificationType.documentRejected:
+        return 'error_outline';
+      case NotificationType.newCaseMessage:
+        return 'message';
+      case NotificationType.caseDeadlineApproaching:
+        return 'warning';
+      case NotificationType.caseCompleted:
+        return 'check_circle';
+      case NotificationType.hearingScheduled:
+        return 'event';
+      case NotificationType.caseTransferred:
+        return 'transfer_within_a_station';
       default:
         return 'notifications';
     }

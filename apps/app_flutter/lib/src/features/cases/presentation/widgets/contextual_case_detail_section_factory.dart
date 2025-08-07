@@ -188,6 +188,11 @@ class ContextualCaseDetailSectionFactory {
   ) {
     AppLogger.info('Building lawyer sections for role: ${currentUser.effectiveUserRole}, allocation: $allocationType');
     
+    // **DIFERENCIAÇÃO ESPECÍFICA POR TIPO DE ADVOGADO**
+    if (currentUser.isIndividualLawyer) {
+      return _buildIndividualLawyerSections(caseDetail, contextualData);
+    }
+    
     switch (allocationType) {
       case AllocationType.internalDelegation:
         return _buildAssociatedLawyerSections(caseDetail, contextualData);
@@ -266,6 +271,77 @@ class ContextualCaseDetailSectionFactory {
     ];
   }
   
+  /// **ADVOGADO AUTÔNOMO** - Foco em gestão independente e captação
+  static List<Widget> _buildIndividualLawyerSections(
+    CaseDetail caseDetail, 
+    ContextualCaseData contextualData
+  ) {
+    return [
+      // Informações essenciais do cliente primeiro
+      LazySection(
+        priority: SectionPriority.critical,
+        child: ClientContactSection(
+          caseDetail: caseDetail,
+          contextualData: contextualData.toMap(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.critical,
+        child: BusinessOpportunitySection(
+          caseDetail: caseDetail,
+          contextualData: contextualData.toMap(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      
+      // Análises técnicas específicas para autônomos
+      LazySection(
+        priority: SectionPriority.high,
+        child: CaseComplexitySection(
+          caseDetail: caseDetail,
+          contextualData: contextualData.toMap(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.high,
+        child: MatchExplanationSection(
+          caseDetail: caseDetail,
+          contextualData: contextualData.toMap(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      
+      // Gestão independente
+      LazySection(
+        priority: SectionPriority.medium,
+        child: StrategicDocumentsSection(
+          caseDetail: caseDetail,
+          contextualData: contextualData.toMap(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.medium,
+        child: ProfitabilitySection(
+          caseDetail: caseDetail,
+          contextualData: contextualData.toMap(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      
+      // Análises avançadas para autônomos
+      LazySection(
+        priority: SectionPriority.low,
+        child: CompetitorAnalysisSection(
+          caseDetail: caseDetail,
+        ),
+      ),
+      const SizedBox(height: 24),
+    ];
+  }
+
   /// **ADVOGADO CONTRATANTE** - Foco em oportunidade de negócio
   static List<Widget> _buildContractingLawyerSections(
     CaseDetail caseDetail, 

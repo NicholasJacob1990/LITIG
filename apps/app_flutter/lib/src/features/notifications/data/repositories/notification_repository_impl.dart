@@ -152,6 +152,27 @@ class NotificationRepositoryImpl implements NotificationRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> createNotification(NotificationEntity notification) async {
+    try {
+      final notificationModel = notification as NotificationModel;
+      final response = await _apiService.post(
+        '/notifications',
+        data: notificationModel.toJson(),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Limpar cache para forçar reload na próxima busca
+        await _clearNotificationsCache();
+        return const Right(null);
+      } else {
+        return const Left(ServerFailure(message: 'Falha ao criar notificação'));
+      }
+    } catch (e) {
+      return Left(ServerFailure(message: 'Erro ao criar notificação: $e'));
+    }
+  }
+
   /// Busca notificações do cache local
   Future<List<NotificationEntity>> _getCachedNotifications() async {
     try {

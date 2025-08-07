@@ -12,11 +12,13 @@ import 'package:meu_app/src/features/search/presentation/widgets/partner_search_
 import 'package:meu_app/src/features/search/presentation/widgets/location_picker.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/lawyer.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
+import 'package:meu_app/src/features/lawyers/presentation/widgets/hybrid_match_list.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:meu_app/injection_container.dart';
+import 'package:go_router/go_router.dart';
 
-class LawyersScreen extends StatelessWidget {
-  const LawyersScreen({super.key});
+class PartnersScreen extends StatelessWidget {
+  const PartnersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,25 +32,26 @@ class LawyersScreen extends StatelessWidget {
         BlocProvider(create: (context) => getIt<FirmBloc>()),
         BlocProvider(create: (context) => getIt<SearchBloc>()),
       ],
-      child: const LawyersView(),
+      child: const PartnersView(),
     );
   }
 }
 
-class LawyersView extends StatefulWidget {
-  const LawyersView({super.key});
+class PartnersView extends StatefulWidget {
+  const PartnersView({super.key});
 
   @override
-  State<LawyersView> createState() => _LawyersViewState();
+  State<PartnersView> createState() => _PartnersViewState();
 }
 
-class _LawyersViewState extends State<LawyersView> with SingleTickerProviderStateMixin {
+class _PartnersViewState extends State<PartnersView> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  String? _selectedPreset;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -73,7 +76,7 @@ class _LawyersViewState extends State<LawyersView> with SingleTickerProviderStat
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Advogados & Escritórios',
+            'Parceiros',
             style: TextStyle(
               fontFamily: 'Sans-serif',
               fontSize: 20,
@@ -92,17 +95,301 @@ class _LawyersViewState extends State<LawyersView> with SingleTickerProviderStat
             controller: _tabController,
             tabs: const [
               Tab(text: 'Recomendações'),
-              Tab(text: 'Buscar'),
+              Tab(text: 'Buscar Advogados'),
+              Tab(text: 'Busca Inteligente'),
             ],
           ),
         ),
         body: TabBarView(
           controller: _tabController,
-          children: const [
-            HybridRecommendationsTabView(),
-            HybridSearchTabView(),
+          children: [
+            _buildRecommendationsTab(),
+            _buildLawyerSearchTab(),
+            _buildAISearchTab(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendationsTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Presets de busca rápida
+          Text(
+            'Busca Rápida',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildPresetSelector(),
+          const SizedBox(height: 24),
+          
+          // Lista de recomendações
+          Expanded(
+            child: BlocBuilder<HybridMatchBloc, HybridMatchState>(
+              builder: (context, state) {
+                if (state is HybridMatchLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (state is HybridMatchError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          LucideIcons.alertCircle,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Erro ao carregar recomendações',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          state.message,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                
+                if (state is HybridMatchLoaded) {
+                  if (state.lawyers.isEmpty && state.firms.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            LucideIcons.users,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Nenhuma recomendação encontrada',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Tente ajustar os filtros ou use a busca manual',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  return HybridMatchList(
+                    lawyers: state.lawyers,
+                    firms: state.firms,
+                  );
+                }
+                
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        LucideIcons.users,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Recomendações de Parceiros',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Selecione um preset para ver recomendações',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLawyerSearchTab() {
+    return const HybridSearchTabView();
+  }
+
+  Widget _buildPresetSelector() {
+    final presets = [
+      {'key': 'balanced', 'label': 'Equilibrado', 'icon': LucideIcons.star},
+      {'key': 'economic', 'label': 'Custo-Benefício', 'icon': LucideIcons.dollarSign},
+      {'key': 'expert', 'label': 'Experiente', 'icon': LucideIcons.award},
+      {'key': 'fast', 'label': 'Resposta Rápida', 'icon': LucideIcons.zap},
+    ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: presets.map((preset) {
+        final isSelected = _selectedPreset == preset['key'];
+        return GestureDetector(
+          onTap: () {
+            setState(() => _selectedPreset = preset['key'] as String);
+            _performPresetSearch(preset['key'] as String);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF1A237E).withValues(alpha: 0.1) : Colors.transparent,
+              border: Border.all(
+                color: isSelected ? const Color(0xFF1A237E) : Colors.grey.shade300,
+                width: isSelected ? 1.5 : 1,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  preset['icon'] as IconData,
+                  size: 16,
+                  color: isSelected ? const Color(0xFF1A237E) : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  preset['label'] as String,
+                  style: TextStyle(
+                    color: isSelected ? const Color(0xFF1A237E) : Colors.grey.shade700,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  void _performPresetSearch(String preset) {
+    // Implementar busca baseada no preset
+    context.read<HybridMatchBloc>().add(
+      SearchHybridMatches(query: ''),
+    );
+  }
+
+  Widget _buildPartnershipSearchTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A237E).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              LucideIcons.bot,
+              size: 64,
+              color: Color(0xFF1A237E),
+            ),
+          ),
+          const SizedBox(height: 32),
+          const Text(
+            'Buscar Parcerias com IA',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Use nossa inteligência artificial para encontrar os melhores parceiros para seus casos.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () {
+              context.go('/triage');
+            },
+            icon: const Icon(LucideIcons.messageCircle),
+            label: const Text('Iniciar Busca com IA'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1A237E),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: const Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(LucideIcons.zap, size: 16, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Text(
+                      'Análise Rápida',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(LucideIcons.target, size: 16, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text(
+                      'Matches Precisos',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(LucideIcons.shield, size: 16, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text(
+                      'Parceiros Verificados',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -112,6 +399,101 @@ class _LawyersViewState extends State<LawyersView> with SingleTickerProviderStat
       context: context,
       isScrollControlled: true,
       builder: (context) => const HybridFiltersModal(),
+    );
+  }
+
+  Widget _buildAISearchTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A237E).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              LucideIcons.bot,
+              size: 64,
+              color: Color(0xFF1A237E),
+            ),
+          ),
+          const SizedBox(height: 32),
+          const Text(
+            'Busca Direta por IA',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Descreva o tipo de parceiro que você busca e nossa IA encontrará os melhores matches para seus casos.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () {
+              context.go('/triage');
+            },
+            icon: const Icon(LucideIcons.messageCircle),
+            label: const Text('Iniciar Busca Direta'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1A237E),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.info,
+                      size: 20,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Busca Direta vs Recomendações',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'A busca direta permite descrever exatamente o que você precisa, enquanto as recomendações usam presets pré-definidos.',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -454,6 +836,102 @@ class _HybridRecommendationsTabViewState extends State<HybridRecommendationsTabV
       ),
     );
   }
+
+  Widget _buildAISearchTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1A237E).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              LucideIcons.bot,
+              size: 64,
+              color: Color(0xFF1A237E),
+            ),
+          ),
+          const SizedBox(height: 32),
+          const Text(
+            'Busca Direta por IA',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Descreva o tipo de parceiro que você busca e nossa IA encontrará os melhores matches para seus casos.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () {
+              context.go('/triage');
+            },
+            icon: const Icon(LucideIcons.messageCircle),
+            label: const Text('Iniciar Busca Direta'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1A237E),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.info,
+                      size: 20,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Busca Direta vs Recomendações',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'A busca direta permite descrever exatamente o que você precisa, enquanto as recomendações usam presets pré-definidos.',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
 
 /// Tab de Busca Híbrida
