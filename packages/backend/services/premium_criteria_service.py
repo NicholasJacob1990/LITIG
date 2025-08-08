@@ -4,7 +4,12 @@ from sqlalchemy.future import select
 from sqlalchemy import or_
 
 from models.premium_criteria import PremiumCriteria
-from config import get_supabase_client
+
+# Import opcional do cliente Supabase
+try:
+    from config import get_supabase_client  # type: ignore
+except Exception:
+    get_supabase_client = None  # type: ignore
 
 
 def _canonical_area(area: str) -> str:
@@ -44,21 +49,18 @@ def _matches_rule(case_data: Dict[str, Any], rule: PremiumCriteria) -> bool:
 
 
 async def get_client_plan_from_db(client_id: str) -> str:
-    """Fetch client plan from Supabase profiles table."""
+    """Fetch client plan from Supabase profiles table (optional in tests)."""
+    if get_supabase_client is None:
+        return "FREE"
     try:
         supabase = get_supabase_client()
-        
-        # Use the SQL function we created
         result = supabase.rpc('get_client_plan', {'client_user_id': client_id}).execute()
-        
         if result.data:
             return result.data
         else:
-            # Fallback: direct query
             profile_result = supabase.table('profiles').select('plan').eq('user_id', client_id).single().execute()
             if profile_result.data:
                 return profile_result.data.get('plan', 'FREE')
-            
         return 'FREE'
     except Exception as e:
         # If any error occurs, default to FREE
@@ -73,14 +75,6 @@ async def evaluate_case_premium(
 ) -> tuple[bool, Optional[PremiumCriteria]]:
     """
     Evaluates if a case should be marked as premium.
-    
-    Args:
-        case_data: Case information dictionary
-        db: SQLAlchemy async session
-        client_id: Client user ID to fetch plan from database
-    
-    Returns:
-        Tuple of (is_premium: bool, matching_rule: Optional[PremiumCriteria])
     """
     area = _canonical_area(case_data.get("area", ""))
     subarea = _canonical_area(case_data.get("subarea", ""))
@@ -122,14 +116,6 @@ async def classify_case_premium(
 ) -> Dict[str, Any]:
     """
     Main function to classify a case as premium and return enriched data.
-    
-    Args:
-        case_data: Case information dictionary
-        db: SQLAlchemy async session  
-        client_id: Client user ID
-        
-    Returns:
-        Dictionary with premium classification and metadata
     """
     is_premium, matching_rule = await evaluate_case_premium(case_data, db, client_id)
     
