@@ -134,11 +134,26 @@ class ContractorDashboard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          StatCard(
-            title: 'Parcerias Ativas',
-            value: '${metrics['activePartnerships']}',
-            icon: LucideIcons.briefcase,
-            color: Colors.orange.shade400,
+          Row(
+            children: [
+              Expanded(
+                child: StatCard(
+                  title: 'Parcerias Ativas',
+                  value: '${metrics['activePartnerships']}',
+                  icon: LucideIcons.briefcase,
+                  color: Colors.orange.shade400,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: StatCard(
+                  title: 'Conversão',
+                  value: '${metrics['conversionRate']}%',
+                  icon: LucideIcons.target,
+                  color: Colors.purple.shade400,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -187,13 +202,7 @@ class ContractorDashboard extends StatelessWidget {
   }
 
   Widget _buildClientPipeline(BuildContext context) {
-    final pipelineData = {
-      'prospects': 12,
-      'qualified': 8,
-      'proposal': 5,
-      'negotiation': 3,
-      'closed': 2
-    };
+    final pipelineData = _getPipelineForRole(userRole);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -409,6 +418,28 @@ class ContractorDashboard extends StatelessWidget {
           'monthlyRevenue': 25000.0,
           'conversionRate': 28,
           'activePartnerships': 2,
+        };
+    }
+  }
+
+  Map<String, int> _getPipelineForRole(String role) {
+    switch (role) {
+      case 'super_associate':
+        return {
+          'prospects': 18,
+          'qualified': 12,
+          'proposal': 7,
+          'negotiation': 4,
+          'closed': 3,
+        };
+      case 'lawyer_individual':
+      default:
+        return {
+          'prospects': 12,
+          'qualified': 8,
+          'proposal': 5,
+          'negotiation': 3,
+          'closed': 2,
         };
     }
   }

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/presentation/bloc/matches_bloc.dart';
 import 'package:meu_app/src/features/search/presentation/widgets/lawyer_search_form.dart';
-import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_card.dart';
+// import 'package:meu_app/src/features/lawyers/presentation/widgets/lawyer_match_card.dart';
 import 'package:meu_app/src/features/search/presentation/bloc/search_bloc.dart';
 import 'package:meu_app/src/features/search/presentation/bloc/search_event.dart';
 import 'package:meu_app/src/features/search/presentation/bloc/search_state.dart';
@@ -15,6 +15,8 @@ import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/injection_container.dart';
 
 import '../../../../shared/services/analytics_service.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 
 class LawyersScreen extends StatefulWidget {
   const LawyersScreen({super.key});
@@ -27,6 +29,7 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
   late TabController _tabController;
   late AnalyticsService _analytics;
   DateTime? _screenEnterTime;
+  bool _showMapView = false;
 
   @override
   void initState() {
@@ -46,6 +49,7 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         _trackTabChange(_tabController.index);
+        setState(() {});
       }
     });
   }
@@ -106,10 +110,18 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
         appBar: AppBar(
           title: const Text('Advogados & Escritórios'),
           actions: [
-            IconButton(
-              icon: const Icon(LucideIcons.slidersHorizontal),
-              onPressed: () => _showFiltersModal(context),
-            ),
+            // Toggle Lista/Mapa visível apenas na aba Buscar (index 0)
+            if (_tabController.index == 0)
+              IconButton(
+                tooltip: _showMapView ? 'Ver lista' : 'Ver mapa',
+                icon: Icon(_showMapView ? LucideIcons.list : LucideIcons.map),
+                onPressed: () => setState(() => _showMapView = !_showMapView),
+              ),
+            if (_tabController.index == 1)
+              IconButton(
+                icon: const Icon(LucideIcons.slidersHorizontal),
+                onPressed: () => _showFiltersModal(context),
+              ),
           ],
           bottom: TabBar(
             controller: _tabController,
@@ -127,13 +139,15 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
         ),
         body: TabBarView(
           controller: _tabController,
-          children: const [
+          children: [
             // Aba de busca
-            _SearchTab(),
+            _SearchTab(showMapView: _showMapView),
             // Aba de recomendações com presets
-            _RecommendationsTab(),
+            const _RecommendationsTab(),
           ],
         ),
+        // Toggle movido para AppBar; não usar FAB
+        floatingActionButton: null,
       ),
     );
   }
@@ -148,18 +162,20 @@ class _LawyersScreenState extends State<LawyersScreen> with TickerProviderStateM
 }
 
 class _SearchTab extends StatelessWidget {
-  const _SearchTab();
+  final bool showMapView;
+
+  const _SearchTab({required this.showMapView});
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          LawyerSearchForm(),
-          SizedBox(height: 16),
+          const LawyerSearchForm(),
+          const SizedBox(height: 16),
           Expanded(
-            child: _SearchResults(),
+            child: _SearchResults(showMapView: showMapView),
           ),
         ],
       ),
@@ -168,112 +184,125 @@ class _SearchTab extends StatelessWidget {
 }
 
 class _SearchResults extends StatelessWidget {
-  const _SearchResults();
+  final bool showMapView;
+
+  const _SearchResults({required this.showMapView});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MatchesBloc, MatchesState>(
+    return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        if (state is MatchesLoading) {
+        // Se o toggle de mapa estiver ativo, sempre renderize o mapa.
+        if (showMapView) {
+          if (state is SearchLoaded) {
+            final lawyers = state.results.whereType<Lawyer>().toList();
+            return _buildMapView(context, lawyers);
+          }
+          // Sem resultados (ainda) ou em erro/carregando: mostra mapa vazio (SP como fallback)
+          return _buildMapView(context, const <Lawyer>[]);
+        }
+
+        // Lista padrão quando o mapa não está ativo
+        if (state is SearchLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
-        if (state is MatchesError) {
+        if (state is SearchError) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  LucideIcons.alertCircle,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Erro ao buscar advogados',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.message,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Tentar novamente a busca
-                  },
-                  icon: const Icon(LucideIcons.refreshCw),
-                  label: const Text('Tentar Novamente'),
-                ),
+                Icon(LucideIcons.alertCircle, size: 48, color: Theme.of(context).colorScheme.error),
+                const SizedBox(height: 12),
+                Text(state.message, textAlign: TextAlign.center),
               ],
             ),
           );
         }
-        
-        if (state is MatchesLoaded) {
-          if (state.matches.isEmpty) {
+        if (state is SearchLoaded) {
+          final lawyers = state.results.whereType<Lawyer>().toList();
+          final firms = state.results.whereType<LawFirm>().toList();
+
+          if (lawyers.isEmpty && firms.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    LucideIcons.searchX,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Nenhum advogado encontrado',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tente ajustar os filtros de busca',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  Icon(LucideIcons.searchX, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const SizedBox(height: 12),
+                  const Text('Nenhum resultado encontrado. Ajuste os filtros e tente novamente.'),
                 ],
               ),
             );
           }
-          
-          return ListView.builder(
-            itemCount: state.matches.length,
-            itemBuilder: (context, index) {
-              final match = state.matches[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: LawyerMatchCard(lawyer: match),
-              );
-            },
+
+          return PartnerSearchResultList(
+            lawyers: lawyers,
+            firms: firms,
+            emptyMessage: 'Nenhum resultado encontrado.',
           );
         }
-        
+
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                LucideIcons.search,
-                size: 48,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Busque por advogados',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Use os filtros acima para encontrar o advogado ideal',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
+              Icon(LucideIcons.search, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              const SizedBox(height: 12),
+              const Text('Busque por advogados'),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+extension on _SearchResults {
+  Widget _buildMapView(BuildContext context, List<Lawyer> lawyers) {
+    final withCoords = lawyers.where((l) => l.latitude != null && l.longitude != null).toList();
+    final Set<Marker> markers = withCoords
+        .map((l) => Marker(
+              markerId: MarkerId('lawyer_${l.id}'),
+              position: LatLng(l.latitude!, l.longitude!),
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+              infoWindow: InfoWindow(title: l.name, snippet: 'OAB: ${l.oab}'),
+            ))
+        .toSet();
+
+    final CameraPosition initial = withCoords.isNotEmpty
+        ? CameraPosition(target: LatLng(withCoords.first.latitude!, withCoords.first.longitude!), zoom: 11)
+        : const CameraPosition(target: LatLng(-23.5505, -46.6333), zoom: 10);
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.location_on, color: Colors.blue, size: 20),
+              const SizedBox(width: 6),
+              Text('${withCoords.length} Advogados com localização'),
+            ],
+          ),
+        ),
+        Expanded(
+          child: GoogleMap(
+            initialCameraPosition: initial,
+            markers: markers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            zoomControlsEnabled: true,
+            mapToolbarEnabled: false,
+          ),
+        ),
+      ],
     );
   }
 }

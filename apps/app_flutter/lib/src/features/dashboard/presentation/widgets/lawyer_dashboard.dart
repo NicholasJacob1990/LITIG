@@ -9,6 +9,7 @@ import 'package:meu_app/src/features/dashboard/data/repositories/dashboard_repos
 import 'package:meu_app/src/features/dashboard/domain/usecases/get_lawyer_stats_usecase.dart';
 import 'package:meu_app/src/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:meu_app/src/features/dashboard/presentation/widgets/stat_card.dart';
+import 'package:meu_app/injection_container.dart';
  
 
 class LawyerDashboard extends StatelessWidget {
@@ -22,8 +23,7 @@ class LawyerDashboard extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) {
-            // TODO: Mover para GetIt
-            final dataSource = DashboardRemoteDataSourceImpl();
+            final dataSource = DashboardRemoteDataSourceImpl(dio: getIt());
             final repository = DashboardRepositoryImpl(remoteDataSource: dataSource);
             final useCase = GetLawyerStatsUseCase(repository);
             return DashboardBloc(getLawyerStatsUseCase: useCase)..add(FetchLawyerStats());

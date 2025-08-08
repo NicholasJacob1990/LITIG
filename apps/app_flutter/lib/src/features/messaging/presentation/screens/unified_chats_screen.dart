@@ -17,6 +17,7 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart';
 import 'package:meu_app/src/features/auth/domain/entities/user.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 class UnifiedChatsScreen extends StatefulWidget {
   const UnifiedChatsScreen({super.key});
@@ -29,12 +30,35 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late UnifiedMessagingBloc _messagingBloc;
+  final UnipileService _unipileService = UnipileService();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _messagingBloc = GetIt.instance<UnifiedMessagingBloc>();
+    // Configuração automática da base URL para ambientes diferentes (Android emulador)
+    const defaultBase = 'http://localhost:8080/api/v2/unipile';
+    _unipileService.setBaseUrl(defaultBase);
+    // Se necessário, aqui poderíamos detectar plataforma e usar 10.0.2.2
+    // Injetar Authorization do usuário logado quando disponível
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated) {
+      final token = authState.user.metadata?['accessToken']
+          ?? authState.user.metadata?['jwt']
+          ?? authState.user.metadata?['sessionToken'];
+      if (token is String && token.isNotEmpty) {
+        _unipileService.setAuthToken(token);
+      }
+    }
+    // Fallback: usar token atual do Supabase se disponível
+    try {
+      final session = supa.Supabase.instance.client.auth.currentSession;
+      final supaToken = session?.accessToken;
+      if (supaToken != null && supaToken.isNotEmpty) {
+        _unipileService.setAuthToken(supaToken);
+      }
+    } catch (_) {}
     
     // Carregar dados na inicialização
     _messagingBloc.add(const LoadUnifiedMessages());
@@ -387,7 +411,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
           ),
         ),
         title: Text(
-          message.sender ?? 'Remetente desconhecido',
+          (message.sender.isNotEmpty) ? message.sender : 'Remetente desconhecido',
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
@@ -400,9 +424,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
             ),
             const SizedBox(height: 4),
             Text(
-              message.timestamp != null 
-                  ? timeago.format(message.timestamp, locale: 'pt_BR')
-                  : 'Horário desconhecido',
+              timeago.format(message.timestamp, locale: 'pt_BR'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -442,7 +464,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
           ),
         ),
         title: Text(
-          message.sender ?? 'Remetente desconhecido',
+          (message.sender.isNotEmpty) ? message.sender : 'Remetente desconhecido',
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
@@ -455,9 +477,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
             ),
             const SizedBox(height: 4),
             Text(
-              message.timestamp != null 
-                  ? timeago.format(message.timestamp, locale: 'pt_BR')
-                  : 'Horário desconhecido',
+              timeago.format(message.timestamp, locale: 'pt_BR'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -501,31 +521,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
     );
   }
 
-  Color _getProviderColor(String? provider) {
-    switch (provider?.toLowerCase()) {
-      case 'whatsapp':
-        return const Color(0xFF25D366);
-      case 'linkedin':
-        return const Color(0xFF0077B5);
-      case 'telegram':
-        return const Color(0xFF0088CC);
-      default:
-        return AppColors.primaryBlue;
-    }
-  }
-
-  IconData _getProviderIcon(String? provider) {
-    switch (provider?.toLowerCase()) {
-      case 'whatsapp':
-        return LucideIcons.messageCircle;
-      case 'linkedin':
-        return LucideIcons.linkedin;
-      case 'telegram':
-        return LucideIcons.send;
-      default:
-        return LucideIcons.messageCircle;
-    }
-  }
+  // Removed unused helpers _getProviderColor and _getProviderIcon (linter cleanup)
 
   void _scheduleConsultation(UnipileMessage message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -633,9 +629,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
               ),
               const SizedBox(height: 4),
               Text(
-                email.receivedAt != null 
-                    ? timeago.format(email.receivedAt, locale: 'pt_BR')
-                    : 'Data desconhecida',
+                timeago.format(email.receivedAt, locale: 'pt_BR'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -668,6 +662,8 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
     );
   }
 
+  // _buildEventCard is currently unused; keeping implementation for upcoming detail screens
+  // ignore: unused_element
   Widget _buildEventCard(UnipileCalendarEvent event) {
     final isToday = _isSameDay(event.startTime, DateTime.now());
     final isPast = event.endTime.isBefore(DateTime.now());
@@ -701,7 +697,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (event.description.isNotEmpty == true) ...[
+            if (event.description.isNotEmpty) ...[
               Text(
                 event.description,
                 maxLines: 1,
@@ -720,7 +716,7 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
                 ),
               ],
             ),
-            if (event.location.isNotEmpty == true) ...[
+            if (event.location.isNotEmpty) ...[
               const SizedBox(height: 2),
               Row(
                 children: [
@@ -878,19 +874,37 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
   }
 
   void _connectWhatsApp(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Conectando WhatsApp...'),
-        backgroundColor: Color(0xFF25D366),
-      ),
-    );
+    context.read<UnifiedMessagingBloc>().add(const ConnectWhatsAppAccount());
   }
 
   void _connectLinkedIn(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Conectando LinkedIn...'),
-        backgroundColor: Color(0xFF0077B5),
+    final usernameController = TextEditingController();
+    final passwordController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Conectar LinkedIn'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(decoration: const InputDecoration(labelText: 'Usuário'), controller: usernameController),
+            const SizedBox(height: 8),
+            TextField(decoration: const InputDecoration(labelText: 'Senha'), controller: passwordController, obscureText: true),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<UnifiedMessagingBloc>().add(ConnectLinkedInAccount(
+                username: usernameController.text,
+                password: passwordController.text,
+              ));
+            },
+            child: const Text('Conectar'),
+          )
+        ],
       ),
     );
   }
@@ -1371,7 +1385,26 @@ class _ConversationsViewState extends State<ConversationsView> with TickerProvid
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Stack(children: [
-            CircleAvatar(radius: 24, backgroundColor: providerConfig.color.withValues(alpha: 0.1), child: chat.avatarUrl != null ? ClipRRect(borderRadius: BorderRadius.circular(24), child: Image.network(chat.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover)) : Icon(LucideIcons.user, color: providerConfig.color, size: 20)),
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: providerConfig.color.withValues(alpha: 0.1),
+              child: (chat.avatarUrl != null && chat.avatarUrl!.isNotEmpty)
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Image.network(
+                        chat.avatarUrl!,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stack) => Icon(
+                          LucideIcons.user,
+                          color: providerConfig.color,
+                          size: 20,
+                        ),
+                      ),
+                    )
+                  : Icon(LucideIcons.user, color: providerConfig.color, size: 20),
+            ),
             Positioned(bottom: 0, right: 0, child: Container(padding: const EdgeInsets.all(3), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)), child: SvgPicture.asset(providerConfig.svgAsset, width: 12, height: 12, colorFilter: ColorFilter.mode(providerConfig.color, BlendMode.srcIn)))),
           ]),
           title: Text(chat.chatName, style: theme.textTheme.titleMedium?.copyWith(fontWeight: chat.unreadCount > 0 ? FontWeight.bold : FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -1439,7 +1472,7 @@ class _ConversationsViewState extends State<ConversationsView> with TickerProvid
   }
   
   void _showConnectAccountDialog(BuildContext context) { showDialog(context: context, builder: (context) => AlertDialog(title: const Text('Conectar Conta'), content: const Text('Funcionalidade em desenvolvimento'), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))])); }
-  void _showSearchDialog(BuildContext context) { showDialog(context: context, builder: (context) => AlertDialog(title: const Text('Buscar Conversas'), content: const TextField(decoration: InputDecoration(hintText: 'Digite para buscar...', prefixIcon: Icon(LucideIcons.search))), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar'))])); }
+  // Removed unused _showSearchDialog (linter cleanup)
   void _showNewChatDialog(BuildContext context) { showDialog(context: context, builder: (context) => AlertDialog(title: const Text('Nova Conversa'), content: const Text('Funcionalidade em desenvolvimento'), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))])); }
 
   void _showDeleteChatDialog(BuildContext context, UnifiedChat chat) {

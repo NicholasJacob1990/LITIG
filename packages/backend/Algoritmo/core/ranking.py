@@ -74,8 +74,16 @@ class RankingFacade(BaseFacade):
                 "top_n": top_n
             })
         
-        # Obter pesos do preset
+        # Obter pesos do preset com normalização
         weights = self._get_preset_weights(preset)
+        feature_keys = set(weights.keys())
+        # Garantir que features faltantes tenham peso 0 e normalizar soma=1
+        all_keys = set(PRESET_WEIGHTS.get("balanced", {}).keys())
+        for k in all_keys:
+            if k not in weights:
+                weights[k] = 0.0
+        s = sum(weights.values()) or 1.0
+        weights = {k: v / s for k, v in weights.items()}
         
         # Calcular scores para todos os advogados
         lawyer_scores = []

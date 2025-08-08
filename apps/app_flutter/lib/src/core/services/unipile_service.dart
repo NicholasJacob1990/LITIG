@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:meu_app/src/core/utils/app_logger.dart';
 
@@ -144,9 +146,35 @@ class UnipileService {
   factory UnipileService() => _instance;
   UnipileService._internal();
 
-  final String _baseUrl = 'http://localhost:8080/api/v2/unipile';
+  String _baseUrl = _resolveDefaultBaseUrl();
   final http.Client _client = http.Client();
   String? _authToken;
+
+  // Permite configurar dinamicamente o token JWT do usuário (para Authorization Bearer)
+  void setAuthToken(String? token) {
+    _authToken = token;
+  }
+
+  // Permite configurar dinamicamente a base URL (ex.: 10.0.2.2 no emulador Android)
+  void setBaseUrl(String baseUrl) {
+    if (baseUrl.isNotEmpty) {
+      _baseUrl = baseUrl;
+    }
+  }
+
+  static String _resolveDefaultBaseUrl() {
+    try {
+      if (kIsWeb) {
+        return 'http://localhost:8080/api/v2/unipile';
+      }
+      if (Platform.isAndroid) {
+        return 'http://10.0.2.2:8080/api/v2/unipile';
+      }
+      return 'http://localhost:8080/api/v2/unipile';
+    } catch (_) {
+      return 'http://localhost:8080/api/v2/unipile';
+    }
+  }
 
   Future<Map<String, String>> _getHeaders() async {
     final headers = {
@@ -278,8 +306,10 @@ class UnipileService {
 
   // ===== EMAIL MANAGEMENT =====
 
-  Future<List<UnipileEmail>> getEmails({String? accountId}) async {
-    final endpoint = accountId != null ? '/emails?account_id=$accountId' : '/emails';
+  Future<List<UnipileEmail>> getEmails({String? connectionId}) async {
+    final endpoint = connectionId != null
+        ? '/messaging/emails?connection_id=$connectionId'
+        : '/messaging/emails?connection_id='; // backend exige connection_id
     final response = await _makeRequest('GET', endpoint);
     final emails = response['emails'] as List<dynamic>? ?? [];
     return emails
@@ -294,14 +324,17 @@ class UnipileService {
     required String body,
     List<String>? attachments,
   }) async {
-    final response = await _makeRequest('POST', '/messaging/send', data: {
-      'account_id': accountId,
-      'to': to,
-      'subject': subject,
-      'body': body,
-      'attachments': attachments ?? [],
-      'type': 'email',
-    });
+    final response = await _makeRequest(
+      'POST',
+      '/messaging/send?connection_id=$accountId',
+      data: {
+        'to': to,
+        'subject': subject,
+        'body': body,
+        'attachments': attachments ?? [],
+        'type': 'email',
+      },
+    );
     
     return response;
   }
@@ -315,7 +348,7 @@ class UnipileService {
   }) async {
     final response = await _makeRequest('POST', '/emails/$emailId/reply', data: {
       'account_id': accountId,
-      'body': replyBody,
+      'reply_body': replyBody,
       'reply_all': replyAll,
       'attachments': attachments ?? [],
     });
@@ -328,10 +361,8 @@ class UnipileService {
     required String accountId,
     required bool permanent,
   }) async {
-    final response = await _makeRequest('DELETE', '/emails/$emailId', data: {
-      'account_id': accountId,
-      'permanent': permanent,
-    });
+    final qp = 'account_id=$accountId&permanent=${permanent ? 'true' : 'false'}';
+    final response = await _makeRequest('DELETE', '/emails/$emailId?$qp');
     
     return response;
   }
@@ -372,7 +403,7 @@ class UnipileService {
   }) async {
     final response = await _makeRequest('POST', '/emails/$emailId/move', data: {
       'account_id': accountId,
-      'folder': folder,
+      'folder_id': folder,
     });
     
     return response;
@@ -381,7 +412,9 @@ class UnipileService {
   // ===== CALENDAR MANAGEMENT =====
 
   Future<List<UnipileCalendarEvent>> getCalendarEvents({String? accountId}) async {
-    final endpoint = accountId != null ? '/calendar/events?account_id=$accountId' : '/calendar/events';
+    final endpoint = accountId != null
+        ? '/calendar/events?connection_id=$accountId'
+        : '/calendar/events?connection_id='; // backend exige connection_id
     final response = await _makeRequest('GET', endpoint);
     final events = response['events'] as List<dynamic>? ?? [];
     return events
@@ -520,8 +553,8 @@ class UnipileService {
     return List<Map<String, dynamic>>.from(response['chats'] ?? []);
   }
 
-  Future<List<UnipileMessage>> getChatMessages(String chatId) async {
-    final response = await _makeRequest('GET', '/chats/$chatId/messages');
+  Future<List<UnipileMessage>> getChatMessages(String chatId, {int limit = 50}) async {
+    final response = await _makeRequest('GET', '/chats/$chatId/messages?limit=$limit');
     final messages = response['messages'] as List<dynamic>? ?? [];
     return messages
         .map((json) => UnipileMessage.fromJson(json))
@@ -530,14 +563,13 @@ class UnipileService {
 
   Future<Map<String, dynamic>> sendChatMessage({
     required String chatId,
-    required String accountId,
+    String? accountId,
     required String message,
     String? messageType,
   }) async {
     final response = await _makeRequest('POST', '/chats/$chatId/messages', data: {
-      'account_id': accountId,
-      'message': message,
-      'type': messageType ?? 'text',
+      'content': message,
+      'attachments': [],
     });
     
     return response;

@@ -51,21 +51,26 @@ class LawyerResponsibleSection extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            CachedNetworkImage(
-              imageUrl: lawyer!.avatarUrl,
-              imageBuilder: (context, imageProvider) => CircleAvatar(
-                radius: 28,
-                backgroundImage: imageProvider,
-              ),
-              placeholder: (context, url) => const CircleAvatar(
-                radius: 28,
-                child: CircularProgressIndicator(),
-              ),
-              errorWidget: (context, url, error) => InitialsAvatar(
-                text: lawyer!.name,
-                radius: 28,
-              ),
-            ),
+            (lawyer!.avatarUrl.isNotEmpty)
+                ? CachedNetworkImage(
+                    imageUrl: lawyer!.avatarUrl,
+                    imageBuilder: (context, imageProvider) => CircleAvatar(
+                      radius: 28,
+                      backgroundImage: imageProvider,
+                    ),
+                    placeholder: (context, url) => const CircleAvatar(
+                      radius: 28,
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorWidget: (context, url, error) => InitialsAvatar(
+                      text: lawyer!.name,
+                      radius: 28,
+                    ),
+                  )
+                : InitialsAvatar(
+                    text: lawyer!.name,
+                    radius: 28,
+                  ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

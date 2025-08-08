@@ -269,7 +269,7 @@ class EnhancedClientDashboard extends StatelessWidget {
           children: [
             Text('Seus Advogados', style: Theme.of(context).textTheme.titleLarge),
             TextButton(
-              onPressed: () => context.go('/advogados'),
+      onPressed: () => context.go('/find-lawyers'),
               child: const Text('Buscar mais'),
             ),
           ],
@@ -489,7 +489,7 @@ class EnhancedClientDashboard extends StatelessWidget {
           context,
           'Buscar Advogados',
           LucideIcons.search,
-          '/advogados',
+  '/find-lawyers',
           Colors.green,
         ),
         _buildActionCard(

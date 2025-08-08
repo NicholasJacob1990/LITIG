@@ -92,8 +92,9 @@ class CaseListCard extends StatelessWidget {
     return Row(
               children: [
                 CircleAvatar(
-          backgroundImage: NetworkImage(lawyer.avatarUrl),
                   radius: 24,
+                  backgroundImage: lawyer.avatarUrl.isNotEmpty ? NetworkImage(lawyer.avatarUrl) : null,
+                  child: lawyer.avatarUrl.isEmpty ? const Icon(LucideIcons.user) : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -10,6 +10,8 @@ class Lawyer extends Equatable {
   final bool isAvailable;
   final double? distanceKm;
   final String plan; // NOVO: Plano do advogado (PRO, FREE, etc.)
+  final double? latitude; // NOVO: localização opcional
+  final double? longitude; // NOVO: localização opcional
 
   const Lawyer({
     required this.id,
@@ -21,6 +23,8 @@ class Lawyer extends Equatable {
     required this.isAvailable,
     this.distanceKm,
     this.plan = 'FREE', // NOVO: Padrão FREE para compatibilidade
+    this.latitude,
+    this.longitude,
   });
 
   /// Verifica se o advogado tem plano PRO
@@ -40,5 +44,7 @@ class Lawyer extends Equatable {
         isAvailable,
         distanceKm,
         plan, // NOVO
+        latitude,
+        longitude,
       ];
 } 

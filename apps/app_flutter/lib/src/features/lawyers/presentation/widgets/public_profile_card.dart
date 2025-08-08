@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/features/lawyers/domain/entities/matched_lawyer.dart';
 import 'package:meu_app/src/features/lawyers/presentation/widgets/contact_request_modal.dart';

@@ -72,6 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     _buildForm(context),
                     const SizedBox(height: 32),
                     _buildRegisterPrompt(context),
+                    const SizedBox(height: 32),
+                    _buildDebugSection(context),
                   ],
                 ),
               ),
@@ -85,10 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildHeader(BuildContext context) {
     return Column(
       children: [
-        const Icon(
+        Icon(
           LucideIcons.shieldCheck,
           size: 64,
-          color: AppColors.primaryBlue,
+          color: Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(height: 16),
         Text(
@@ -148,9 +150,9 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () {
           // TODO: Implementar lógica de esqueci a senha
         },
-        child: const Text(
+        child: Text(
           'Esqueceu a senha?',
-          style: TextStyle(color: AppColors.primaryBlue),
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
       ),
     );
@@ -196,11 +198,11 @@ class _LoginScreenState extends State<LoginScreen> {
             const Text('Não tem uma conta?'),
             TextButton(
               onPressed: () => context.go('/register-client'),
-              child: const Text(
+              child: Text(
                 'Cadastre-se como Cliente',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
@@ -208,13 +210,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
 
         const SizedBox(height: 24),
-        
         const Divider(),
-        
         const SizedBox(height: 24),
 
         // Cadastro de Advogado
-        Text('É advogado(a)? Cadastre-se como:', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textPrimary)),
+        Text(
+          'É advogado(a)? Cadastre-se como:',
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(color: AppColors.textPrimary),
+        ),
         const SizedBox(height: 16),
         Wrap(
           spacing: 12.0,
@@ -224,69 +230,67 @@ class _LoginScreenState extends State<LoginScreen> {
             OutlinedButton.icon(
               icon: const Icon(LucideIcons.user),
               label: const Text('Autônomo'),
-              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_individual'}),
+              onPressed: () => context.go(
+                '/register-lawyer',
+                extra: {'role': 'lawyer_individual'},
+              ),
             ),
             OutlinedButton.icon(
               icon: const Icon(LucideIcons.users),
               label: const Text('Associado'),
-              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_firm_member'}),
+              onPressed: () => context.go(
+                '/register-lawyer',
+                extra: {'role': 'lawyer_firm_member'},
+              ),
             ),
             OutlinedButton.icon(
               icon: const Icon(LucideIcons.building),
               label: const Text('Escritório'),
-              onPressed: () => context.go('/register-lawyer', extra: {'role': 'lawyer_office'}),
+              onPressed: () => context.go(
+                '/register-lawyer',
+                extra: {'role': 'lawyer_office'},
+              ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 32),
-        
-        // === MODO DEBUG ===
-        Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.warningLight,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.bug_report, color: AppColors.warning, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Modo Debug - Teste de Usuários',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppColors.warning,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+      ],
+    );
+  }
+
+  Widget _buildDebugSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          'Modo Debug - Entrar sem senha',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: AppColors.warning,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Clique em um botão abaixo para testar como diferentes tipos de usuário:',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.warning,
-                ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Selecione um perfil para testar rapidamente:',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.warning,
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildDebugButton(context, 'Cliente', 'PF', AppColors.info),
-                  _buildDebugButton(context, 'Advogado Associado', 'lawyer_firm_member', AppColors.success),
-                  _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', AppColors.primaryPurple),
-                          _buildDebugButton(context, 'Escritório', 'firm', AppColors.error),
-        _buildDebugButton(context, 'Super Associado', 'super_associate', AppColors.warning),
-                ],
-              ),
-            ],
-          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: [
+            _buildDebugButton(context, 'Cliente PF', 'client_pf', AppColors.info),
+            _buildDebugButton(context, 'Advogado Associado', 'lawyer_firm_member', AppColors.success),
+            _buildDebugButton(context, 'Advogado Autônomo', 'lawyer_individual', AppColors.primaryPurple),
+            _buildDebugButton(context, 'Escritório', 'firm', AppColors.error),
+            _buildDebugButton(context, 'Super Associado', 'super_associate', AppColors.warning),
+          ],
         ),
       ],
     );
@@ -306,30 +310,52 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _switchToDebugUser(BuildContext context, String userRole) {
-    final debugUsers = {
-      'PF': const User(
+    final debugUsers = <String, User>{
+      'client_pf': const User(
         id: 'debug-client-1',
         email: 'cliente@teste.com',
         fullName: 'João Silva (Cliente)',
-        role: 'client_pf',
+        role: 'client',
         userRole: 'client_pf',
-        permissions: ['nav.view.client_home', 'nav.view.client_cases', 'nav.view.find_lawyers', 'nav.view.client_messages', 'nav.view.services', 'nav.view.client_profile'],
+        permissions: [
+          'nav.view.client_home',
+          'nav.view.client_cases',
+          'nav.view.find_lawyers',
+          'nav.view.client_messages',
+          'nav.view.services',
+          'nav.view.client_profile',
+        ],
       ),
       'lawyer_firm_member': const User(
         id: 'debug-lawyer-1',
         email: 'advogado@teste.com',
-        fullName: 'Maria Santos (Advogada Associada)',
+        fullName: 'Maria Santos (Associada)',
         role: 'lawyer',
         userRole: 'lawyer_firm_member',
-        permissions: ['nav.view.dashboard', 'nav.view.cases', 'nav.view.schedule', 'nav.view.offers', 'nav.view.messages', 'nav.view.profile'],
+        permissions: [
+          'nav.view.dashboard',
+          'nav.view.cases',
+          'nav.view.schedule',
+          'nav.view.offers',
+          'nav.view.messages',
+          'nav.view.profile',
+        ],
       ),
       'lawyer_individual': const User(
         id: 'debug-lawyer-2',
         email: 'autonomo@teste.com',
-        fullName: 'Pedro Costa (Advogado Autônomo)',
+        fullName: 'Pedro Costa (Autônomo)',
         role: 'lawyer',
         userRole: 'lawyer_individual',
-        permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
+        permissions: [
+          'nav.view.home',
+          'nav.view.cases',
+          'nav.view.offers',
+          'nav.view.partners',
+          'nav.view.partnerships',
+          'nav.view.messages',
+          'nav.view.profile',
+        ],
       ),
       'firm': const User(
         id: 'debug-firm-1',
@@ -337,7 +363,15 @@ class _LoginScreenState extends State<LoginScreen> {
         fullName: 'Escritório Silva & Associados',
         role: 'lawyer',
         userRole: 'firm',
-        permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
+        permissions: [
+          'nav.view.home',
+          'nav.view.cases',
+          'nav.view.offers',
+          'nav.view.partners',
+          'nav.view.partnerships',
+          'nav.view.messages',
+          'nav.view.profile',
+        ],
       ),
       'super_associate': const User(
         id: 'debug-super-1',
@@ -345,7 +379,15 @@ class _LoginScreenState extends State<LoginScreen> {
         fullName: 'Ana Super (Super Associada)',
         role: 'lawyer',
         userRole: 'super_associate',
-        permissions: ['nav.view.home', 'nav.view.cases', 'nav.view.offers', 'nav.view.partners', 'nav.view.partnerships', 'nav.view.messages', 'nav.view.profile'],
+        permissions: [
+          'nav.view.home',
+          'nav.view.cases',
+          'nav.view.offers',
+          'nav.view.partners',
+          'nav.view.partnerships',
+          'nav.view.messages',
+          'nav.view.profile',
+        ],
       ),
     };
 

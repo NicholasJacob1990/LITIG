@@ -6,8 +6,11 @@ import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partn
 import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_event.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_state.dart';
 import 'package:meu_app/src/features/partnerships/presentation/widgets/hybrid_partnerships_list.dart';
+import 'package:meu_app/src/features/partnerships/presentation/widgets/partnership_card.dart';
 import 'package:meu_app/src/shared/widgets/molecules/empty_state_widget.dart';
 import '../../../../shared/services/analytics_service.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_event.dart' as p_events;
 
 class PartnershipsScreen extends StatefulWidget {
   const PartnershipsScreen({super.key});
@@ -184,9 +187,8 @@ class _PartnershipsScreenState extends State<PartnershipsScreen>
                   HybridPartnershipsListType.sent,
                   'Propostas de parceria enviadas por você.',
                 ),
-                _buildPartnershipsList(
-                  state, 
-                  HybridPartnershipsListType.received,
+                _buildReceivedPartnershipsList(
+                  state,
                   'Propostas de parceria recebidas.',
                 ),
               ],
@@ -221,6 +223,75 @@ class _PartnershipsScreenState extends State<PartnershipsScreen>
           listType: type,
           onRefresh: () async {
             context.read<HybridPartnershipsBloc>().add(const LoadHybridPartnerships(refresh: true));
+          },
+        ),
+      ),
+    );
+  }
+
+  // Aba "Recebidas" com callbacks de aceitar/rejeitar
+  Widget _buildReceivedPartnershipsList(
+    HybridPartnershipsLoaded state,
+    String semanticLabel,
+  ) {
+    return Semantics(
+      label: semanticLabel,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          context.read<HybridPartnershipsBloc>().add(const LoadHybridPartnerships(refresh: true));
+        },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: state.lawyerPartnerships.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.inbox, color: Colors.orange, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Propostas Recebidas',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final partnership = state.lawyerPartnerships[index - 1];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: PartnershipCard(
+                partnership: partnership,
+                listContext: HybridPartnershipsListType.received,
+                onAccept: () {
+                  context.read<PartnershipsBloc>().add(
+                        p_events.AcceptPartnership(partnershipId: partnership.id),
+                      );
+                },
+                onReject: () {
+                  context.read<PartnershipsBloc>().add(
+                        p_events.RejectPartnership(
+                          partnershipId: partnership.id,
+                          reason: 'not_specified',
+                        ),
+                      );
+                },
+              ),
+            );
           },
         ),
       ),

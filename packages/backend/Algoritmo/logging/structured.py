@@ -122,9 +122,25 @@ class StructuredFormatter(logging.Formatter):
             "line": record.lineno,
         }
         
-        # Adicionar contexto estruturado se disponível
+        # Adicionar contexto estruturado se disponível, com redação de PII
         if hasattr(record, 'structured_data') and record.structured_data:
-            log_data["context"] = record.structured_data
+            def _redact(value: Any):
+                sensitive_keys = {"email", "phone", "linkedin_url", "coords", "document", "cpf", "cnpj", "ad_campaign_id"}
+                try:
+                    if isinstance(value, dict):
+                        redacted = {}
+                        for k, v in value.items():
+                            if k in sensitive_keys:
+                                redacted[k] = "***"
+                            else:
+                                redacted[k] = _redact(v)
+                        return redacted
+                    if isinstance(value, list):
+                        return [_redact(v) for v in value]
+                    return value
+                except Exception:
+                    return value
+            log_data["context"] = _redact(record.structured_data)
         
         # Adicionar exception info se disponível
         if record.exc_info:

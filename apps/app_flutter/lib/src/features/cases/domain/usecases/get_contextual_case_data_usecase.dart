@@ -112,6 +112,11 @@ class GetContextualCaseDataUseCase with ContextualCaseDataConverters {
           .map((document) => convertCaseDocument(document as Map<String, dynamic>))
           .toList(),
       processStatus: convertProcessStatus(data['process_status'] as Map<String, dynamic>? ?? {}),
+      clientName: data['client_name'] as String?,
+      clientEmail: data['client_email'] as String?,
+      clientPhone: data['client_phone'] as String?,
+      clientAddress: data['client_address'] as String?,
+      exactCaseValue: (data['exact_case_value'] as num?)?.toDouble(),
     );
   }
 

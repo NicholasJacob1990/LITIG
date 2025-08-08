@@ -68,8 +68,11 @@ class User extends Equatable {
   /// Retorna o tipo de usuário específico (userRole) ou role como fallback
   String get effectiveUserRole => userRole ?? role ?? 'client';
 
-  /// Verifica se o usuário é cliente
-  bool get isClient => effectiveUserRole == 'client';
+  /// Verifica se o usuário é cliente (suporta variações PF/PJ e legados)
+  bool get isClient {
+    final role = effectiveUserRole.toLowerCase();
+    return role == 'client' || role == 'client_pf' || role == 'client_pj' || role == 'pf';
+  }
 
   /// Verifica se o usuário é advogado associado
   bool get isAssociatedLawyer => effectiveUserRole == 'lawyer_firm_member';  // Atualizado

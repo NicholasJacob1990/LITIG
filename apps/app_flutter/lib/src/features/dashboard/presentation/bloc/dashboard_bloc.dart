@@ -7,9 +7,13 @@ part 'dashboard_state.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final GetLawyerStatsUseCase getLawyerStatsUseCase;
+  final GetContractorStatsUseCase? getContractorStatsUseCase;
+  final GetClientStatsUseCase? getClientStatsUseCase;
 
-  DashboardBloc({required this.getLawyerStatsUseCase}) : super(DashboardInitial()) {
+  DashboardBloc({required this.getLawyerStatsUseCase, this.getContractorStatsUseCase, this.getClientStatsUseCase}) : super(DashboardInitial()) {
     on<FetchLawyerStats>(_onFetchLawyerStats);
+    on<FetchContractorStats>(_onFetchContractorStats);
+    on<FetchClientStats>(_onFetchClientStats);
   }
 
   Future<void> _onFetchLawyerStats(
@@ -18,6 +22,43 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) async {
     emit(DashboardLoading());
     try {
+      final stats = await getLawyerStatsUseCase();
+      emit(DashboardLoaded(stats));
+    } catch (e) {
+      emit(DashboardError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchContractorStats(
+    FetchContractorStats event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(DashboardLoading());
+    try {
+      if (getContractorStatsUseCase == null) {
+        // Fallback simples a lawyer stats
+        final stats = await getLawyerStatsUseCase();
+        emit(DashboardLoaded(stats));
+        return;
+      }
+      final stats = await getContractorStatsUseCase!();
+      emit(DashboardLoaded(stats));
+    } catch (e) {
+      emit(DashboardError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchClientStats(
+    FetchClientStats event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(DashboardLoading());
+    try {
+      if (getClientStatsUseCase != null) {
+        final stats = await getClientStatsUseCase!();
+        emit(DashboardLoaded(stats));
+        return;
+      }
       final stats = await getLawyerStatsUseCase();
       emit(DashboardLoaded(stats));
     } catch (e) {

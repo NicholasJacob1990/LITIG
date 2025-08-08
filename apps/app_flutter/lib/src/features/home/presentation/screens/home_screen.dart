@@ -53,10 +53,10 @@ class HomeScreen extends StatelessWidget {
                     style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 48),
-                  ElevatedButton.icon(
-                    icon: const Icon(LucideIcons.playCircle),
-                    label: const Text('Iniciar Consulta com IA'),
-                    onPressed: () => context.go('/client-home'),
+                    ElevatedButton.icon(
+                      icon: const Icon(LucideIcons.playCircle),
+                      label: const Text('Iniciar Consulta com IA'),
+                      onPressed: () => context.go('/triage'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),

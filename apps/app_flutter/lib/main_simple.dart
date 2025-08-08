@@ -247,11 +247,7 @@ class LawyersPage extends StatelessWidget {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=${index + 1}',
-                      ),
-                    ),
+                    leading: const CircleAvatar(child: Icon(Icons.person)),
                     title: Text('Dr. Advogado ${index + 1}'),
                     subtitle: Text('Especialidade: ${_getSpecialty(index)}'),
                     trailing: Column(
@@ -298,10 +294,7 @@ class ProfilePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const CircleAvatar(
-            radius: 50,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=1'),
-          ),
+          const CircleAvatar(radius: 50, child: Icon(Icons.person)),
           const SizedBox(height: 16),
           Text(
             'João Silva',

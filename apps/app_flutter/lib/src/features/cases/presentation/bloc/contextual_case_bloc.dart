@@ -229,17 +229,29 @@ class ContextualCaseBloc extends Bloc<ContextualCaseEvent, ContextualCaseState> 
     final cachedData = _cache.get(cacheKey);
     if (cachedData != null) {
       AppLogger.info('Using cached contextual data for case ${event.caseId}');
-      emit(ContextualCaseLoaded(
-        caseDetail: createDummyCaseDetail(event.caseId),
-        contextualData: cachedData,
-        kpis: const [], // KPIs podem ser carregados lazy
-        actions: _getDefaultActions(cachedData.allocationType),
-        highlight: _getDefaultHighlight(cachedData.allocationType),
-      ));
-      
-      // Carregar KPIs em background
-      _loadKPIsInBackground(event.caseId, event.userId, emit);
-      return;
+      // Mesmo com cache, manter a UI consistente buscando entidades tipadas via UseCase
+      try {
+        final result = await getContextualCaseData.call(caseId: event.caseId, userId: event.userId);
+        emit(ContextualCaseLoaded(
+          caseDetail: result.caseDetail,
+          contextualData: result.contextualData,
+          kpis: result.kpis,
+          actions: result.actions,
+          highlight: result.highlight,
+        ));
+        return;
+      } catch (e) {
+        // Se falhar, cai no fluxo normal com cache mínimo
+        emit(ContextualCaseLoaded(
+          caseDetail: createDummyCaseDetail(event.caseId),
+          contextualData: cachedData,
+          kpis: const [],
+          actions: _getDefaultActions(cachedData.allocationType),
+          highlight: _getDefaultHighlight(cachedData.allocationType),
+        ));
+        _loadKPIsInBackground(event.caseId, event.userId, emit);
+        return;
+      }
     }
 
     _loadingKeys.add(cacheKey);
@@ -248,28 +260,18 @@ class ContextualCaseBloc extends Bloc<ContextualCaseEvent, ContextualCaseState> 
     try {
       AppLogger.info('Loading contextual data for case ${event.caseId}');
       
-      // Carregamento paralelo otimizado
-      final futures = [
-        loadContextualDataWithTimeout(event.caseId, event.userId),
-        _loadKPIsWithTimeout(event.caseId, event.userId),
-        _loadActionsWithTimeout(event.caseId, event.userId),
-      ];
-      
-      final results = await Future.wait(futures);
+      // Buscar do backend via UseCase unificado (retorna entidades tipadas completas)
+      final result = await getContextualCaseData.call(caseId: event.caseId, userId: event.userId);
 
-      final contextualData = results[0] as ContextualCaseData;
-      final kpis = results[1] as List<ContextualKPI>? ?? [];
-      final actions = results[2] as ContextualActions? ?? _getDefaultActions(contextualData.allocationType);
-
-      // Cache dos dados principais
-      _cache.put(cacheKey, contextualData);
+      // Cache apenas o bloco contextual, pois o CaseDetail será reobtido no próximo load se necessário
+      _cache.put(cacheKey, result.contextualData);
 
       emit(ContextualCaseLoaded(
-        caseDetail: createDummyCaseDetail(event.caseId),
-        contextualData: contextualData,
-        kpis: kpis,
-        actions: actions,
-        highlight: _getDefaultHighlight(contextualData.allocationType),
+        caseDetail: result.caseDetail,
+        contextualData: result.contextualData,
+        kpis: result.kpis,
+        actions: result.actions,
+        highlight: result.highlight,
       ));
 
       AppLogger.success('Contextual data loaded successfully for case ${event.caseId}');
@@ -368,31 +370,7 @@ class ContextualCaseBloc extends Bloc<ContextualCaseEvent, ContextualCaseState> 
     }
   }
 
-  Future<List<ContextualKPI>?> _loadKPIsWithTimeout(
-    String caseId,
-    String userId,
-  ) async {
-    try {
-      return await getContextualKPIs.call(caseId: caseId, userId: userId)
-          .timeout(const Duration(seconds: 3));
-    } catch (e) {
-      AppLogger.warning('KPIs loading timeout or failed: ${e.toString()}');
-      return null;
-    }
-  }
-
-  Future<ContextualActions?> _loadActionsWithTimeout(
-    String caseId,
-    String userId,
-  ) async {
-    try {
-      return await getContextualActions.call(caseId: caseId, userId: userId)
-          .timeout(const Duration(seconds: 2));
-    } catch (e) {
-      AppLogger.warning('Actions loading timeout or failed: ${e.toString()}');
-      return null;
-    }
-  }
+  // Removidos helpers não utilizados (otimização)
 
   ContextualActions _getDefaultActions(AllocationType allocationType) {
     switch (allocationType) {

@@ -375,7 +375,7 @@ class AnalyticsService {
   // ========================================================================================
 
   Future<void> _trackInteractionEvent(String eventName, Map<String, dynamic> properties) async {
-    final enhancedProperties = {
+    final rawEnhanced = {
       ...properties,
       'session_id': _sessionId,
       'install_id': _installId,
@@ -385,6 +385,7 @@ class AnalyticsService {
       'network_quality': await _getNetworkQuality(),
       'timestamp_iso': DateTime.now().toIso8601String(),
     };
+    final enhancedProperties = Map<String, dynamic>.from(_sanitizeForJson(rawEnhanced) as Map<String, dynamic>);
 
     final event = AnalyticsEvent(
       name: eventName,
@@ -395,6 +396,21 @@ class AnalyticsService {
     );
 
     await _addToBatch(event);
+  }
+
+  // Ensures all values are JSON-encodable. Converts Duration/DateTime, and
+  // recursively sanitizes Maps/Lists.
+  dynamic _sanitizeForJson(dynamic value) {
+    if (value == null) return null;
+    if (value is Duration) return value.inMilliseconds;
+    if (value is DateTime) return value.toIso8601String();
+    if (value is Map) {
+      return value.map((k, v) => MapEntry(k.toString(), _sanitizeForJson(v)));
+    }
+    if (value is Iterable) {
+      return value.map(_sanitizeForJson).toList();
+    }
+    return value;
   }
 
   Future<void> _addToBatch(AnalyticsEvent event) async {
@@ -553,7 +569,10 @@ class AnalyticsService {
   }
   
   Future<void> _saveEventQueue(List<AnalyticsEvent> queue) async {
-    final queueJson = queue.map((event) => jsonEncode(event.toJson())).toList();
+    final queueJson = queue.map((event) {
+      final sanitized = _sanitizeForJson(event.toJson());
+      return jsonEncode(sanitized);
+    }).toList();
     await _prefs.setStringList(_eventQueueKey, queueJson);
   }
   

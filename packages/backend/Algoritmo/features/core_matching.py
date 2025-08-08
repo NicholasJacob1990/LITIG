@@ -19,11 +19,11 @@ class CoreMatchingFeatures(FeatureStrategy):
         Calcula features básicas de matching.
         
         Returns:
-            Dict com features "A" (area_match) e "C" (case_similarity)
+            Dict com features "A" (area_match) e "S" (case_similarity)
         """
         return {
             "A": self.area_match(),
-            "C": self.case_similarity()
+            "S": self.case_similarity()
         }
     
     def area_match(self) -> float:

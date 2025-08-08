@@ -21,7 +21,7 @@ class PerformanceFeatures(FeatureStrategy):
             Dict com feature "S" (success_rate)
         """
         return {
-            "S": self.success_rate()
+            "T": self.success_rate()
         }
     
     def success_rate(self) -> float:

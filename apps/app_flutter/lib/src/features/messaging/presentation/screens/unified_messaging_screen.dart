@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:meu_app/src/shared/utils/app_colors.dart';
 import 'package:meu_app/src/core/services/unipile_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart';
 import 'package:intl/intl.dart';
 import 'package:meu_app/src/features/messaging/presentation/widgets/calendar_integration_widget.dart';
 import 'dart:async';
@@ -88,6 +91,20 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    // Configurar base URL e Authorization token para UnipileService
+    const defaultBase = 'http://localhost:8080/api/v2/unipile';
+    _unipileService.setBaseUrl(defaultBase);
+    try {
+      // Tentar obter token do AuthBloc (armazenado em metadata do usuário)
+      final authState = context.read<AuthBloc>().state;
+      if (authState is Authenticated) {
+        final userMeta = authState.user.metadata;
+        final token = userMeta?['accessToken'] ?? userMeta?['jwt'] ?? userMeta?['sessionToken'];
+        if (token is String && token.isNotEmpty) {
+          _unipileService.setAuthToken(token);
+        }
+      }
+    } catch (_) {}
     _loadChats();
     _searchController.addListener(_onSearchChanged);
     _startRealTimeUpdates();
@@ -137,8 +154,20 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
       final UnifiedMessagingService messagingService = UnifiedMessagingService();
       final internalChatsData = await messagingService.getInternalChats();
       
+      // Normalizar retorno (pode ser List ou Map com chave 'chats')
+      List<Map<String, dynamic>> internalList;
+      if (internalChatsData is List) {
+        internalList = List<Map<String, dynamic>>.from(internalChatsData as List);
+      } else if (internalChatsData is Map) {
+        final Map map = internalChatsData;
+        final chats = map['chats'];
+        internalList = chats is List ? List<Map<String, dynamic>>.from(chats) : const [];
+      } else {
+        internalList = const [];
+      }
+      
       // Converter dados internos para formato UnifiedChat
-      _allChats = internalChatsData.map((chatData) => _mapInternalChatToUnified(chatData)).toList();
+      _allChats = internalList.map((chatData) => _mapInternalChatToUnified(chatData)).toList();
       
       // Adicionar chats externos se disponíveis
       try {
@@ -301,9 +330,6 @@ class _UnifiedMessagingScreenState extends State<UnifiedMessagingScreen>
         lastActive: now.subtract(const Duration(hours: 1)),
       ),
     ];
-    
-    _filterChats();
-    setState(() => _isLoading = false);
   }
 
 

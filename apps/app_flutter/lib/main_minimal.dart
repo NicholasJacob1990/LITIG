@@ -408,11 +408,7 @@ class LawyersScreen extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  'https://i.pravatar.cc/150?img=${index + 10}',
-                ),
-              ),
+              leading: const CircleAvatar(child: Icon(Icons.person)),
               title: Text('Dr(a). ${_getLawyerName(index)}'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -495,12 +491,7 @@ class LawyersScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                    'https://i.pravatar.cc/150?img=${index + 10}',
-                  ),
-                ),
+                const CircleAvatar(radius: 30, child: Icon(Icons.person)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -583,11 +574,7 @@ class ChatScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           return Card(
             child: ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  'https://i.pravatar.cc/150?img=${index + 20}',
-                ),
-              ),
+              leading: const CircleAvatar(child: Icon(Icons.person)),
               title: Text('Dr(a). ${_getChatName(index)}'),
               subtitle: Text(_getLastMessage(index)),
               trailing: Column(
@@ -769,10 +756,7 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             // Profile Header
-            const CircleAvatar(
-              radius: 60,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/200?img=1'),
-            ),
+            const CircleAvatar(radius: 60, child: Icon(Icons.person)),
             const SizedBox(height: 16),
             Text(
               'João Silva',

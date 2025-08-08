@@ -525,11 +525,11 @@ class _FirmDetailScreenState extends State<FirmDetailScreen>
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundImage: lawyer.avatarUrl != null
+          backgroundImage: (lawyer.avatarUrl != null && lawyer.avatarUrl!.isNotEmpty)
               ? NetworkImage(lawyer.avatarUrl!)
               : null,
           backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-          child: lawyer.avatarUrl == null
+          child: (lawyer.avatarUrl == null || lawyer.avatarUrl!.isEmpty)
               ? Icon(
                   Icons.person,
                   color: Theme.of(context).primaryColor,

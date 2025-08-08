@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:meu_app/src/features/partnerships/presentation/widgets/hybrid_partnerships_list.dart' show HybridPartnershipsListType;
 import 'package:meu_app/src/features/partnerships/domain/entities/partnership.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -11,9 +13,20 @@ import 'package:timeago/timeago.dart' as timeago;
 class PartnershipCard extends StatelessWidget {
   /// A parceria a ser exibida.
   final Partnership partnership;
+  /// Contexto da lista (Ativas, Enviadas, Recebidas) para CTA contextual
+  final HybridPartnershipsListType? listContext;
+  /// Callbacks para ações rápidas (usado principalmente em Recebidas)
+  final VoidCallback? onAccept;
+  final VoidCallback? onReject;
 
   /// {@macro partnership_card}
-  const PartnershipCard({super.key, required this.partnership});
+  const PartnershipCard({
+    super.key,
+    required this.partnership,
+    this.listContext,
+    this.onAccept,
+    this.onReject,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +48,7 @@ class PartnershipCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () {
-            // TODO: Implementar navegação para detalhes da parceria
-            // Ex: context.go('/partnerships/${partnership.id}');
+            context.go('/partnerships/${partnership.id}', extra: {'partnership': partnership});
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -77,14 +89,13 @@ class PartnershipCard extends StatelessWidget {
                     _buildTypeChip(partnership.type, colorScheme),
                     const Spacer(),
                     TextButton(
-                      onPressed: () {
-                        // TODO: Implementar navegação para detalhes da parceria
-                        // Ex: context.go('/partnerships/${partnership.id}');
-                      },
+                      onPressed: () => context.go('/partnerships/${partnership.id}', extra: {'partnership': partnership}),
                       child: const Text('Ver Detalhes'),
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                _buildContextualActions(context, colorScheme),
               ],
             ),
           ),
@@ -109,23 +120,33 @@ class PartnershipCard extends StatelessWidget {
     }
     
     // Padrão para advogado
-    return CircleAvatar(
-      radius: 20,
-      backgroundImage: CachedNetworkImageProvider(partnership.partnerAvatarUrl),
-      // Fallback em caso de erro ao carregar a imagem
-      onBackgroundImageError: (_, __) {},
-      child: CachedNetworkImage(
-        imageUrl: partnership.partnerAvatarUrl,
-        imageBuilder: (context, imageProvider) => Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
-          ),
-        ),
-        placeholder: (context, url) => const CircularProgressIndicator(),
-        errorWidget: (context, url, error) => Icon(
+    final avatar = partnership.partnerAvatarUrl;
+    if (avatar.isEmpty) {
+      return CircleAvatar(
+        radius: 20,
+        child: Icon(
           Icons.person,
           color: Theme.of(context).colorScheme.onSecondaryContainer,
+        ),
+      );
+    }
+    return CircleAvatar(
+      radius: 20,
+      child: ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: avatar,
+          fit: BoxFit.cover,
+          width: 40,
+          height: 40,
+          placeholder: (context, url) => const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          errorWidget: (context, url, error) => Icon(
+            Icons.person,
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
         ),
       ),
     );
@@ -151,9 +172,9 @@ class PartnershipCard extends StatelessWidget {
         textColor = colorScheme.onSurfaceVariant;
         break;
       case PartnershipStatus.pending:
-      default: // Garante robustez contra novos status
         backgroundColor = colorScheme.secondaryContainer;
         textColor = colorScheme.onSecondaryContainer;
+        break;
     }
 
     return Chip(
@@ -177,8 +198,8 @@ class PartnershipCard extends StatelessWidget {
         icon = Icons.school_outlined;
         break;
       case PartnershipType.caseSharing:
-      default: // Garante robustez contra novos tipos
         icon = Icons.workspaces_outline;
+        break;
     }
 
     return Chip(
@@ -189,6 +210,71 @@ class PartnershipCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
+  }
+
+  // Ações contextuais por aba
+  Widget _buildContextualActions(BuildContext context, ColorScheme colorScheme) {
+    switch (listContext) {
+      case HybridPartnershipsListType.active:
+        return Align(
+          alignment: Alignment.centerRight,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              if (partnership.partnerType == PartnerEntityType.lawyer && partnership.partnerAsLawyer != null) {
+                final partner = partnership.partnerAsLawyer!;
+                context.go('/internal-chat/${partner.id}?recipientName=${Uri.encodeComponent(partner.name)}');
+              } else if (partnership.partnerType == PartnerEntityType.firm && partnership.partnerAsFirm != null) {
+                final firm = partnership.partnerAsFirm!;
+                context.go('/firm/${firm.id}/profile');
+              }
+            },
+            icon: const Icon(Icons.chat_outlined, size: 18),
+            label: const Text('Conversar'),
+          ),
+        );
+      case HybridPartnershipsListType.sent:
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Wrap(
+            spacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Chip(
+                label: const Text('Proposta Enviada'),
+                backgroundColor: colorScheme.secondaryContainer.withValues(alpha: 0.35),
+                labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => context.go('/partnerships/${partnership.id}', extra: {'partnership': partnership}),
+                icon: const Icon(Icons.visibility_outlined, size: 18),
+                label: const Text('Revisar'),
+              ),
+            ],
+          ),
+        );
+      case HybridPartnershipsListType.received:
+        return Align(
+          alignment: Alignment.centerRight,
+          child: Wrap(
+            spacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onReject ?? () => context.go('/partnerships/${partnership.id}', extra: {'partnership': partnership}),
+                icon: const Icon(Icons.close, size: 18),
+                label: const Text('Rejeitar'),
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+              ),
+              ElevatedButton.icon(
+                onPressed: onAccept ?? () => context.go('/partnerships/${partnership.id}', extra: {'partnership': partnership}),
+                icon: const Icon(Icons.check_circle, size: 18),
+                label: const Text('Aceitar'),
+              ),
+            ],
+          ),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 }
 
@@ -204,7 +290,6 @@ String _getPartnershipStatusLabel(PartnershipStatus status) {
     case PartnershipStatus.rejected:
       return 'Rejeitada';
     case PartnershipStatus.pending:
-    default:
       return 'Pendente';
   }
 }
@@ -216,7 +301,6 @@ String _getPartnershipTypeLabel(PartnershipType type) {
     case PartnershipType.expertOpinion:
       return 'Parecerista';
     case PartnershipType.caseSharing:
-    default:
       return 'Divisão de Caso';
   }
 }

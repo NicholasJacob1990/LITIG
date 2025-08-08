@@ -284,7 +284,9 @@ class _ContactRequestModalState extends State<ContactRequestModal> {
       title: Row(
         children: [
           CircleAvatar(
-            backgroundImage: NetworkImage(widget.lawyer.avatarUrl),
+            backgroundImage: widget.lawyer.avatarUrl.isNotEmpty
+                ? NetworkImage(widget.lawyer.avatarUrl)
+                : null,
             child: widget.lawyer.avatarUrl.isEmpty
                 ? Text(widget.lawyer.nome.substring(0, 1).toUpperCase())
                 : null,

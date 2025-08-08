@@ -72,6 +72,8 @@ class LawyerModel {
       isAvailable: isAvailable,
       distanceKm: distanceKm,
       plan: plan, // NOVO: Incluir no mapeamento
+      latitude: coordinates?['lat'],
+      longitude: coordinates?['lng'],
     );
   }
 } 

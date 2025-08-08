@@ -8,6 +8,8 @@ import '../../../../core/utils/logger.dart';
 import '../../../../core/services/ocr_service.dart';
 import '../../../../features/documents/presentation/screens/document_scanner_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/privacy_cases_bloc.dart';
 
 class CaseDocumentsScreen extends StatefulWidget {
   final String caseId;
@@ -126,6 +128,43 @@ class _CaseDocumentsScreenState extends State<CaseDocumentsScreen> with TickerPr
     _tabController = TabController(length: 2, vsync: this);
   }
 
+  List<CaseDocument> _maskDocuments(List<CaseDocument> docs) {
+    return docs
+        .map((d) => CaseDocument(
+              id: d.id,
+              name: '***',
+              type: d.type,
+              url: '',
+              uploadedAt: d.uploadedAt,
+              uploadedBy: d.uploadedBy,
+              sizeBytes: d.sizeBytes,
+              isRequired: d.isRequired,
+            ))
+        .toList();
+  }
+
+  Widget _buildLockedOverlay({required String message}) {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.white.withValues(alpha: 0.85),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.lock_outline, size: 48, color: Colors.grey),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -206,7 +245,23 @@ class _CaseDocumentsScreenState extends State<CaseDocumentsScreen> with TickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildDocumentsList(clientDocuments, canUpload: true),
+          BlocBuilder<PrivacyCasesBloc, PrivacyCasesState>(
+            builder: (context, pState) {
+              final fullAccess = pState is AccessStatusLoaded && pState.fullAccess;
+              return Stack(
+                children: [
+                  _buildDocumentsList(
+                    fullAccess ? clientDocuments : _maskDocuments(clientDocuments),
+                    canUpload: fullAccess,
+                  ),
+                  if (!fullAccess)
+                    _buildLockedOverlay(
+                      message: 'Aceite o caso para visualizar e enviar documentos do cliente.',
+                    ),
+                ],
+              );
+            },
+          ),
           _buildDocumentsList(processDocuments, canUpload: false),
         ],
       ),
@@ -847,6 +902,7 @@ class _CaseDocumentsScreenState extends State<CaseDocumentsScreen> with TickerPr
         'is_required': false,
         'category': _categorizeByFileName(fileName),
       };
+      AppLogger.debug('Upload payload (preview): ${uploadData['file_name']} (${uploadData['file_size']} bytes)');
       
       // Finalizar progresso
       setState(() => _uploadProgress = 1.0);

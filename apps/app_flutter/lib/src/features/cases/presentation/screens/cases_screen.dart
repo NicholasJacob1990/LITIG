@@ -38,6 +38,18 @@ class _CasesScreenState extends State<CasesScreen> {
           title: const Text('Meus Casos'),
           centerTitle: true,
           actions: [
+            // Acesso rápido: Meus Casos Aceitos (somente para advogados)
+            BlocBuilder<AuthBloc, auth_states.AuthState>(
+              builder: (context, authState) {
+                final isLawyer = authState is auth_states.Authenticated && _isLawyer(authState.user.role);
+                if (!isLawyer) return const SizedBox.shrink();
+                return IconButton(
+                  onPressed: () => context.go('/cases/accepted'),
+                  icon: const Icon(LucideIcons.badgeCheck),
+                  tooltip: 'Meus Casos Aceitos',
+                );
+              },
+            ),
             BlocBuilder<CasesBloc, CasesState>(
               builder: (context, state) {
                 return IconButton(

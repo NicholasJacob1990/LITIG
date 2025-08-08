@@ -36,7 +36,7 @@ class _InvitationModalState extends State<InvitationModal> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     
     return Container(
@@ -157,8 +157,8 @@ class _InvitationModalState extends State<InvitationModal> {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundImage: NetworkImage(rec.avatarUrl),
-            onBackgroundImageError: (_, __) => {},
+            backgroundImage: rec.avatarUrl.isNotEmpty ? NetworkImage(rec.avatarUrl) : null,
+            child: rec.avatarUrl.isEmpty ? const Icon(Icons.person) : null,
           ),
           const SizedBox(width: 16),
           Expanded(

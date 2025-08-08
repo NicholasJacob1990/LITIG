@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:meu_app/src/core/services/dio_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -28,6 +29,12 @@ import 'package:meu_app/src/features/cases/domain/usecases/get_my_cases_usecase.
 import 'package:meu_app/src/features/cases/domain/usecases/get_case_detail_usecase.dart';
 import 'package:meu_app/src/features/cases/presentation/bloc/cases_bloc.dart';
 import 'package:meu_app/src/features/cases/data/services/case_firm_recommendation_service.dart';
+// Privacy Cases
+import 'package:meu_app/src/features/cases/data/datasources/privacy_cases_remote_data_source.dart';
+import 'package:meu_app/src/features/cases/data/repositories/privacy_cases_repository_impl.dart';
+import 'package:meu_app/src/features/cases/domain/repositories/privacy_cases_repository.dart';
+import 'package:meu_app/src/features/cases/domain/usecases/privacy_cases_usecases.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/privacy_cases_bloc.dart';
 
 // Contextual Cases
 import 'package:meu_app/src/features/cases/data/datasources/contextual_case_remote_data_source.dart';
@@ -70,26 +77,27 @@ import 'package:meu_app/src/features/dashboard/presentation/bloc/lawyer_firm_blo
 // Firms
 import 'package:meu_app/src/features/firms/data/datasources/firm_remote_data_source.dart';
 
-// SLA Management - TEMPORARIAMENTE COMENTADO PARA COMPILAÇÃO
-// import 'package:meu_app/src/features/sla_management/data/datasources/sla_settings_remote_data_source.dart';
-// import 'package:meu_app/src/features/sla_management/data/datasources/sla_settings_local_data_source.dart';
-// import 'package:meu_app/src/features/sla_management/data/datasources/sla_escalation_remote_data_source.dart';
-// import 'package:meu_app/src/features/sla_management/data/datasources/sla_escalation_local_data_source.dart';
-// import 'package:meu_app/src/features/sla_management/data/datasources/sla_metrics_remote_data_source.dart';
-// import 'package:meu_app/src/features/sla_management/data/datasources/sla_audit_remote_data_source.dart';
-// import 'package:meu_app/src/features/sla_management/data/repositories/sla_settings_repository_impl.dart';
-// import 'package:meu_app/src/features/sla_management/data/repositories/sla_escalation_repository_impl.dart';
-// import 'package:meu_app/src/features/sla_management/domain/repositories/sla_settings_repository.dart';
-// import 'package:meu_app/src/features/sla_management/domain/repositories/sla_escalation_repository.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_settings_usecase.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/update_sla_settings_usecase.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_metrics_usecase.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_escalations_usecase.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_audit_usecase.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_presets_usecase.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/calculate_sla_deadline.dart';
-// import 'package:meu_app/src/features/sla_management/domain/usecases/validate_sla_settings.dart';
-// import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
+// SLA Management
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_settings_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_settings_local_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_escalation_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_escalation_local_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_metrics_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/datasources/sla_audit_remote_data_source.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_settings_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_escalation_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_metrics_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/data/repositories/sla_audit_repository_impl.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_settings_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_escalation_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_metrics_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/repositories/sla_audit_repository.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_settings_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/update_sla_settings_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/get_sla_metrics_usecase.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/calculate_sla_deadline.dart';
+import 'package:meu_app/src/features/sla_management/domain/usecases/validate_sla_settings.dart';
+import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
 import 'package:meu_app/src/features/firms/data/repositories/firm_repository_impl.dart';
 import 'package:meu_app/src/features/firms/domain/repositories/firm_repository.dart';
 import 'package:meu_app/src/features/firms/domain/usecases/get_firms.dart';
@@ -241,7 +249,7 @@ Future<void> configureDependencies() async {
   // External dependencies
   getIt.registerLazySingleton(() => http.Client());
   getIt.registerLazySingleton(() => Connectivity());
-  getIt.registerLazySingleton<Dio>(() => Dio());
+  getIt.registerLazySingleton<Dio>(() => DioService.dio);
   getIt.registerLazySingleton(() => Supabase.instance.client);
   
   // SharedPreferences  
@@ -296,6 +304,28 @@ Future<void> configureDependencies() async {
     getMyCasesUseCase: getIt(),
     getCurrentUserUseCase: getIt(),
   ));
+
+  // Privacy Cases (Supabase Policy)
+  // Data Source
+  // Register the data source under its abstraction to satisfy consumers expecting the interface
+  getIt.registerLazySingleton<PrivacyCasesRemoteDataSource>(
+      () => PrivacyCasesRemoteDataSourceImpl());
+  // Repository
+  getIt.registerLazySingleton<PrivacyCasesRepository>(
+      () => PrivacyCasesRepositoryImpl(getIt()));
+  // Use Cases
+  getIt.registerLazySingleton(() => CanAcceptCaseUseCase(getIt()));
+  getIt.registerLazySingleton(() => AcceptCaseUseCase(getIt()));
+  getIt.registerLazySingleton(() => AbandonCaseUseCase(getIt()));
+  getIt.registerLazySingleton(() => HasFullAccessUseCase(getIt()));
+  getIt.registerLazySingleton(() => ListMyAcceptedCasesUseCase(getIt()));
+  // Bloc
+  getIt.registerFactory(() => PrivacyCasesBloc(
+        listMyAcceptedCases: getIt(),
+        acceptCase: getIt(),
+        abandonCase: getIt(),
+        hasFullAccess: getIt(),
+      ));
 
   // Contextual Cases
   // Datasources
@@ -496,66 +526,67 @@ Future<void> configureDependencies() async {
   ));
   getIt.registerLazySingleton(() => CaseNotificationService(getIt(), getIt()));
 
-  // SLA Management System - TEMPORARIAMENTE COMENTADO PARA COMPILAÇÃO
-  
+  // SLA Management System - REATIVADO
+  // Base URL do DioService já aponta para /api; reutilizamos a mesma instância
+  final String slaBaseUrl = DioService.dio.options.baseUrl;
+
   // SLA Local Data Sources
-  // getIt.registerLazySingleton<SlaSettingsLocalDataSource>(
-  //   () => SlaSettingsLocalDataSourceImpl(sharedPreferences: getIt()));
-  // getIt.registerLazySingleton<SlaEscalationLocalDataSource>(
-  //   () => SlaEscalationLocalDataSourceImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<SlaSettingsLocalDataSource>(
+    () => SlaSettingsLocalDataSourceImpl(sharedPreferences: getIt()));
+  getIt.registerLazySingleton<SlaEscalationLocalDataSource>(
+    () => SlaEscalationLocalDataSourceImpl(sharedPreferences: getIt()));
 
   // SLA Remote Data Sources
-  // getIt.registerLazySingleton<SlaSettingsRemoteDataSource>(
-  //   () => SlaSettingsRemoteDataSourceImpl(
-  //     dio: getIt<Dio>(),
-  //     baseUrl: getIt<String>(instanceName: 'baseUrl'),
-  //   ));
-  // getIt.registerLazySingleton<SlaEscalationRemoteDataSource>(
-  //   () => SlaEscalationRemoteDataSourceImpl(
-  //     dio: getIt<Dio>(),
-  //     baseUrl: getIt<String>(instanceName: 'baseUrl'),
-  //   ));
-  // getIt.registerLazySingleton<SlaMetricsRemoteDataSource>(
-  //   () => SlaMetricsRemoteDataSourceImpl(client: getIt<Dio>()));
-  // getIt.registerLazySingleton<SlaAuditRemoteDataSource>(
-  //   () => SlaAuditRemoteDataSourceImpl(dio: getIt<Dio>()));
+  getIt.registerLazySingleton<SlaSettingsRemoteDataSource>(
+    () => SlaSettingsRemoteDataSourceImpl(
+      dio: getIt<Dio>(),
+      baseUrl: slaBaseUrl,
+    ));
+  getIt.registerLazySingleton<SlaEscalationRemoteDataSource>(
+    () => SlaEscalationRemoteDataSourceImpl(
+      dio: getIt<Dio>(),
+      baseUrl: slaBaseUrl,
+    ));
+  getIt.registerLazySingleton<SlaMetricsRemoteDataSource>(
+    () => SlaMetricsRemoteDataSourceImpl(client: getIt<Dio>()));
+  getIt.registerLazySingleton<SlaAuditRemoteDataSource>(
+    () => SlaAuditRemoteDataSourceImpl(dio: getIt<Dio>()));
 
   // SLA Repositories
-  // getIt.registerLazySingleton<SlaSettingsRepository>(
-  //   () => SlaSettingsRepositoryImpl(
-  //     localDataSource: getIt<SlaSettingsLocalDataSource>(),
-  //     remoteDataSource: getIt<SlaSettingsRemoteDataSource>(),
-  //   ));
-  // getIt.registerLazySingleton<SlaEscalationRepository>(
-  //   () => SlaEscalationRepositoryImpl(
-  //     remoteDataSource: getIt<SlaEscalationRemoteDataSource>(),
-  //     localDataSource: getIt<SlaEscalationLocalDataSource>(),
-  //     dio: getIt<Dio>(),
-  //   ));
-  // getIt.registerLazySingleton<SlaMetricsRepository>(
-  //   () => SlaMetricsRepositoryImpl(
-  //     remoteDataSource: getIt<SlaMetricsRemoteDataSource>(),
-  //   ));
-  // getIt.registerLazySingleton<SlaAuditRepository>(
-  //   () => SlaAuditRepositoryImpl(
-  //     remoteDataSource: getIt<SlaAuditRemoteDataSource>(),
-  //   ));
+  getIt.registerLazySingleton<SlaSettingsRepository>(
+    () => SlaSettingsRepositoryImpl(
+      localDataSource: getIt<SlaSettingsLocalDataSource>(),
+      remoteDataSource: getIt<SlaSettingsRemoteDataSource>(),
+    ));
+  getIt.registerLazySingleton<SlaEscalationRepository>(
+    () => SlaEscalationRepositoryImpl(
+      remoteDataSource: getIt<SlaEscalationRemoteDataSource>(),
+      localDataSource: getIt<SlaEscalationLocalDataSource>(),
+      dio: getIt<Dio>(),
+    ));
+  getIt.registerLazySingleton<SlaMetricsRepository>(
+    () => SlaMetricsRepositoryImpl(
+      remoteDataSource: getIt<SlaMetricsRemoteDataSource>(),
+    ));
+  getIt.registerLazySingleton<SlaAuditRepository>(
+    () => SlaAuditRepositoryImpl(
+      remoteDataSource: getIt<SlaAuditRemoteDataSource>(),
+    ));
 
-  // SLA Use Cases
-  // getIt.registerLazySingleton(() => GetSlaSettingsUseCase(getIt()));
-  // getIt.registerLazySingleton(() => UpdateSlaSettingsUseCase(getIt()));
-  // getIt.registerLazySingleton(() => GetSlaMetricsUseCase(getIt()));
-  // getIt.registerLazySingleton(() => GetSlaEscalationsUseCase(getIt()));
-  // getIt.registerLazySingleton(() => GetSlaAuditUseCase(getIt()));
-  // getIt.registerLazySingleton(() => GetSlaPresetsUseCase(getIt()));
-  // getIt.registerLazySingleton(() => CalculateSlaDeadlineUseCase(getIt()));
-  // getIt.registerLazySingleton(() => ValidateSlaSettings());
+  // SLA Use Cases (principais)
+  getIt.registerLazySingleton(() => GetSlaSettingsUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateSlaSettingsUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetSlaMetricsUseCase(getIt()));
+  getIt.registerLazySingleton(() => ValidateSlaSettings());
+  getIt.registerLazySingleton<CalculateSlaDeadlineUseCase>(
+    () => CalculateSlaDeadlineUseCase(getIt<SlaSettingsRepository>()),
+  );
 
-  // SLA BLoCs
-  // getIt.registerFactory(() => SlaSettingsBloc(
-  //       validateSlaSettings: getIt<ValidateSlaSettings>(),
-  //       calculateSlaDeadlineUseCase: getIt<CalculateSlaDeadlineUseCase>(),
-  //     ));
+  // SLA BLoC básico
+  getIt.registerFactory(() => SlaSettingsBloc(
+        validateSlaSettings: getIt<ValidateSlaSettings>(),
+        calculateSlaDeadlineUseCase: getIt<CalculateSlaDeadlineUseCase>(),
+      ));
   // TODO: Implement missing SLA Analytics use cases
   // getIt.registerFactory(() => SlaAnalyticsBloc(
   //       generateSlaReport: getIt<GenerateSlaReport>(),

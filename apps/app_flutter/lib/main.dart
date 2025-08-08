@@ -36,7 +36,6 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
       };
 }
 
@@ -209,6 +208,7 @@ class _MyAppState extends State<MyApp> {
             darkTheme: AppTheme.dark(),
             routerConfig: appRouter(_authBloc),
             debugShowCheckedModeBanner: false,
+            // Evita asserts com PointerDeviceKind.trackpad no Flutter Web
             scrollBehavior: MyCustomScrollBehavior(),
             locale: const Locale('pt', 'BR'),
             supportedLocales: const [

@@ -171,10 +171,10 @@ class ClientProfileSection extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: ClipRRect(
+            child: ClipRRect(
             borderRadius: BorderRadius.circular(30),
-            child: clientInfo.avatarUrl != null
-                ? CachedNetworkImage(
+              child: clientInfo.avatarUrl != null && clientInfo.avatarUrl!.isNotEmpty
+                  ? CachedNetworkImage(
                     imageUrl: clientInfo.avatarUrl!,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(

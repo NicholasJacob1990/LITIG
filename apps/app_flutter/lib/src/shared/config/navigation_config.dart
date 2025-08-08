@@ -24,46 +24,46 @@ class NavigationTab {
 /// Cada aba é associada a uma permissão específica
 /// CORRIGIDO: Índices sequenciais e labels conforme documentação
 final Map<String, NavigationTab> allPossibleTabs = {
-  // === CLIENTE (CORRETO conforme documentação) ===
+  // === CLIENTE (branches 13-18 no app_router) ===
   'client_home': const NavigationTab(
     label: 'Início',
     icon: LucideIcons.home,
-    branchIndex: 0,
+    branchIndex: 13,
     requiredPermission: 'nav.view.client_home',
     route: '/client-home',
   ),
   'client_cases': const NavigationTab(
     label: 'Meus Casos',
     icon: LucideIcons.clipboardList,
-    branchIndex: 1,
+    branchIndex: 14,
     requiredPermission: 'nav.view.client_cases',
     route: '/client-cases',
   ),
   'find_lawyers': const NavigationTab(
     label: 'Advogados',
     icon: LucideIcons.search,
-    branchIndex: 2,
+    branchIndex: 15,
     requiredPermission: 'nav.view.find_lawyers',
     route: '/find-lawyers',
   ),
   'client_messages': const NavigationTab(
     label: 'Mensagens',
     icon: LucideIcons.messageCircle,
-    branchIndex: 3,
+    branchIndex: 16,
     requiredPermission: 'nav.view.client_messages',
     route: '/client-messages',
   ),
   'services': const NavigationTab(
     label: 'Serviços',
     icon: LucideIcons.briefcase,
-    branchIndex: 4,
+    branchIndex: 17,
     requiredPermission: 'nav.view.services',
     route: '/services',
   ),
   'client_profile': const NavigationTab(
     label: 'Perfil',
     icon: LucideIcons.user,
-    branchIndex: 5,
+    branchIndex: 18,
     requiredPermission: 'nav.view.client_profile',
     route: '/client-profile',
   ),
@@ -112,53 +112,53 @@ final Map<String, NavigationTab> allPossibleTabs = {
     route: '/profile',
   ),
 
-  // === ADVOGADO CONTRATANTE ===
+  // === ADVOGADO CONTRATANTE (branches 6-12 no app_router) ===
   'home': const NavigationTab(
     label: 'Início',
     icon: LucideIcons.home,
-    branchIndex: 8,
+    branchIndex: 6,
     requiredPermission: 'nav.view.home',
     route: '/home',
   ),
   'contractor_cases': const NavigationTab(
     label: 'Meus Casos',
     icon: LucideIcons.clipboardList,
-    branchIndex: 9,
+    branchIndex: 7,
     requiredPermission: 'nav.view.contractor_cases',
     route: '/contractor-cases',
   ),
   'contractor_offers': const NavigationTab(
     label: 'Ofertas',
     icon: LucideIcons.inbox,
-    branchIndex: 10,
+    branchIndex: 8,
     requiredPermission: 'nav.view.contractor_offers',
     route: '/contractor-offers',
   ),
   'partners': const NavigationTab(
     label: 'Parceiros',
     icon: LucideIcons.search,
-    branchIndex: 11,
+    branchIndex: 9,
     requiredPermission: 'nav.view.partners',
     route: '/partners',
   ),
   'partnerships': const NavigationTab(
     label: 'Parcerias',
     icon: LucideIcons.users,
-    branchIndex: 12,
+    branchIndex: 10,
     requiredPermission: 'nav.view.partnerships',
     route: '/partnerships',
   ),
   'contractor_messages': const NavigationTab(
     label: 'Mensagens',
     icon: LucideIcons.messageSquare,
-    branchIndex: 13,
+    branchIndex: 11,
     requiredPermission: 'nav.view.contractor_messages',
     route: '/contractor-messages',
   ),
   'contractor_profile': const NavigationTab(
     label: 'Perfil',
     icon: LucideIcons.user,
-    branchIndex: 14,
+    branchIndex: 12,
     requiredPermission: 'nav.view.contractor_profile',
     route: '/contractor-profile',
   ),

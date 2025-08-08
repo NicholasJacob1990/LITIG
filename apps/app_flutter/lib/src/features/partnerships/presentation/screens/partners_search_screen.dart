@@ -132,7 +132,10 @@ class _PartnersSearchViewState extends State<PartnersSearchView> with SingleTick
           controller: _tabController,
           children: [
             const PartnersDiscoveryTabView(),
-            PartnersSearchTabView(searchController: _searchController),
+            PartnersSearchTabView(
+              searchController: _searchController,
+              tabController: _tabController,
+            ),
           ],
         ),
       ),
@@ -249,10 +252,12 @@ class PartnersDiscoveryTabView extends StatelessWidget {
 /// Tab de busca ativa de parceiros
 class PartnersSearchTabView extends StatefulWidget {
   final TextEditingController searchController;
+  final TabController tabController;
 
   const PartnersSearchTabView({
     super.key,
     required this.searchController,
+    required this.tabController,
   });
 
   @override
@@ -260,6 +265,18 @@ class PartnersSearchTabView extends StatefulWidget {
 }
 
 class _PartnersSearchTabViewState extends State<PartnersSearchTabView> {
+  late AnalyticsService _analytics;
+  DateTime? _searchStartTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnalytics();
+  }
+
+  Future<void> _initializeAnalytics() async {
+    _analytics = await AnalyticsService.getInstance();
+  }
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -336,8 +353,8 @@ class _PartnersSearchTabViewState extends State<PartnersSearchTabView> {
   }
 
   void _trackSearchExecution(String query) {
-    final searchDuration = _searchStartTime != null 
-        ? DateTime.now().difference(_searchStartTime!) 
+    final searchDuration = _searchStartTime != null
+        ? DateTime.now().difference(_searchStartTime!)
         : null;
 
     _analytics.trackSearch(
@@ -349,7 +366,7 @@ class _PartnersSearchTabViewState extends State<PartnersSearchTabView> {
       appliedFilters: {
         'search_type': 'correspondent',
         'include_firms': true,
-        'current_tab': _tabController.index == 0 ? 'lawyers' : 'firms',
+        'current_tab': widget.tabController.index == 0 ? 'discover' : 'search',
         'is_empty_search': query.isEmpty,
       },
     );

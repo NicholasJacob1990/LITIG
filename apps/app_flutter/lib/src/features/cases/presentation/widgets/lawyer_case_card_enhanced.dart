@@ -167,7 +167,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(19),
-              child: clientInfo.avatarUrl != null
+              child: clientInfo.avatarUrl != null && clientInfo.avatarUrl!.isNotEmpty
                   ? Image.network(
                       clientInfo.avatarUrl!,
                       fit: BoxFit.cover,

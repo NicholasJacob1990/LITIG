@@ -18,6 +18,12 @@ class CaseDetail extends Equatable {
   final List<LitigationParty> parties; // NOVO: Partes processuais
   final String? caseType; // NOVO: Tipo do caso (litigation, consultancy, etc.)
   final String? cnjNumber; // NOVO: Número CNJ para casos contenciosos
+  // NOVO: Dados sensíveis do cliente (visíveis apenas com acesso completo)
+  final String? clientName;
+  final String? clientEmail;
+  final String? clientPhone;
+  final String? clientAddress;
+  final double? exactCaseValue;
 
   const CaseDetail({
     required this.id,
@@ -35,6 +41,11 @@ class CaseDetail extends Equatable {
     this.parties = const [], // NOVO: Lista de partes processuais
     this.caseType, // NOVO: Tipo do caso
     this.cnjNumber, // NOVO: Número CNJ
+    this.clientName,
+    this.clientEmail,
+    this.clientPhone,
+    this.clientAddress,
+    this.exactCaseValue,
   });
 
   /// Verifica se o caso é contencioso (tem partes processuais)
@@ -97,6 +108,11 @@ class CaseDetail extends Equatable {
         parties, // NOVO
         caseType, // NOVO
         cnjNumber, // NOVO
+        clientName,
+        clientEmail,
+        clientPhone,
+        clientAddress,
+        exactCaseValue,
       ];
 }
 

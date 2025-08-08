@@ -16,9 +16,12 @@ import '../widgets/sections/case_chat_section.dart';
 import '../../../../shared/utils/app_colors.dart';
 import 'package:meu_app/src/features/cases/domain/entities/process_status.dart';
 import '../../domain/entities/contextual_case_data.dart';
+import '../../domain/entities/case_detail.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart' as auth_states;
 import '../../../../core/utils/logger.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/privacy_cases_bloc.dart';
+import 'package:meu_app/injection_container.dart';
 
 class CaseDetailScreen extends StatelessWidget {
   const CaseDetailScreen({super.key, required this.caseId});
@@ -111,12 +114,19 @@ class CaseDetailScreen extends StatelessWidget {
                 
                 // Carregar dados contextuais SOMENTE para advogados
                 AppLogger.info('Lawyer detected: ${currentUser.id} - Loading contextual view');
-                return BlocProvider(
-                  create: (context) => GetIt.instance<ContextualCaseBloc>()
-                    ..add(LoadContextualCaseData(
-                      caseId: caseId,
-                      userId: currentUser.id,
-                    )),
+                return MultiBlocProvider(
+                  providers: [
+                    BlocProvider<ContextualCaseBloc>(
+                      create: (context) => GetIt.instance<ContextualCaseBloc>()
+                        ..add(LoadContextualCaseData(
+                          caseId: caseId,
+                          userId: currentUser.id,
+                        )),
+                    ),
+                    BlocProvider<PrivacyCasesBloc>(
+                      create: (_) => getIt<PrivacyCasesBloc>(),
+                    ),
+                  ],
                   child: BlocConsumer<ContextualCaseBloc, ContextualCaseState>(
                     listener: (context, contextualState) {
                       if (contextualState is ContextualCaseError) {
@@ -124,21 +134,22 @@ class CaseDetailScreen extends StatelessWidget {
                       }
                     },
                     builder: (context, contextualState) {
-                      // Extract contextual data if available
+                      // Se carregado, usar CaseDetail e ContextualData tipados do backend
+                      CaseDetail? effectiveCaseDetail = caseDetail;
                       ContextualCaseData? contextualData;
                       if (contextualState is ContextualCaseLoaded) {
+                        effectiveCaseDetail = contextualState.caseDetail;
                         contextualData = contextualState.contextualData;
                         AppLogger.info('Using contextual data for allocation: ${contextualData.allocationType}');
                       } else {
                         AppLogger.info('No contextual data available for lawyer, using basic lawyer sections');
                       }
-                      
+
                       return SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Show contextual loading indicator if loading
                             if (contextualState is ContextualCaseLoading)
                               Container(
                                 padding: const EdgeInsets.all(8),
@@ -150,24 +161,155 @@ class CaseDetailScreen extends StatelessWidget {
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    ),
+                                    SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                                     SizedBox(width: 8),
-                                    Text(
-                                      'Carregando dados contextuais...',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
+                                    Text('Carregando dados contextuais...', style: TextStyle(fontSize: 12)),
                                   ],
                                 ),
                               ),
-                            
-                            // Render sections using factory (ONLY FOR LAWYERS)
+
+                            // Banner de estado de acesso (Full/Preview)
+                            BlocBuilder<PrivacyCasesBloc, PrivacyCasesState>(
+                              builder: (context, pState) {
+                                final fullAccess = pState is AccessStatusLoaded && pState.fullAccess;
+                                return Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  decoration: BoxDecoration(
+                                    color: fullAccess
+                                        ? Colors.green.withValues(alpha: 0.08)
+                                        : Colors.amber.withValues(alpha: 0.12),
+                                    border: Border.all(
+                                      color: fullAccess
+                                          ? Colors.green.withValues(alpha: 0.3)
+                                          : Colors.amber.withValues(alpha: 0.3),
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        fullAccess ? Icons.lock_open : Icons.visibility_off,
+                                        color: fullAccess ? Colors.green : Colors.amber[800],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          fullAccess
+                                              ? 'Acesso Completo aos dados do cliente'
+                                              : 'Visualização em modo Preview. Aceite o caso para ver dados completos do cliente.',
+                                          style: TextStyle(
+                                            color: fullAccess ? Colors.green[800] : Colors.amber[900],
+                                          ),
+                                        ),
+                                      ),
+                                      if (!fullAccess)
+                                        TextButton.icon(
+                                          onPressed: () => context
+                                              .read<PrivacyCasesBloc>()
+                                              .add(AcceptCaseRequested(caseId)),
+                                          icon: const Icon(Icons.verified_user),
+                                          label: const Text('Aceitar Caso'),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+
+                            // Ações de aceite/abandono para advogados
+                            BlocConsumer<PrivacyCasesBloc, PrivacyCasesState>(
+                              listener: (context, pState) {
+                                if (pState is PrivacyCasesActionSuccess) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(pState.message)),
+                                  );
+                                  // Revalidar acesso após ações
+                                  context.read<PrivacyCasesBloc>().add(CheckAccessRequested(caseId));
+                                } else if (pState is PrivacyCasesError) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(pState.message)),
+                                  );
+                                }
+                              },
+                              builder: (context, pState) {
+                                final isLoading = pState is PrivacyCasesLoading;
+                                final fullAccess = pState is AccessStatusLoaded && pState.fullAccess;
+                                // dispara verificação de acesso uma vez
+                                if (pState is! AccessStatusLoaded && pState is! PrivacyCasesLoading) {
+                                  context.read<PrivacyCasesBloc>().add(CheckAccessRequested(caseId));
+                                }
+                                return Row(
+                                  children: [
+                                    if (!fullAccess)
+                                      ElevatedButton.icon(
+                                        onPressed: isLoading
+                                            ? null
+                                            : () => context.read<PrivacyCasesBloc>().add(
+                                                  AcceptCaseRequested(caseId),
+                                                ),
+                                        icon: const Icon(Icons.verified_user),
+                                        label: const Text('Aceitar Caso'),
+                                      )
+                                    else
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.lock_open, size: 16, color: Colors.green),
+                                            SizedBox(width: 6),
+                                            Text('Acesso Completo', style: TextStyle(color: Colors.green)),
+                                          ],
+                                        ),
+                                      ),
+                                    const SizedBox(width: 12),
+                                    OutlinedButton.icon(
+                                      onPressed: isLoading
+                                          ? null
+                                          : () async {
+                                              final confirm = await showDialog<bool>(
+                                                context: context,
+                                                builder: (dCtx) => AlertDialog(
+                                                  title: const Text('Abandonar Caso'),
+                                                  content: const Text('Tem certeza que deseja abandonar este caso?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () => Navigator.of(dCtx).pop(false),
+                                                      child: const Text('Cancelar'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () => Navigator.of(dCtx).pop(true),
+                                                      child: const Text('Confirmar'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                              if (confirm == true) {
+                                                // opcional: solicitar motivo
+                                                context.read<PrivacyCasesBloc>().add(
+                                                      AbandonCaseRequested(caseId),
+                                                    );
+                                              }
+                                            },
+                                      icon: const Icon(Icons.logout),
+                                      label: const Text('Abandonar'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 12),
+
                             ...ContextualCaseDetailSectionFactory.buildSectionsForUser(
                               currentUser: currentUser,
-                              caseDetail: caseDetail,
+                              caseDetail: effectiveCaseDetail,
                               contextualData: contextualData,
                             ),
                           ],

@@ -95,7 +95,8 @@ Future<void> _navigateToPartnershipSearch(WidgetTester tester) async {
   await tester.tap(find.text('Parcerias'));
   await tester.pumpAndSettle();
   
-  await tester.tap(find.text('Buscar Parcerias'));
+  // Aba removida: "Buscar Parcerias". Usar a aba "Busca por IA".
+  await tester.tap(find.text('Busca por IA'));
   await tester.pumpAndSettle();
 }
 

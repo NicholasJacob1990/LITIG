@@ -61,37 +61,12 @@ mixin ContextualCaseBlocHelpers {
     Duration timeout = const Duration(seconds: 10),
   }) async {
     try {
-      // Mock implementation - replace with actual use case call
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Esta função agora apenas impõe timeout; o carregamento real ocorre no UseCase
+      await Future.delayed(const Duration(milliseconds: 50));
+      // Retorna uma estrutura mínima até que o UseCase emita o estado carregado
       return ContextualCaseData(
-        allocationType: AllocationType.internalDelegation,
-        matchScore: 85.0,
-        responseDeadline: DateTime.now().add(const Duration(days: 7)),
-        partnerId: 'partner_123',
-        delegatedBy: 'admin_user',
-        contextMetadata: const {
-          'complexity': 'medium',
-          'priority': 'high',
-        },
-        partnerName: 'Escritório Parceiro',
-        partnerSpecialization: 'Direito Civil',
-        partnerRating: 4.5,
-        yourShare: 60,
-        partnerShare: 40,
-        collaborationArea: 'Contencioso',
-        responseTimeLeft: '7 dias',
-        distance: 15.5,
-        estimatedValue: 25000.0,
-        initiatorName: 'Cliente ABC',
-        slaHours: 48,
-        conversionRate: 0.85,
-        complexityScore: 7,
-        hoursBudgeted: 40,
-        hourlyRate: 200.0,
-        delegatedByName: 'Coordenador Legal',
-        deadlineDays: 30,
-        aiSuccessRate: 0.87,
-        aiReason: 'Caso complexo que requer atenção especializada',
+        allocationType: AllocationType.platformMatchDirect,
+        contextMetadata: const {},
       );
     } catch (e) {
       AppLogger.error('Error loading contextual data', error: e);
@@ -99,64 +74,5 @@ mixin ContextualCaseBlocHelpers {
     }
   }
 
-  /// Loads KPIs with timeout
-  Future<List<ContextualKPI>> _loadKPIsWithTimeout(
-    String caseId, 
-    String userId) async {
-    try {
-      // Mock implementation
-      await Future.delayed(const Duration(milliseconds: 300));
-      return [
-        const ContextualKPI(
-          icon: '📈',
-          label: 'Taxa de Sucesso',
-          value: '87%',
-        ),
-        const ContextualKPI(
-          icon: '⏱️',
-          label: 'Tempo Médio',
-          value: '45d',
-        ),
-      ];
-    } catch (e) {
-      AppLogger.error('Error loading KPIs', error: e);
-      return [];
-    }
-  }
-
-  /// Loads actions with timeout
-  Future<ContextualActions> _loadActionsWithTimeout(
-    String caseId, 
-    String userId) async {
-    try {
-      // Mock implementation
-      await Future.delayed(const Duration(milliseconds: 200));
-      return const ContextualActions(
-        primaryAction: ContextualAction(
-          action: 'view_details',
-          label: 'Ver Detalhes',
-        ),
-        secondaryActions: [
-          ContextualAction(
-            action: 'contact_client',
-            label: 'Contatar Cliente',
-          ),
-          ContextualAction(
-            action: 'update_status',
-            label: 'Atualizar Status',
-          ),
-        ],
-      );
-    } catch (e) {
-      AppLogger.error('Error loading actions', error: e);
-      // Return default actions
-      return const ContextualActions(
-        primaryAction: ContextualAction(
-          action: 'view_details',
-          label: 'Ver Detalhes',
-        ),
-        secondaryActions: [],
-      );
-    }
-  }
+  // Removidos métodos de mock com timeout não utilizados
 }

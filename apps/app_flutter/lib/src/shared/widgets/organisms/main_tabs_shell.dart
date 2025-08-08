@@ -95,12 +95,15 @@ class MainTabsShell extends StatelessWidget {
 
   /// Nova lógica baseada em permissões
   List<NavigationTab> _getNavItemsForPermissions(List<String> userPermissions, String userRole) {
-    // Usar sistema baseado em permissões com ordem por perfil
-    final tabs = getVisibleTabsForUser(userPermissions: userPermissions, userRole: userRole);
-    if (tabs.isNotEmpty) return tabs;
-    // Fallback em último caso
-    print('DEBUG - Permissions returned empty. Falling back to role defaults for $userRole');
+    // TEMPORÁRIO: Sistema de permissões não está configurado, usar fallback sempre
+    print('DEBUG - Usando fallback direto para userRole: $userRole (permissões: $userPermissions)');
     return _getFallbackTabsForRole(userRole);
+    
+    // TODO: Reativar quando permissões estiverem configuradas
+    // final tabs = getVisibleTabsForUser(userPermissions: userPermissions, userRole: userRole);
+    // if (tabs.isNotEmpty) return tabs;
+    // print('DEBUG - Permissions returned empty. Falling back to role defaults for $userRole');
+    // return _getFallbackTabsForRole(userRole);
   }
   
     /// Fallback com abas padrão por perfil quando o sistema de permissões falha
@@ -139,6 +142,14 @@ class MainTabsShell extends StatelessWidget {
             requiredPermission: 'nav.view.offers',
             route: '/offers',
           ),
+          // Disponibiliza a aba de parceiros também para associados
+          const NavigationTab(
+            label: 'Parceiros',
+            icon: LucideIcons.search,
+            branchIndex: 9,
+            requiredPermission: 'nav.view.partners',
+            route: '/partners',
+          ),
           const NavigationTab(
             label: 'Mensagens',
             icon: LucideIcons.messageSquare,
@@ -156,6 +167,10 @@ class MainTabsShell extends StatelessWidget {
         ];
         
       case 'lawyer_individual':
+      case 'lawyer':
+      case 'LAWYER':
+      case 'advogado':
+      case 'Lawyer':
       case 'firm':
       case 'super_associate':
         return [
@@ -217,42 +232,42 @@ class MainTabsShell extends StatelessWidget {
           const NavigationTab(
             label: 'Início',
             icon: LucideIcons.home,
-            branchIndex: 12,
+            branchIndex: 13,
             requiredPermission: 'nav.view.client.home',
             route: '/client-home',
           ),
           const NavigationTab(
             label: 'Meus Casos',
             icon: LucideIcons.folder,
-            branchIndex: 13,
+            branchIndex: 14,
             requiredPermission: 'nav.view.client.cases',
             route: '/client-cases',
           ),
           const NavigationTab(
             label: 'Advogados',
             icon: LucideIcons.search,
-            branchIndex: 14,
+            branchIndex: 15,
             requiredPermission: 'nav.view.client.find_lawyers',
             route: '/find-lawyers',
           ),
           const NavigationTab(
             label: 'Mensagens',
             icon: LucideIcons.messageSquare,
-            branchIndex: 15,
+            branchIndex: 16,
             requiredPermission: 'nav.view.client.messages',
             route: '/client-messages',
           ),
           const NavigationTab(
             label: 'Serviços',
             icon: LucideIcons.briefcase,
-            branchIndex: 16,
+            branchIndex: 17,
             requiredPermission: 'nav.view.client.services',
             route: '/services',
           ),
           const NavigationTab(
             label: 'Perfil',
             icon: LucideIcons.user,
-            branchIndex: 17,
+            branchIndex: 18,
             requiredPermission: 'nav.view.client.profile',
             route: '/client-profile',
           ),

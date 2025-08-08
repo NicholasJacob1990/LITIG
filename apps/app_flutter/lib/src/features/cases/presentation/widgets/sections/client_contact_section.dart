@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../base_info_section.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/privacy_cases_bloc.dart';
 
 /// Seção de Contato com Cliente para advogados contratantes
 /// 
@@ -22,23 +24,29 @@ class ClientContactSection extends BaseInfoSection {
 
   @override
   Widget build(BuildContext context) {
-    return buildSectionCard(
-      context,
-      title: 'Informações do Cliente',
-      children: [
-        _buildClientProfile(context),
-        const SizedBox(height: 16),
-        _buildContactInfo(context),
-        const SizedBox(height: 16),
-        _buildClientHistory(context),
-        const SizedBox(height: 20),
-        _buildQuickActions(context),
-      ],
+    return BlocBuilder<PrivacyCasesBloc, PrivacyCasesState>(
+      builder: (context, pState) {
+        final fullAccess = pState is AccessStatusLoaded && pState.fullAccess;
+        return buildSectionCard(
+          context,
+          title: 'Informações do Cliente',
+          children: [
+            _buildClientProfile(context, fullAccess: fullAccess),
+            const SizedBox(height: 16),
+            _buildContactInfo(context, fullAccess: fullAccess),
+            const SizedBox(height: 16),
+            _buildClientHistory(context),
+            const SizedBox(height: 20),
+            _buildQuickActions(context),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildClientProfile(BuildContext context) {
-    final clientName = contextualData?['client_name'] ?? 'Cliente Litgo';
+  Widget _buildClientProfile(BuildContext context, {required bool fullAccess}) {
+    final clientNameRaw = caseDetail.clientName ?? contextualData?['client_name'] ?? 'Cliente Litgo';
+    final clientName = fullAccess ? clientNameRaw : _mask(clientNameRaw);
     final clientType = contextualData?['client_type'] ?? 'Pessoa Física';
     final clientRating = contextualData?['client_rating'] ?? 8.5;
     final clientSince = contextualData?['client_since'] ?? 'Jan/2024';
@@ -149,9 +157,11 @@ class ClientContactSection extends BaseInfoSection {
     );
   }
 
-  Widget _buildContactInfo(BuildContext context) {
-    final email = contextualData?['client_email'] ?? 'cliente@email.com';
-    final phone = contextualData?['client_phone'] ?? '(11) 99999-9999';
+  Widget _buildContactInfo(BuildContext context, {required bool fullAccess}) {
+    final emailRaw = caseDetail.clientEmail ?? contextualData?['client_email'] ?? 'cliente@email.com';
+    final phoneRaw = caseDetail.clientPhone ?? contextualData?['client_phone'] ?? '(11) 99999-9999';
+    final email = fullAccess ? emailRaw : _maskEmail(emailRaw);
+    final phone = fullAccess ? phoneRaw : _maskKeepLast(phoneRaw, 2);
     final preferredContact = contextualData?['preferred_contact'] ?? 'WhatsApp';
 
     return Column(
@@ -185,6 +195,20 @@ class ClientContactSection extends BaseInfoSection {
         ),
       ],
     );
+  }
+
+  String _mask(String input) => input.isNotEmpty ? '${input[0]}***' : '***';
+  String _maskEmail(String input) {
+    final at = input.indexOf('@');
+    if (at <= 0) return '***';
+    final name = input.substring(0, at);
+    final domain = input.substring(at);
+    final maskedName = name.isNotEmpty ? '${name[0]}***' : '***';
+    return '$maskedName$domain';
+  }
+  String _maskKeepLast(String input, int keep) {
+    if (input.length <= keep) return '***';
+    return '***${input.substring(input.length - keep)}';
   }
 
   Widget _buildClientHistory(BuildContext context) {

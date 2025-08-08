@@ -228,7 +228,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
         borderRadius: BorderRadius.circular(12),
         color: Theme.of(context).colorScheme.primaryContainer,
       ),
-      child: firm.logoUrl != null
+      child: (firm.logoUrl != null && firm.logoUrl!.isNotEmpty)
           ? ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(

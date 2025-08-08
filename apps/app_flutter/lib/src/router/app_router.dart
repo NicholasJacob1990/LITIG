@@ -13,9 +13,11 @@ import 'package:meu_app/src/features/auth/presentation/screens/contract_signatur
 import 'package:meu_app/src/features/auth/presentation/screens/splash_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/case_detail_screen.dart';
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/partners_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/lawyers_screen.dart';
+// import 'package:meu_app/src/features/partnerships/presentation/screens/partners_search_screen.dart';
 
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -26,7 +28,9 @@ import 'package:meu_app/src/features/profile/presentation/screens/communication_
 import 'package:meu_app/src/features/profile/presentation/screens/privacy_settings_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/social_connections_screen.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/hybrid_partnerships_bloc.dart';
+import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
 import 'package:meu_app/src/features/partnerships/presentation/screens/partnerships_screen.dart';
+import 'package:meu_app/src/features/partnerships/presentation/screens/partnership_detail_screen.dart';
 import 'package:meu_app/src/features/offers/presentation/screens/offers_screen.dart';
 import 'package:meu_app/src/shared/widgets/organisms/main_tabs_shell.dart';
 import 'package:meu_app/src/features/triage/presentation/screens/chat_triage_screen.dart';
@@ -37,6 +41,7 @@ import 'package:meu_app/src/features/sla_management/presentation/screens/sla_set
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
+// import removed: ChatRoomsScreen no longer used for main message tabs
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/claim_profile_screen.dart';import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
 import 'package:meu_app/src/features/firms/presentation/screens/firm_team_screen.dart';
@@ -53,7 +58,7 @@ import 'package:meu_app/src/features/firms/presentation/bloc/firm_profile_bloc.d
 import 'package:meu_app/src/features/firms/presentation/screens/firm_profile_screen.dart';
 import 'package:meu_app/src/features/cluster_insights/presentation/screens/cluster_insights_screen.dart';
 import 'package:meu_app/src/features/cluster_insights/presentation/screens/cluster_detail_screen.dart';
-import 'package:meu_app/injection_container.dart';
+// injection_container já importado acima; remoção de import duplicado
 // Importação correta das novas telas
 import 'package:meu_app/src/features/admin/presentation/screens/premium_criteria_list.dart';
 import 'package:meu_app/src/features/cases/presentation/pages/lawyer_cases_demo_page.dart';
@@ -67,6 +72,9 @@ import 'package:meu_app/src/features/financial/presentation/bloc/financial_bloc.
 import 'package:meu_app/src/features/messaging/presentation/screens/unified_chats_screen.dart';
 // import 'package:meu_app/pages/admin/premium_criteria_form.dart';
 import 'package:meu_app/src/features/schedule/presentation/screens/schedule_screen.dart';
+import 'package:meu_app/src/features/cases/presentation/screens/my_accepted_cases_screen.dart';
+import 'package:meu_app/injection_container.dart';
+import 'package:meu_app/src/features/cases/presentation/bloc/privacy_cases_bloc.dart';
 
 // Definição da rota de perfil reutilizável com sub-rotas
 final profileGoRoute = GoRoute(
@@ -188,12 +196,21 @@ GoRouter appRouter(AuthBloc authBloc) {
           // 0: Advogado Associado - Painel
           StatefulShellBranch(routes: [GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen())]),
           // 1: Advogado Associado - Casos
-          StatefulShellBranch(routes: [GoRoute(path: '/cases', builder: (context, state) => const CasesScreen())]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/cases', builder: (context, state) => const CasesScreen()),
+            GoRoute(
+              path: '/cases/accepted',
+              builder: (context, state) => BlocProvider(
+                create: (context) => getIt<PrivacyCasesBloc>(),
+                child: const MyAcceptedCasesScreen(),
+              ),
+            ),
+          ]),
           // 2: Advogado Associado - Agenda
           StatefulShellBranch(routes: [GoRoute(path: '/schedule', builder: (context, state) => const ScheduleScreen())]),
           // 3: Advogado Associado - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
-          // 4: Advogado Associado - Mensagens
+          // 4: Advogado Associado - Mensagens (Unificada)
           StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const UnifiedChatsScreen())]),
           // 5: Advogado Associado - Perfil
           StatefulShellBranch(routes: [
@@ -233,7 +250,7 @@ GoRouter appRouter(AuthBloc authBloc) {
             ),
           ]),
           
-          // === ADVOGADO CONTRATANTE (branches 6-11) ===
+          // === ADVOGADO CONTRATANTE (branches 6-12) ===
           // 6: Advogado Contratante - Início
           StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const DashboardScreen())]),
           // 7: Advogado Contratante - Casos
@@ -247,14 +264,28 @@ GoRouter appRouter(AuthBloc authBloc) {
             routes: [
               GoRoute(
                 path: '/partnerships',
-                builder: (context, state) => BlocProvider(
-                  create: (context) => getIt<HybridPartnershipsBloc>(),
+                builder: (context, state) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => getIt<HybridPartnershipsBloc>()),
+                    BlocProvider(create: (_) => getIt<PartnershipsBloc>()),
+                  ],
                   child: const PartnershipsScreen(),
                 ),
               ),
+              GoRoute(
+                path: '/partnerships/:id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return PartnershipDetailScreen(
+                    partnershipId: id,
+                    initialData: extra != null ? extra['partnership'] : null,
+                  );
+                },
+              ),
             ],
           ),
-          // 11: Advogado Contratante - Mensagens
+          // 11: Advogado Contratante - Mensagens (Unificada)
           StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const UnifiedChatsScreen())]),
           // 12: Advogado Contratante - Perfil
            StatefulShellBranch(routes: [
@@ -294,18 +325,18 @@ GoRouter appRouter(AuthBloc authBloc) {
             ),
           ]),
 
-          // === CLIENTE (branches 12-17) ===
-          // 12: Cliente - Início (Triagem com IA)
-          StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const ChatTriageScreen())]),
-          // 13: Cliente - Casos
+          // === CLIENTE (branches 13-18) ===
+          // 13: Cliente - Início (Home com slogan)
+          StatefulShellBranch(routes: [GoRoute(path: '/client-home', builder: (context, state) => const HomeScreen())]),
+          // 14: Cliente - Casos
           StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),
-          // 14: Cliente - Advogados (Busca de Advogados)
+          // 15: Cliente - Advogados (Busca de Advogados)
           StatefulShellBranch(routes: [GoRoute(path: '/find-lawyers', builder: (context, state) => const LawyersScreen())]),
-          // 15: Cliente - Mensagens
+          // 16: Cliente - Mensagens (Unificada)
           StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const UnifiedChatsScreen())]),
-          // 16: Cliente - Serviços
+          // 17: Cliente - Serviços
           StatefulShellBranch(routes: [GoRoute(path: '/services', builder: (context, state) => const ServicesScreen())]),
-          // 17: Cliente - Perfil
+          // 18: Cliente - Perfil
            StatefulShellBranch(routes: [
              GoRoute(
                 path: '/client-profile',

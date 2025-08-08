@@ -9,14 +9,24 @@ import 'package:meu_app/injection_container.dart';
 import 'package:meu_app/src/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:meu_app/src/features/profile/presentation/bloc/profile_state.dart';
 import 'package:meu_app/src/features/profile/presentation/bloc/profile_event.dart';
+import 'package:meu_app/src/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:meu_app/src/features/dashboard/data/datasources/dashboard_remote_data_source.dart';
+import 'package:meu_app/src/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:meu_app/src/features/dashboard/domain/usecases/get_lawyer_stats_usecase.dart';
+import 'package:meu_app/src/features/dashboard/domain/entities/dashboard_stats.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<LawyerFirmBloc>()..add(const LoadLawyerFirmInfo()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<LawyerFirmBloc>(
+          create: (context) => getIt<LawyerFirmBloc>()..add(const LoadLawyerFirmInfo()),
+        ),
+        // DashboardBloc será criado depois de obtermos o usuário autenticado
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Perfil'),
@@ -44,8 +54,35 @@ class ProfileScreen extends StatelessWidget {
           builder: (context, authState) {
             if (authState is Authenticated) {
               final user = authState.user;
-              return BlocProvider(
-                create: (context) => getIt<ProfileBloc>()..add(LoadProfile(user.id)),
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider<ProfileBloc>(
+                    create: (context) => getIt<ProfileBloc>()..add(LoadProfile(user.id)),
+                  ),
+                  BlocProvider<DashboardBloc>(
+                    create: (context) {
+                      final ds = DashboardRemoteDataSourceImpl(dio: getIt());
+                      final repo = DashboardRepositoryImpl(remoteDataSource: ds);
+                      final lawyerUC = GetLawyerStatsUseCase(repo);
+                      final contractorUC = GetContractorStatsUseCase(repo);
+                      final clientUC = GetClientStatsUseCase(repo);
+                      final bloc = DashboardBloc(
+                        getLawyerStatsUseCase: lawyerUC,
+                        getContractorStatsUseCase: contractorUC,
+                        getClientStatsUseCase: clientUC,
+                      );
+                      final role = user.role ?? 'client_pf';
+                      if (role.contains('firm') || role.contains('contractor')) {
+                        bloc.add(FetchContractorStats());
+                      } else if (role.startsWith('client')) {
+                        bloc.add(FetchClientStats());
+                      } else {
+                        bloc.add(FetchLawyerStats());
+                      }
+                      return bloc;
+                    },
+                  ),
+                ],
                 child: BlocBuilder<ProfileBloc, ProfileState>(
                   builder: (context, profileState) {
                     if (profileState is ProfileLoaded) {
@@ -62,9 +99,25 @@ class ProfileScreen extends StatelessWidget {
                             
                             const SizedBox(height: 24),
                             
-                            // Dashboard Contextual Resumido
+                            // Dashboard Contextual Resumido (conectado ao DashboardBloc)
                             if (user.role == 'lawyer' || user.role == 'lawyer_firm_member' || user.role == 'firm')
-                              _buildContextualDashboard(context, user),
+                              BlocBuilder<DashboardBloc, DashboardState>(
+                                builder: (context, state) {
+                                  if (state is DashboardLoaded) {
+                                    return _buildContextualDashboard(context, user, state.stats);
+                                  }
+                                  if (state is DashboardError) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                      child: Text('Erro ao carregar métricas: ${state.message}'),
+                                    );
+                                  }
+                                  return const Center(child: Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: CircularProgressIndicator(),
+                                  ));
+                                },
+                              ),
                             
                             // Seção de Escritório
                             if (user.role == 'lawyer' || user.role == 'lawyer_firm_member') ...[
@@ -164,11 +217,11 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContextualDashboard(BuildContext context, dynamic user) {
+  Widget _buildContextualDashboard(BuildContext context, dynamic user, DashboardStats stats) {
     return Column(
       children: [
         // Métricas resumidas
-        _buildPersonalMetricsSection(context, user),
+        _buildPersonalMetricsSection(context, user, stats),
         const SizedBox(height: 16),
         
         // Dashboard contextual expandido baseado no tipo de usuário
@@ -361,7 +414,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPersonalMetricsSection(BuildContext context, dynamic user) {
+  Widget _buildPersonalMetricsSection(BuildContext context, dynamic user, DashboardStats stats) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -381,7 +434,7 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildMetricsForUserType(context, user.role),
+            _buildMetricsForUserType(context, user.role, stats),
           ],
         ),
       ),
@@ -758,78 +811,78 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricsForUserType(BuildContext context, String? role) {
+  Widget _buildMetricsForUserType(BuildContext context, String? role, DashboardStats stats) {
     // TODO: Implementar chamadas reais da API baseadas no tipo de usuário
     switch (role) {
       case 'lawyer':
       case 'lawyer_individual':
       case 'lawyer_office':
       case 'lawyer_platform_associate':
-        return _buildLawyerMetrics(context);
+        return _buildLawyerMetrics(context, stats);
       case 'lawyer_firm_member':
-        return _buildAssociatedLawyerMetrics(context);
+        return _buildAssociatedLawyerMetrics(context, stats);
       case 'client':
       case 'PF':
-        return _buildClientMetrics(context);
+        return _buildClientMetrics(context, stats);
       default:
         return _buildDefaultMetrics(context);
     }
   }
 
-  Widget _buildLawyerMetrics(BuildContext context) {
+  Widget _buildLawyerMetrics(BuildContext context, DashboardStats stats) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildMetricItem(context, 'Casos Ativos', '8', LucideIcons.briefcase)),
-            Expanded(child: _buildMetricItem(context, 'Taxa Sucesso', '87%', LucideIcons.trendingUp)),
+            Expanded(child: _buildMetricItem(context, 'Casos Ativos', '${stats.activeCases}', LucideIcons.briefcase)),
+            Expanded(child: _buildMetricItem(context, 'Taxa Sucesso', '${stats.conversionRate}%', LucideIcons.trendingUp)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildMetricItem(context, 'Avaliação', '4.7⭐', LucideIcons.star)),
-            Expanded(child: _buildMetricItem(context, 'Este Mês', 'R\$ 25K', LucideIcons.dollarSign)),
+            Expanded(child: _buildMetricItem(context, 'Leads Novos', '${stats.newLeads}', LucideIcons.userPlus)),
+            Expanded(child: _buildMetricItem(context, 'Receita Mês', 'R\$ ${stats.monthlyRevenue.toStringAsFixed(0)}', LucideIcons.dollarSign)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildAssociatedLawyerMetrics(BuildContext context) {
+  Widget _buildAssociatedLawyerMetrics(BuildContext context, DashboardStats stats) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildMetricItem(context, 'Casos Ativos', '5', LucideIcons.briefcase)),
-            Expanded(child: _buildMetricItem(context, 'Produtividade', '92%', LucideIcons.trendingUp)),
+            Expanded(child: _buildMetricItem(context, 'Casos Ativos', '${stats.activeCases}', LucideIcons.briefcase)),
+            Expanded(child: _buildMetricItem(context, 'Produtividade', '${stats.conversionRate}%', LucideIcons.trendingUp)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildMetricItem(context, 'Horas Mês', '156h', LucideIcons.clock)),
-            Expanded(child: _buildMetricItem(context, 'Avaliação', '4.5⭐', LucideIcons.star)),
+            Expanded(child: _buildMetricItem(context, 'Leads', '${stats.newLeads}', LucideIcons.userPlus)),
+            Expanded(child: _buildMetricItem(context, 'Receita', 'R\$ ${stats.monthlyRevenue.toStringAsFixed(0)}', LucideIcons.dollarSign)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildClientMetrics(BuildContext context) {
+  Widget _buildClientMetrics(BuildContext context, DashboardStats stats) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildMetricItem(context, 'Casos Ativos', '3', LucideIcons.briefcase)),
-            Expanded(child: _buildMetricItem(context, 'Advogados', '2', LucideIcons.userCheck)),
+            Expanded(child: _buildMetricItem(context, 'Casos Ativos', '${stats.activeCases}', LucideIcons.briefcase)),
+            Expanded(child: _buildMetricItem(context, 'Leads', '${stats.newLeads}', LucideIcons.userCheck)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildMetricItem(context, 'Audiências', '1', LucideIcons.calendar)),
-            Expanded(child: _buildMetricItem(context, 'Mensagens', '5', LucideIcons.messageCircle)),
+            Expanded(child: _buildMetricItem(context, 'Prospects', '${stats.prospects}', LucideIcons.calendar)),
+            Expanded(child: _buildMetricItem(context, 'Qualificados', '${stats.qualified}', LucideIcons.messageCircle)),
           ],
         ),
       ],

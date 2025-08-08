@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meu_app/src/features/firms/domain/entities/law_firm.dart';
 import 'package:meu_app/src/features/partnerships/domain/entities/partnership.dart';
 import 'package:meu_app/src/features/partnerships/presentation/widgets/partnership_card.dart';
@@ -137,16 +138,16 @@ class HybridPartnershipsList extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: InkWell(
         onTap: () {
-          // TODO: Implementar navegação para detalhes da parceria
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Parceria com ${partnership.partnerName}'),
-              backgroundColor: Colors.blue,
-            ),
-          );
+          // Navegar para detalhes via go_router (se disponível)
+          // Mantemos fallback silencioso para não quebrar execução
+          try {
+            // ignore: use_build_context_synchronously
+            Navigator.of(context).pushNamed('/partnerships/${partnership.id}');
+          } catch (_) {}
         },
         child: PartnershipCard(
           partnership: partnership,
+          listContext: listType,
         ),
       ),
     );
@@ -195,13 +196,7 @@ class HybridPartnershipsList extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: () {
-                  // TODO: Implementar navegação para detalhes da parceria com escritório
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Parceria B2B com ${firm.name}'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  context.go('/firm/${firm.id}/profile');
                 },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

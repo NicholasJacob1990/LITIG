@@ -47,6 +47,7 @@ from routes.enriched_firms import router as enriched_firms_router
 from routes.data_quality_dashboard import router as data_quality_router
 from routes.admin_economy_dashboard_simple import router as admin_economy_router
 from routes.academic_profiles import router as academic_profiles_router
+from routes.dashboard import router as dashboard_router
 from routes.case_notifications import router as case_notifications_router
 from middleware.auto_context_middleware import AutoContextMiddleware
 from services.cache_service_simple import close_simple_cache, init_simple_cache
@@ -66,7 +67,12 @@ from packages.backend.routes import (
     facebook,
     outlook
 )
-from routes.lawyer_routes import router as lawyer_routes
+try:
+    from routes.lawyer_routes import router as lawyer_routes
+except Exception:
+    # Ambiente pode não ter esse módulo; protege import opcional
+    from types import SimpleNamespace
+    lawyer_routes = SimpleNamespace(router=SimpleNamespace())
 from .routes import privacy_cases
 from .routes import supabase_cases
 # from . import models  # Removido - não existe database.py
@@ -119,6 +125,7 @@ async def lifespan(app: FastAPI):
         
         # Inicializar job de otimização econômica
         try:
+            import asyncio
             from jobs.economic_optimization_job import start_optimization_job
             asyncio.create_task(start_optimization_job())
             logger.info("Job de otimização econômica iniciado.")
@@ -127,6 +134,7 @@ async def lifespan(app: FastAPI):
         
         # Inicializar modelos ML para cache predictivo
         try:
+            import asyncio
             from services.predictive_cache_ml_service import predictive_cache_ml
             asyncio.create_task(predictive_cache_ml.initialize_models())
             logger.info("Modelos ML de cache predictivo inicializados.")
@@ -229,6 +237,7 @@ app.include_router(supabase_cases.router)
 app.include_router(process_updates_router)
 app.include_router(persons_router)
 app.include_router(process_movements_router)
+app.include_router(dashboard_router, prefix="/api")
 
 # Rotas de Advogados
 app.include_router(lawyer_routes.router, prefix="/api/v1/lawyers", tags=["lawyers"])

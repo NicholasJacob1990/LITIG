@@ -25,11 +25,13 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: scheme.outline.withOpacity(0.3))),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -42,7 +44,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
                 Icon(
                   LucideIcons.slidersHorizontal,
                   size: 20,
-                  color: Theme.of(context).primaryColor,
+                  color: scheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -50,7 +52,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
                     'Filtros de Busca',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
+                      color: scheme.onSurface,
                       fontSize: 18,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -138,9 +140,10 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
   }
 
   Widget _buildEntityFilterSegmentedControl() {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: scheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -152,7 +155,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                 decoration: BoxDecoration(
-                  color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+                  color: isSelected ? scheme.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -162,14 +165,14 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
                     Icon(
                       filter.icon,
                       size: 16,
-                      color: isSelected ? Colors.white : Colors.grey.shade600,
+                      color: isSelected ? scheme.onPrimary : scheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         filter.label,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey.shade600,
+                          color: isSelected ? scheme.onPrimary : scheme.onSurfaceVariant,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           fontSize: 12,
                         ),
@@ -188,6 +191,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
   }
 
   Widget _buildPresetSelector() {
+    final scheme = Theme.of(context).colorScheme;
     final presets = [
       {'key': 'balanced', 'label': 'Recomendado', 'icon': LucideIcons.star},
       {'key': 'economic', 'label': 'Melhor Custo', 'icon': LucideIcons.dollarSign},
@@ -204,9 +208,9 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.transparent,
+              color: isSelected ? scheme.primary.withOpacity(0.08) : scheme.surface,
               border: Border.all(
-                color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                color: isSelected ? scheme.primary : scheme.outline.withOpacity(0.5),
                 width: isSelected ? 2 : 1,
               ),
               borderRadius: BorderRadius.circular(12),
@@ -216,13 +220,13 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
                 Icon(
                   preset['icon'] as IconData,
                   size: 20,
-                  color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade600,
+                  color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   preset['label'] as String,
                   style: TextStyle(
-                    color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade800,
+                    color: isSelected ? scheme.primary : scheme.onSurface,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -231,7 +235,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
                   Icon(
                     LucideIcons.check,
                     size: 18,
-                    color: Theme.of(context).primaryColor,
+                    color: scheme.primary,
                   ),
               ],
             ),
@@ -242,6 +246,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
   }
 
   Widget _buildRenderingOption() {
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -263,7 +268,7 @@ class _HybridFiltersModalState extends State<HybridFiltersModal> {
           },
           secondary: Icon(
             _mixedRendering ? LucideIcons.shuffle : LucideIcons.list,
-            color: Theme.of(context).primaryColor,
+            color: scheme.primary,
           ),
         ),
       ],

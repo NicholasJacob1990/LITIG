@@ -2,4 +2,6 @@ import 'package:meu_app/src/features/dashboard/domain/entities/dashboard_stats.d
 
 abstract class DashboardRepository {
   Future<DashboardStats> getLawyerStats();
+  Future<DashboardStats> getContractorStats();
+  Future<DashboardStats> getClientStats();
 } 

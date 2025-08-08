@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:meu_app/src/router/app_router.dart';
 import 'package:meu_app/injection_container.dart' as di;
+import 'package:meu_app/src/core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,10 +26,9 @@ class MyApp extends StatelessWidget {
           return MaterialApp.router(
             routerConfig: router,
             title: 'LITIG',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-              useMaterial3: true,
-            ),
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            debugShowCheckedModeBanner: false,
           );
         },
       ),

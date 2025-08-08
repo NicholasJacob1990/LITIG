@@ -107,6 +107,13 @@ except ImportError:
             pass
 import httpx
 
+# Tentar usar serviço modularizado de enriquecimento acadêmico (ordem segura)
+try:
+    from .services.academic_enrichment import create_academic_enricher as _create_academic_enricher
+    _HAS_ACAD_SVC = True
+except Exception:
+    _HAS_ACAD_SVC = False
+
 # 🆕 FASE 1: Unified Cache Service Integration
 try:
     from .services.unified_cache_service import UnifiedCacheService, CachedFeatures, unified_cache
@@ -136,6 +143,7 @@ except ImportError:
 
 # LTR Service Integration
 LTR_ENDPOINT = os.getenv("LTR_ENDPOINT", "http://ltr-service:8080/ltr/score")
+LTR_TIMEOUT_SEC = float(os.getenv("LTR_TIMEOUT", "2.0"))
 try:
     from .services.availability_service import get_lawyers_availability_status
 except ImportError:
@@ -216,11 +224,21 @@ HARDCODED_FALLBACK_WEIGHTS = {
     "L": 0.04  # 🆕 Feature L (Languages & Events)
 }
 
+# Conjunto de chaves de features e função de normalização
+FEATURE_KEYS = set(HARDCODED_FALLBACK_WEIGHTS.keys())
+
+def _normalize_weights(weights: Dict[str, float]) -> Dict[str, float]:
+    """Normaliza pesos para conter exatamente FEATURE_KEYS e somar 1.0."""
+    w = {k: float(weights.get(k, 0.0)) for k in FEATURE_KEYS}
+    s = sum(w.values()) or 1.0
+    return {k: v / s for k, v in w.items()}
+
 # Tenta carregar os pesos otimizados; se falhar, usa o fallback fixo
 try:
-    OPTIMIZED_WEIGHTS = get_optimized_weights()
+    raw_weights = get_optimized_weights()
+    OPTIMIZED_WEIGHTS = _normalize_weights(raw_weights or {})
     if not OPTIMIZED_WEIGHTS or sum(OPTIMIZED_WEIGHTS.values()) == 0:
-        logging.warning("Pesos otimizados estão vazios ou zerados. Usando fallback fixo.")
+        logging.warning("Pesos otimizados vazios/zerados. Usando fallback fixo.")
         OPTIMIZED_WEIGHTS = HARDCODED_FALLBACK_WEIGHTS
 except Exception as e:
     logging.error(f"Falha crítica ao carregar pesos otimizados: {e}. Usando fallback fixo.")
@@ -375,7 +393,7 @@ def load_experimental_weights(version: str) -> Optional[Dict[str, float]]:
                 if any(v > 0 for v in loaded.values()):
                     logging.info(
                         f"Pesos EXPERIMENTAIS '{version}' carregados de '{exp_path}'")
-                    return loaded
+                    return _normalize_weights(loaded)
         return None
     except (IOError, json.JSONDecodeError, ValueError) as e:
         logging.warning(
@@ -406,11 +424,27 @@ OVERLOAD_FLOOR = float(os.getenv("OVERLOAD_FLOOR", "0.01"))
 
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:  # noqa: D401
+        def _redact(value: Any):
+            sensitive_keys = {"email", "phone", "linkedin_url", "coords", "document", "cpf", "cnpj", "ad_campaign_id"}
+            try:
+                if isinstance(value, dict):
+                    redacted = {}
+                    for k, v in value.items():
+                        if k in sensitive_keys:
+                            redacted[k] = "***"
+                        else:
+                            redacted[k] = _redact(v)
+                    return redacted
+                if isinstance(value, list):
+                    return [_redact(v) for v in value]
+                return value
+            except Exception:
+                return value
         return json.dumps({
             "timestamp": self.formatTime(record, self.datefmt),
             "level": record.levelname,
             "message": record.getMessage(),
-            "context": record.args,
+            "context": _redact(record.args),
         })
 
 
@@ -1004,7 +1038,23 @@ class FeatureCalculator:
     async def qualification_score_async(self) -> float:
         """(v2.8) Métrica de reputação enriquecida com dados acadêmicos externos."""
         cv = self.cv
-        enricher = AcademicEnricher(cache)
+        if _HAS_ACAD_SVC:
+            try:
+                enricher = _create_academic_enricher(
+                    cache,
+                    perplexity_func=perplexity_chat,
+                    deep_func=deep_research_request,
+                    uni_ttl_h=UNI_RANK_TTL_H,
+                    jour_ttl_h=JOUR_RANK_TTL_H,
+                    audit_logger=AUDIT_LOGGER,
+                )
+            except Exception:
+                enricher = AcademicEnricher(cache) if 'AcademicEnricher' in globals() else None
+        else:
+            enricher = AcademicEnricher(cache) if 'AcademicEnricher' in globals() else None
+        if enricher is None:
+            # Fallback: lógica síncrona
+            return self.qualification_score()
 
         # ── 1. Experiência (inalterado) ──────────────────────────────
         score_exp = min(1.0, cv.get("anos_experiencia", 0) / 25)
@@ -1168,7 +1218,8 @@ class FeatureCalculator:
     def urgency_capacity(self) -> float:
         if self.case.urgency_h <= 0:
             return 0.0
-        return np.clip(1 - self.lawyer.kpi.tempo_resposta_h / self.case.urgency_h, 0, 1)
+        tempo_resposta = max(0.1, float(self.lawyer.kpi.tempo_resposta_h or 0.0))
+        return np.clip(1 - tempo_resposta / self.case.urgency_h, 0, 1)
 
     def review_score(self) -> float:
         """Score de reviews com filtro anti-spam (alinhado com soft_skill validation)."""
@@ -1326,9 +1377,15 @@ class FeatureCalculator:
         k = firm.kpi_firm
         
         # Parte 1: Score de Reputação (baseado em KPIs)
+        # Normalizar NPS (geralmente em [-100, 100]) para [0,1]
+        nps_norm = getattr(k, 'nps', 0.0)
+        try:
+            nps_norm = (float(nps_norm) + 100.0) / 200.0
+        except Exception:
+            nps_norm = 0.5
         reputation_score = np.clip(
             0.35 * k.success_rate +
-            0.20 * k.nps +
+            0.20 * nps_norm +
             0.15 * k.reputation_score +
             0.10 * k.diversity_index +
             0.20 * k.maturity_index,
@@ -1564,7 +1621,7 @@ class FeatureCalculator:
             cached_features = await self._get_or_calculate_cached_features()
             
             if cached_features:
-                return {
+                result = {
                     "A": cached_features.area_match_score or self.area_match(),
                     "S": cached_features.similarity_score or self.case_similarity(),
                     "T": cached_features.success_rate_score or self.success_rate(),
@@ -1578,6 +1635,9 @@ class FeatureCalculator:
                     "M": cached_features.maturity_score,
                     "I": cached_features.interaction_score,
                 }
+                # Garantir presença da feature L enquanto não está no cache unificado
+                result["L"] = self.languages_events_score()
+                return result
             
         except Exception as e:
             print(f"⚠️ Erro no cache unificado: {e} - usando cálculo direto")
@@ -1665,6 +1725,7 @@ class FeatureCalculator:
             "I": self.interaction_score(),  # IEP calculation  
             "C": self.soft_skill(),  # NLP sentiment analysis
             "E": self.firm_reputation(),  # Firm analysis
+            "L": self.languages_events_score(),  # Languages & Events
             # Features leves para cache completo
             "A": self.area_match(),
             "S": self.case_similarity(),
@@ -1822,21 +1883,21 @@ class MatchmakingAlgorithm:
                 timeout=CONFLICT_TIMEOUT_SEC
             )
         except asyncio.TimeoutError:
-            # Timeout: fail-open (assume sem conflito) e loga alerta
-            AUDIT_LOGGER.warning("Conflict scan timeout - fail-open mode", {
+            # Timeout: fail-safe (tratar como potencial conflito para segurança)
+            AUDIT_LOGGER.warning("Conflict scan timeout - fail-safe treated as conflict", {
                 "case_id": case.id, 
                 "lawyer_id": lawyer.id, 
                 "timeout": CONFLICT_TIMEOUT_SEC
             })
-            return False
+            return True
         except Exception as e:
-            # Outros erros: fail-open e loga erro
-            AUDIT_LOGGER.warning("Conflict scan error - fail-open mode", {
+            # Erros: fail-safe
+            AUDIT_LOGGER.warning("Conflict scan error - fail-safe treated as conflict", {
                 "case_id": case.id, 
                 "lawyer_id": lawyer.id, 
                 "error": str(e)
             })
-            return False
+            return True
 
     # ------------------------------------------------------------------
     async def _calculate_ltr_scores_parallel(self, lawyers: List[Lawyer], weights: Dict[str, float], 
@@ -1856,17 +1917,20 @@ class MatchmakingAlgorithm:
                 resp = await client.post(
                     LTR_ENDPOINT, 
                     json=payload, 
-                    timeout=2.0
+                    timeout=LTR_TIMEOUT_SEC
                 )
-                print(f"    Status: {resp.status_code}")
+                # Debug opcional via logger
+                # AUDIT_LOGGER.info("LTR response status", {"status": resp.status_code})
                 resp.raise_for_status()
                 score_ltr = resp.json()["score"]
                 lw.scores["source"] = "ltr"
-                print(f"    ✅ LTR Score: {score_ltr}")
+                # AUDIT_LOGGER.debug("LTR score computed", {"score": score_ltr})
             except Exception as e:
-                print(f"    ❌ Erro LTR: {type(e).__name__}: {e}")
-                if hasattr(e, 'response') and hasattr(e.response, 'text'):
-                    print(f"    Response: {e.response.text}")
+                # Substitui prints por logs estruturados
+                AUDIT_LOGGER.warning("LTR request failed - using weighted fallback", {
+                    "error": str(e),
+                    "exception": type(e).__name__
+                })
                 # Fallback para soma ponderada
                 score_ltr = sum(features.get(k, 0) * weights.get(k, 0) for k in weights)
                 lw.scores["source"] = "weights"
@@ -2382,8 +2446,11 @@ class MatchmakingAlgorithm:
                 external_lawyers = []
                 for profile in external_profiles:
                     # Criar objeto Lawyer para perfil externo
+                    def _stable_external_id(*parts: str) -> str:
+                        data = "||".join([p or "" for p in parts])
+                        return "ext_" + hashlib.sha256(data.encode("utf-8")).hexdigest()[:16]
                     external_lawyer = Lawyer(
-                        id=f"ext_{hash(profile.name)}",  # ID único para perfil externo
+                        id=_stable_external_id(profile.email, profile.name, profile.firm_name),
                         nome=profile.name,
                         tags_expertise=[case.area] + profile.specializations,
                         geo_latlon=case.coords,  # Usar coordenadas do caso como aproximação
@@ -2550,7 +2617,17 @@ class MatchmakingAlgorithm:
             organic_recommendations.append(Recommendation(lawyer=lw, fair_score=fair_score, is_sponsored=False))
 
         sponsored_lawyers = await fetch_ads_for_case(case, limit=3)
-        sponsored_recommendations = [Recommendation(lawyer=sl, fair_score=sl.scores.get('fair_base', 0.0), is_sponsored=True, ad_campaign_id=getattr(sl, 'ad_meta', {}).get('campaign_id')) for sl in sponsored_lawyers]
+        # Dedupe patrocinados que já estão nos orgânicos
+        organic_ids = {rec.lawyer.id for rec in organic_recommendations}
+        sponsored_filtered = [sl for sl in sponsored_lawyers if getattr(sl, 'id', None) not in organic_ids]
+        sponsored_recommendations = [
+            Recommendation(
+                lawyer=sl,
+                fair_score=sl.scores.get('fair_base', 0.0),
+                is_sponsored=True,
+                ad_campaign_id=getattr(sl, 'ad_meta', {}).get('campaign_id')
+            ) for sl in sponsored_filtered
+        ]
 
         return organic_recommendations + sponsored_recommendations
 
@@ -3202,7 +3279,18 @@ if __name__ == "__main__":
         print("\n🧪 Testando Academic Enrichment com Templates Consolidados")
         print("=" * 60)
         
-        enricher = AcademicEnricher(cache)
+        # Preferir serviço modularizado se disponível
+        if _HAS_ACAD_SVC:
+            enricher = _create_academic_enricher(
+                cache,
+                perplexity_func=perplexity_chat,
+                deep_func=deep_research_request,
+                uni_ttl_h=UNI_RANK_TTL_H,
+                jour_ttl_h=JOUR_RANK_TTL_H,
+                audit_logger=AUDIT_LOGGER,
+            )
+        else:
+            enricher = AcademicEnricher(cache)
         
         # Teste validador e canonical
         try:
@@ -3570,17 +3658,8 @@ except ImportError:
 # Importa classes dos novos módulos para manter compatibilidade com código existente
 # =============================================================================
 
-# Re-export domain models
+# Re-export domain models (evitar sobrescrever classes já definidas neste módulo)
 from .models.domain import (
-    DiversityMeta,
-    ProfessionalMaturityData, 
-    Case,
-    KPI,
-    FirmKPI,
-    Parecer,
-    Reconhecimento,
-    Lawyer,
-    LawFirm,
     EMBEDDING_DIM as _EMBEDDING_DIM,
 )
 

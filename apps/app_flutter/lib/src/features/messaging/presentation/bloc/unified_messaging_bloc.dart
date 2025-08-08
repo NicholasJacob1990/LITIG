@@ -89,6 +89,22 @@ class ConnectEmailAccount extends UnifiedMessagingEvent {
   List<Object?> get props => [provider];
 }
 
+// ===== CONNECT MESSAGING ACCOUNTS =====
+
+class ConnectWhatsAppAccount extends UnifiedMessagingEvent {
+  const ConnectWhatsAppAccount();
+}
+
+class ConnectLinkedInAccount extends UnifiedMessagingEvent {
+  final String username;
+  final String password;
+
+  const ConnectLinkedInAccount({required this.username, required this.password});
+
+  @override
+  List<Object?> get props => [username, password];
+}
+
 // ===== NOVOS EVENTS LINKEDIN =====
 
 class SendLinkedInInMail extends UnifiedMessagingEvent {
@@ -332,6 +348,8 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
     on<SendChatMessage>(_onSendChatMessage);
     on<CreateCalendarEvent>(_onCreateCalendarEvent);
     on<ConnectEmailAccount>(_onConnectEmailAccount);
+    on<ConnectWhatsAppAccount>(_onConnectWhatsAppAccount);
+    on<ConnectLinkedInAccount>(_onConnectLinkedInAccount);
     
     // Novos handlers LinkedIn
     on<SendLinkedInInMail>(_onSendLinkedInInMail);
@@ -368,7 +386,7 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
           (account) => account.provider == 'gmail' || account.provider == 'outlook',
         );
         emails = await _unipileService.getEmails(
-          accountId: emailAccount.id,
+          connectionId: emailAccount.id,
         );
       }
 
@@ -598,6 +616,44 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
     } catch (e) {
       AppLogger.error('Erro ao conectar conta de email', error: e);
       emit(UnifiedMessagingError(message: 'Erro ao conectar ${event.provider}: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onConnectWhatsAppAccount(
+    ConnectWhatsAppAccount event,
+    Emitter<UnifiedMessagingState> emit,
+  ) async {
+    try {
+      emit(UnifiedMessagingConnecting());
+      final newAccount = await _unipileService.connectWhatsApp();
+      emit(UnifiedMessagingConnected(newAccount: newAccount));
+      add(const LoadUnifiedMessages(refresh: true));
+    } catch (e) {
+      AppLogger.error('Erro ao conectar WhatsApp', error: e);
+      emit(UnifiedMessagingError(message: 'Erro ao conectar WhatsApp: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onConnectLinkedInAccount(
+    ConnectLinkedInAccount event,
+    Emitter<UnifiedMessagingState> emit,
+  ) async {
+    try {
+      emit(UnifiedMessagingConnecting());
+      final response = await _unipileService.connectLinkedInV2(
+        username: event.username,
+        password: event.password,
+      );
+      // Alguns endpoints V2 retornam envelope; buscar a account se vier
+      final accountJson = (response['account'] ?? response['data'] ?? {}) as Map<String, dynamic>;
+      final account = accountJson.isNotEmpty
+          ? UnipileAccount.fromJson(accountJson)
+          : await _unipileService.getAccounts().then((list) => list.firstWhere((a) => a.provider == 'linkedin'));
+      emit(UnifiedMessagingConnected(newAccount: account));
+      add(const LoadUnifiedMessages(refresh: true));
+    } catch (e) {
+      AppLogger.error('Erro ao conectar LinkedIn', error: e);
+      emit(UnifiedMessagingError(message: 'Erro ao conectar LinkedIn: ${e.toString()}'));
     }
   }
 

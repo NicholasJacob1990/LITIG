@@ -11,4 +11,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
   Future<DashboardStats> getLawyerStats() async {
     return await remoteDataSource.getLawyerStats();
   }
+
+  Future<DashboardStats> getContractorStats() async {
+    return await remoteDataSource.getContractorStats();
+  }
+
+  @override
+  Future<DashboardStats> getClientStats() async {
+    return await remoteDataSource.getClientStats();
+  }
 } 

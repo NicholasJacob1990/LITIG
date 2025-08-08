@@ -3,32 +3,27 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/sla_audit_entity.dart';
 import '../../domain/entities/sla_enums.dart';
+import '../../domain/repositories/sla_audit_repository.dart';
 import '../datasources/sla_audit_remote_data_source.dart';
 
-class SlaAuditRepositoryImpl {
+class SlaAuditRepositoryImpl implements SlaAuditRepository {
   final SlaAuditRemoteDataSource remoteDataSource;
 
   SlaAuditRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, SlaAuditEntity>> createAuditEntry({
-    required String firmId,
-    required AuditEventType eventType,
-    required String entityId,
-    required String entityType,
-    required String userId,
-    required Map<String, dynamic> changes,
-    required Map<String, dynamic> metadata,
+  Future<Either<Failure, SlaAuditEntity>> createAuditEvent({
+    required SlaAuditEntity auditEvent,
   }) async {
     try {
       final result = await remoteDataSource.createAuditEntry(
-        firmId: firmId,
-        eventType: eventType,
-        entityId: entityId,
-        entityType: entityType,
-        userId: userId,
-        changes: changes,
-        metadata: metadata,
+        firmId: auditEvent.firmId,
+        eventType: auditEvent.eventType,
+        entityId: auditEvent.entityId ?? '',
+        entityType: auditEvent.entityType ?? 'unknown',
+        userId: auditEvent.userId,
+        changes: auditEvent.oldValues ?? const {},
+        metadata: auditEvent.metadata ?? const {},
       );
       return Right(result);
     } on ServerException {
@@ -41,22 +36,24 @@ class SlaAuditRepositoryImpl {
   }
 
   @override
-  Future<Either<Failure, List<SlaAuditEntity>>> getAuditTrail({
+  Future<Either<Failure, List<SlaAuditEntity>>> getAuditEvents({
     required String firmId,
-    String? entityId,
-    String? entityType,
-    List<AuditEventType>? eventTypes,
-    String? userId,
     DateTime? startDate,
     DateTime? endDate,
+    List<AuditEventType>? eventTypes,
+    List<AuditEventCategory>? categories,
+    List<AuditSeverity>? severities,
+    String? userId,
+    String? entityType,
+    String? entityId,
     int limit = 100,
     int offset = 0,
   }) async {
     try {
       final result = await remoteDataSource.getAuditTrail(
         firmId: firmId,
-        entityId: entityId,
         entityType: entityType,
+        entityId: entityId,
         eventTypes: eventTypes,
         userId: userId,
         startDate: startDate,
@@ -66,7 +63,7 @@ class SlaAuditRepositoryImpl {
       );
       return Right(result);
     } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter trilha de auditoria'));
+      return const Left(ServerFailure(message: 'Erro ao obter eventos de auditoria'));
     } on NetworkException {
       return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
@@ -77,19 +74,19 @@ class SlaAuditRepositoryImpl {
   @override
   Future<Either<Failure, Map<String, dynamic>>> generateComplianceReport({
     required String firmId,
-    required String period,
-    bool includeDetails = true,
-    List<String> complianceStandards = const ['ISO9001', 'LGPD', 'OAB', 'INTERNAL'],
-    String format = 'json',
+    required DateTime startDate,
+    required DateTime endDate,
+    String reportType = 'standard',
   }) async {
     try {
+      // Mapeia start/end para um período simples (ex.: yyyy-MM)
+      final period = '${startDate.toIso8601String()}_${endDate.toIso8601String()}';
       final result = await remoteDataSource.generateComplianceReport(
-        firmId: firmId,
-        period: period,
-        includeDetails: includeDetails,
-        complianceStandards: complianceStandards,
-        format: format,
-      );
+          firmId: firmId,
+          period: period,
+          includeDetails: reportType != 'summary',
+          complianceStandards: const ['ISO9001', 'LGPD', 'OAB', 'INTERNAL'],
+          format: 'json');
       return Right(result);
     } on ServerException {
       return const Left(ServerFailure(message: 'Erro ao gerar relatório de compliance'));
@@ -101,7 +98,7 @@ class SlaAuditRepositoryImpl {
   }
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> verifyIntegrity({
+  Future<Either<Failure, Map<String, dynamic>>> verifyLogIntegrity({
     required String firmId,
     DateTime? startDate,
     DateTime? endDate,
@@ -123,13 +120,12 @@ class SlaAuditRepositoryImpl {
   }
 
   @override
-  Future<Either<Failure, String>> exportAuditLog({
+  Future<Either<Failure, String>> exportAuditLogs({
     required String firmId,
+    required DateTime startDate,
+    required DateTime endDate,
     required String format,
-    DateTime? startDate,
-    DateTime? endDate,
-    bool includeMetadata = true,
-    bool encryptFile = false,
+    Map<String, dynamic>? filters,
   }) async {
     try {
       final result = await remoteDataSource.exportAuditLog(
@@ -137,8 +133,8 @@ class SlaAuditRepositoryImpl {
         format: format,
         startDate: startDate,
         endDate: endDate,
-        includeMetadata: includeMetadata,
-        encryptFile: encryptFile,
+        includeMetadata: (filters ?? const {})['includeMetadata'] ?? true,
+        encryptFile: (filters ?? const {})['encryptFile'] ?? false,
       );
       return Right(result);
     } on ServerException {
@@ -151,22 +147,24 @@ class SlaAuditRepositoryImpl {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getSecurityEvents({
+  Future<Either<Failure, List<SlaAuditEntity>>> getCriticalEvents({
     required String firmId,
     DateTime? startDate,
     DateTime? endDate,
-    String? severity,
+    bool unacknowledgedOnly = false,
   }) async {
     try {
-      final result = await remoteDataSource.getSecurityEvents(
+      // Não há endpoint dedicado: reutiliza trail e filtra depois (placeholder)
+      final result = await remoteDataSource.getAuditTrail(
         firmId: firmId,
         startDate: startDate,
         endDate: endDate,
-        severity: severity,
+        limit: 200,
       );
+      // Placeholder: apenas retorna a lista recebida
       return Right(result);
     } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter eventos de segurança'));
+      return const Left(ServerFailure(message: 'Erro ao obter eventos críticos'));
     } on NetworkException {
       return const Left(NetworkFailure(message: 'Erro de conexão'));
     } catch (e) {
@@ -196,245 +194,188 @@ class SlaAuditRepositoryImpl {
     }
   }
 
+  // ====== MÉTODOS PENDENTES (stubs) ======
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getUserActivity({
+  Future<Either<Failure, SlaAuditEntity>> getAuditEvent({
+    required String auditId,
+  }) async => const Left(UnexpectedFailure(message: 'getAuditEvent não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getConfigurationChanges({
     required String firmId,
-    required String userId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? entityType,
+  }) async => const Left(UnexpectedFailure(message: 'getConfigurationChanges não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getDataAccessEvents({
+    required String firmId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? userId,
+    String? entityType,
+  }) async => const Left(UnexpectedFailure(message: 'getDataAccessEvents não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getAuthenticationEvents({
+    String? userId,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool failedOnly = false,
+  }) async => const Left(UnexpectedFailure(message: 'getAuthenticationEvents não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getSecurityEvents({
+    required String firmId,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<AuditSeverity>? severities,
+  }) async => const Left(UnexpectedFailure(message: 'getSecurityEvents não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> searchAuditEvents({
+    required String firmId,
+    required String searchTerm,
     DateTime? startDate,
     DateTime? endDate,
     int limit = 100,
-    int offset = 0,
-  }) async {
-    try {
-      final result = await remoteDataSource.getUserActivity(
-        firmId: firmId,
-        userId: userId,
-        startDate: startDate,
-        endDate: endDate,
-        limit: limit,
-        offset: offset,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter atividade do usuário'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+  }) async => const Left(UnexpectedFailure(message: 'searchAuditEvents não implementado'));
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getChangeHistory({
-    required String firmId,
-    required String entityId,
-    String? entityType,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      final result = await remoteDataSource.getChangeHistory(
-        firmId: firmId,
-        entityId: entityId,
-        entityType: entityType,
-        startDate: startDate,
-        endDate: endDate,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter histórico de mudanças'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+  Future<Either<Failure, Map<String, dynamic>>> getUserActivitySummary({
+    required String userId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async => const Left(UnexpectedFailure(message: 'getUserActivitySummary não implementado'));
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getComplianceViolations({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getSuspiciousPatterns({
     required String firmId,
     DateTime? startDate,
     DateTime? endDate,
-    String? standard,
-    String? severity,
-  }) async {
-    try {
-      final result = await remoteDataSource.getComplianceViolations(
-        firmId: firmId,
-        startDate: startDate,
-        endDate: endDate,
-        standard: standard,
-        severity: severity,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter violações de compliance'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+  }) async => const Left(UnexpectedFailure(message: 'getSuspiciousPatterns não implementado'));
 
   @override
-  Future<Either<Failure, bool>> createRetentionPolicy({
+  Future<Either<Failure, List<Map<String, dynamic>>>> getCompliancePolicies({
     required String firmId,
-    required Map<String, dynamic> policy,
-  }) async {
-    try {
-      final result = await remoteDataSource.createRetentionPolicy(
-        firmId: firmId,
-        policy: policy,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao criar política de retenção'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+  }) async => const Left(UnexpectedFailure(message: 'getCompliancePolicies não implementado'));
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getRetentionPolicies(String firmId) async {
-    try {
-      final result = await remoteDataSource.getRetentionPolicies(firmId);
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter políticas de retenção'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, bool>> executeRetentionPolicy({
+  Future<Either<Failure, void>> updateCompliancePolicy({
     required String firmId,
     required String policyId,
-    bool dryRun = false,
-  }) async {
-    try {
-      final result = await remoteDataSource.executeRetentionPolicy(
-        firmId: firmId,
-        policyId: policyId,
-        dryRun: dryRun,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao executar política de retenção'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+    required Map<String, dynamic> policy,
+  }) async => const Left(UnexpectedFailure(message: 'updateCompliancePolicy não implementado'));
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getDataGovernanceReport({
+  Future<Either<Failure, Map<String, dynamic>>> checkCompliance({
     required String firmId,
     DateTime? startDate,
     DateTime? endDate,
-  }) async {
-    try {
-      final result = await remoteDataSource.getDataGovernanceReport(
-        firmId: firmId,
-        startDate: startDate,
-        endDate: endDate,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter relatório de governança'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+    List<String>? policyIds,
+  }) async => const Left(UnexpectedFailure(message: 'checkCompliance não implementado'));
 
   @override
-  Future<Either<Failure, bool>> createComplianceAlert({
+  Future<Either<Failure, Map<String, dynamic>>> cleanupOldLogs({
     required String firmId,
-    required Map<String, dynamic> alertConfig,
-  }) async {
-    try {
-      final result = await remoteDataSource.createComplianceAlert(
-        firmId: firmId,
-        alertConfig: alertConfig,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao criar alerta de compliance'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+    DateTime? cutoffDate,
+    bool dryRun = true,
+  }) async => const Left(UnexpectedFailure(message: 'cleanupOldLogs não implementado'));
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getComplianceAlerts({
+  Future<Either<Failure, String>> createAuditBackup({
     required String firmId,
-    bool activeOnly = true,
-  }) async {
-    try {
-      final result = await remoteDataSource.getComplianceAlerts(
-        firmId: firmId,
-        activeOnly: activeOnly,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter alertas de compliance'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+    required DateTime startDate,
+    required DateTime endDate,
+    String format = 'encrypted_json',
+  }) async => const Left(UnexpectedFailure(message: 'createAuditBackup não implementado'));
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> getRiskAssessment({
+  Future<Either<Failure, void>> restoreAuditBackup({
+    required String firmId,
+    required String backupId,
+    bool validateIntegrity = true,
+  }) async => const Left(UnexpectedFailure(message: 'restoreAuditBackup não implementado'));
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getAuditMetrics({
+    required String firmId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async => const Left(UnexpectedFailure(message: 'getAuditMetrics não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getUserAuditEvents({
+    required String userId,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<AuditEventType>? eventTypes,
+    int limit = 100,
+  }) async => const Left(UnexpectedFailure(message: 'getUserAuditEvents não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getEntityAuditTrail({
+    required String entityType,
+    required String entityId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async => const Left(UnexpectedFailure(message: 'getEntityAuditTrail não implementado'));
+
+  @override
+  Future<Either<Failure, List<SlaAuditEntity>>> getComplianceViolations({
     required String firmId,
     DateTime? startDate,
     DateTime? endDate,
-  }) async {
-    try {
-      final result = await remoteDataSource.getRiskAssessment(
-        firmId: firmId,
-        startDate: startDate,
-        endDate: endDate,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao obter avaliação de risco'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+    List<ComplianceStatus>? statuses,
+  }) async => const Left(UnexpectedFailure(message: 'getComplianceViolations não implementado'));
 
   @override
-  Future<Either<Failure, bool>> archiveAuditEntries({
+  Future<Either<Failure, void>> updateAuditAlert({
+    required String alertId,
+    Map<String, dynamic>? conditions,
+    List<String>? recipients,
+    bool? isActive,
+  }) async => const Left(UnexpectedFailure(message: 'updateAuditAlert não implementado'));
+
+  @override
+  Future<Either<Failure, void>> acknowledgeEvent({
+    required String auditId,
+    required String acknowledgedBy,
+    String? notes,
+  }) async => const Left(UnexpectedFailure(message: 'acknowledgeEvent não implementado'));
+
+  @override
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAuditAlerts({
     required String firmId,
-    required DateTime beforeDate,
-    String? archiveLocation,
-  }) async {
-    try {
-      final result = await remoteDataSource.archiveAuditEntries(
-        firmId: firmId,
-        beforeDate: beforeDate,
-        archiveLocation: archiveLocation,
-      );
-      return Right(result);
-    } on ServerException {
-      return const Left(ServerFailure(message: 'Erro ao arquivar entradas de auditoria'));
-    } on NetworkException {
-      return const Left(NetworkFailure(message: 'Erro de conexão'));
-    } catch (e) {
-      return Left(UnexpectedFailure(message: 'Erro inesperado: ${e.toString()}'));
-    }
-  }
+    bool activeOnly = false,
+  }) async => const Left(UnexpectedFailure(message: 'getAuditAlerts não implementado'));
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getAuditSystemHealth() async => const Left(UnexpectedFailure(message: 'getAuditSystemHealth não implementado'));
+
+  @override
+  Future<Either<Failure, String>> createAuditAlert({
+    required String firmId,
+    required String name,
+    required Map<String, dynamic> conditions,
+    required List<String> recipients,
+    bool isActive = true,
+  }) async => const Left(UnexpectedFailure(message: 'createAuditAlert não implementado'));
+
+  @override
+  Future<Either<Failure, void>> deleteAuditAlert({
+    required String alertId,
+  }) async => const Left(UnexpectedFailure(message: 'deleteAuditAlert não implementado'));
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getRetentionSettings({
+    required String firmId,
+  }) async => const Left(UnexpectedFailure(message: 'getRetentionSettings não implementado'));
+
+  @override
+  Future<Either<Failure, void>> updateRetentionSettings({
+    required String firmId,
+    required Map<String, dynamic> settings,
+  }) async => const Left(UnexpectedFailure(message: 'updateRetentionSettings não implementado'));
 } 

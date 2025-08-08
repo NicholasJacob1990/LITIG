@@ -28,6 +28,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Expor placeholder da API de mapas para o AndroidManifest
+        manifestPlaceholders["MAPS_API_KEY"] = System.getenv("MAPS_API_KEY") ?: (project.findProperty("MAPS_API_KEY") as String? ?: "")
     }
 
     buildTypes {

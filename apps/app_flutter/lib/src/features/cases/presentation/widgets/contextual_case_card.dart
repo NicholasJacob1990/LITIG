@@ -155,6 +155,20 @@ class ContextualCaseCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (caseData.isPremium)
+                const _BadgeChip(icon: Icons.workspace_premium, label: 'Premium'),
+              if (caseData.clientPlan != null)
+                _BadgeChip(icon: Icons.verified_user, label: 'Plano ${caseData.clientPlan}'),
+              // Badge de acesso completo (pós-aceite) — inferência pelo status
+              if (_hasFullAccess())
+                const _BadgeChip(icon: Icons.lock_open, label: 'Acesso Completo'),
+            ],
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -191,6 +205,11 @@ class ContextualCaseCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _hasFullAccess() {
+    // Heurística simples: quando status indica progresso real
+    return caseData.status == 'in_progress' || caseData.status == 'assigned' || caseData.status == 'closed';
   }
 
   Widget _buildContextualActions() {
@@ -338,6 +357,33 @@ class ContextualCaseCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+}
+
+class _BadgeChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _BadgeChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.grey[700]),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(fontSize: 11)),
+        ],
+      ),
+    );
   }
 }
 
