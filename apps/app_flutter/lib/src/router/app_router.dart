@@ -11,13 +11,15 @@ import 'package:meu_app/src/features/auth/presentation/screens/register_client_s
 import 'package:meu_app/src/features/auth/presentation/screens/register_lawyer_screen.dart';
 import 'package:meu_app/src/features/auth/presentation/screens/contract_signature_screen.dart';
 import 'package:meu_app/src/features/auth/presentation/screens/splash_screen.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
+import 'package:meu_app/src/features/auth/domain/entities/user.dart' as auth_user;
 import 'package:meu_app/src/features/cases/presentation/screens/case_detail_screen.dart';
 import 'package:meu_app/src/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:meu_app/src/features/home/presentation/screens/home_screen.dart';
 import 'package:meu_app/src/features/cases/presentation/screens/cases_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/partners_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/lawyers_screen.dart';
-// import 'package:meu_app/src/features/partnerships/presentation/screens/partners_search_screen.dart';
+import 'package:meu_app/src/features/partnerships/presentation/screens/partners_search_screen.dart';
 
 import 'package:meu_app/src/features/profile/presentation/screens/profile_screen.dart';
 import 'package:meu_app/src/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -41,6 +43,7 @@ import 'package:meu_app/src/features/sla_management/presentation/screens/sla_set
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_settings_bloc.dart';
 import 'package:meu_app/src/features/sla_management/presentation/bloc/sla_analytics_bloc.dart';
 import 'package:meu_app/src/features/chat/presentation/screens/chat_screen.dart';
+import 'package:meu_app/src/features/chat/presentation/screens/chat_rooms_screen.dart';
 // import removed: ChatRoomsScreen no longer used for main message tabs
 import 'package:meu_app/src/features/video_call/presentation/screens/video_call_screen.dart';
 import 'package:meu_app/src/features/lawyers/presentation/screens/claim_profile_screen.dart';import 'package:meu_app/src/features/ratings/presentation/screens/case_rating_screen.dart';
@@ -210,8 +213,8 @@ GoRouter appRouter(AuthBloc authBloc) {
           StatefulShellBranch(routes: [GoRoute(path: '/schedule', builder: (context, state) => const ScheduleScreen())]),
           // 3: Advogado Associado - Ofertas
           StatefulShellBranch(routes: [GoRoute(path: '/offers', builder: (context, state) => const OffersScreen())]),
-          // 4: Advogado Associado - Mensagens (Unificada)
-          StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const UnifiedChatsScreen())]),
+          // 4: Advogado Associado - Mensagens (Nativa)
+          StatefulShellBranch(routes: [GoRoute(path: '/messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 5: Advogado Associado - Perfil
           StatefulShellBranch(routes: [
              GoRoute(
@@ -285,8 +288,8 @@ GoRouter appRouter(AuthBloc authBloc) {
               ),
             ],
           ),
-          // 11: Advogado Contratante - Mensagens (Unificada)
-          StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const UnifiedChatsScreen())]),
+          // 11: Advogado Contratante - Mensagens (Nativa)
+          StatefulShellBranch(routes: [GoRoute(path: '/contractor-messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 12: Advogado Contratante - Perfil
            StatefulShellBranch(routes: [
              GoRoute(
@@ -332,8 +335,8 @@ GoRouter appRouter(AuthBloc authBloc) {
           StatefulShellBranch(routes: [GoRoute(path: '/client-cases', builder: (context, state) => const CasesScreen())]),
           // 15: Cliente - Advogados (Busca de Advogados)
           StatefulShellBranch(routes: [GoRoute(path: '/find-lawyers', builder: (context, state) => const LawyersScreen())]),
-          // 16: Cliente - Mensagens (Unificada)
-          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const UnifiedChatsScreen())]),
+          // 16: Cliente - Mensagens (Nativa)
+          StatefulShellBranch(routes: [GoRoute(path: '/client-messages', builder: (context, state) => const ChatRoomsScreen())]),
           // 17: Cliente - Serviços
           StatefulShellBranch(routes: [GoRoute(path: '/services', builder: (context, state) => const ServicesScreen())]),
           // 18: Cliente - Perfil
@@ -382,6 +385,48 @@ GoRouter appRouter(AuthBloc authBloc) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const UnifiedChatsScreen(),
       ),
+      // ===== DEBUG: alternar usuário rapidamente para testes (cliente/advogado) =====
+      GoRoute(
+        path: '/__debug/switch-user',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'] ?? 'lawyer_firm_member';
+          final id = state.uri.queryParameters['id'] ?? 'debug-user';
+          final fullName = state.uri.queryParameters['name'] ?? (role.startsWith('lawyer') ? 'Advogado Demo' : 'Cliente Demo');
+
+          // Monta user de debug com o papel solicitado
+          final user = auth_user.User(
+            id: id,
+            email: role.startsWith('lawyer') ? 'advogado@demo.com' : 'cliente@demo.com',
+            fullName: fullName,
+            role: role,
+            userRole: role,
+            permissions: const [
+              'nav.view.client_home',
+              'nav.view.client_cases',
+              'nav.view.find_lawyers',
+              'nav.view.client_messages',
+              'nav.view.services',
+              'nav.view.client_profile',
+            ],
+          );
+
+          // Dispara troca de usuário
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AuthBloc>().add(AuthDebugUserSwitch(user));
+            // Redireciona para casos do advogado ou do cliente conforme role
+            if (role == 'lawyer_firm_member' || role == 'lawyer_individual' || role == 'lawyer_platform_associate' || role == 'firm') {
+              context.go('/cases');
+            } else {
+              context.go('/client-cases');
+            }
+          });
+
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
+      ),
       GoRoute(
         path: '/unified-chat',
         parentNavigatorKey: _rootNavigatorKey,
@@ -425,6 +470,11 @@ GoRouter appRouter(AuthBloc authBloc) {
           final auto = state.uri.queryParameters['auto'] == '1';
           return ChatTriageScreen(autoStart: auto);
         },
+      ),
+      GoRoute(
+        path: '/partners-search',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PartnersSearchScreen(),
       ),
       GoRoute(
         path: '/case-detail/:caseId',

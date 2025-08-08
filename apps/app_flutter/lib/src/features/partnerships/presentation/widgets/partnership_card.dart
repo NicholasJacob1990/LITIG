@@ -18,6 +18,8 @@ class PartnershipCard extends StatelessWidget {
   /// Callbacks para ações rápidas (usado principalmente em Recebidas)
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
+  /// ID do usuário atual (para determinar direção: enviada/recebida)
+  final String? currentUserId;
 
   /// {@macro partnership_card}
   const PartnershipCard({
@@ -26,6 +28,7 @@ class PartnershipCard extends StatelessWidget {
     this.listContext,
     this.onAccept,
     this.onReject,
+    this.currentUserId,
   });
 
   @override
@@ -68,9 +71,43 @@ class PartnershipCard extends StatelessWidget {
                             partnership.partnerName,
                             style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          Text(
-                            'Parceria iniciada ${timeago.format(partnership.createdAt, locale: 'pt_BR')}',
-                            style: textTheme.bodySmall,
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Text(
+                                'Iniciada ${timeago.format(partnership.createdAt, locale: 'pt_BR')}',
+                                style: textTheme.bodySmall,
+                              ),
+                              if (partnership.linkedCaseId != null && partnership.linkedCaseId!.isNotEmpty)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.link, size: 14, color: Colors.grey),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      partnership.linkedCaseTitle != null && partnership.linkedCaseTitle!.isNotEmpty
+                                          ? partnership.linkedCaseTitle!
+                                          : 'Caso ${partnership.linkedCaseId}',
+                                      style: textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.public, size: 14, color: Colors.grey),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Externa',
+                                      style: textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -87,6 +124,8 @@ class PartnershipCard extends StatelessWidget {
                 Row(
                   children: [
                     _buildTypeChip(partnership.type, colorScheme),
+                    const SizedBox(width: 6),
+                    _buildDirectionBadge(context),
                     const Spacer(),
                     TextButton(
                       onPressed: () => context.go('/partnerships/${partnership.id}', extra: {'partnership': partnership}),
@@ -94,6 +133,32 @@ class PartnershipCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                if (partnership.honorarios != null || partnership.proposalMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        if (partnership.honorarios != null)
+                          Chip(
+                            avatar: const Icon(Icons.payments_outlined, size: 16),
+                            label: Text(partnership.honorarios!),
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        const SizedBox(width: 8),
+                        if (partnership.proposalMessage != null)
+                          Expanded(
+                            child: Text(
+                              partnership.proposalMessage!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.bodySmall?.copyWith(color: Colors.black54),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                _buildActivityBadges(),
                 const SizedBox(height: 8),
                 _buildContextualActions(context, colorScheme),
               ],
@@ -184,6 +249,56 @@ class PartnershipCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
+  }
+
+  Widget _buildDirectionBadge(BuildContext context) {
+    if (currentUserId == null || currentUserId!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final direction = partnership.directionForUser(currentUserId!);
+    if (direction == null) return const SizedBox.shrink();
+
+    final isSent = direction == 'sent';
+    final color = isSent ? Colors.blue : Colors.orange;
+    final icon = isSent ? Icons.north_east : Icons.south_west;
+    final label = isSent ? 'Enviada' : 'Recebida';
+
+    return Chip(
+      avatar: Icon(icon, size: 14, color: color),
+      label: Text(label),
+      backgroundColor: color.withValues(alpha: 0.12),
+      labelStyle: TextStyle(color: color),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
+
+  Widget _buildActivityBadges() {
+    if (partnership.unreadCount == null && partnership.lastActivityAt == null && partnership.slaDueAt == null) {
+      return const SizedBox.shrink();
+    }
+    final items = <Widget>[];
+    if (partnership.unreadCount != null && (partnership.unreadCount ?? 0) > 0) {
+      items.add(Chip(
+        avatar: const Icon(Icons.mark_chat_unread, size: 14),
+        label: Text('${partnership.unreadCount} não lidos'),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ));
+    }
+    if (partnership.lastActivityAt != null) {
+      items.add(Chip(
+        avatar: const Icon(Icons.update, size: 14),
+        label: Text('Atividade: ${timeago.format(partnership.lastActivityAt!, locale: 'pt_BR')}'),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ));
+    }
+    if (partnership.slaDueAt != null) {
+      items.add(Chip(
+        avatar: const Icon(Icons.timer, size: 14),
+        label: Text('SLA: ${timeago.format(partnership.slaDueAt!, locale: 'pt_BR')}'),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ));
+    }
+    return Wrap(spacing: 6, runSpacing: 4, children: items);
   }
 
   Widget _buildTypeChip(PartnershipType type, ColorScheme colorScheme) {

@@ -20,6 +20,11 @@ class ChatRoomsScreen extends StatelessWidget {
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           actions: [
             IconButton(
+              onPressed: () => context.push('/unified-messages'),
+              icon: const Icon(LucideIcons.layoutGrid),
+              tooltip: 'Mensagens Unificadas',
+            ),
+            IconButton(
               onPressed: () {
                 context.read<ChatBloc>().add(LoadChatRooms());
               },

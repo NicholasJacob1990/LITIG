@@ -29,7 +29,7 @@ class LawyersRemoteDataSourceImpl implements LawyersRemoteDataSource {
     try {
       final response = await dio.post(
         // TODO: Mover URL para uma constante
-        'http://localhost:8000/api/match', 
+        'http://127.0.0.1:8080/api/match', 
         data: {
           'case_id': caseId, 
           'k': 5, 
@@ -58,7 +58,7 @@ class LawyersRemoteDataSourceImpl implements LawyersRemoteDataSource {
     try {
       final response = await dio.post(
         // TODO: Mover URL para uma constante
-        'http://localhost:8000/api/match', 
+        'http://127.0.0.1:8080/api/match', 
         data: {
           'case_id': caseId, 
           'k': 5, 

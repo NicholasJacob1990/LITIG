@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:meu_app/src/core/utils/app_logger.dart';
+import 'package:meu_app/src/core/services/communications_service.dart';
 
 class UnipileException implements Exception {
   final String message;
@@ -153,6 +154,10 @@ class UnipileService {
   // Permite configurar dinamicamente o token JWT do usuário (para Authorization Bearer)
   void setAuthToken(String? token) {
     _authToken = token;
+    // Sincroniza token com novo CommunicationsService para migração de Unipile
+    try {
+      CommunicationsService().setAuthToken(token);
+    } catch (_) {}
   }
 
   // Permite configurar dinamicamente a base URL (ex.: 10.0.2.2 no emulador Android)

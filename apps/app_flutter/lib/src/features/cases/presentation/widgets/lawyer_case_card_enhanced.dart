@@ -4,9 +4,7 @@ import '../../domain/entities/client_info.dart';
 import '../../domain/entities/business_context.dart';
 import '../../domain/entities/match_analysis.dart';
 import '../../domain/entities/lawyer_metrics.dart';
-import '../../../../shared/utils/app_colors.dart';
 import '../../../../shared/widgets/atoms/initials_avatar.dart';
-import '../../../../core/theme/adaptive_colors.dart';
 
 /// Card de caso aprimorado para advogados com espelhamento completo
 /// Contraparte do CaseCard do cliente com informações simétricas
@@ -16,9 +14,10 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
   final String title;
   final String status;
   final String caseType;
-  final ClientInfo clientInfo; // ✅ Ao invés de String clientName
-  final BusinessContext? businessContext; // ✅ Análise comercial completa
-  final MatchAnalysis? matchAnalysis; // ✅ Análise de match específica
+  final ClientInfo clientInfo;
+  // Mantidos para compatibilidade com fontes de chamada existentes
+  final BusinessContext? businessContext;
+  final MatchAnalysis? matchAnalysis;
   final LawyerMetrics? metrics;
   final String userRole;
   final VoidCallback? onTap;
@@ -73,18 +72,8 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
               _buildHeader(theme),
               const SizedBox(height: 16),
               _buildQuickClientInfo(theme),
-              if (businessContext != null) ...[
-                const SizedBox(height: 16),
-                _buildBusinessSummary(theme),
-              ],
-              if (matchAnalysis != null) ...[
-                const SizedBox(height: 16),
-                _buildMatchSummary(theme),
-              ],
               const SizedBox(height: 16),
-              _buildMetrics(theme),
-              const SizedBox(height: 16),
-              _buildActionButtons(theme),
+              _buildActionButtonsMinimal(theme),
             ],
           ),
         ),
@@ -106,7 +95,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
                     Icon(
                       _getCaseTypeIcon(),
                       size: 16,
-                      color: _getCaseTypeColor(context),
+                      color: _getCaseTypeColor(),
                     ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -239,321 +228,14 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     );
   }
 
-  Widget _buildBusinessSummary(ThemeData theme) {
-    final business = businessContext!;
-    
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.success.withValues(alpha: 0.3),
-          width: 1,
-        ),
+  Widget _buildActionButtonsMinimal(ThemeData theme) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: OutlinedButton.icon(
+        onPressed: onViewDetails,
+        icon: const Icon(LucideIcons.eye, size: 16),
+        label: const Text('Ver Detalhes'),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                LucideIcons.trendingUp,
-                size: 16,
-                color: AppColors.success,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Análise Comercial',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.success,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: business.isProfitable ? Colors.green.withValues(alpha: 0.2) : Colors.orange.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  business.isProfitable ? 'Viável' : 'Avaliar',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: business.isProfitable ? Colors.green : Colors.orange,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildBusinessMetric(
-                theme,
-                label: 'Valor',
-                value: 'R\$ ${business.estimatedValue.toStringAsFixed(2)}',
-                icon: LucideIcons.dollarSign,
-              ),
-              const SizedBox(width: 12),
-              _buildBusinessMetric(
-                theme,
-                label: 'ROI',
-                value: '${business.roiProjection.toStringAsFixed(1)}%',
-                icon: LucideIcons.trendingUp,
-              ),
-              const SizedBox(width: 12),
-              _buildBusinessMetric(
-                theme,
-                label: 'Risco',
-                value: business.riskProfile.riskLevel,
-                icon: LucideIcons.shield,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBusinessMetric(
-    ThemeData theme, {
-    required String label,
-    required String value,
-    required IconData icon,
-  }) {
-    return Expanded(
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 12,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-                Text(
-                  value,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMatchSummary(ThemeData theme) {
-    final match = matchAnalysis!;
-    
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: match.matchColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: match.matchColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: match.matchColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Center(
-              child: Text(
-                '${match.matchScore.toInt()}%',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: match.matchColor,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Match: ${match.matchLevel}',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: match.matchColor,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  match.matchReason,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetrics(ThemeData theme) {
-    if (metrics == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          if (metrics is IndependentLawyerMetrics) ...[
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.target,
-              label: 'Match',
-              value: '${(metrics as IndependentLawyerMetrics).matchScore.toInt()}%',
-            ),
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.trendingUp,
-              label: 'Sucesso',
-              value: '${((metrics as IndependentLawyerMetrics).successProbability * 100).toInt()}%',
-            ),
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.users,
-              label: 'Competidores',
-              value: '${(metrics as IndependentLawyerMetrics).competitorCount}',
-            ),
-          ] else if (metrics is AssociateLawyerMetrics) ...[
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.clock,
-              label: 'Progresso',
-              value: '${(metrics as AssociateLawyerMetrics).completionPercentage.toInt()}%',
-            ),
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.star,
-              label: 'Avaliação',
-              value: (metrics as AssociateLawyerMetrics).supervisorRating.toStringAsFixed(1),
-            ),
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.target,
-              label: 'Tarefas',
-              value: '${(metrics as AssociateLawyerMetrics).tasksCompleted}/${(metrics as AssociateLawyerMetrics).tasksTotal}',
-            ),
-          ] else if (metrics is OfficeLawyerMetrics) ...[
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.users,
-              label: 'Colaboração',
-              value: '${(metrics as OfficeLawyerMetrics).collaborationScore.toInt()}%',
-            ),
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.percent,
-              label: 'Participação',
-              value: '${(metrics as OfficeLawyerMetrics).revenueShare.toInt()}%',
-            ),
-            _buildMetricItem(
-              theme,
-              icon: LucideIcons.star,
-              label: 'Satisfação',
-              value: (metrics as OfficeLawyerMetrics).clientSatisfaction.toStringAsFixed(1),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricItem(
-    ThemeData theme, {
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: theme.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(ThemeData theme) {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: onContactClient,
-            icon: Icon(_getContactIcon(), size: 16),
-            label: const Text('Contatar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryBlue,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onViewDetails,
-            icon: const Icon(LucideIcons.eye, size: 16),
-            label: const Text('Detalhes'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -562,7 +244,7 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: context.getBadgeBackground(statusColor),
+        color: statusColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: statusColor.withValues(alpha: 0.3),
@@ -581,13 +263,14 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
   }
 
   Widget _buildCaseTypeBadge(ThemeData theme, BuildContext context) {
+    final ctColor = _getCaseTypeColor();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: context.getBadgeBackground(_getCaseTypeColor(context)),
+        color: ctColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getCaseTypeColor(context).withValues(alpha: 0.3),
+          color: ctColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -596,19 +279,19 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: _getCaseTypeColor(context),
+          color: ctColor,
         ),
       ),
     );
   }
 
   Widget _buildClientStatusBadge(ThemeData theme, BuildContext context) {
-    final statusColor = context.getClientStatusColor(clientInfo.status.name);
+    final statusColor = _getClientStatusColor(clientInfo.status.name);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: context.getBadgeBackground(statusColor),
+        color: statusColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -623,7 +306,17 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
   }
 
   Color _getStatusColor(BuildContext context) {
-    return context.getStatusColor(status);
+    // cores essenciais por status
+    switch (status.toLowerCase()) {
+      case 'em andamento':
+        return Colors.orange;
+      case 'concluído':
+        return Colors.green;
+      case 'aguardando':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
   }
 
   IconData _getCaseTypeIcon() {
@@ -649,8 +342,44 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     }
   }
 
-  Color _getCaseTypeColor(BuildContext context) {
-    return context.getCaseTypeColor(caseType);
+  Color _getCaseTypeColor() {
+    switch (caseType) {
+      case 'consultancy':
+        return Colors.blue;
+      case 'litigation':
+        return Colors.red;
+      case 'contract':
+        return Colors.teal;
+      case 'compliance':
+        return Colors.orange;
+      case 'due_diligence':
+        return Colors.indigo;
+      case 'ma':
+        return Colors.purple;
+      case 'ip':
+        return Colors.brown;
+      case 'corporate':
+        return Colors.cyan;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getClientStatusColor(String statusName) {
+    switch (statusName.toLowerCase()) {
+      case 'new':
+      case 'lead':
+        return Colors.blue;
+      case 'active':
+        return Colors.green;
+      case 'vip':
+        return Colors.amber.shade800;
+      case 'inactive':
+      case 'churned':
+        return Colors.grey;
+      default:
+        return Colors.blueGrey;
+    }
   }
 
   String _getCaseTypeDisplayName() {
@@ -676,16 +405,5 @@ class LawyerCaseCardEnhanced extends StatelessWidget {
     }
   }
 
-  IconData _getContactIcon() {
-    switch (clientInfo.preferredCommunication) {
-      case 'whatsapp':
-        return LucideIcons.messageCircle;
-      case 'phone':
-        return LucideIcons.phone;
-      case 'teams':
-        return LucideIcons.video;
-      default:
-        return LucideIcons.mail;
-    }
-  }
+  // Ícone de contato removido em versão essencial
 }

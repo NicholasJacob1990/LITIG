@@ -97,6 +97,7 @@ dependencies:
   just_audio: ^0.10.4
   audioplayers: ^6.0.0
   record: ^6.0.0
+  firebase_analytics: ^11.6.0
 
 dev_dependencies:
   flutter_test:
@@ -108,6 +109,8 @@ dev_dependencies:
   mockito: ^5.4.4
   bloc_test: ^10.0.0
   injectable: ^2.3.2
+  bloc: ^9.0.0
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true

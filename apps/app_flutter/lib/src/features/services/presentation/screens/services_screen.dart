@@ -319,7 +319,7 @@ class LegalServiceCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(LucideIcons.star, size: 16, color: Colors.amber),
+                  const Icon(LucideIcons.star, size: 16, color: Colors.amber),
                   const SizedBox(width: 4),
                   Text(
                     service.rating.toStringAsFixed(1),
@@ -639,7 +639,7 @@ class ServiceDetailDialog extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Icon(LucideIcons.star, size: 16, color: Colors.amber),
+                        const Icon(LucideIcons.star, size: 16, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text('${service.rating.toStringAsFixed(1)} (${service.reviewCount} avaliações)'),
                         const Spacer(),
@@ -665,7 +665,7 @@ class ServiceDetailDialog extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Row(
                         children: [
-                          Icon(LucideIcons.check, size: 16, color: Colors.green),
+                          const Icon(LucideIcons.check, size: 16, color: Colors.green),
                           const SizedBox(width: 8),
                           Expanded(child: Text(req)),
                         ],

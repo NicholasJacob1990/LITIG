@@ -32,7 +32,7 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
   @override
   Future<EnrichedFirm> getEnrichedFirm(String firmId) async {
     if (!await networkInfo.isConnected) {
-      throw NetworkException('Sem conexão com a internet');
+      throw NetworkException();
     }
 
     try {
@@ -50,30 +50,30 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         final jsonData = json.decode(response.body);
         return _parseEnrichedFirmFromJson(jsonData);
       } else if (response.statusCode == 404) {
-        throw NotFoundException('Escritório não encontrado');
+        throw NotFoundException(resource: 'Escritório não encontrado');
       } else if (response.statusCode == 401) {
-        throw UnauthorizedException('Acesso não autorizado');
+        throw AuthenticationException(message: 'Acesso não autorizado');
       } else if (response.statusCode == 403) {
-        throw AuthorizationException('Permissão negada');
+        throw PermissionException(message: 'Permissão negada');
       } else {
-        throw ServerException('Erro no servidor: ${response.statusCode}');
+        throw ServerException(message: 'Erro no servidor: ${response.statusCode}');
       }
     } on http.ClientException {
-      throw NetworkException('Erro de conexão');
+      throw ConnectionException(message: 'Erro de conexão');
     } on FormatException {
-      throw ParsingException('Erro ao processar resposta do servidor');
+      throw ServerException(message: 'Erro ao processar resposta do servidor');
     } catch (e) {
-      if (e is ServerException || e is NetworkException || e is ParsingException) {
+      if (e is ServerException || e is NetworkException || e is ServerException) {
         rethrow;
       }
-      throw ServerException('Erro inesperado: $e');
+      throw ServerException(message: 'Erro inesperado: $e');
     }
   }
 
   @override
   Future<EnrichedFirm> refreshEnrichedFirm(String firmId) async {
     if (!await networkInfo.isConnected) {
-      throw NetworkException('Sem conexão com a internet');
+      throw NetworkException();
     }
 
     try {
@@ -90,28 +90,28 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         final jsonData = json.decode(response.body);
         return _parseEnrichedFirmFromJson(jsonData);
       } else if (response.statusCode == 404) {
-        throw NotFoundException('Escritório não encontrado');
+        throw NotFoundException(resource: 'Escritório não encontrado');
       } else if (response.statusCode == 401) {
-        throw UnauthorizedException('Acesso não autorizado');
+        throw AuthenticationException(message: 'Acesso não autorizado');
       } else {
-        throw ServerException('Erro ao atualizar dados: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao atualizar dados: ${response.statusCode}');
       }
     } on http.ClientException {
-      throw NetworkException('Erro de conexão');
+      throw ConnectionException(message: 'Erro de conexão');
     } on FormatException {
-      throw ParsingException('Erro ao processar resposta do servidor');
+      throw ServerException(message: 'Erro ao processar resposta do servidor');
     } catch (e) {
-      if (e is ServerException || e is NetworkException || e is ParsingException) {
+      if (e is ServerException || e is NetworkException || e is ServerException) {
         rethrow;
       }
-      throw ServerException('Erro inesperado: $e');
+      throw ServerException(message: 'Erro inesperado: $e');
     }
   }
 
   @override
   Future<FirmTeamData> getTeamData(String firmId) async {
     if (!await networkInfo.isConnected) {
-      throw NetworkException('Sem conexão com a internet');
+      throw NetworkException();
     }
 
     try {
@@ -127,26 +127,26 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         final jsonData = json.decode(response.body);
         return _parseTeamDataFromJson(jsonData);
       } else if (response.statusCode == 404) {
-        throw NotFoundException('Dados da equipe não encontrados');
+        throw NotFoundException(resource: 'Dados da equipe não encontrados');
       } else {
-        throw ServerException('Erro ao buscar dados da equipe: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao buscar dados da equipe: ${response.statusCode}');
       }
     } on http.ClientException {
-      throw NetworkException('Erro de conexão');
+      throw ConnectionException(message: 'Erro de conexão');
     } on FormatException {
-      throw ParsingException('Erro ao processar dados da equipe');
+      throw ServerException(message: 'Erro ao processar dados da equipe');
     } catch (e) {
-      if (e is ServerException || e is NetworkException || e is ParsingException) {
+      if (e is ServerException || e is NetworkException || e is ServerException) {
         rethrow;
       }
-      throw ServerException('Erro inesperado: $e');
+      throw ServerException(message: 'Erro inesperado: $e');
     }
   }
 
   @override
   Future<FirmFinancialSummary> getFinancialData(String firmId) async {
     if (!await networkInfo.isConnected) {
-      throw NetworkException('Sem conexão com a internet');
+      throw NetworkException();
     }
 
     try {
@@ -162,28 +162,28 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         final jsonData = json.decode(response.body);
         return _parseFinancialDataFromJson(jsonData);
       } else if (response.statusCode == 403) {
-        throw AuthorizationException('Acesso negado aos dados financeiros');
+        throw PermissionException(message: 'Acesso negado aos dados financeiros');
       } else if (response.statusCode == 404) {
-        throw NotFoundException('Dados financeiros não encontrados');
+        throw NotFoundException(resource: 'Dados financeiros não encontrados');
       } else {
-        throw ServerException('Erro ao buscar dados financeiros: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao buscar dados financeiros: ${response.statusCode}');
       }
     } on http.ClientException {
-      throw NetworkException('Erro de conexão');
+      throw ConnectionException(message: 'Erro de conexão');
     } on FormatException {
-      throw ParsingException('Erro ao processar dados financeiros');
+      throw ServerException(message: 'Erro ao processar dados financeiros');
     } catch (e) {
-      if (e is ServerException || e is NetworkException || e is ParsingException) {
+      if (e is ServerException || e is NetworkException || e is ServerException) {
         rethrow;
       }
-      throw ServerException('Erro inesperado: $e');
+      throw ServerException(message: 'Erro inesperado: $e');
     }
   }
 
   @override
   Future<List<CaseInfo>> getFirmCases(String firmId, {Map<String, dynamic>? filters}) async {
     if (!await networkInfo.isConnected) {
-      throw NetworkException('Sem conexão com a internet');
+      throw NetworkException();
     }
 
     try {
@@ -209,26 +209,26 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         final jsonData = json.decode(response.body);
         return _parseCasesFromJson(jsonData);
       } else if (response.statusCode == 404) {
-        throw NotFoundException('Casos não encontrados');
+        throw NotFoundException(resource: 'Casos não encontrados');
       } else {
-        throw ServerException('Erro ao buscar casos: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao buscar casos: ${response.statusCode}');
       }
     } on http.ClientException {
-      throw NetworkException('Erro de conexão');
+      throw ConnectionException(message: 'Erro de conexão');
     } on FormatException {
-      throw ParsingException('Erro ao processar dados dos casos');
+      throw ServerException(message: 'Erro ao processar dados dos casos');
     } catch (e) {
-      if (e is ServerException || e is NetworkException || e is ParsingException) {
+      if (e is ServerException || e is NetworkException || e is ServerException) {
         rethrow;
       }
-      throw ServerException('Erro inesperado: $e');
+      throw ServerException(message: 'Erro inesperado: $e');
     }
   }
 
   @override
   Future<List<PartnershipInfo>> getFirmPartnerships(String firmId, {Map<String, dynamic>? filters}) async {
     if (!await networkInfo.isConnected) {
-      throw NetworkException('Sem conexão com a internet');
+      throw NetworkException();
     }
 
     try {
@@ -254,19 +254,19 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         final jsonData = json.decode(response.body);
         return _parsePartnershipsFromJson(jsonData);
       } else if (response.statusCode == 404) {
-        throw NotFoundException('Parcerias não encontradas');
+        throw NotFoundException(resource: 'Parcerias não encontradas');
       } else {
-        throw ServerException('Erro ao buscar parcerias: ${response.statusCode}');
+        throw ServerException(message: 'Erro ao buscar parcerias: ${response.statusCode}');
       }
     } on http.ClientException {
-      throw NetworkException('Erro de conexão');
+      throw ConnectionException(message: 'Erro de conexão');
     } on FormatException {
-      throw ParsingException('Erro ao processar dados das parcerias');
+      throw ServerException(message: 'Erro ao processar dados das parcerias');
     } catch (e) {
-      if (e is ServerException || e is NetworkException || e is ParsingException) {
+      if (e is ServerException || e is NetworkException || e is ServerException) {
         rethrow;
       }
-      throw ServerException('Erro inesperado: $e');
+      throw ServerException(message: 'Erro inesperado: $e');
     }
   }
 
@@ -278,7 +278,7 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         name: json['name'] as String,
         description: json['description'] as String? ?? '',
         specializations: List<String>.from(json['specializations'] ?? []),
-        location: json['location'] as String? ?? '',
+        location: _parseLocation(json['location'] as Map<String, dynamic>?),
         foundedYear: json['founded_year'] as int? ?? 0,
         size: _parseFirmSize(json['size'] as String?),
         rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
@@ -286,15 +286,17 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         averageResponseTime: Duration(hours: json['average_response_time_hours'] as int? ?? 0),
         priceRange: _parsePriceRange(json['price_range'] as String?),
         languages: List<String>.from(json['languages'] ?? []),
-        certifications: List<String>.from(json['certifications'] ?? []),
+        certifications: (json['certifications'] as List<dynamic>? ?? [])
+            .map((cert) => _parseCertification(cert as Map<String, dynamic>))
+            .toList(),
         contactInfo: _parseContactInfo(json['contact_info'] as Map<String, dynamic>?),
         teamData: _parseTeamDataFromJson(json['team_data'] as Map<String, dynamic>? ?? {}),
-        transparencyReport: _parseTransparencyReport(json['transparency_report'] as Map<String, dynamic>?),
+        transparencyReport: _parseTransparencyReport(json['transparency_report'] as Map<String, dynamic>?)!,
         financialSummary: _parseFinancialDataFromJson(json['financial_summary'] as Map<String, dynamic>? ?? {}),
         lastUpdated: DateTime.parse(json['last_updated'] as String? ?? DateTime.now().toIso8601String()),
       );
     } catch (e) {
-      throw ParsingException('Erro ao processar dados do escritório: $e');
+      throw ServerException(message: 'Erro ao processar dados do escritório: $e');
     }
   }
 
@@ -302,16 +304,17 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
     try {
       return FirmTeamData(
         totalLawyers: json['total_lawyers'] as int? ?? 0,
-        partners: json['partners'] as int? ?? 0,
-        associates: json['associates'] as int? ?? 0,
-        juniors: json['juniors'] as int? ?? 0,
-        specialistsByArea: Map<String, int>.from(json['specialists_by_area'] ?? {}),
-        averageExperience: (json['average_experience'] as num?)?.toDouble() ?? 0.0,
-        barAssociations: List<String>.from(json['bar_associations'] ?? []),
-        certifications: List<String>.from(json['certifications'] ?? []),
+        partnersCount: json['partners'] as int? ?? 0,
+        associatesCount: json['associates'] as int? ?? 0,
+        specialistsCount: json['juniors'] as int? ?? 0,
+        stats: Map<String, int>.from(json['specialists_by_area'] ?? {}),
+        overallQualityScore: (json['average_experience'] as num?)?.toDouble() ?? 0.0,
+        completenessScore: 0, // Placeholder
+        dataSources: [], // Placeholder
+        lastConsolidated: DateTime.now(), // Placeholder
       );
     } catch (e) {
-      throw ParsingException('Erro ao processar dados da equipe: $e');
+      throw ServerException(message: 'Erro ao processar dados da equipe: $e');
     }
   }
 
@@ -328,7 +331,7 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         yearOverYearMetrics: Map<String, int>.from(json['year_over_year_metrics'] ?? {}),
       );
     } catch (e) {
-      throw ParsingException('Erro ao processar dados financeiros: $e');
+      throw ServerException(message: 'Erro ao processar dados financeiros: $e');
     }
   }
 
@@ -354,7 +357,7 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         );
       }).toList();
     } catch (e) {
-      throw ParsingException('Erro ao processar dados dos casos: $e');
+      throw ServerException(message: 'Erro ao processar dados dos casos: $e');
     }
   }
 
@@ -381,7 +384,7 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
         );
       }).toList();
     } catch (e) {
-      throw ParsingException('Erro ao processar dados das parcerias: $e');
+      throw ServerException(message: 'Erro ao processar dados das parcerias: $e');
     }
   }
 
@@ -456,11 +459,11 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
 
   FirmContactInfo _parseContactInfo(Map<String, dynamic>? json) {
     if (json == null) {
-      return const FirmContactInfo(
+      return FirmContactInfo(
         email: '',
         phone: '',
         website: '',
-        address: '',
+        address: FirmLocation(address: '', city: '', state: '', country: '', postalCode: ''),
       );
     }
 
@@ -468,18 +471,13 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
       website: json['website'] as String? ?? '',
-      address: json['address'] as String? ?? '',
+      address: _parseLocation(json['address'] as Map<String, dynamic>?)!,
     );
   }
 
-  FirmTransparencyReport _parseTransparencyReport(Map<String, dynamic>? json) {
+  FirmTransparencyReport? _parseTransparencyReport(Map<String, dynamic>? json) {
     if (json == null) {
-      return const FirmTransparencyReport(
-        dataSources: [],
-        dataQualityScore: 0.0,
-        lastConsolidated: '',
-        privacyPolicy: '',
-      );
+      return null;
     }
 
     return FirmTransparencyReport(
@@ -497,4 +495,23 @@ class EnrichedFirmRemoteDataSourceImpl implements EnrichedFirmRemoteDataSource {
       privacyPolicy: json['privacy_policy'] as String? ?? '',
     );
   }
-} 
+
+  FirmLocation? _parseLocation(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    return FirmLocation(
+        address: json['address'] ?? '',
+        city: json['city'] ?? '',
+        state: json['state'] ?? '',
+        country: json['country'] ?? '',
+        postalCode: json['postal_code'] ?? '',
+    );
+  }
+
+  FirmCertification _parseCertification(Map<String, dynamic> json) {
+    return FirmCertification(
+        name: json['name'] ?? '',
+        authority: json['authority'] ?? '',
+        year: json['year'] ?? 0,
+    );
+  }
+}

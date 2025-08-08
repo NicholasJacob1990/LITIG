@@ -234,7 +234,7 @@ class ServicesRepositoryImpl implements ServicesRepository {
   Future<Result<void>> cancelBooking(String bookingId, String reason) async {
     try {
       await Future.delayed(const Duration(milliseconds: 300));
-      return Result.success(null);
+      return const Result.success(null);
     } catch (e) {
       return Result.genericFailure('Erro ao cancelar agendamento', 'CANCEL_BOOKING_ERROR');
     }
@@ -269,7 +269,7 @@ class ServicesRepositoryImpl implements ServicesRepository {
   }) async {
     try {
       await Future.delayed(const Duration(milliseconds: 300));
-      return Result.success(null);
+      return const Result.success(null);
     } catch (e) {
       return Result.genericFailure('Erro ao avaliar serviço', 'RATE_SERVICE_ERROR');
     }
@@ -289,7 +289,7 @@ class ServicesRepositoryImpl implements ServicesRepository {
   Future<Result<Map<String, dynamic>>> getServiceStats(String serviceId) async {
     try {
       await Future.delayed(const Duration(milliseconds: 200));
-      return Result.success({
+      return const Result.success({
         'total_bookings': 156,
         'completed_bookings': 142,
         'average_rating': 4.7,
@@ -305,7 +305,7 @@ class ServicesRepositoryImpl implements ServicesRepository {
   Future<Result<List<Map<String, dynamic>>>> getServiceCategories() async {
     try {
       await Future.delayed(const Duration(milliseconds: 200));
-      return Result.success([
+      return const Result.success([
         {'category': 'civil', 'name': 'Direito Civil', 'count': 23, 'icon': 'gavel'},
         {'category': 'criminal', 'name': 'Direito Criminal', 'count': 18, 'icon': 'shield'},
         {'category': 'labor', 'name': 'Direito Trabalhista', 'count': 31, 'icon': 'briefcase'},
@@ -331,8 +331,8 @@ class ServicesRepositoryImpl implements ServicesRepository {
         discountPrice: 399.90,
         duration: '2-3 dias úteis',
         expertise: 'Direito Empresarial',
-        requirements: ['CNPJ da empresa', 'Contrato social', 'Últimas alterações'],
-        deliverables: ['Parecer jurídico', 'Plano de ação', 'Documentação revisada'],
+        requirements: const ['CNPJ da empresa', 'Contrato social', 'Últimas alterações'],
+        deliverables: const ['Parecer jurídico', 'Plano de ação', 'Documentação revisada'],
         isActive: true,
         isPopular: true,
         rating: 4.8,
@@ -350,8 +350,8 @@ class ServicesRepositoryImpl implements ServicesRepository {
         basePrice: 249.90,
         duration: '1-2 dias úteis',
         expertise: 'Direito Trabalhista',
-        requirements: ['Contrato atual', 'Histórico de alterações'],
-        deliverables: ['Contrato revisado', 'Lista de adequações', 'Orientações legais'],
+        requirements: const ['Contrato atual', 'Histórico de alterações'],
+        deliverables: const ['Contrato revisado', 'Lista de adequações', 'Orientações legais'],
         isActive: true,
         isPopular: false,
         rating: 4.6,
@@ -370,8 +370,8 @@ class ServicesRepositoryImpl implements ServicesRepository {
         discountPrice: 699.90,
         duration: '5-7 dias úteis',
         expertise: 'Direito de Família e Sucessões',
-        requirements: ['Documentos pessoais', 'Inventário de bens', 'Certidões'],
-        deliverables: ['Plano sucessório', 'Documentos legais', 'Orientação fiscal'],
+        requirements: const ['Documentos pessoais', 'Inventário de bens', 'Certidões'],
+        deliverables: const ['Plano sucessório', 'Documentos legais', 'Orientação fiscal'],
         isActive: true,
         isPopular: true,
         rating: 4.9,
@@ -389,8 +389,8 @@ class ServicesRepositoryImpl implements ServicesRepository {
         basePrice: 1299.90,
         duration: 'Conforme andamento processual',
         expertise: 'Direito Criminal',
-        requirements: ['Documentos do processo', 'Histórico dos fatos'],
-        deliverables: ['Peças processuais', 'Acompanhamento integral', 'Recurso se necessário'],
+        requirements: const ['Documentos do processo', 'Histórico dos fatos'],
+        deliverables: const ['Peças processuais', 'Acompanhamento integral', 'Recurso se necessário'],
         isActive: true,
         isPopular: false,
         rating: 4.7,
@@ -415,8 +415,8 @@ class ServicesRepositoryImpl implements ServicesRepository {
         agreedPrice: 399.90,
         scheduledDate: now.add(const Duration(days: 3)),
         notes: 'Preciso de consultoria urgente para abertura de filial',
-        requirements: {'urgency': 'high', 'documents_ready': true},
-        attachments: [],
+        requirements: const {'urgency': 'high', 'documents_ready': true},
+        attachments: const [],
         createdAt: now.subtract(const Duration(days: 2)),
         updatedAt: now.subtract(const Duration(hours: 6)),
       ),
@@ -429,8 +429,8 @@ class ServicesRepositoryImpl implements ServicesRepository {
         agreedPrice: 249.90,
         scheduledDate: now.subtract(const Duration(days: 5)),
         notes: null,
-        requirements: {},
-        attachments: ['contract.pdf'],
+        requirements: const {},
+        attachments: const ['contract.pdf'],
         createdAt: now.subtract(const Duration(days: 10)),
         updatedAt: now.subtract(const Duration(days: 5)),
         completedAt: now.subtract(const Duration(days: 5)),

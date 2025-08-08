@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meu_app/src/core/services/unipile_service.dart';
+import 'package:meu_app/src/core/services/communications_service.dart';
 import 'package:meu_app/src/core/utils/logger.dart';
 
 // ===== EVENTS =====
@@ -337,9 +338,11 @@ class UnifiedMessagingConnected extends UnifiedMessagingState {
 
 class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingState> {
   final UnipileService _unipileService;
+  final CommunicationsService _comms;
   
-  UnifiedMessagingBloc({UnipileService? unipileService}) 
+  UnifiedMessagingBloc({UnipileService? unipileService, CommunicationsService? communicationsService}) 
       : _unipileService = unipileService ?? UnipileService(),
+        _comms = communicationsService ?? CommunicationsService(),
         super(UnifiedMessagingInitial()) {
     
     on<LoadUnifiedMessages>(_onLoadUnifiedMessages);
@@ -360,6 +363,9 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
     on<DeleteEmail>(_onDeleteEmail);
     on<ArchiveEmail>(_onArchiveEmail);
     on<CreateEmailDraft>(_onCreateEmailDraft);
+    // WhatsApp Business direct handlers
+    on<SendWhatsAppMessage>(_onSendWhatsAppMessage);
+    on<SendWhatsAppVoiceMessage>(_onSendWhatsAppVoiceMessage);
   }
 
   Future<void> _onLoadUnifiedMessages(
@@ -532,19 +538,30 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
           orElse: () => throw Exception('Nenhuma conta de messaging conectada'),
         );
 
-        final result = await _unipileService.sendChatMessage(
-          accountId: messagingAccount.id,
-          chatId: event.chatId,
-          message: event.message,
-        );
-
-        if (result['success'] == true) {
-          emit(const UnifiedMessagingSent(successMessage: 'Mensagem enviada com sucesso!'));
-          // Recarregar mensagens
-          add(const LoadUnifiedMessages(refresh: true));
+        // Migração: se provider for WhatsApp, envia direto pela Communications
+        if (messagingAccount.provider == 'whatsapp') {
+          final ok = await _comms.sendWhatsAppText(
+            toPhoneE164: event.chatId, // FIXME: mapear chatId->phone no app
+            message: event.message,
+          );
+          if (!ok) {
+            emit(const UnifiedMessagingError(message: 'Falha ao enviar mensagem WhatsApp'));
+            return;
+          }
         } else {
-          emit(const UnifiedMessagingError(message: 'Falha ao enviar mensagem'));
+          final result = await _unipileService.sendChatMessage(
+            accountId: messagingAccount.id,
+            chatId: event.chatId,
+            message: event.message,
+          );
+          if (result['success'] != true) {
+            emit(const UnifiedMessagingError(message: 'Falha ao enviar mensagem'));
+            return;
+          }
         }
+
+        emit(const UnifiedMessagingSent(successMessage: 'Mensagem enviada com sucesso!'));
+        add(const LoadUnifiedMessages(refresh: true));
       }
     } catch (e) {
       AppLogger.error('Erro ao enviar mensagem', error: e);
@@ -810,6 +827,50 @@ class UnifiedMessagingBloc extends Bloc<UnifiedMessagingEvent, UnifiedMessagingS
     } catch (e) {
       AppLogger.error('Erro ao criar rascunho', error: e);
       emit(UnifiedMessagingError(message: 'Erro ao criar rascunho: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onSendWhatsAppMessage(
+    SendWhatsAppMessage event,
+    Emitter<UnifiedMessagingState> emit,
+  ) async {
+    try {
+      emit(UnifiedMessagingSending());
+      final ok = await _comms.sendWhatsAppText(
+        toPhoneE164: event.phone,
+        message: event.message,
+      );
+      if (ok) {
+        emit(const UnifiedMessagingSent(successMessage: 'Mensagem WhatsApp enviada!'));
+        add(const LoadUnifiedMessages(refresh: true));
+      } else {
+        emit(const UnifiedMessagingError(message: 'Falha ao enviar via WhatsApp'));
+      }
+    } catch (e) {
+      AppLogger.error('Erro ao enviar WhatsApp', error: e);
+      emit(UnifiedMessagingError(message: 'Erro WhatsApp: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onSendWhatsAppVoiceMessage(
+    SendWhatsAppVoiceMessage event,
+    Emitter<UnifiedMessagingState> emit,
+  ) async {
+    try {
+      emit(UnifiedMessagingSending());
+      final ok = await _comms.sendWhatsAppAudio(
+        toPhoneE164: event.phone,
+        audioUrl: event.audioFilePath,
+      );
+      if (ok) {
+        emit(const UnifiedMessagingSent(successMessage: 'Áudio WhatsApp enviado!'));
+        add(const LoadUnifiedMessages(refresh: true));
+      } else {
+        emit(const UnifiedMessagingError(message: 'Falha ao enviar áudio WhatsApp'));
+      }
+    } catch (e) {
+      AppLogger.error('Erro ao enviar áudio WhatsApp', error: e);
+      emit(UnifiedMessagingError(message: 'Erro áudio WhatsApp: ${e.toString()}'));
     }
   }
 

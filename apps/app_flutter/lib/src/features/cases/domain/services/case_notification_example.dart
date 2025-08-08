@@ -55,7 +55,7 @@ class CaseNotificationExample {
     );
     
     // 2. Documento carregado (simulação após algum tempo)
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     await service.notifyDocumentUploaded(
       caseId: caseId,
       caseTitle: 'Revisão Contratual - Empresa XYZ',
@@ -67,7 +67,7 @@ class CaseNotificationExample {
     );
     
     // 3. Documento aprovado
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     await service.notifyDocumentApproved(
       caseId: caseId,
       caseTitle: 'Revisão Contratual - Empresa XYZ',
@@ -79,7 +79,7 @@ class CaseNotificationExample {
     );
     
     // 4. Caso concluído
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     await service.notifyCaseCompleted(
       caseId: caseId,
       caseTitle: 'Revisão Contratual - Empresa XYZ',

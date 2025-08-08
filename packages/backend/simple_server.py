@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
 import uvicorn
@@ -8,7 +8,7 @@ app = FastAPI()
 # Configurar CORS para desenvolvimento
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite todas as origens em desenvolvimento
+    allow_origins=["http://127.0.0.1:8081"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -84,6 +84,18 @@ async def get_my_cases():
             "urgency_hours": 24
         }
     ]
+
+@app.post("/api/cases/semantic_search_case")
+async def semantic_search_case():
+    return {"results": [], "total": 0}
+
+@app.get("/api/contextual-cases/{case_id}")
+async def get_contextual_case(case_id: str):
+    return {
+        "case_id": case_id,
+        "kpis": {"risk": 0.2, "urgency_hours": 24},
+        "actions": []
+    }
 
 @app.get("/api/cases/{case_id}")
 async def get_case_details(case_id: str):
@@ -243,6 +255,40 @@ async def get_eligible_lawyers():
             "contract_signed": True
         }
     ]
+
+# Notifications (stubs)
+@app.get("/api/notifications")
+async def list_notifications(page: int = 1, limit: int = 20):
+    return {"items": [], "page": page, "limit": limit, "total": 0}
+
+@app.get("/api/notifications/unread-count")
+async def notifications_unread_count():
+    return {"count": 0}
+
+# Social profiles (stub) - corrigindo path com /api/api
+@app.get("/api/api/v1/social/profiles/me")
+async def social_profiles_me():
+    return {"profiles": []}
+
+# Chat (stubs)
+@app.get("/api/chat/rooms")
+async def chat_rooms():
+    return []
+
+@app.get("/api/chat/rooms/{room_id}/messages")
+async def chat_room_messages(room_id: str, limit: int = 50, offset: int = 0):
+    return {"items": [], "limit": limit, "offset": offset}
+
+@app.websocket("/api/chat/ws/{room_id}")
+async def chat_ws(websocket: WebSocket, room_id: str):
+    await websocket.accept()
+    try:
+        await websocket.send_json({"type": "welcome", "room_id": room_id})
+        while True:
+            _ = await websocket.receive_text()
+            await websocket.send_json({"type": "ack"})
+    except WebSocketDisconnect:
+        pass
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080) 

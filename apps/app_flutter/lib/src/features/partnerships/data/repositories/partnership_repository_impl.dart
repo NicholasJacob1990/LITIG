@@ -277,7 +277,7 @@ class PartnershipRepositoryImpl implements PartnershipRepository {
         );
         
         if (response.statusCode == 200) {
-          return Result.success(null);
+          return const Result.success(null);
         } else {
           return Result.genericFailure(
             'Erro ao aceitar parceria',
@@ -311,7 +311,7 @@ class PartnershipRepositoryImpl implements PartnershipRepository {
         );
         
         if (response.statusCode == 200) {
-          return Result.success(null);
+          return const Result.success(null);
         } else {
           return Result.genericFailure(
             'Erro ao rejeitar parceria',
