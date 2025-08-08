@@ -1,56 +1,48 @@
 import 'package:equatable/equatable.dart';
-import '../../../lawyers/domain/entities/enriched_lawyer.dart';
-import '../../../lawyers/domain/entities/data_source_info.dart';
+
+// Enums based on parsing methods in the data source
+enum FirmSize { small, medium, large }
+enum PriceRange { economic, standard, premium, luxury }
 
 class EnrichedFirm extends Equatable {
   final String id;
   final String name;
   final String description;
-  final String? logoUrl;
   final List<String> specializations;
-  final List<EnrichedLawyer> partners;
-  final List<EnrichedLawyer> associates;
-  final int totalLawyers;
-  final int partnersCount;
-  final int associatesCount;
-  final int specialistsCount;
-  final Map<String, int> specialistsByArea;
-  final List<FirmCertification> certifications;
-  final List<FirmAward> awards;
   final FirmLocation? location;
-  final FirmContactInfo? contactInfo;
-  final Map<String, DataSourceInfo> dataSources;
-  final double overallQualityScore;
-  final double completenessScore;
-  final DateTime lastConsolidated;
-  final FirmFinancialInfo? financialInfo;
-  final List<FirmPartnership> partnerships;
-  final FirmStats stats;
+  final int foundedYear;
+  final FirmSize size;
+  final double rating;
+  final double caseSuccessRate;
+  final Duration averageResponseTime;
+  final PriceRange priceRange;
+  final List<String> languages;
+  final List<FirmCertification> certifications;
+  final FirmContactInfo contactInfo;
+  final FirmTeamData teamData;
+  final FirmTransparencyReport transparencyReport;
+  final FirmFinancialSummary financialSummary;
+  final DateTime lastUpdated;
 
   const EnrichedFirm({
     required this.id,
     required this.name,
     required this.description,
-    this.logoUrl,
-    this.specializations = const [],
-    this.partners = const [],
-    this.associates = const [],
-    required this.totalLawyers,
-    required this.partnersCount,
-    required this.associatesCount,
-    required this.specialistsCount,
-    this.specialistsByArea = const {},
-    this.certifications = const [],
-    this.awards = const [],
+    required this.specializations,
     this.location,
-    this.contactInfo,
-    required this.dataSources,
-    required this.overallQualityScore,
-    required this.completenessScore,
-    required this.lastConsolidated,
-    this.financialInfo,
-    this.partnerships = const [],
-    required this.stats,
+    required this.foundedYear,
+    required this.size,
+    required this.rating,
+    required this.caseSuccessRate,
+    required this.averageResponseTime,
+    required this.priceRange,
+    required this.languages,
+    required this.certifications,
+    required this.contactInfo,
+    required this.teamData,
+    required this.transparencyReport,
+    required this.financialSummary,
+    required this.lastUpdated,
   });
 
   @override
@@ -58,227 +50,189 @@ class EnrichedFirm extends Equatable {
         id,
         name,
         description,
-        logoUrl,
         specializations,
-        partners,
-        associates,
+        location,
+        foundedYear,
+        size,
+        rating,
+        caseSuccessRate,
+        averageResponseTime,
+        priceRange,
+        languages,
+        certifications,
+        contactInfo,
+        teamData,
+        transparencyReport,
+        financialSummary,
+        lastUpdated,
+      ];
+}
+
+class FirmLocation extends Equatable {
+    final String address;
+    final String city;
+    final String state;
+    final String country;
+    final String postalCode;
+
+    const FirmLocation({
+        required this.address,
+        required this.city,
+        required this.state,
+        required this.country,
+        required this.postalCode,
+    });
+
+    @override
+    List<Object?> get props => [address, city, state, country, postalCode];
+}
+
+class FirmCertification extends Equatable {
+    final String name;
+    final String authority;
+    final int year;
+
+    const FirmCertification({
+        required this.name,
+        required this.authority,
+        required this.year,
+    });
+
+    @override
+    List<Object?> get props => [name, authority, year];
+}
+
+class FirmContactInfo extends Equatable {
+  final String email;
+  final String phone;
+  final String website;
+  final FirmLocation address;
+
+  const FirmContactInfo({
+    required this.email,
+    required this.phone,
+    required this.website,
+    required this.address,
+  });
+
+  @override
+  List<Object?> get props => [email, phone, website, address];
+}
+
+class FirmTeamData extends Equatable {
+  final int totalLawyers;
+  final int partnersCount;
+  final int associatesCount;
+  final int specialistsCount;
+  final Map<String, int> stats;
+  final double overallQualityScore;
+  final double completenessScore;
+  final List<DataSourceInfo> dataSources;
+  final DateTime lastConsolidated;
+
+  const FirmTeamData({
+    required this.totalLawyers,
+    required this.partnersCount,
+    required this.associatesCount,
+    required this.specialistsCount,
+    required this.stats,
+    required this.overallQualityScore,
+    required this.completenessScore,
+    required this.dataSources,
+    required this.lastConsolidated,
+  });
+
+  @override
+  List<Object?> get props => [
         totalLawyers,
         partnersCount,
         associatesCount,
         specialistsCount,
-        specialistsByArea,
-        certifications,
-        awards,
-        location,
-        contactInfo,
-        dataSources,
+        stats,
         overallQualityScore,
         completenessScore,
+        dataSources,
         lastConsolidated,
-        financialInfo,
-        partnerships,
-        stats,
       ];
 }
 
-class FirmCertification extends Equatable {
-  final String name;
-  final String issuer;
-  final DateTime? validUntil;
-  final String? certificateUrl;
-  final bool isActive;
+class FirmFinancialSummary extends Equatable {
+  final int annualRevenue;
+  final double profitMargin;
+  final int ebitda;
+  final int averageTicket;
+  final double revenueGrowth;
+  final double clientRetentionRate;
+  final Map<String, int> revenueByArea;
+  final Map<String, int> yearOverYearMetrics;
 
-  const FirmCertification({
-    required this.name,
-    required this.issuer,
-    this.validUntil,
-    this.certificateUrl,
-    this.isActive = true,
-  });
-
-  @override
-  List<Object?> get props => [name, issuer, validUntil, certificateUrl, isActive];
-}
-
-class FirmAward extends Equatable {
-  final String name;
-  final String category;
-  final DateTime dateReceived;
-  final String? issuer;
-  final String? description;
-
-  const FirmAward({
-    required this.name,
-    required this.category,
-    required this.dateReceived,
-    this.issuer,
-    this.description,
-  });
-
-  @override
-  List<Object?> get props => [name, category, dateReceived, issuer, description];
-}
-
-class FirmLocation extends Equatable {
-  final String address;
-  final String city;
-  final String state;
-  final String? zipCode;
-  final String country;
-  final double? latitude;
-  final double? longitude;
-  final bool isMainOffice;
-  final List<String> nearbyLandmarks;
-
-  const FirmLocation({
-    required this.address,
-    required this.city,
-    required this.state,
-    this.zipCode,
-    required this.country,
-    this.latitude,
-    this.longitude,
-    this.isMainOffice = true,
-    this.nearbyLandmarks = const [],
+  const FirmFinancialSummary({
+    required this.annualRevenue,
+    required this.profitMargin,
+    required this.ebitda,
+    required this.averageTicket,
+    required this.revenueGrowth,
+    required this.clientRetentionRate,
+    required this.revenueByArea,
+    required this.yearOverYearMetrics,
   });
 
   @override
   List<Object?> get props => [
-        address,
-        city,
-        state,
-        zipCode,
-        country,
-        latitude,
-        longitude,
-        isMainOffice,
-        nearbyLandmarks,
+        annualRevenue,
+        profitMargin,
+        ebitda,
+        averageTicket,
+        revenueGrowth,
+        clientRetentionRate,
+        revenueByArea,
+        yearOverYearMetrics,
       ];
 }
 
-class FirmContactInfo extends Equatable {
-  final String? phone;
-  final String? email;
-  final String? website;
-  final String? linkedinUrl;
-  final List<String> socialMediaUrls;
-  final String? whatsapp;
+class FirmTransparencyReport extends Equatable {
+  final List<DataSourceInfo> dataSources;
+  final double dataQualityScore;
+  final String lastConsolidated;
+  final String privacyPolicy;
 
-  const FirmContactInfo({
-    this.phone,
-    this.email,
-    this.website,
-    this.linkedinUrl,
-    this.socialMediaUrls = const [],
-    this.whatsapp,
+  const FirmTransparencyReport({
+    required this.dataSources,
+    required this.dataQualityScore,
+    required this.lastConsolidated,
+    required this.privacyPolicy,
   });
 
   @override
   List<Object?> get props => [
-        phone,
-        email,
-        website,
-        linkedinUrl,
-        socialMediaUrls,
-        whatsapp,
+        dataSources,
+        dataQualityScore,
+        lastConsolidated,
+        privacyPolicy,
       ];
 }
 
-class FirmFinancialInfo extends Equatable {
-  final String? revenueRange;
-  final int? foundedYear;
-  final String? legalStructure;
-  final bool isPubliclyTraded;
-  final String? stockSymbol;
-  final int? employeeCount;
-  final List<String> officeLocations;
+class DataSourceInfo extends Equatable {
+  final String sourceName;
+  final String lastUpdated;
+  final double qualityScore;
+  final int dataPoints;
+  final List<String> errors;
 
-  const FirmFinancialInfo({
-    this.revenueRange,
-    this.foundedYear,
-    this.legalStructure,
-    this.isPubliclyTraded = false,
-    this.stockSymbol,
-    this.employeeCount,
-    this.officeLocations = const [],
+  const DataSourceInfo({
+    required this.sourceName,
+    required this.lastUpdated,
+    required this.qualityScore,
+    required this.dataPoints,
+    required this.errors,
   });
 
   @override
   List<Object?> get props => [
-        revenueRange,
-        foundedYear,
-        legalStructure,
-        isPubliclyTraded,
-        stockSymbol,
-        employeeCount,
-        officeLocations,
+        sourceName,
+        lastUpdated,
+        qualityScore,
+        dataPoints,
+        errors,
       ];
 }
-
-class FirmPartnership extends Equatable {
-  final String partnerFirmId;
-  final String partnerFirmName;
-  final String partnershipType;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final bool isActive;
-  final String? description;
-  final List<String> collaborationAreas;
-
-  const FirmPartnership({
-    required this.partnerFirmId,
-    required this.partnerFirmName,
-    required this.partnershipType,
-    this.startDate,
-    this.endDate,
-    this.isActive = true,
-    this.description,
-    this.collaborationAreas = const [],
-  });
-
-  @override
-  List<Object?> get props => [
-        partnerFirmId,
-        partnerFirmName,
-        partnershipType,
-        startDate,
-        endDate,
-        isActive,
-        description,
-        collaborationAreas,
-      ];
-}
-
-class FirmStats extends Equatable {
-  final int totalCases;
-  final int activeCases;
-  final int wonCases;
-  final double successRate;
-  final double averageRating;
-  final int totalReviews;
-  final double averageResponseTime;
-  final int casesThisYear;
-
-  const FirmStats({
-    required this.totalCases,
-    required this.activeCases,
-    required this.wonCases,
-    required this.successRate,
-    required this.averageRating,
-    required this.totalReviews,
-    required this.averageResponseTime,
-    required this.casesThisYear,
-  });
-
-  @override
-  List<Object?> get props => [
-        totalCases,
-        activeCases,
-        wonCases,
-        successRate,
-        averageRating,
-        totalReviews,
-        averageResponseTime,
-        casesThisYear,
-      ];
-} 

@@ -76,7 +76,7 @@ class FirebaseAnalyticsService {
           'content_type': 'lawyer_profile',
           'content_id': lawyerId,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -96,7 +96,7 @@ class FirebaseAnalyticsService {
           'content_type': 'firm_profile',
           'content_id': firmId,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -116,7 +116,7 @@ class FirebaseAnalyticsService {
           'tab_name': tabName,
           'navigation_type': 'tab_switch',
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -136,7 +136,7 @@ class FirebaseAnalyticsService {
           'filter_count': filters.length,
           'filters_applied': filters.keys.join(','),
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -156,7 +156,7 @@ class FirebaseAnalyticsService {
           'profile_id': profileId,
           'action_type': 'user_initiated_refresh',
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -177,7 +177,7 @@ class FirebaseAnalyticsService {
           'method': shareMethod,
           'item_id': profileId,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -197,7 +197,7 @@ class FirebaseAnalyticsService {
           'profile_id': profileId,
           'feature_type': 'algorithm_transparency',
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -218,7 +218,7 @@ class FirebaseAnalyticsService {
           'lawyer_id': lawyerId,
           'content_id': lawyerId,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -238,7 +238,7 @@ class FirebaseAnalyticsService {
           'load_time_ms': loadingTime.inMilliseconds,
           'performance_metric': 'loading_time',
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -257,7 +257,7 @@ class FirebaseAnalyticsService {
           'error_type': errorType,
           'error_message': message.length > 100 ? message.substring(0, 100) : message,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -277,7 +277,7 @@ class FirebaseAnalyticsService {
           'screen_name': screen,
           'results_count': resultsCount,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -297,7 +297,7 @@ class FirebaseAnalyticsService {
           'action_type': action,
           'interaction_type': 'user_action',
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -318,7 +318,7 @@ class FirebaseAnalyticsService {
           'value': value,
           'currency': 'BRL',
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -338,7 +338,7 @@ class FirebaseAnalyticsService {
           'session_duration_ms': sessionDuration.inMilliseconds,
           'engagement_time_msec': sessionDuration.inMilliseconds,
           'timestamp': DateTime.now().toIso8601String(),
-          ..._sanitizeParameters(metadata),
+          ..._sanitizeParametersToObject(metadata),
         },
       );
     } catch (e) {
@@ -353,7 +353,7 @@ class FirebaseAnalyticsService {
     try {
       await _analytics.logEvent(
         name: eventName,
-        parameters: _sanitizeParameters(parameters),
+        parameters: _sanitizeParametersToObject(parameters),
       );
     } catch (e) {
       print('Erro ao registrar evento customizado: $e');
@@ -382,6 +382,12 @@ class FirebaseAnalyticsService {
     });
     
     return sanitized;
+  }
+
+  /// Converte e sanitiza parâmetros para Map<String, Object>
+  Map<String, Object> _sanitizeParametersToObject(Map<String, dynamic>? parameters) {
+    final sanitizedDynamic = _sanitizeParameters(parameters);
+    return Map<String, Object>.from(sanitizedDynamic);
   }
 
   /// Força o envio de eventos pendentes
@@ -532,4 +538,4 @@ class IntegratedAnalyticsService {
   Future<void> enableTracking() async {
     await _firebaseAnalytics.enable();
   }
-} 
+}

@@ -11,6 +11,8 @@ import 'package:meu_app/src/shared/widgets/molecules/empty_state_widget.dart';
 import '../../../../shared/services/analytics_service.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_bloc.dart';
 import 'package:meu_app/src/features/partnerships/presentation/bloc/partnerships_event.dart' as p_events;
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart' as auth_states;
 
 class PartnershipsScreen extends StatefulWidget {
   const PartnershipsScreen({super.key});
@@ -211,6 +213,8 @@ class _PartnershipsScreenState extends State<PartnershipsScreen>
     HybridPartnershipsListType type,
     String semanticLabel,
   ) {
+    final authState = context.read<AuthBloc>().state;
+    final currentUserId = (authState is auth_states.Authenticated) ? authState.user.id : null;
     return Semantics(
       label: semanticLabel,
       child: RefreshIndicator(
@@ -224,6 +228,7 @@ class _PartnershipsScreenState extends State<PartnershipsScreen>
           onRefresh: () async {
             context.read<HybridPartnershipsBloc>().add(const LoadHybridPartnerships(refresh: true));
           },
+          currentUserId: currentUserId,
         ),
       ),
     );
@@ -272,11 +277,14 @@ class _PartnershipsScreenState extends State<PartnershipsScreen>
             }
 
             final partnership = state.lawyerPartnerships[index - 1];
+            final authState = context.read<AuthBloc>().state;
+            final currentUserId = (authState is auth_states.Authenticated) ? authState.user.id : null;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: PartnershipCard(
                 partnership: partnership,
                 listContext: HybridPartnershipsListType.received,
+                currentUserId: currentUserId,
                 onAccept: () {
                   context.read<PartnershipsBloc>().add(
                         p_events.AcceptPartnership(partnershipId: partnership.id),

@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String apiBaseUrl = 'http://localhost:8000'; // Configurar para produção
+  static const String apiBaseUrl = 'http://127.0.0.1:8080';
   static String? userToken; // Será definido pelo auth service
   static String? currentUserId; // Será definido pelo auth service
   static String? currentUserName; // Será definido pelo auth service

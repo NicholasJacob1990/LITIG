@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-enum PartnershipType { 
-  strategic, 
-  commercial, 
-  referral, 
-  international, 
+enum PartnershipType {
+  strategic,
+  commercial,
+  referral,
+  international,
   technology,
   academic
 }
@@ -59,37 +59,3 @@ class PartnershipInfo extends Equatable {
         collaborationScore,
       ];
 }
-
-extension PartnershipTypeExtension on PartnershipType {
-  String get displayName {
-    switch (this) {
-      case PartnershipType.strategic:
-        return 'Estratégica';
-      case PartnershipType.commercial:
-        return 'Comercial';
-      case PartnershipType.referral:
-        return 'Indicação';
-      case PartnershipType.international:
-        return 'Internacional';
-      case PartnershipType.technology:
-        return 'Tecnologia';
-      case PartnershipType.academic:
-        return 'Acadêmica';
-    }
-  }
-}
-
-extension PartnershipStatusExtension on PartnershipStatus {
-  String get displayName {
-    switch (this) {
-      case PartnershipStatus.active:
-        return 'Ativa';
-      case PartnershipStatus.inactive:
-        return 'Inativa';
-      case PartnershipStatus.pending:
-        return 'Pendente';
-      case PartnershipStatus.suspended:
-        return 'Suspensa';
-    }
-  }
-} 

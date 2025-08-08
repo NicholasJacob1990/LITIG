@@ -15,6 +15,7 @@ class HybridPartnershipsList extends StatelessWidget {
   final List<LawFirm> firmPartnerships;
   final HybridPartnershipsListType listType;
   final Future<void> Function() onRefresh;
+  final String? currentUserId;
 
   const HybridPartnershipsList({
     super.key,
@@ -22,6 +23,7 @@ class HybridPartnershipsList extends StatelessWidget {
     required this.firmPartnerships,
     required this.listType,
     required this.onRefresh,
+    this.currentUserId,
   });
 
   @override
@@ -148,6 +150,7 @@ class HybridPartnershipsList extends StatelessWidget {
         child: PartnershipCard(
           partnership: partnership,
           listContext: listType,
+          currentUserId: currentUserId,
         ),
       ),
     );
@@ -355,7 +358,9 @@ class HybridPartnershipsList extends StatelessWidget {
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // TODO: Navegar para busca de parceiros
+                    try {
+                      context.go('/partners-search');
+                    } catch (_) {}
                   },
                   icon: const Icon(Icons.search),
                   label: const Text('Buscar Parceiros'),

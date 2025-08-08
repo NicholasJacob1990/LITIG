@@ -1,19 +1,19 @@
 import 'package:equatable/equatable.dart';
 
-enum CaseStatus { active, closed, pending, won, lost }
-
-enum CaseArea { 
-  civil, 
-  criminal, 
-  corporate, 
-  labor, 
-  tax, 
-  family, 
-  intellectual, 
+enum CaseArea {
+  civil,
+  criminal,
+  corporate,
+  labor,
+  tax,
+  family,
+  intellectual,
   environmental,
   constitutional,
   administrative
 }
+
+enum CaseStatus { active, closed, pending, won, lost }
 
 class CaseInfo extends Equatable {
   final String id;
@@ -60,47 +60,3 @@ class CaseInfo extends Equatable {
         tags,
       ];
 }
-
-extension CaseAreaExtension on CaseArea {
-  String get displayName {
-    switch (this) {
-      case CaseArea.civil:
-        return 'Direito Civil';
-      case CaseArea.criminal:
-        return 'Direito Criminal';
-      case CaseArea.corporate:
-        return 'Direito Empresarial';
-      case CaseArea.labor:
-        return 'Direito Trabalhista';
-      case CaseArea.tax:
-        return 'Direito Tributário';
-      case CaseArea.family:
-        return 'Direito de Família';
-      case CaseArea.intellectual:
-        return 'Propriedade Intelectual';
-      case CaseArea.environmental:
-        return 'Direito Ambiental';
-      case CaseArea.constitutional:
-        return 'Direito Constitucional';
-      case CaseArea.administrative:
-        return 'Direito Administrativo';
-    }
-  }
-}
-
-extension CaseStatusExtension on CaseStatus {
-  String get displayName {
-    switch (this) {
-      case CaseStatus.active:
-        return 'Ativo';
-      case CaseStatus.closed:
-        return 'Encerrado';
-      case CaseStatus.pending:
-        return 'Pendente';
-      case CaseStatus.won:
-        return 'Ganho';
-      case CaseStatus.lost:
-        return 'Perdido';
-    }
-  }
-} 

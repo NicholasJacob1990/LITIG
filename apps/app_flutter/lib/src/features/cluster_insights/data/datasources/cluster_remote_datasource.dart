@@ -30,7 +30,7 @@ class ClusterRemoteDataSourceImpl implements ClusterRemoteDataSource {
 
   ClusterRemoteDataSourceImpl({
     required this.client,
-    this.baseUrl = 'http://localhost:8000',
+    this.baseUrl = 'http://127.0.0.1:8080',
   });
 
   @override

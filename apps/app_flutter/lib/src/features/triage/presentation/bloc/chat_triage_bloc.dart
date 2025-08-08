@@ -27,7 +27,7 @@ class ChatTriageBloc extends Bloc<ChatTriageEvent, ChatTriageState> {
       print('DEBUG: Erro na API, usando fallback mock: $e');
       // Fallback mock para desenvolvimento
       _caseId = 'mock_case_${DateTime.now().millisecondsSinceEpoch}';
-      final mockMessage = '''Olá! Sou sua assistente jurídica inteligente. 
+      const mockMessage = '''Olá! Sou sua assistente jurídica inteligente. 
 
 Estou aqui para entender seu problema legal e conectar você ao advogado mais adequado para seu caso.
 
@@ -83,10 +83,10 @@ Pode começar me contando sobre sua situação...''';
         add(MessageReceived(mockResponse, isUser: false));
         
         // Simular finalização da triagem após algumas trocas
-        final messageCount = (currentState as ChatTriageActive).messages.length;
+        final messageCount = (currentState).messages.length;
         if (messageCount >= 6) { // Após 3 pares de mensagens (user + AI)
           await Future.delayed(const Duration(seconds: 1));
-          add(MessageReceived('''Perfeito! Com base nas informações que você forneceu, já tenho o suficiente para encontrar os melhores advogados para seu caso.
+          add(const MessageReceived('''Perfeito! Com base nas informações que você forneceu, já tenho o suficiente para encontrar os melhores advogados para seu caso.
 
 🎯 **Análise Concluída:**
 • Área identificada: Direito Civil/Consumidor

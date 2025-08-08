@@ -13,6 +13,7 @@ import 'package:meu_app/src/core/services/storage_service.dart';
 import 'package:meu_app/src/core/services/ocr_service.dart';
 import 'package:meu_app/src/core/services/calendar_service.dart';
 import 'package:meu_app/src/core/services/social_auth_service.dart';
+import 'package:meu_app/src/core/services/communications_service.dart';
 
 // Auth
 import 'package:meu_app/src/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -262,6 +263,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<StorageService>(() => StorageService());
   getIt.registerLazySingleton<CalendarService>(() => CalendarService());
   getIt.registerLazySingleton<SocialAuthService>(() => SocialAuthService());
+  getIt.registerLazySingleton<CommunicationsService>(() => CommunicationsService());
 
   // Auth
   // Datasources
@@ -522,7 +524,7 @@ Future<void> configureDependencies() async {
   // Services
   getIt.registerLazySingleton(() => CaseNotificationRemoteDataSource(
     httpClient: getIt(),
-    baseUrl: 'http://localhost:8000', // TODO: Mover para configuração
+    baseUrl: 'http://127.0.0.1:8080',
   ));
   getIt.registerLazySingleton(() => CaseNotificationService(getIt(), getIt()));
 
@@ -789,7 +791,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<EnrichedLawyerDataSource>(() => 
     EnrichedLawyerRemoteDataSource(
       client: getIt(),
-      baseUrl: 'http://localhost:8000', // TODO: Mover para configuração
+      baseUrl: 'http://127.0.0.1:8080',
     )
   );
   
@@ -818,7 +820,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<EnrichedFirmDataSource>(() => 
     EnrichedFirmDataSourceImpl(
       client: getIt(),
-      baseUrl: 'http://localhost:8000',
+      baseUrl: 'http://127.0.0.1:8080',
     )
   );
   

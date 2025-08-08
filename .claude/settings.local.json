@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(find:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter pub add:*)",
+      "Bash(mkdir:*)",
+      "Bash(flutter run:*)",
+      "Bash(flutter pub:*)",
+      "Bash(dart analyze:*)",
+      "Bash(grep:*)",
+      "Bash(dart run build_runner:*)",
+      "Bash(flutter packages pub run build_runner build:*)",
+      "Bash(flutter build:*)",
+      "WebFetch(domain:developer.unipile.com)",
+      "Bash(python3:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "WebFetch(domain:pub.dev)",
+      "Bash(# Verificar e corrigir profitability_section.dart\ngrep -n \"\"^class ProfitabilitySection\"\" /Users/nicholasjacob/LITIG-1/apps/app_flutter/lib/src/features/cases/presentation/widgets/sections/profitability_section.dart | head -2)",
+      "Bash(# Verificar e corrigir os arquivos restantes\necho \"\"=== escalation_section.dart ===\"\"\ngrep -n \"\"^class EscalationSection\"\" /Users/nicholasjacob/LITIG-1/apps/app_flutter/lib/src/features/cases/presentation/widgets/sections/escalation_section.dart | head -2\n\necho -e \"\"\\n=== competitor_analysis_section.dart ===\"\"\ngrep -n \"\"^class CompetitorAnalysisSection\"\" /Users/nicholasjacob/LITIG-1/apps/app_flutter/lib/src/features/cases/presentation/widgets/sections/competitor_analysis_section.dart | head -2\n\necho -e \"\"\\n=== next_opportunities_section.dart ===\"\"\ngrep -n \"\"^class NextOpportunitiesSection\"\" /Users/nicholasjacob/LITIG-1/apps/app_flutter/lib/src/features/cases/presentation/widgets/sections/next_opportunities_section.dart | head -2)",
+      "Bash(sed:*)",
+      "Bash(rm:*)",
+      "Bash",
+      "Read", 
+      "Edit",
+      "Write",
+      "WebFetch",
+      "Grep",
+      "Glob",
+      "LS",
+      "MultiEdit",
+      "NotebookRead",
+      "NotebookEdit",
+      "TodoRead",
+      "TodoWrite",
+      "WebSearch"
+    ],
+    "deny": []
+  }
+}
+

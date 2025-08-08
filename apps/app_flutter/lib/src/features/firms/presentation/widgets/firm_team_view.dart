@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../domain/entities/enriched_firm.dart';
-import '../../../lawyers/domain/entities/enriched_lawyer.dart';
 
 class FirmTeamView extends StatelessWidget {
   final String firmId;
@@ -23,14 +21,6 @@ class FirmTeamView extends StatelessWidget {
         children: [
           _buildTeamOverview(context),
           const SizedBox(height: 24),
-          if (enrichedFirm.partners.isNotEmpty) ...[
-            _buildPartnersSection(context),
-            const SizedBox(height: 24),
-          ],
-          if (enrichedFirm.associates.isNotEmpty) ...[
-            _buildAssociatesSection(context),
-            const SizedBox(height: 24),
-          ],
           _buildSpecialistsByArea(context),
           const SizedBox(height: 24),
           _buildTeamAchievements(context),
@@ -73,22 +63,22 @@ class FirmTeamView extends StatelessWidget {
               children: [
                 _buildTeamMetricCard(
                   'Total de Advogados',
-                  '${enrichedFirm.totalLawyers}',
+                  '${enrichedFirm.teamData.totalLawyers}',
                   Colors.blue,
                 ),
                 _buildTeamMetricCard(
                   'Sócios',
-                  '${enrichedFirm.partnersCount}',
+                  '${enrichedFirm.teamData.partnersCount}',
                   Colors.purple,
                 ),
                 _buildTeamMetricCard(
                   'Associados',
-                  '${enrichedFirm.associatesCount}',
+                  '${enrichedFirm.teamData.associatesCount}',
                   Colors.green,
                 ),
                 _buildTeamMetricCard(
                   'Especialistas',
-                  '${enrichedFirm.specialistsCount}',
+                  '${enrichedFirm.teamData.specialistsCount}',
                   Colors.orange,
                 ),
               ],
@@ -132,147 +122,8 @@ class FirmTeamView extends StatelessWidget {
     );
   }
 
-  Widget _buildPartnersSection(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  LucideIcons.crown,
-                  size: 20,
-                  color: Colors.amber,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Sócios do Escritório',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                if (enrichedFirm.partners.length > 3)
-                  TextButton(
-                    onPressed: () => _viewAllPartners(context),
-                    child: const Text('Ver Todos'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...enrichedFirm.partners.take(3).map((partner) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _buildLawyerListTile(context, partner, true),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAssociatesSection(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  LucideIcons.users,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Advogados Associados',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                if (enrichedFirm.associates.length > 3)
-                  TextButton(
-                    onPressed: () => _viewAllAssociates(context),
-                    child: const Text('Ver Todos'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...enrichedFirm.associates.take(3).map((associate) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _buildLawyerListTile(context, associate, false),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLawyerListTile(BuildContext context, EnrichedLawyer lawyer, bool isPartner) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Stack(
-        children: [
-          CircleAvatar(
-            backgroundImage: lawyer.avatarUrl.isNotEmpty ? NetworkImage(lawyer.avatarUrl) : null,
-            radius: 24,
-            onBackgroundImageError: (exception, stackTrace) {},
-            child: lawyer.avatarUrl.isEmpty
-                ? const Icon(LucideIcons.user, size: 20)
-                : null,
-          ),
-          if (isPartner)
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: const Icon(
-                  LucideIcons.crown,
-                  size: 8,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-        ],
-      ),
-      title: Text(
-        lawyer.nome,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (lawyer.especialidades.isNotEmpty)
-            Text(lawyer.especialidades.first),
-          Row(
-            children: [
-              if (lawyer.linkedinProfile != null) ...[
-                const Icon(Icons.star, size: 16, color: Colors.amber),
-                Text(' ${(lawyer.fair * 10).toStringAsFixed(1)}'),
-                const SizedBox(width: 16),
-              ],
-              Text('Match: ${(lawyer.fair * 100).toInt()}%'),
-            ],
-          ),
-        ],
-      ),
-      trailing: OutlinedButton(
-        onPressed: () => _viewLawyerProfile(context, lawyer.id),
-        child: const Text('Ver Perfil'),
-      ),
-    );
-  }
+  // Seções de sócios e associados removidas temporariamente por ausência desses
+  // dados na entidade atual. Reintroduzir quando a API expuser estas listas.
 
   Widget _buildSpecialistsByArea(BuildContext context) {
     return Card(
@@ -288,7 +139,7 @@ class FirmTeamView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            if (enrichedFirm.specialistsByArea.isEmpty)
+            if (enrichedFirm.teamData.stats.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -309,7 +160,7 @@ class FirmTeamView extends StatelessWidget {
                 ),
               )
             else
-              ...enrichedFirm.specialistsByArea.entries.map((entry) => Padding(
+              ...enrichedFirm.teamData.stats.entries.map((entry) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
                   children: [
@@ -392,21 +243,21 @@ class FirmTeamView extends StatelessWidget {
             const SizedBox(height: 16),
             _buildAchievementItem(
               'Taxa de Sucesso da Equipe',
-              '${(enrichedFirm.stats.successRate * 100).toInt()}%',
+              '${(enrichedFirm.caseSuccessRate * 100).toInt()}%',
               LucideIcons.trendingUp,
               Colors.green,
             ),
             const SizedBox(height: 12),
             _buildAchievementItem(
               'Avaliação Média',
-              '${enrichedFirm.stats.averageRating.toStringAsFixed(1)} ⭐',
+              '${enrichedFirm.rating.toStringAsFixed(1)} ⭐',
               LucideIcons.star,
               Colors.amber,
             ),
             const SizedBox(height: 12),
             _buildAchievementItem(
               'Tempo Médio de Resposta',
-              '${enrichedFirm.stats.averageResponseTime.toInt()}h',
+              '${enrichedFirm.averageResponseTime.inHours}h',
               LucideIcons.clock,
               Colors.blue,
             ),
@@ -485,27 +336,5 @@ class FirmTeamView extends StatelessWidget {
     }
   }
 
-  void _viewAllPartners(BuildContext context) {
-    // TODO: Implementar visualização de todos os sócios
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Visualização completa de sócios em desenvolvimento'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _viewAllAssociates(BuildContext context) {
-    // TODO: Implementar visualização de todos os associados
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Visualização completa de associados em desenvolvimento'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _viewLawyerProfile(BuildContext context, String lawyerId) {
-    context.push('/lawyer/$lawyerId/profile');
-  }
+  // Secções detalhadas e navegação de perfis serão reintroduzidas quando a API expuser listas de membros.
 } 

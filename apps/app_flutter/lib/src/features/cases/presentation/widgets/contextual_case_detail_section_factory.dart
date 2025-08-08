@@ -35,6 +35,7 @@ import 'sections/quality_control_section.dart';
 import 'sections/escalation_section.dart';
 import 'sections/competitor_analysis_section.dart';
 import 'sections/next_opportunities_section.dart';
+import 'sections/related_partnerships_section.dart';
 
 /// Factory principal para seções contextuais da tela de detalhes do caso
 /// 
@@ -97,9 +98,27 @@ class ContextualCaseDetailSectionFactory {
           contextualData: contextualData,
         );
       } else {
-        // **FALLBACK: Para advogados sem contexto, usar seções básicas de advogado**
-        AppLogger.warning('Lawyer user without contextual data, using basic lawyer fallback');
-        sections = _buildClientSections(caseDetail); // Usar seções de cliente como fallback temporário
+        // **NOVO FALLBACK PARA ADVOGADOS:** nunca espelhar visão de cliente
+        AppLogger.warning('Lawyer user without contextual data - using shared basic + default lawyer sections');
+        if (caseDetail != null) {
+          final defaultContext = ContextualCaseData(
+            allocationType: AllocationType.platformMatchDirect,
+            contextMetadata: const {},
+          );
+          sections = [
+            ..._buildSharedBasicSections(caseDetail),
+            ..._buildDefaultLawyerSections(caseDetail, defaultContext),
+          ];
+        } else {
+          sections = const [
+            _PlaceholderSection(
+              title: 'Carregando dados do caso...',
+              description: 'Aguarde enquanto buscamos informações necessárias.',
+              icon: Icons.hourglass_top,
+              color: Colors.blueGrey,
+            ),
+          ];
+        }
       }
     } else {
       // **FALLBACK FINAL: Experiência padrão do cliente para casos indefinidos**
@@ -188,26 +207,121 @@ class ContextualCaseDetailSectionFactory {
   ) {
     AppLogger.info('Building lawyer sections for role: ${currentUser.effectiveUserRole}, allocation: $allocationType');
     
-    // **DIFERENCIAÇÃO ESPECÍFICA POR TIPO DE ADVOGADO**
+    // Base compartilhada (espelha cliente)
+    final base = _buildSharedBasicSections(caseDetail);
+
+    // Advogado autônomo
     if (currentUser.isIndividualLawyer) {
-      return _buildIndividualLawyerSections(caseDetail, contextualData);
+      return [...base, ..._buildIndividualLawyerSections(caseDetail, contextualData)];
     }
-    
-    switch (allocationType) {
-      case AllocationType.internalDelegation:
-        return _buildAssociatedLawyerSections(caseDetail, contextualData);
-      case AllocationType.platformMatchDirect:
-        if (currentUser.isPlatformAssociate) {
-          return _buildSuperAssociateSections(caseDetail, contextualData);
-        } else {
-          return _buildContractingLawyerSections(caseDetail, contextualData);
-        }
-      case AllocationType.partnershipProactiveSearch:
-      case AllocationType.partnershipPlatformSuggestion:
-        return _buildPartnershipSections(caseDetail, contextualData);
-      default:
-        return _buildDefaultLawyerSections(caseDetail, contextualData);
+
+    // Escritório (firm)
+    if (currentUser.isLawOffice) {
+      switch (allocationType) {
+        case AllocationType.partnershipProactiveSearch:
+        case AllocationType.partnershipPlatformSuggestion:
+          return [...base, ..._buildPartnershipSections(caseDetail, contextualData)];
+        case AllocationType.internalDelegation:
+          // Escritório pode orquestrar trabalho interno, mas não renderizar visão de associado
+          return [...base, ..._buildContractingLawyerSections(caseDetail, contextualData)];
+        case AllocationType.platformMatchDirect:
+          return [...base, ..._buildContractingLawyerSections(caseDetail, contextualData)];
+        default:
+          return [...base, ..._buildContractingLawyerSections(caseDetail, contextualData)];
+      }
     }
+
+    // Super associado (match direto da plataforma)
+    if (currentUser.isPlatformAssociate && allocationType == AllocationType.platformMatchDirect) {
+      return [...base, ..._buildSuperAssociateSections(caseDetail, contextualData)];
+    }
+
+    // Delegação interna apenas para associado de escritório
+    if (allocationType == AllocationType.internalDelegation) {
+      if (currentUser.role == 'lawyer_firm_member') {
+        return [...base, ..._buildAssociatedLawyerSections(caseDetail, contextualData)];
+      }
+      return [...base, ..._buildContractingLawyerSections(caseDetail, contextualData)];
+    }
+
+    // Parcerias
+    if (allocationType == AllocationType.partnershipProactiveSearch ||
+        allocationType == AllocationType.partnershipPlatformSuggestion) {
+      return [...base, ..._buildPartnershipSections(caseDetail, contextualData)];
+    }
+
+    // Fallback
+    return [...base, ..._buildDefaultLawyerSections(caseDetail, contextualData)];
+  }
+
+  /// Seções essenciais compartilhadas (espelham a visão do cliente; usa mock quando faltar dado)
+  static List<Widget> _buildSharedBasicSections(CaseDetail caseDetail) {
+    final sections = <Widget>[
+      LazySection(
+        priority: SectionPriority.critical,
+        child: LawyerResponsibleSection(lawyer: caseDetail.assignedLawyer),
+      ),
+      const SizedBox(height: 16),
+      // Dados de contato do cliente para perfis não-cliente
+      LazySection(
+        priority: SectionPriority.critical,
+        child: ClientContactSection(
+          caseDetail: caseDetail,
+          contextualData: const {},
+        ),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.high,
+        child: ConsultationInfoSection(consultation: caseDetail.consultation),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.high,
+        child: PreAnalysisSection(preAnalysis: caseDetail.preAnalysis),
+      ),
+      const SizedBox(height: 16),
+      if (caseDetail.isLitigation == true && caseDetail.parties.isNotEmpty) ...[
+        LazySection(
+          priority: SectionPriority.high,
+          child: LitigationPartiesSection(
+            parties: caseDetail.parties,
+            title: 'Partes do Processo',
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+      LazySection(
+        priority: SectionPriority.medium,
+        child: NextStepsSection(nextSteps: caseDetail.nextSteps),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.medium,
+        child: DocumentsSection(
+          documents: caseDetail.documents,
+          caseId: caseDetail.id,
+        ),
+      ),
+      const SizedBox(height: 16),
+      // NOVO: Parcerias relacionadas ao caso (internas e externas)
+      LazySection(
+        priority: SectionPriority.medium,
+        child: RelatedPartnershipsSection(
+          caseId: caseDetail.id,
+        ),
+      ),
+      const SizedBox(height: 16),
+      LazySection(
+        priority: SectionPriority.low,
+        child: ProcessStatusSection(
+          processStatus: caseDetail.processStatus,
+          caseId: caseDetail.id,
+        ),
+      ),
+      const SizedBox(height: 16),
+    ];
+    return sections;
   }
   
   /// **ADVOGADO ASSOCIADO** - Foco em produtividade e tarefas internas

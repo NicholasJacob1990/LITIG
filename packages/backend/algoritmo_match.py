@@ -66,7 +66,12 @@ except ImportError:
         from services.weight_optimizer_service import get_optimized_weights
     except ImportError:
         # Último fallback: definir classes/funções mock
-        print("⚠️ Imports de schemas/services não disponíveis - usando fallbacks")
+        try:
+            from .logging import log_warning
+            log_warning("Imports de schemas/services não disponíveis - usando fallbacks", 
+                        component="initialization", fallback_mode=True)
+        except ImportError:
+            print("⚠️ Imports de schemas/services não disponíveis - usando fallbacks")
         class Recommendation:
             pass
         def fetch_ads_for_case(*args, **kwargs):
@@ -81,6 +86,9 @@ import math
 # type: ignore - para ignorar erros de importação não resolvidos
 import numpy as np
 import redis.asyncio as aioredis
+
+# Logging estruturado (importado no topo para evitar problemas de ordem)
+from .logging import log_warning, log_error, log_info, log_debug
 
 # --- Academic Enrichment Dependencies ---
 try:
@@ -106,7 +114,12 @@ try:
 except ImportError:
     UNIFIED_CACHE_AVAILABLE = False
     unified_cache = None
-    print("⚠️ UnifiedCacheService não disponível - usando cache Redis básico")
+    try:
+        from .logging import log_warning
+        log_warning("UnifiedCacheService não disponível - usando cache Redis básico",
+                    component="cache", cache_type="redis_fallback")
+    except ImportError:
+        print("⚠️ UnifiedCacheService não disponível - usando cache Redis básico")
 
 # 🆕 FASE 2: Case Match ML Service Integration  
 try:
@@ -114,7 +127,12 @@ try:
     CASE_MATCH_ML_AVAILABLE = True
 except ImportError:
     CASE_MATCH_ML_AVAILABLE = False
-    print("⚠️ CaseMatchMLService não disponível - usando pesos estáticos")
+    try:
+        from .logging import log_warning
+        log_warning("CaseMatchMLService não disponível - usando pesos estáticos",
+                    component="ml_service", fallback="static_weights")
+    except ImportError:
+        print("⚠️ CaseMatchMLService não disponível - usando pesos estáticos")
 
 # LTR Service Integration
 LTR_ENDPOINT = os.getenv("LTR_ENDPOINT", "http://ltr-service:8080/ltr/score")
@@ -254,7 +272,12 @@ def _validate_preset_weights():
         total = sum(weights.values())
         if abs(total - 1.0) > 1e-6:
             raise ValueError(f"Preset '{name}' não soma 1.0 (soma={total:.6f})")
-    print("✓ Todos os presets validados (soma=1.0)")
+    try:
+        from .logging import log_info
+        log_info("Todos os presets validados", 
+                 component="configuration", validation="weights", sum_check=1.0)
+    except ImportError:
+        print("✓ Todos os presets validados (soma=1.0)")
 
 # Configurações de timeout e decay
 CONFLICT_TIMEOUT_SEC = float(os.getenv("CONFLICT_TIMEOUT", "2.0"))
@@ -3542,3 +3565,170 @@ except ImportError:
         def validate_batch_size(self, items: List[str], max_size: int):
             if len(items) > max_size:
                 raise ValueError(f"Batch size {len(items)} exceeds maximum {max_size}")
+# =============================================================================
+# BACKWARD COMPATIBILITY RE-EXPORTS
+# Importa classes dos novos módulos para manter compatibilidade com código existente
+# =============================================================================
+
+# Re-export domain models
+from .models.domain import (
+    DiversityMeta,
+    ProfessionalMaturityData, 
+    Case,
+    KPI,
+    FirmKPI,
+    Parecer,
+    Reconhecimento,
+    Lawyer,
+    LawFirm,
+    EMBEDDING_DIM as _EMBEDDING_DIM,
+)
+
+# Re-export utilities
+from .utils import (
+    haversine,
+    cosine_similarity,
+    canonical,
+    _chunks,
+    safe_json_dump,
+)
+
+# Re-export services
+from .services import (
+    RedisCache,
+    create_redis_cache,
+    AcademicEnricher,
+    AcademicPromptTemplates,
+    AcademicPromptValidator,
+    create_academic_enricher,
+)
+
+# Re-export features
+from .features import (
+    ModernFeatureCalculator,
+    create_feature_calculator,
+    FeatureStrategy,
+    CoreMatchingFeatures,
+    GeographicFeatures,
+    PerformanceFeatures,
+)
+
+# Re-export core facades
+from .core import (
+    MatchingOrchestrator,
+    create_matching_orchestrator,
+    RankingFacade,
+    create_ranking_facade,
+    FeedbackFacade,
+    create_feedback_facade,
+)
+
+# Re-export DI system
+from .di import (
+    setup_di_container,
+    get_container,
+    get_service,
+    get_matching_orchestrator,
+    inject,
+)
+
+# Re-export modern matching
+from .modern_matching import (
+    ModernMatchmakingAlgorithm,
+    create_modern_matching_algorithm,
+)
+
+# Re-export logging system
+from .logging import (
+    StructuredLogger,
+    get_main_logger,
+    get_audit_logger,
+    log_info,
+    log_warning,
+    log_error,
+    log_debug,
+)
+
+# Re-export observability system
+from .observability import (
+    MatchingMetrics,
+    get_metrics,
+    start_metrics_server,
+    instrument_function,
+)
+
+# Re-export performance system
+from .performance import (
+    RateLimitConfig,
+    get_rate_limiter_pool,
+    rate_limited,
+    rate_limit,
+)
+
+# Ensure EMBEDDING_DIM constant is available
+EMBEDDING_DIM = _EMBEDDING_DIM
+
+# Export all re-exported symbols for backward compatibility
+__all__ = [
+    "DiversityMeta",
+    "ProfessionalMaturityData",
+    "Case", 
+    "KPI",
+    "FirmKPI",
+    "Parecer",
+    "Reconhecimento",
+    "Lawyer",
+    "LawFirm",
+    "EMBEDDING_DIM",
+    "haversine",
+    "cosine_similarity",
+    "canonical", 
+    "_chunks",
+    "safe_json_dump",
+    "MatchmakingAlgorithm",
+    "FeatureCalculator",
+    "RedisCache",
+    "create_redis_cache",
+    "AcademicEnricher",
+    "AcademicPromptTemplates",
+    "AcademicPromptValidator", 
+    "create_academic_enricher",
+    "ModernFeatureCalculator",
+    "create_feature_calculator",
+    "FeatureStrategy",
+    "CoreMatchingFeatures",
+    "GeographicFeatures",
+    "PerformanceFeatures",
+    "MatchingOrchestrator",
+    "create_matching_orchestrator",
+    "RankingFacade",
+    "create_ranking_facade",
+    "FeedbackFacade",
+    "create_feedback_facade",
+    "setup_di_container",
+    "get_container",
+    "get_service",
+    "get_matching_orchestrator",
+    "inject",
+    "ModernMatchmakingAlgorithm",
+    "create_modern_matching_algorithm",
+    "StructuredLogger",
+    "get_main_logger",
+    "get_audit_logger",
+    "log_info",
+    "log_warning",
+    "log_error",
+    "log_debug",
+    "MatchingMetrics",
+    "get_metrics",
+    "start_metrics_server",
+    "instrument_function",
+    "RateLimitConfig",
+    "get_rate_limiter_pool",
+    "rate_limited",
+    "rate_limit",
+]
+
+# Nota: Testes unitários estão disponíveis em Algoritmo.tests
+# Execute: python -m Algoritmo.tests.test_runner para todos os testes
+

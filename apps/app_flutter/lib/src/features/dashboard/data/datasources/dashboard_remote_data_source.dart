@@ -11,7 +11,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   final Dio dio;
   final String baseUrl;
 
-  DashboardRemoteDataSourceImpl({required this.dio, this.baseUrl = 'http://localhost:8000/api/v1/dashboard'});
+  DashboardRemoteDataSourceImpl({required this.dio, this.baseUrl = 'http://127.0.0.1:8080/api/v1/dashboard'});
 
   @override
   Future<DashboardStats> getLawyerStats() async {

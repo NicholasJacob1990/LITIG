@@ -8,6 +8,7 @@ import '../bloc/firm_profile_event.dart';
 import '../bloc/firm_profile_state.dart';
 import '../widgets/firm_team_view.dart';
 import '../widgets/firm_data_transparency_view.dart';
+import '../../../lawyers/domain/entities/data_source_info.dart' as lds;
 
 class FirmProfileScreen extends StatefulWidget {
   final String firmId;
@@ -210,7 +211,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
               Expanded(
                 child: _buildFirmInfo(firm),
               ),
-              _buildQualityIndicator(firm.overallQualityScore),
+              _buildQualityIndicator(firm.teamData.overallQualityScore),
             ],
           ),
           const SizedBox(height: 16),
@@ -228,16 +229,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
         borderRadius: BorderRadius.circular(12),
         color: Theme.of(context).colorScheme.primaryContainer,
       ),
-      child: (firm.logoUrl != null && firm.logoUrl!.isNotEmpty)
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                firm.logoUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildDefaultLogo(),
-              ),
-            )
-          : _buildDefaultLogo(),
+      child: _buildDefaultLogo(),
     );
   }
 
@@ -261,7 +253,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          '${firm.totalLawyers} advogados • ${firm.specializations.length} especializações',
+          '${firm.teamData.totalLawyers} advogados • ${firm.specializations.length} especializações',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Colors.grey[600],
           ),
@@ -274,7 +266,7 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  '${firm.location!.city}, ${firm.location!.state}',
+          '${firm.location!.city}, ${firm.location!.state}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -326,26 +318,26 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
       children: [
         _buildMetricItem(
           'Taxa de Sucesso',
-          '${(firm.stats.successRate * 100).toInt()}%',
+          '${(firm.caseSuccessRate * 100).toInt()}%',
           LucideIcons.trendingUp,
           Colors.green,
         ),
         _buildMetricItem(
-          'Casos Ativos',
-          '${firm.stats.activeCases}',
-          LucideIcons.briefcase,
+          'Advogados',
+          '${firm.teamData.totalLawyers}',
+          LucideIcons.users,
           Colors.blue,
         ),
         _buildMetricItem(
           'Avaliação',
-          '${firm.stats.averageRating.toStringAsFixed(1)}',
+          '${firm.rating.toStringAsFixed(1)}',
           LucideIcons.star,
           Colors.amber,
         ),
         _buildMetricItem(
           'Anos de Mercado',
-          firm.financialInfo?.foundedYear != null 
-            ? '${DateTime.now().year - firm.financialInfo!.foundedYear!}' 
+          firm.foundedYear > 0 
+            ? '${DateTime.now().year - firm.foundedYear}' 
             : 'N/A',
           LucideIcons.calendar,
           Colors.purple,
@@ -423,9 +415,18 @@ class _FirmProfileScreenState extends State<FirmProfileScreen> {
 
   Widget _buildTransparencyTab(FirmProfileLoaded state) {
     return FirmDataTransparencyView(
-      dataSources: state.enrichedFirm.dataSources,
-      qualityScore: state.enrichedFirm.overallQualityScore,
-      lastUpdated: state.enrichedFirm.lastConsolidated,
+      dataSources: {
+        for (final src in state.enrichedFirm.transparencyReport.dataSources)
+          src.sourceName: lds.DataSourceInfo(
+            sourceName: src.sourceName,
+            lastUpdated: DateTime.tryParse(src.lastUpdated) ?? DateTime.now(),
+            qualityScore: src.qualityScore,
+            hasError: (src.errors).isNotEmpty,
+            errorMessage: (src.errors).isNotEmpty ? src.errors.first : null,
+          )
+      },
+      qualityScore: state.enrichedFirm.transparencyReport.dataQualityScore,
+      lastUpdated: DateTime.tryParse(state.enrichedFirm.transparencyReport.lastConsolidated) ?? DateTime.now(),
       firmId: widget.firmId,
     );
   }

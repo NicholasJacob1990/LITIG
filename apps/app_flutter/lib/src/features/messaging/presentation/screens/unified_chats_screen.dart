@@ -73,17 +73,18 @@ class _UnifiedChatsScreenState extends State<UnifiedChatsScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Garante provider disponível para descendentes mesmo em rotas diferentes
     return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _messagingBloc),
-        BlocProvider(
-          create: (context) => calendar.CalendarBloc()
-            ..add(calendar.LoadCalendarEvents(
-              startDate: DateTime.now(),
-              endDate: DateTime.now().add(const Duration(days: 30)),
-            )),
-        ),
-      ],
+        providers: [
+        BlocProvider<UnifiedMessagingBloc>.value(value: _messagingBloc),
+          BlocProvider(
+            create: (context) => calendar.CalendarBloc()
+              ..add(calendar.LoadCalendarEvents(
+                startDate: DateTime.now(),
+                endDate: DateTime.now().add(const Duration(days: 30)),
+              )),
+          ),
+        ],
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Comunicações'),
