@@ -10,7 +10,9 @@ import 'package:meu_app/src/features/auth/presentation/bloc/auth_event.dart';
 import 'package:meu_app/src/features/auth/presentation/bloc/auth_state.dart';
 
 class ChatTriageScreen extends StatelessWidget {
-  const ChatTriageScreen({super.key});
+  final bool autoStart;
+
+  const ChatTriageScreen({super.key, this.autoStart = false});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,18 @@ class ChatTriageScreen extends StatelessWidget {
           String userName = 'Usuário';
           if (authState is Authenticated) {
             userName = authState.user.fullName ?? 'Usuário';
+          }
+
+          // Auto start para clientes ou quando explicitamente solicitado via rota (?auto=1)
+          final isClient = authState is Authenticated && (authState.user.role == 'client' || authState.user.role == 'client_pf');
+          if (autoStart || isClient) {
+            // Dispara start após o primeiro frame para evitar setState durante build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final bloc = context.read<ChatTriageBloc>();
+              if (bloc.state is ChatTriageInitial) {
+                bloc.add(StartConversation());
+              }
+            });
           }
           
           return Scaffold(
@@ -63,7 +77,7 @@ class ChatTriageScreen extends StatelessWidget {
               },
               builder: (context, state) {
                 // Tela inicial de apresentação
-                if (state is ChatTriageInitial) {
+                if (state is ChatTriageInitial && !(autoStart || isClient)) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

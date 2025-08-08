@@ -56,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                     ElevatedButton.icon(
                       icon: const Icon(LucideIcons.playCircle),
                       label: const Text('Iniciar Consulta com IA'),
-                      onPressed: () => context.go('/triage'),
+                      onPressed: () => context.go('/triage?auto=1'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),

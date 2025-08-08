@@ -421,7 +421,10 @@ GoRouter appRouter(AuthBloc authBloc) {
       GoRoute(
         path: '/triage',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ChatTriageScreen(),
+        builder: (context, state) {
+          final auto = state.uri.queryParameters['auto'] == '1';
+          return ChatTriageScreen(autoStart: auto);
+        },
       ),
       GoRoute(
         path: '/case-detail/:caseId',
